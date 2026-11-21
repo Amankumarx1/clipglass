@@ -1,0 +1,26 @@
+# Dockerfile.worker - ClipGlass Background Task Worker
+FROM python:3.13-slim-bookworm
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    ffmpeg \
+    ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN useradd -m -u 1000 appuser
+
+WORKDIR /app
+
+COPY apps/api/requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+COPY apps/api/ .
+
+RUN mkdir -p /tmp/clipglass_downloads && chown -R appuser:appuser /tmp/clipglass_downloads /app
+
+USER appuser
+
+ENV PYTHONPATH=/app
+ENV TEMP_STORAGE_DIR=/tmp/clipglass_downloads
+
+CMD ["python", "-m", "workers.worker"]
+

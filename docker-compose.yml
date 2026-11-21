@@ -1,0 +1,48 @@
+version: '3.8'
+
+services:
+  web:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.web
+    container_name: clipglass_web
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - NEXT_PUBLIC_API_URL=http://localhost:8000
+    depends_on:
+      - api
+    restart: unless-stopped
+
+  api:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.api
+    container_name: clipglass_api
+    ports:
+      - "8000:8000"
+    environment:
+      - ENVIRONMENT=production
+      - PORT=8000
+      - ALLOWED_ORIGINS=http://localhost:3000,https://clipglass.local
+      - MAX_DURATION_SECONDS=10800
+      - MAX_FILE_SIZE_BYTES=2147483648
+      - FILE_TTL_SECONDS=900
+      - REDIS_URL=redis://redis:6379/0
+      - USE_REDIS=false
+      - TEMP_STORAGE_DIR=/tmp/clipglass_downloads
+    volumes:
+      - ephemeral_storage:/tmp/clipglass_downloads
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    container_name: clipglass_redis
+    ports:
+      - "6379:6379"
+    restart: unless-stopped
+
+volumes:
+  ephemeral_storage:
+

@@ -1,0 +1,222 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --canvas: #E9ECF3;
+    --ink: #0B1020;
+    --ink-2: #4A5270;
+    --ink-3: #7A829E;
+    --glass-fill: linear-gradient(135deg, rgba(255, 255, 255, 0.68), rgba(255, 255, 255, 0.24));
+    --glass-fill-dense: linear-gradient(135deg, rgba(255, 255, 255, 0.88), rgba(255, 255, 255, 0.48));
+    --glass-border: rgba(255, 255, 255, 0.78);
+    --glass-shadow:
+      inset 0 1px 1.5px rgba(255, 255, 255, 0.98),
+      inset 0 -10px 18px rgba(120, 130, 170, 0.14),
+      0 24px 48px -14px rgba(60, 70, 110, 0.26),
+      0 3px 8px rgba(60, 70, 110, 0.08);
+    --glass-shadow-sm:
+      inset 0 1px 1px rgba(255, 255, 255, 0.98),
+      inset 0 -4px 8px rgba(120, 130, 170, 0.1),
+      0 10px 20px -8px rgba(60, 70, 110, 0.18);
+    --rim: conic-gradient(
+      from 210deg,
+      rgba(255, 120, 150, 0.6),
+      rgba(255, 210, 120, 0.55),
+      rgba(120, 210, 255, 0.6),
+      rgba(170, 140, 255, 0.6),
+      rgba(255, 120, 150, 0.6)
+    );
+  }
+
+  .dark {
+    --canvas: #060814;
+    --ink: #FFFFFF;
+    --ink-2: #94A3B8;
+    --ink-3: #64748B;
+    --glass-fill: linear-gradient(135deg, rgba(22, 30, 62, 0.58) 0%, rgba(9, 13, 30, 0.46) 100%);
+    --glass-fill-dense: linear-gradient(135deg, rgba(30, 42, 85, 0.72) 0%, rgba(13, 19, 44, 0.58) 100%);
+    --glass-border: rgba(255, 255, 255, 0.16);
+    --glass-shadow:
+      inset 0 1px 1.5px rgba(255, 255, 255, 0.38),
+      inset 0 -1px 2px rgba(168, 85, 247, 0.3),
+      0 28px 65px -14px rgba(0, 0, 0, 0.85),
+      0 0 45px -5px rgba(47, 107, 255, 0.28);
+    --glass-shadow-sm:
+      inset 0 1px 1px rgba(255, 255, 255, 0.35),
+      inset 0 -1px 2px rgba(168, 85, 247, 0.25),
+      0 12px 28px -8px rgba(0, 0, 0, 0.65),
+      0 0 22px -3px rgba(47, 107, 255, 0.22);
+    --rim: conic-gradient(
+      from 220deg,
+      rgba(56, 189, 248, 0.85) 0%,
+      rgba(168, 85, 247, 0.85) 45%,
+      rgba(244, 63, 94, 0.7) 75%,
+      rgba(56, 189, 248, 0.85) 100%
+    );
+  }
+
+  body {
+    background-color: var(--canvas);
+    color: var(--ink);
+    min-height: 100dvh;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+}
+
+/* Glass Surface with Iridescent Specular Rims */
+.glass {
+  background: var(--glass-fill);
+  backdrop-filter: blur(24px) saturate(165%);
+  -webkit-backdrop-filter: blur(24px) saturate(165%);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow);
+  position: relative;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+@media (max-width: 768px) {
+  .glass {
+    backdrop-filter: blur(14px) saturate(150%);
+    -webkit-backdrop-filter: blur(14px) saturate(150%);
+  }
+}
+
+/* Glass Iridescent 1.5px Rim with Conic Refraction */
+.glass-rim::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1.5px;
+  background: var(--rim);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0.65;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+.glass-rim:hover::before {
+  opacity: 1;
+}
+
+/* Buttons with 3D Specular Highlight (.btn-gloss) */
+.btn-gloss {
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-gloss::after {
+  content: '';
+  position: absolute;
+  inset: 2px 2px 52% 2px;
+  border-radius: inherit;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0));
+  pointer-events: none;
+}
+
+.btn-red-orange {
+  background: linear-gradient(135deg, #FF5A3C 0%, #E8301F 55%, #FF9A3C 100%);
+  box-shadow:
+    inset 0 1px 2px rgba(255, 255, 255, 0.6),
+    0 10px 25px -4px rgba(232, 48, 31, 0.45),
+    0 2px 6px rgba(232, 48, 31, 0.2);
+}
+
+.dark .btn-red-orange {
+  background: linear-gradient(135deg, #FF6B4A 0%, #E82810 60%, #FF8A3C 100%);
+  box-shadow:
+    inset 0 1px 2px rgba(255, 255, 255, 0.7),
+    0 0 28px rgba(255, 90, 60, 0.6),
+    0 4px 14px rgba(232, 40, 16, 0.5);
+}
+
+.btn-blue {
+  background: linear-gradient(135deg, #2F6BFF 0%, #2AA8FF 50%, #5CE1FF 100%);
+  box-shadow:
+    inset 0 1px 2px rgba(255, 255, 255, 0.6),
+    0 10px 25px -4px rgba(47, 107, 255, 0.45),
+    0 2px 6px rgba(47, 107, 255, 0.2);
+}
+
+.dark .btn-blue {
+  background: linear-gradient(135deg, #2AA8FF 0%, #0055FF 100%);
+  box-shadow:
+    inset 0 1px 2px rgba(255, 255, 255, 0.7),
+    0 0 28px rgba(42, 168, 255, 0.65),
+    0 4px 14px rgba(0, 85, 255, 0.5);
+}
+
+.btn-purple {
+  background: linear-gradient(135deg, #7C4DFF 0%, #9F54FF 50%, #B36BFF 100%);
+  box-shadow:
+    inset 0 1px 2px rgba(255, 255, 255, 0.6),
+    0 10px 25px -4px rgba(124, 77, 255, 0.45),
+    0 2px 6px rgba(124, 77, 255, 0.2);
+}
+
+.dark .btn-purple {
+  background: linear-gradient(135deg, #9D5CFF 0%, #6825E8 100%);
+  box-shadow:
+    inset 0 1px 2px rgba(255, 255, 255, 0.7),
+    0 0 28px rgba(157, 92, 255, 0.6),
+    0 4px 14px rgba(104, 37, 232, 0.5);
+}
+
+/* Floating Fluid Ambient Morphing Blobs */
+@keyframes fluidDriftTop {
+  0%, 100% {
+    transform: translate(0px, 0px) scale(1);
+  }
+  50% {
+    transform: translate(40px, 30px) scale(1.08);
+  }
+}
+
+@keyframes fluidDriftBottom {
+  0%, 100% {
+    transform: translate(0px, 0px) scale(1);
+  }
+  50% {
+    transform: translate(-35px, -25px) scale(1.06);
+  }
+}
+
+.fluid-blob-lavender {
+  animation: fluidDriftTop 16s ease-in-out infinite;
+}
+
+.fluid-blob-iceblue {
+  animation: fluidDriftBottom 18s ease-in-out infinite;
+}
+
+/* Accessibility Focus Ring */
+*:focus-visible {
+  outline: 2px solid #2F6BFF;
+  outline-offset: 2px;
+}
+
+/* Fallback for devices without backdrop-filter */
+@supports not (backdrop-filter: blur(1px)) {
+  .glass {
+    background: rgba(255, 255, 255, 0.94);
+  }
+  .dark .glass {
+    background: rgba(16, 22, 38, 0.94);
+  }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .glass {
+    backdrop-filter: none;
+    background: rgba(240, 243, 249, 0.98);
+  }
+  .dark .glass {
+    background: rgba(15, 20, 35, 0.98);
+  }
+}
