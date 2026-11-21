@@ -4,7 +4,7 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from app.config import settings
-from routers import inspect, jobs, health, explainer
+from routers import inspect, jobs, health, explainer, clip
 from services.sweeper_service import run_cleanup_sweeper, clean_stale_storage_on_startup
 
 @asynccontextmanager
@@ -51,6 +51,7 @@ app.include_router(health.router)
 app.include_router(inspect.router)
 app.include_router(jobs.router)
 app.include_router(explainer.router)
+app.include_router(clip.router)
 
 if __name__ == "__main__":
     import uvicorn

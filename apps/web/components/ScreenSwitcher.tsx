@@ -43,6 +43,7 @@ export const ScreenSwitcher: React.FC = () => {
     { id: 'configure', label: '02 CONFIGURE' },
     { id: 'in_progress', label: '03 IN PROGRESS' },
     { id: 'complete', label: '04 COMPLETE' },
+    { id: 'auto_clip', label: '05 AUTO CLIP' },
   ];
 
   const handleSelectScreen = (id: ScreenState) => {

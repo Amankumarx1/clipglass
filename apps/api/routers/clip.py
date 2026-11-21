@@ -1,0 +1,225 @@
+import os
+import re
+import asyncio
+from fastapi import APIRouter, Request, HTTPException, status, Header
+from fastapi.responses import FileResponse, StreamingResponse
+from sse_starlette.sse import EventSourceResponse
+from schemas.clip import (
+    ClipJobCreateRequest, ClipJobEventData, ClipMoment,
+    ClipMomentUpdateRequest
+)
+from services.clip_queue_service import clip_job_manager
+from services.clip_render_service import render_clip_segment, package_clips_zip
+
+router = APIRouter(prefix="/api/clip", tags=["Auto Clip"])
+
+JOB_ID_REGEX = re.compile(r'^[a-fA-F0-9]{32}$')
+
+def validate_job_id(job_id: str) -> str:
+    if not job_id or not JOB_ID_REGEX.match(job_id):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid clip job ID format."
+        )
+    return job_id
+
+@router.post("/jobs")
+async def create_clip_job(request: Request, body: ClipJobCreateRequest):
+    if not body.consent:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail={
+                "code": "consent-required",
+                "title": "Consent Required",
+                "explanation": "You must confirm you own this video or have legal permission to clip it.",
+                "suggestedAction": "Check the consent checkbox to proceed."
+            }
+        )
+
+    client_ip = request.client.host if request.client else "127.0.0.1"
+
+    try:
+        job_id = clip_job_manager.create_job(body, client_ip)
+        return {"jobId": job_id, "message": "Auto Clip job initiated."}
+    except ValueError as e:
+        raise HTTPException(status_code=status.HTTP_429_TOO_MANY_REQUESTS, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
+
+@router.get("/jobs/{job_id}/events")
+async def clip_job_events(job_id: str):
+    valid_id = validate_job_id(job_id)
+    record = clip_job_manager.get_job(valid_id)
+    if not record:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Clip job not found.")
+
+    async def event_generator():
+        initial = record.to_event_data()
+        yield {"event": "update", "data": initial.model_dump_json()}
+
+        if record.stage in ("ready", "failed", "cancelled"):
+            return
+
+        q = asyncio.Queue()
+        record.listeners.append(q)
+        try:
+            while True:
+                try:
+                    event = await asyncio.wait_for(q.get(), timeout=15.0)
+                    yield {"event": "update", "data": event.model_dump_json()}
+                    if event.stage in ("ready", "failed", "cancelled"):
+                        break
+                except asyncio.TimeoutError:
+                    yield {"event": "ping", "data": "keep-alive"}
+        finally:
+            if q in record.listeners:
+                record.listeners.remove(q)
+
+    return EventSourceResponse(event_generator())
+
+@router.get("/jobs/{job_id}/clips")
+async def get_job_clips(job_id: str):
+    valid_id = validate_job_id(job_id)
+    record = clip_job_manager.get_job(valid_id)
+    if not record:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Clip job not found.")
+    return {"jobId": valid_id, "stage": record.stage, "clips": record.clips}
+
+@router.patch("/jobs/{job_id}/clips/{cid}")
+async def update_clip_moment(job_id: str, cid: str, body: ClipMomentUpdateRequest):
+    valid_id = validate_job_id(job_id)
+    record = clip_job_manager.get_job(valid_id)
+    if not record:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Clip job not found.")
+
+    matched_clip = next((c for c in record.clips if c.clipId == cid), None)
+    if not matched_clip:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Clip moment not found.")
+
+    if body.start is not None: matched_clip.start = body.start
+    if body.end is not None: matched_clip.end = body.end
+    if body.start is not None or body.end is not None:
+        matched_clip.duration = round(matched_clip.end - matched_clip.start, 2)
+    if body.hook is not None: matched_clip.hook = body.hook
+    if body.title is not None: matched_clip.title = body.title
+    if body.hashtags is not None: matched_clip.hashtags = body.hashtags
+    if body.reframeMode is not None: matched_clip.reframeMode = body.reframeMode
+    if body.captionPreset is not None: matched_clip.captionPreset = body.captionPreset
+    if body.transcriptText is not None: matched_clip.transcriptText = body.transcriptText
+    if body.words is not None: matched_clip.words = body.words
+
+    # Invalidate rendered status on edit
+    matched_clip.status = 'discovered'
+    matched_clip.videoUrl = None
+
+    record.emit_update()
+    return {"message": "Clip updated successfully", "clip": matched_clip}
+
+@router.post("/jobs/{job_id}/clips/{cid}/render")
+async def render_clip(job_id: str, cid: str):
+    valid_id = validate_job_id(job_id)
+    record = clip_job_manager.get_job(valid_id)
+    if not record:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Clip job not found.")
+
+    matched_clip = next((c for c in record.clips if c.clipId == cid), None)
+    if not matched_clip:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Clip moment not found.")
+
+    if not record.source_video or not os.path.exists(record.source_video):
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Source video is not available.")
+
+    matched_clip.status = 'rendering'
+    record.emit_update()
+
+    success, mp4_path, err_msg = render_clip_segment(
+        record.source_video,
+        record.job_dir,
+        matched_clip
+    )
+
+    if not success or not mp4_path:
+        matched_clip.status = 'failed'
+        record.emit_update()
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"Render failed: {err_msg}")
+
+    matched_clip.status = 'ready'
+    matched_clip.videoUrl = f"/api/clip/jobs/{job_id}/clips/{cid}/download"
+    record.emit_update()
+
+    return {"message": "Clip rendered successfully", "clip": matched_clip}
+
+@router.get("/jobs/{job_id}/clips/{cid}/download")
+async def download_clip(job_id: str, cid: str, range: str = Header(None)):
+    valid_id = validate_job_id(job_id)
+    record = clip_job_manager.get_job(valid_id)
+    if not record:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Clip job not found.")
+
+    mp4_filename = f"clip_{cid}.mp4"
+    file_path = os.path.join(record.job_dir, mp4_filename)
+    if not os.path.exists(file_path):
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Rendered clip file not found.")
+
+    file_size = os.path.getsize(file_path)
+
+    # HTTP Range Request handling (206 Partial Content) for resumable video streaming
+    if range:
+        range_match = re.match(r"bytes=(\d+)-(\d*)", range)
+        if range_match:
+            start_b = int(range_match.group(1))
+            end_b = int(range_match.group(2)) if range_match.group(2) else file_size - 1
+            if start_b <= end_b and end_b < file_size:
+                length = end_b - start_b + 1
+
+                def iter_chunk():
+                    with open(file_path, "rb") as f:
+                        f.seek(start_b)
+                        bytes_left = length
+                        while bytes_left > 0:
+                            chunk_sz = min(bytes_left, 64 * 1024)
+                            data = f.read(chunk_sz)
+                            if not data:
+                                break
+                            bytes_left -= len(data)
+                            yield data
+
+                headers = {
+                    "Content-Range": f"bytes {start_b}-{end_b}/{file_size}",
+                    "Accept-Ranges": "bytes",
+                    "Content-Length": str(length),
+                    "Content-Type": "video/mp4",
+                    "Content-Disposition": f'inline; filename="{mp4_filename}"',
+                }
+                return StreamingResponse(iter_chunk(), status_code=status.HTTP_206_PARTIAL_CONTENT, headers=headers)
+
+    return FileResponse(
+        file_path,
+        media_type="video/mp4",
+        filename=mp4_filename,
+        headers={"Accept-Ranges": "bytes"}
+    )
+
+@router.get("/jobs/{job_id}/export-all")
+async def export_all_clips(job_id: str):
+    valid_id = validate_job_id(job_id)
+    record = clip_job_manager.get_job(valid_id)
+    if not record:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Clip job not found.")
+
+    # Render any unrendered clips first
+    for clip in record.clips:
+        if clip.status != 'ready':
+            success, _, _ = render_clip_segment(record.source_video, record.job_dir, clip)
+            if success:
+                clip.status = 'ready'
+
+    zip_path = package_clips_zip(record.job_dir, record.clips)
+    if not zip_path or not os.path.exists(zip_path):
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Failed to assemble ZIP export bundle.")
+
+    return FileResponse(
+        zip_path,
+        media_type="application/zip",
+        filename=f"clipglass_{job_id[:8]}_all_clips.zip"
+    )

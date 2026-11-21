@@ -7,6 +7,7 @@ import { Screen01Home } from '@/components/Screen01Home';
 import { Screen02Configure } from '@/components/Screen02Configure';
 import { Screen03InProgress } from '@/components/Screen03InProgress';
 import { Screen04Complete } from '@/components/Screen04Complete';
+import { ScreenAutoClip } from '@/components/ScreenAutoClip';
 import { GlassSessionDrawer } from '@/components/GlassSessionDrawer';
 import { GlassHowItWorks } from '@/components/GlassHowItWorks';
 import { GlassFAQ } from '@/components/GlassFAQ';
@@ -59,6 +60,8 @@ export default function HomePage() {
             <Screen04Complete />
           </>
         )}
+
+        {screen === 'auto_clip' && <ScreenAutoClip />}
       </div>
 
       {/* Ephemeral Session History Drawer */}

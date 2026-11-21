@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { VideoMetadata, sampleVideoMetadata } from './mockData';
 
-export type ScreenState = 'home' | 'configure' | 'in_progress' | 'complete';
+export type ScreenState = 'home' | 'configure' | 'in_progress' | 'complete' | 'auto_clip';
 export type DownloadMode = 'video' | 'video_only' | 'audio';
 export type ContainerFormat = 'mp4' | 'webm';
 export type AudioFormat = 'mp3' | 'm4a' | 'opus' | 'wav' | 'flac';

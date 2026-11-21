@@ -27,6 +27,17 @@ class Settings(BaseSettings):
     YOUTUBE_PROXY: str = ""
     YOUTUBE_COOKIES_FILE: str = ""
 
+    # Auto Clip Engine Settings
+    CLIP_DURATION_CAP: int = 3600  # 60 minutes cap for Auto Clip
+    WHISPER_MODEL: str = "base"     # tiny, base, small, medium
+    WHISPER_DEVICE: str = "cpu"     # cpu or cuda
+    WHISPER_COMPUTE_TYPE: str = "int8" # int8, float16, float32
+    ANTHROPIC_API_KEY: str = ""
+    OPENROUTER_API_KEY: str = ""
+    OLLAMA_BASE_URL: str = "http://127.0.0.1:11434"
+    OLLAMA_MODEL: str = "llama3.2"
+    ENABLE_LOCAL_CLIPS_KITTY_ADAPTER: bool = False
+
     SENTRY_DSN: str = ""
 
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")

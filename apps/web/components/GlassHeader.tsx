@@ -2,12 +2,14 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { Moon, Sun, Volume2, VolumeX, History, Bookmark, Check, DownloadCloud } from 'lucide-react';
+import { Moon, Sun, Volume2, VolumeX, History, Bookmark, Check, DownloadCloud, Sparkles } from 'lucide-react';
 import { useAppStore } from '@/lib/store';
 import { playGlassTick, playCrystalChime } from '@/lib/soundEffects';
 
 export const GlassHeader: React.FC = () => {
   const {
+    screen,
+    setScreen,
     theme,
     toggleTheme,
     soundEnabled,
@@ -72,6 +74,23 @@ export const GlassHeader: React.FC = () => {
 
       {/* Center Nav Links */}
       <nav className="hidden sm:flex items-center gap-4 md:gap-6 text-xs md:text-sm font-semibold text-ink-secondary dark:text-ink-dark-secondary">
+        <button
+          type="button"
+          onClick={() => { playGlassTick(); setScreen('auto_clip'); }}
+          className="flex items-center gap-1.5 px-3 py-1 rounded-pill bg-gradient-to-r from-orange-500/20 to-red-500/20 text-orange-600 dark:text-orange-300 font-bold border border-orange-500/30 hover:opacity-90 transition-all text-xs"
+        >
+          <Sparkles className="w-3.5 h-3.5" />
+          <span>Auto Clip (9:16)</span>
+        </button>
+        <span className="text-ink-tertiary/40">|</span>
+        <button
+          type="button"
+          onClick={() => { playGlassTick(); setScreen('home'); }}
+          className="hover:text-ink-primary dark:hover:text-ink-dark-primary transition-colors"
+        >
+          Downloader
+        </button>
+        <span className="text-ink-tertiary/40">|</span>
         <Link href="/#how-it-works" className="hover:text-ink-primary dark:hover:text-ink-dark-primary transition-colors">
           How it works
         </Link>
