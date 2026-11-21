@@ -67,3 +67,4 @@ def test_clip_pipeline_render_and_zip(tmp_path):
     assert zip_path is not None
     assert os.path.exists(zip_path)
     assert os.path.getsize(zip_path) > 500
+

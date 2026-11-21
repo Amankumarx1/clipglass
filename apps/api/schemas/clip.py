@@ -78,3 +78,4 @@ class ClipJobEventData(BaseModel):
     eta: Optional[int] = None
     clips: List[ClipMoment] = Field(default_factory=list)
     error: Optional[FriendlyError] = None
+

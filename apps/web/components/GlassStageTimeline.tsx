@@ -84,3 +84,4 @@ export const GlassStageTimeline: React.FC<StageTimelineProps> = ({ stage, percen
     </div>
   );
 };
+

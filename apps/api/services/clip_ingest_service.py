@@ -100,19 +100,18 @@ def ingest_video_and_metadata(
             suggestedAction="Please verify the video URL and try again."
         )
 
-    # 3. Download Source Video + Audio + Captions
+    # 3. Download Source Video + Audio (Deterministic 2-step: Video stream first, captions next)
     video_out = os.path.join(job_dir, "source.mp4")
     outtmpl = os.path.join(job_dir, "source.%(ext)s")
 
+    # Step 3a: Video and Audio stream download
     download_opts = dict(base_opts)
     download_opts.update({
         "outtmpl": outtmpl,
-        "format": "bv*[height<=1080][ext=mp4]+ba[ext=m4a]/b[height<=1080][ext=mp4]/best[height<=1080]",
+        "format": "bv*[height<=1080]+ba/b[height<=1080]/best",
         "merge_output_format": "mp4",
-        "writesubtitles": True,
-        "writeautomaticsub": True,
-        "subtitleslangs": ["en.*", "en"],
-        "subtitlesformat": "json3/vtt/srt",
+        "writesubtitles": False,
+        "writeautomaticsub": False,
     })
 
     if progress_cb:
@@ -121,42 +120,60 @@ def ingest_video_and_metadata(
     try:
         with yt_dlp.YoutubeDL(download_opts) as ydl:
             ydl.download([canonical_url])
-
-        # Verify source video exists
-        if not os.path.exists(video_out):
-            # Check if any .mp4 exists in job_dir
-            mp4_files = [f for f in os.listdir(job_dir) if f.endswith(".mp4")]
-            if mp4_files:
-                video_out = os.path.join(job_dir, mp4_files[0])
-            else:
-                return None, FriendlyError(
-                    code="download-failed",
-                    title="Source Download Failed",
-                    explanation="Could not download video and audio streams for clipping.",
-                    suggestedAction="Try another YouTube URL."
-                )
-
-        # Detect caption file if downloaded
-        caption_path = None
-        for f in os.listdir(job_dir):
-            if f.startswith("source") and f.endswith((".json3", ".vtt", ".srt")):
-                caption_path = os.path.join(job_dir, f)
-                break
-
-        return IngestResult(
-            video_path=video_out,
-            duration=duration,
-            title=title,
-            channel=channel,
-            chapters=chapters,
-            heatmap=heatmap,
-            caption_path=caption_path
-        ), None
-
     except Exception as e:
-        return None, FriendlyError(
-            code="download-error",
-            title="Download Processing Error",
-            explanation=str(e)[:250],
-            suggestedAction="Please retry shortly."
-        )
+        mp4_files = [f for f in os.listdir(job_dir) if f.endswith(".mp4")]
+        if not mp4_files:
+            return None, FriendlyError(
+                code="download-error",
+                title="Download Processing Error",
+                explanation=str(e)[:250],
+                suggestedAction="Please retry shortly."
+            )
+
+    # Verify source video exists
+    if not os.path.exists(video_out):
+        mp4_files = [f for f in os.listdir(job_dir) if f.endswith(".mp4")]
+        if mp4_files:
+            video_out = os.path.join(job_dir, mp4_files[0])
+        else:
+            return None, FriendlyError(
+                code="download-failed",
+                title="Source Download Failed",
+                explanation="Could not download video and audio streams for clipping.",
+                suggestedAction="Try another YouTube URL."
+            )
+
+    # Step 3b: Optional subtitles fetch (non-blocking, fallback to faster-whisper on error)
+    sub_opts = dict(base_opts)
+    sub_opts.update({
+        "outtmpl": outtmpl,
+        "skip_download": True,
+        "writesubtitles": True,
+        "writeautomaticsub": True,
+        "subtitleslangs": ["en-IN", "hi", "en", "en-US"],
+        "subtitlesformat": "json3/vtt/srt",
+    })
+    try:
+        with yt_dlp.YoutubeDL(sub_opts) as ydl:
+            ydl.download([canonical_url])
+    except Exception:
+        # Non-fatal subtitle error (e.g. YouTube HTTP 429 timedtext); pipeline gracefully falls back
+        pass
+
+    # Detect caption file if downloaded (prefer json3, then vtt, then srt)
+    caption_path = None
+    candidates = [f for f in os.listdir(job_dir) if f.startswith("source") and f.endswith((".json3", ".vtt", ".srt"))]
+    candidates.sort(key=lambda x: (0 if x.endswith(".json3") else 1 if x.endswith(".vtt") else 2))
+    if candidates:
+        caption_path = os.path.join(job_dir, candidates[0])
+
+    return IngestResult(
+        video_path=video_out,
+        duration=duration,
+        title=title,
+        channel=channel,
+        chapters=chapters,
+        heatmap=heatmap,
+        caption_path=caption_path
+    ), None
+

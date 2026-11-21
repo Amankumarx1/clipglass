@@ -86,3 +86,4 @@ def test_heuristic_score_clips():
     assert top.start <= 40.0
     assert top.end >= 50.0
     assert len(top.hashtags) > 0
+

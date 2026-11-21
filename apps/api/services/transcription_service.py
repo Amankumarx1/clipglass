@@ -44,8 +44,8 @@ def parse_youtube_json3_captions(json3_path: str) -> List[TranscriptSentence]:
                     ))
                     current_sentence_text.append(clean_word)
 
-                    # Sentence punctuation split
-                    if any(clean_word.endswith(p) for p in ('.', '!', '?', '...')):
+                    # Sentence punctuation split or max length
+                    if any(clean_word.endswith(p) for p in ('.', '!', '?', '...', '।')) or len(current_sentence_text) >= 12:
                         full_txt = " ".join(current_sentence_text)
                         if current_words:
                             sentences.append(TranscriptSentence(
@@ -223,3 +223,4 @@ def get_or_create_transcript(job_dir: str, video_path: str, caption_path: Option
         pass
 
     return sentences
+

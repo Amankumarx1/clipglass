@@ -83,7 +83,7 @@ async def get_job_clips(job_id: str):
     record = clip_job_manager.get_job(valid_id)
     if not record:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Clip job not found.")
-    return {"jobId": valid_id, "stage": record.stage, "clips": record.clips}
+    return {"jobId": valid_id, "stage": record.stage, "clips": record.clips, "error": record.error}
 
 @router.patch("/jobs/{job_id}/clips/{cid}")
 async def update_clip_moment(job_id: str, cid: str, body: ClipMomentUpdateRequest):
@@ -223,3 +223,4 @@ async def export_all_clips(job_id: str):
         media_type="application/zip",
         filename=f"clipglass_{job_id[:8]}_all_clips.zip"
     )
+

@@ -190,3 +190,4 @@ export const GlassClipCard: React.FC<GlassClipCardProps> = ({ clip, jobId }) => 
     </motion.div>
   );
 };
+

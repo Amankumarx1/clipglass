@@ -29,3 +29,4 @@ All notable changes to the ClipGlass project are documented in this file.
   - Clean-room implementation ensuring complete AGPL avoidance (no copied code or prompts from Clips Kitty; no YOLOv8/ultralytics).
   - Lemo-Opuscar design-time polish pack with manifests.
   - 100% test coverage across signals, scoring, ASS generation, security, and synthetic video rendering.
+

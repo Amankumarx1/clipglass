@@ -95,3 +95,4 @@ def build_reframe_filter(
     else:
         # 'center' mode fallback
         return compute_center_crop_filter(width, height), False
+

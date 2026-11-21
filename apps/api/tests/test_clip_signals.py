@@ -30,3 +30,4 @@ def test_map_heatmap_to_bins():
     assert bins[22] == 0.5
     # Untouched range should be 0.0
     assert bins[5] == 0.0
+

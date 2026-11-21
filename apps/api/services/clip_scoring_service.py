@@ -283,3 +283,4 @@ Transcript Timeline:
         print(f"LLM scoring exception notice: {e}; falling back to heuristic scorer.")
 
     return heuristic_score_clips(signals, sentences, clip_count, min_dur, max_dur, title_prefix)
+

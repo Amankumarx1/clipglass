@@ -140,3 +140,4 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
         f.write(full_ass_content)
 
     return out_path
+

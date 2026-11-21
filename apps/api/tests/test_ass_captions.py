@@ -34,3 +34,4 @@ def test_generate_ass_subtitles(tmp_path):
     assert "Dialogue:" in content
     assert "{\\k" in content
     assert "ClipGlass" in content
+
