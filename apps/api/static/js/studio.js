@@ -1,130 +1,782 @@
-// ClipGlass Audio Studio Core Engine (Sections 24 to 31)
-// Pure In-Browser Web Audio API & Worker DSP Engine
+// ClipGlass Audio Studio Engine — Simplified 60-Effects Library & In-Browser DSP
+// Pure In-Browser Web Audio API & OfflineAudioContext Renderer
 
 (function(window) {
   'use strict';
 
-  // 1. MODULE REGISTRY (19 Manual Modules + 60 Automated Modules A01-A60 = 79 Total)
-  const MODULE_REGISTRY = [
-    // --- MANUAL MODULES (19) ---
-    // Space and Time
-    { id: 'lush_plate', name: 'Lush Plate Reverb', category: 'space', engine: 'RT', isAuto: false, desc: 'Silky smooth high-end reverb tail', order: 50, defaultIntensity: 50, params: { decay: 2.2, preDelay: 0.02, wet: 0.25 } },
-    { id: 'cathedral_hall', name: 'Cathedral Hall', category: 'space', engine: 'RT', isAuto: false, desc: 'Huge expansive acoustics with a 3.2 s decay', order: 51, defaultIntensity: 45, params: { decay: 3.2, preDelay: 0.04, wet: 0.3 } },
-    { id: 'ping_pong_delay', name: 'Ping-Pong Delay', category: 'space', engine: 'RT', isAuto: false, desc: 'Rhythmic stereo bouncing echoes with feedback', order: 52, defaultIntensity: 40, params: { delayTime: 0.35, feedback: 0.45, wet: 0.25 } },
-    { id: 'tape_echo', name: 'Tape Echo 1974', category: 'space', engine: 'RT', isAuto: false, desc: 'Vintage warm saturation delay', order: 53, defaultIntensity: 40, params: { delayTime: 0.28, flutter: 0.2, wet: 0.25 } },
-    
-    // Modulation
-    { id: 'vintage_chorus', name: 'Vintage Chorus', category: 'modulation', engine: 'RT', isAuto: false, desc: 'Warm 80s analog stereo widening', order: 54, defaultIntensity: 50, params: { rate: 1.2, depth: 0.003, wet: 0.4 } },
-    { id: 'optical_flanger', name: 'Optical Flanger', category: 'modulation', engine: 'RT', isAuto: false, desc: 'Deep jet-plane resonant sweeps', order: 55, defaultIntensity: 45, params: { rate: 0.25, feedback: 0.6, wet: 0.35 } },
-    { id: 'harmonic_tremolo', name: 'Harmonic Tremolo', category: 'modulation', engine: 'RT', isAuto: false, desc: 'Tube amplifier amplitude pulsation', order: 56, defaultIntensity: 50, params: { rate: 4.0, depth: 0.6 } },
-    
-    // Equalizer
-    { id: 'parametric_eq', name: 'Parametric 10-Band EQ', category: 'eq', engine: 'RT', isAuto: false, desc: 'Surgical curve tone control across the spectrum', order: 30, defaultIntensity: 60, params: { lowGain: 1.5, midGain: -0.5, highGain: 2.1 } },
-    { id: 'warm_pultec', name: 'Warm Analog Pultec', category: 'eq', engine: 'RT', isAuto: false, desc: 'Musical low-end boost and attenuate curves', order: 31, defaultIntensity: 55, params: { boostFreq: 60, boost: 3.0, atten: 1.5 } },
-    { id: 'air_band', name: 'Air Band (20 kHz)', category: 'eq', engine: 'RT', isAuto: false, desc: 'Ultra-high sheen and vocal breathiness', order: 32, defaultIntensity: 60, params: { freq: 16000, gain: 2.8 } },
-    
-    // Dynamics
-    { id: 'bus_compressor', name: 'Bus Compressor', category: 'dynamics', engine: 'RT', isAuto: false, desc: 'Glues rhythm, transient punch and bass together', order: 40, defaultIntensity: 60, params: { threshold: -18, ratio: 3.2, attack: 0.01, release: 0.2 } },
-    { id: 'brickwall_limiter', name: 'Brickwall Limiter', category: 'dynamics', engine: 'RT', isAuto: false, desc: 'True peak overshoot protection at -0.1 dB', order: 41, defaultIntensity: 70, params: { ceiling: -0.1, threshold: -4.0 } },
-    { id: 'optical_leveler', name: 'Optical Leveler (LA-2A)', category: 'dynamics', engine: 'RT', isAuto: false, desc: 'Smooth, natural vocal dynamics control', order: 42, defaultIntensity: 50, params: { peakReduction: 45, gain: 2.0 } },
-    
-    // Creative FX
-    { id: 'tube_saturation', name: 'Tube Saturation', category: 'creative', engine: 'RT', isAuto: false, desc: 'Warm harmonic distortion and subtle clipping', order: 57, defaultIntensity: 45, params: { drive: 2.5, warmth: 0.6 } },
-    { id: 'bitcrusher', name: 'Bitcrusher and Lo-Fi', category: 'creative', engine: 'RT', isAuto: false, desc: '8-bit vintage sampler crunch and downsampling', order: 58, defaultIntensity: 40, params: { bits: 8, normFreq: 0.25 } },
-    
-    // Stereo
-    { id: 'haas_widener', name: 'Haas Stereo Widener', category: 'stereo', engine: 'RT', isAuto: false, desc: 'Psychoacoustic wide stereo image expansion', order: 60, defaultIntensity: 55, params: { delayMs: 18, width: 1.25 } },
-    { id: 'bass_mono', name: 'Bass Mono-Maker', category: 'stereo', engine: 'RT', isAuto: false, desc: 'Centers all frequencies below 120 Hz to keep punch on mono systems', order: 61, defaultIntensity: 100, params: { cutoff: 120 } },
-    
-    // Voice Processing
-    { id: 'de_esser', name: 'De-Esser Sibilance', category: 'voice', engine: 'WL', isAuto: false, desc: 'Tames harsh s, sh and t frequencies', order: 25, defaultIntensity: 60, params: { freq: 6500, threshold: -20, reduction: 4.5 } },
-    { id: 'vocal_clarity', name: 'Vocal Clarity Exciter', category: 'voice', engine: 'RT', isAuto: false, desc: 'Adds harmonic presence so vocals cut through dense mixes', order: 33, defaultIntensity: 55, params: { freq: 3200, sheen: 2.2 } },
-
-    // --- AUTOMATED 60 ONE-CLICK MODULES (A01 - A60) ---
-    // Time, Speed & Pitch (10-18)
-    { id: 'A01', code: 'A01', name: 'Slow-Mo', category: 'time', engine: 'OFF', isAuto: true, desc: 'Slows track (0.95x to 0.50x) without pitch drop, keeping transients', order: 10, defaultIntensity: 50, params: { rate: 0.8 } },
-    { id: 'A02', code: 'A02', name: 'Slowed + Reverb', category: 'time', engine: 'OFF', isAuto: true, desc: 'Lowers speed & pitch together (0.95x-0.70x) with tempo-sized reverb', order: 11, defaultIntensity: 60, params: { rate: 0.85, reverbWet: 0.4 } },
-    { id: 'A03', code: 'A03', name: 'Speed-Up / Nightcore', category: 'time', engine: 'OFF', isAuto: true, desc: 'Raises speed & pitch together (1.05x-1.50x) with bright high shelf', order: 12, defaultIntensity: 55, params: { rate: 1.25, highShelf: 2.5 } },
-    { id: 'A04', code: 'A04', name: 'Tempo Match', category: 'time', engine: 'OFF', isAuto: true, desc: 'Detects BPM and stretches to target BPM typed or chosen', order: 13, defaultIntensity: 50, params: { targetBpm: 128 } },
-    { id: 'A05', code: 'A05', name: 'Key Transpose', category: 'time', engine: 'OFF', isAuto: true, desc: 'Detects key and shifts by up to 12 semitones, preserving tempo', order: 14, defaultIntensity: 50, params: { semitones: 2 } },
-    { id: 'A06', code: 'A06', name: 'Half-Time / Double-Time', category: 'time', engine: 'OFF', isAuto: true, desc: 'Re-times groove to half or double feel with beat-aware stretch', order: 15, defaultIntensity: 50, params: { mode: 'half' } },
-    { id: 'A07', code: 'A07', name: 'Reverse', category: 'time', engine: 'OFF', isAuto: true, desc: 'Reverses track or region with optional reverse-reverb swell', order: 16, defaultIntensity: 100, params: { swell: true } },
-    { id: 'A08', code: 'A08', name: 'Tape Stop / Vinyl Brake', category: 'time', engine: 'OFF', isAuto: true, desc: 'Classic mechanical spin-down at user markers or track end', order: 17, defaultIntensity: 80, params: { curve: 'exponential' } },
-
-    // Space & Ambience (50-56)
-    { id: 'A09', code: 'A09', name: 'Smart Ambience Fit', category: 'space', engine: 'RT', isAuto: true, desc: 'Measures dry-to-wet ratio and adds just enough room space', order: 50, defaultIntensity: 50, params: { roomSize: 0.4, wet: 0.22 } },
-    { id: 'A10', code: 'A10', name: 'Club Room Simulator', category: 'space', engine: 'RT', isAuto: true, desc: 'Medium club acoustics with short pre-delay and damped highs', order: 51, defaultIntensity: 55, params: { preDelay: 0.03, damping: 4000 } },
-    { id: 'A11', code: 'A11', name: 'Concert Arena Bloom', category: 'space', engine: 'RT', isAuto: true, desc: 'Expansive diffused wash tailored to detected musical key', order: 52, defaultIntensity: 60, params: { decay: 4.5, bloom: 0.35 } },
-    { id: 'A12', code: 'A12', name: 'Vocal Depth Creator', category: 'space', engine: 'RT', isAuto: true, desc: 'Subtle early reflections pushing lead vocals forward without mud', order: 53, defaultIntensity: 45, params: { earlyWet: 0.2, preDelay: 0.015 } },
-    { id: 'A13', code: 'A13', name: 'Sunset Lo-Fi Space', category: 'space', engine: 'RT', isAuto: true, desc: 'Combines tape warmth, spring reverb flutter and rolled-off top end', order: 54, defaultIntensity: 60, params: { flutter: 0.25, rolloff: 7500 } },
-    { id: 'A14', code: 'A14', name: '80s Gated Snare Verb', category: 'space', engine: 'RT', isAuto: true, desc: 'Detects snare transients and fires gated nonlinear reverb bursts', order: 55, defaultIntensity: 70, params: { gateTime: 0.18, wet: 0.4 } },
-    { id: 'A15', code: 'A15', name: 'Shimmering Octave Reverb', category: 'space', engine: 'RT', isAuto: true, desc: 'Pitches reverb reflections up one octave for dreamy ethereal tail', order: 56, defaultIntensity: 50, params: { shimmerPitch: 12, decay: 3.5 } },
-
-    // Cleanup & Restoration (20-28)
-    { id: 'A16', code: 'A16', name: '50/60 Hz Hum Killer', category: 'cleanup', engine: 'RT', isAuto: true, desc: 'Detects mains hum & 4 harmonics and applies surgical narrow notches', order: 20, defaultIntensity: 90, params: { baseHz: 60, q: 35 } },
-    { id: 'A17', code: 'A17', name: 'Harsh Resonance Tamer', category: 'cleanup', engine: 'WL', isAuto: true, desc: 'Locates whistling piercing peaks (2.5-8 kHz) and attenuates dynamically', order: 21, defaultIntensity: 65, params: { dynamicThreshold: -18 } },
-    { id: 'A18', code: 'A18', name: 'Click and Pop Stripper', category: 'cleanup', engine: 'OFF', isAuto: true, desc: 'Detects vinyl scratches, clicks, and interpolates over dropouts', order: 22, defaultIntensity: 80, params: { sensitivity: 0.7 } },
-    { id: 'A19', code: 'A19', name: 'Room Echo Reducer', category: 'cleanup', engine: 'OFF', isAuto: true, desc: 'Suppresses late room reverberation without hollowing direct sound', order: 23, defaultIntensity: 60, params: { deVerbRatio: 0.45 } },
-    { id: 'A20', code: 'A20', name: 'Clip Repair and Declip', category: 'cleanup', engine: 'OFF', isAuto: true, desc: 'Reconstructs squared clipped peaks via cubic spline interpolation', order: 24, defaultIntensity: 85, params: { ceiling: -0.5 } },
-    { id: 'A21', code: 'A21', name: 'Breath and Plosive Reducer', category: 'cleanup', engine: 'WL', isAuto: true, desc: 'Identifies low-frequency mic thumps (<100Hz) and dips gain', order: 25, defaultIntensity: 75, params: { highpass: 85, tamer: 0.5 } },
-    { id: 'A22', code: 'A22', name: 'DC Offset Remover', category: 'cleanup', engine: 'RT', isAuto: true, desc: 'Calculates mean offset and re-centers waveform via steep 10 Hz HP', order: 26, defaultIntensity: 100, params: { freq: 12 } },
-    { id: 'A23', code: 'A23', name: 'Silence Trimmer and Tightener', category: 'cleanup', engine: 'OFF', isAuto: true, desc: 'Detects dead air at head & tail and tightens gaps based on RMS', order: 27, defaultIntensity: 70, params: { thresholdDb: -48 } },
-
-    // Loudness & Dynamics (40-49)
-    { id: 'A24', code: 'A24', name: 'Streaming Target Matcher (-14 LUFS)', category: 'loudness', engine: 'RT', isAuto: true, desc: 'Normalizes integrated loudness to -14.0 LUFS with true peak capped at -1.0 dBTP', order: 40, defaultIntensity: 100, params: { targetLufs: -14.0, truePeakLimit: -1.0 } },
-    { id: 'A25', code: 'A25', name: 'Club Banger Leveler (-9 LUFS)', category: 'loudness', engine: 'RT', isAuto: true, desc: 'Heavy multi-stage limiting and punch pushed to -9.0 LUFS for loud DJ sets', order: 41, defaultIntensity: 85, params: { targetLufs: -9.0, punch: 2.5 } },
-    { id: 'A26', code: 'A26', name: 'Broadcast Voice Leveler (-16 LUFS)', category: 'loudness', engine: 'RT', isAuto: true, desc: 'Smooth dual-stage leveling for podcasts and spoken word targeting -16.0 LUFS', order: 42, defaultIntensity: 80, params: { targetLufs: -16.0 } },
-    { id: 'A27', code: 'A27', name: 'Dynamic Range Preserver (-18 LUFS)', category: 'loudness', engine: 'RT', isAuto: true, desc: 'Gentle transparent gain riding for jazz, acoustic, and classical music', order: 43, defaultIntensity: 60, params: { targetLufs: -18.0 } },
-    { id: 'A28', code: 'A28', name: 'Punch and Transient Snap', category: 'dynamics', engine: 'RT', isAuto: true, desc: 'Boosts initial attack transients on drums and plucked instruments', order: 44, defaultIntensity: 65, params: { attackBoostDb: 3.2 } },
-    { id: 'A29', code: 'A29', name: 'Multi-Band Glue', category: 'dynamics', engine: 'RT', isAuto: true, desc: '3-band crossover compression tightening bass, controlling mids, smoothing highs', order: 45, defaultIntensity: 60, params: { lowRatio: 3.0, midRatio: 2.2, highRatio: 2.0 } },
-    { id: 'A30', code: 'A30', name: 'Sidechain Pump Generator', category: 'dynamics', engine: 'RT', isAuto: true, desc: 'Generates musical four-on-the-floor volume ducking without extra kick routing', order: 46, defaultIntensity: 70, params: { depth: 0.65, releaseMs: 180 } },
-
-    // Tone & EQ (30-38)
-    { id: 'A31', code: 'A31', name: 'Smile Curve Sheen', category: 'eq', engine: 'RT', isAuto: true, desc: 'Broad hi-fi boost at 60 Hz and 12 kHz with subtle mid-dip', order: 30, defaultIntensity: 60, params: { lowBoost: 2.2, midDip: -1.2, highBoost: 2.8 } },
-    { id: 'A32', code: 'A32', name: 'Mid-Range Clarifier', category: 'eq', engine: 'RT', isAuto: true, desc: 'Carves out mud around 300-500 Hz and brings presence at 2-4 kHz', order: 31, defaultIntensity: 65, params: { mudCut: -2.4, presenceBoost: 1.8 } },
-    { id: 'A33', code: 'A33', name: 'Sub Bass Tightener', category: 'eq', engine: 'RT', isAuto: true, desc: 'High-passes rumble below 32 Hz and focuses 45-80 Hz punch', order: 32, defaultIntensity: 80, params: { subHp: 32, punchFreq: 60, punchGain: 2.5 } },
-    { id: 'A34', code: 'A34', name: 'Vintage Vinyl EQ', category: 'eq', engine: 'RT', isAuto: true, desc: 'Warm RIAA-inspired curve with soft roll-off above 14 kHz', order: 33, defaultIntensity: 55, params: { warmGain: 2.0, highRoll: 14000 } },
-    { id: 'A35', code: 'A35', name: 'Telephone and Radio Bandpass', category: 'eq', engine: 'RT', isAuto: true, desc: 'Cuts below 400 Hz & above 3.5 kHz with narrow peak for vintage lo-fi', order: 34, defaultIntensity: 75, params: { lowCut: 400, highCut: 3500 } },
-    { id: 'A36', code: 'A36', name: 'Air Sheen (+3 dB at 16 kHz)', category: 'eq', engine: 'RT', isAuto: true, desc: 'Ultra-smooth high shelf adding studio silkiness without harshness', order: 35, defaultIntensity: 60, params: { freq: 16000, gain: 3.0 } },
-
-    // Stereo & Spatial (60-67)
-    { id: 'A37', code: 'A37', name: 'Mono Compatibility Guard', category: 'stereo', engine: 'RT', isAuto: true, desc: 'Monitors phase correlation and collapses out-of-phase low-mids to avoid cancel', order: 60, defaultIntensity: 90, params: { threshold: 0.2 } },
-    { id: 'A38', code: 'A38', name: 'Wide Stereo Imager', category: 'stereo', engine: 'RT', isAuto: true, desc: 'Expands side channel energy above 600 Hz for wide panoramic sound', order: 61, defaultIntensity: 65, params: { widthPercent: 125 } },
-    { id: 'A39', code: 'A39', name: 'Sub 120 Hz Center', category: 'stereo', engine: 'RT', isAuto: true, desc: 'Sums all frequencies below 120 Hz into pure mono for club punch', order: 62, defaultIntensity: 100, params: { cutoff: 120 } },
-    { id: 'A40', code: 'A40', name: '3D Headphone Spatializer', category: 'stereo', engine: 'RT', isAuto: true, desc: 'Binaural HRTF cross-feed filter taking audio out of the head into room', order: 63, defaultIntensity: 50, params: { crossfeed: 0.3 } },
-    { id: 'A41', code: 'A41', name: 'Auto Panner', category: 'stereo', engine: 'RT', isAuto: true, desc: 'Sine or random stereo pan movement locked to detected track tempo', order: 64, defaultIntensity: 50, params: { rateSync: '1/4', depth: 0.6 } },
-    { id: 'A42', code: 'A42', name: 'Center Isolator / Karaoke Reducer', category: 'stereo', engine: 'RT', isAuto: true, desc: 'Attenuates or solos center information to dip or isolate lead vocals', order: 65, defaultIntensity: 60, params: { mode: 'dip_vocal', centerGain: -8.0 } },
-
-    // Voice & Podcast (25, 43, 44)
-    { id: 'A43', code: 'A43', name: 'Podcast Voice Polish', category: 'voice', engine: 'RT', isAuto: true, desc: 'High-pass, de-esser, gentle warmth EQ, vocal leveler in 1 click', order: 25, defaultIntensity: 75, params: { hp: 80, eqSheen: 2.0, compRatio: 2.8 } },
-    { id: 'A44', code: 'A44', name: 'Intimate ASMR Vocal', category: 'voice', engine: 'RT', isAuto: true, desc: 'Heavy proximity boost, high-end sensitivity and fast compression', order: 43, defaultIntensity: 70, params: { proximityBoost: 4.0, air: 3.5 } },
-    { id: 'A45', code: 'A45', name: 'De-Esser Adaptive', category: 'voice', engine: 'WL', isAuto: true, desc: 'Dynamically tracks vocal formants to tame sibilance between 4 and 9 kHz', order: 26, defaultIntensity: 65, params: { sensitivity: 0.65 } },
-    { id: 'A46', code: 'A46', name: 'Radio DJ Voice', category: 'voice', engine: 'RT', isAuto: true, desc: 'Rich chest resonance, broadcast punchy limiting, crisp presence', order: 44, defaultIntensity: 75, params: { lowChest: 3.2, highPunch: 2.4 } },
-    { id: 'A47', code: 'A47', name: 'Vocal Warmth and Body', category: 'voice', engine: 'RT', isAuto: true, desc: 'Adds second-harmonic saturation in 200-400 Hz chest resonance range', order: 36, defaultIntensity: 55, params: { warmthFreq: 300, drive: 1.8 } },
-    { id: 'A48', code: 'A48', name: 'Vocal Sheen and Air', category: 'voice', engine: 'RT', isAuto: true, desc: 'Adds silkiness in 12-16 kHz octave to float vocals over instrumentation', order: 37, defaultIntensity: 60, params: { airGain: 2.8 } },
-    { id: 'A49', code: 'A49', name: 'Voice Clarity Expander', category: 'voice', engine: 'RT', isAuto: true, desc: 'Downward expander silencing room noise when speaker pauses', order: 27, defaultIntensity: 70, params: { floorDb: -42, ratio: 2.5 } },
-
-    // Creative & Rhythmic (50-59)
-    { id: 'A50', code: 'A50', name: 'Vintage Cassette Flutter', category: 'creative', engine: 'RT', isAuto: true, desc: 'Tape wow & flutter with subtle pitch drift and high-end loss', order: 50, defaultIntensity: 55, params: { wow: 0.15, flutter: 0.25 } },
-    { id: 'A51', code: 'A51', name: 'Lo-Fi Radio Crush', category: 'creative', engine: 'RT', isAuto: true, desc: 'Combines bandpass filter, harmonic crunch and soft vinyl hiss', order: 51, defaultIntensity: 65, params: { bandpass: [450, 4200], crunch: 2.0 } },
-    { id: 'A52', code: 'A52', name: '8-Bit Game Console', category: 'creative', engine: 'RT', isAuto: true, desc: 'Bit depth reduction to 8-bit & downsampling to 11 kHz', order: 52, defaultIntensity: 75, params: { bits: 8, srate: 11025 } },
-    { id: 'A53', code: 'A53', name: 'Tape Saturation Heat', category: 'creative', engine: 'RT', isAuto: true, desc: 'Simulates tape magnetic hysteresis with natural soft-clipping', order: 53, defaultIntensity: 60, params: { drive: 3.2, headBumpDb: 1.8 } },
-    { id: 'A54', code: 'A54', name: 'Tube Warmth Glow', category: 'creative', engine: 'RT', isAuto: true, desc: 'Even-order harmonic generator modeled after 12AX7 vacuum triodes', order: 54, defaultIntensity: 50, params: { triodeDrive: 2.2 } },
-    { id: 'A55', code: 'A55', name: 'Beat Synced Tremolo', category: 'creative', engine: 'RT', isAuto: true, desc: 'Amplitude modulation locked to 1/4 or 1/8 note of detected BPM', order: 55, defaultIntensity: 60, params: { division: '1/8', depth: 0.7 } },
-    { id: 'A56', code: 'A56', name: 'Auto Fades', category: 'creative', engine: 'RT', isAuto: true, desc: 'Adds natural smooth fade-in and fade-out sized to song energy', order: 56, defaultIntensity: 100, params: { fadeInSec: 1.5, fadeOutSec: 3.0 } },
-    { id: 'A57', code: 'A57', name: 'Seamless Loop Maker', category: 'creative', engine: 'OFF', isAuto: true, desc: 'Finds optimal loop points on beat & zero-crossings for infinite loop', order: 57, defaultIntensity: 80, params: { crossfadeMs: 250 } },
-
-    // Smart Enhancers (60-63)
-    { id: 'A58', code: 'A58', name: 'Vocal Doubler', category: 'smart', engine: 'WL', isAuto: true, desc: 'Adds subtly detuned delayed vocal copy (automatic double tracking)', order: 60, defaultIntensity: 55, params: { detuneCents: 12, delayMs: 22 } },
-    { id: 'A59', code: 'A59', name: 'Auto Harmonizer', category: 'smart', engine: 'OFF', isAuto: true, desc: 'Adds harmony voices (3rd or 5th) in detected key under lead vocal', order: 61, defaultIntensity: 50, params: { interval: 'third_up', key: 'detected' } },
-    { id: 'A60', code: 'A60', name: 'Genre Smart Master', category: 'smart', engine: 'RT', isAuto: true, desc: 'Auto-adapts EQ, bus dynamics, stereo width and loudness to detected genre', order: 62, defaultIntensity: 60, params: { adaptChain: true } }
+  // 1. ALL 60 EFFECTS LIBRARY (7 Categories per Simplified Spec)
+  const CATEGORIES = [
+    { id: 'all', name: 'All' },
+    { id: 'space', name: 'Space & Time' },
+    { id: 'modulation', name: 'Modulation' },
+    { id: 'eq', name: 'Equalizer & Filters' },
+    { id: 'dynamics', name: 'Dynamics' },
+    { id: 'creative', name: 'Creative Effects' },
+    { id: 'stereo', name: 'Stereo & Spatial' },
+    { id: 'voice', name: 'Vocal & Noise Processing' }
   ];
 
-  // Map by ID
-  const MODULE_MAP = {};
-  MODULE_REGISTRY.forEach(m => { MODULE_MAP[m.id] = m; });
+  const EFFECTS_LIBRARY = [
+    // --- CATEGORY 1: Space & Time (6 effects) ---
+    {
+      id: 'reverb',
+      name: 'Reverb',
+      category: 'space',
+      categoryLabel: 'Space & Time',
+      desc: 'Create spacious acoustic depth & reflections',
+      icon: '〰',
+      controls: [
+        { key: 'roomSize', label: 'Room Size', min: 10, max: 100, step: 1, unit: '%', default: 65 },
+        { key: 'decay', label: 'Decay Time', min: 0.5, max: 10, step: 0.1, unit: 's', default: 4.5 },
+        { key: 'wet', label: 'Wet / Dry Mix', min: 0, max: 100, step: 1, unit: '%', default: 35 },
+        { key: 'preDelay', label: 'Pre-delay', min: 0, max: 100, step: 1, unit: 'ms', default: 25 }
+      ]
+    },
+    {
+      id: 'echo',
+      name: 'Echo',
+      category: 'space',
+      categoryLabel: 'Space & Time',
+      desc: 'Rhythmic repeating audio reflections',
+      icon: '🔊',
+      controls: [
+        { key: 'delayTime', label: 'Delay Time', min: 50, max: 1000, step: 10, unit: 'ms', default: 350 },
+        { key: 'feedback', label: 'Feedback', min: 0, max: 90, step: 1, unit: '%', default: 45 },
+        { key: 'wet', label: 'Wet / Dry Mix', min: 0, max: 100, step: 1, unit: '%', default: 30 },
+        { key: 'damping', label: 'High Damping', min: 1000, max: 12000, step: 100, unit: 'Hz', default: 5000 }
+      ]
+    },
+    {
+      id: 'delay',
+      name: 'Delay',
+      category: 'space',
+      categoryLabel: 'Space & Time',
+      desc: 'Crisp tempo-synced stereo delay taps',
+      icon: '⏱',
+      controls: [
+        { key: 'delayTime', label: 'Delay Time', min: 20, max: 800, step: 5, unit: 'ms', default: 250 },
+        { key: 'feedback', label: 'Feedback', min: 0, max: 85, step: 1, unit: '%', default: 40 },
+        { key: 'stereoWidth', label: 'Stereo Spread', min: 0, max: 100, step: 1, unit: '%', default: 75 },
+        { key: 'wet', label: 'Wet / Dry Mix', min: 0, max: 100, step: 1, unit: '%', default: 35 }
+      ]
+    },
+    {
+      id: 'slowed_reverb',
+      name: 'Slowed + Reverb',
+      category: 'space',
+      categoryLabel: 'Space & Time',
+      desc: 'Dreamy slowed tempo with lush reverberation',
+      icon: '🌌',
+      controls: [
+        { key: 'speed', label: 'Speed & Pitch', min: 70, max: 95, step: 1, unit: '%', default: 85 },
+        { key: 'decay', label: 'Decay Time', min: 1.0, max: 8.0, step: 0.1, unit: 's', default: 4.2 },
+        { key: 'wet', label: 'Atmosphere Mix', min: 0, max: 100, step: 1, unit: '%', default: 45 }
+      ]
+    },
+    {
+      id: 'reverse',
+      name: 'Reverse',
+      category: 'space',
+      categoryLabel: 'Space & Time',
+      desc: 'Play audio backwards with swell dynamics',
+      icon: '◀',
+      controls: [
+        { key: 'swell', label: 'Reverse Swell', min: 0, max: 100, step: 1, unit: '%', default: 50 },
+        { key: 'crossfade', label: 'Edge Crossfade', min: 10, max: 200, step: 5, unit: 'ms', default: 50 }
+      ]
+    },
+    {
+      id: 'pre_delay',
+      name: 'Pre-delay',
+      category: 'space',
+      categoryLabel: 'Space & Time',
+      desc: 'Offset initial reflections from direct sound',
+      icon: '⚡',
+      controls: [
+        { key: 'offsetMs', label: 'Offset Time', min: 1, max: 100, step: 1, unit: 'ms', default: 30 },
+        { key: 'feedback', label: 'Reflection Blend', min: 0, max: 50, step: 1, unit: '%', default: 10 }
+      ]
+    },
 
-  // 2. DSP ENGINE & WEB AUDIO GRAPH
+    // --- CATEGORY 2: Modulation (8 effects) ---
+    {
+      id: 'chorus',
+      name: 'Chorus',
+      category: 'modulation',
+      categoryLabel: 'Modulation',
+      desc: 'Rich multi-voice shimmer & stereo motion',
+      icon: '🌊',
+      controls: [
+        { key: 'rate', label: 'Modulation Rate', min: 0.2, max: 5.0, step: 0.1, unit: 'Hz', default: 1.5 },
+        { key: 'depth', label: 'Depth', min: 1, max: 15, step: 0.5, unit: 'ms', default: 5 },
+        { key: 'wet', label: 'Wet / Dry Mix', min: 0, max: 100, step: 1, unit: '%', default: 40 }
+      ]
+    },
+    {
+      id: 'flanger',
+      name: 'Flanger',
+      category: 'modulation',
+      categoryLabel: 'Modulation',
+      desc: 'Jet-plane resonant comb-filtering sweeps',
+      icon: '✈',
+      controls: [
+        { key: 'speed', label: 'Sweep Speed', min: 0.1, max: 3.0, step: 0.1, unit: 'Hz', default: 0.4 },
+        { key: 'feedback', label: 'Resonance Feedback', min: 0, max: 90, step: 1, unit: '%', default: 60 },
+        { key: 'wet', label: 'Wet / Dry Mix', min: 0, max: 100, step: 1, unit: '%', default: 40 }
+      ]
+    },
+    {
+      id: 'phaser',
+      name: 'Phaser',
+      category: 'modulation',
+      categoryLabel: 'Modulation',
+      desc: 'Psychedelic multi-stage phase sweeping',
+      icon: '🌀',
+      controls: [
+        { key: 'rate', label: 'Phase Sweep Rate', min: 0.1, max: 6.0, step: 0.1, unit: 'Hz', default: 0.8 },
+        { key: 'depth', label: 'Phase Depth', min: 0, max: 100, step: 1, unit: '%', default: 70 },
+        { key: 'feedback', label: 'Feedback', min: 0, max: 85, step: 1, unit: '%', default: 55 }
+      ]
+    },
+    {
+      id: 'tremolo',
+      name: 'Tremolo',
+      category: 'modulation',
+      categoryLabel: 'Modulation',
+      desc: 'Rhythmic pulsing amplitude modulation',
+      icon: '📳',
+      controls: [
+        { key: 'speed', label: 'Pulse Speed', min: 0.5, max: 15.0, step: 0.5, unit: 'Hz', default: 4.5 },
+        { key: 'depth', label: 'Modulation Depth', min: 0, max: 100, step: 1, unit: '%', default: 65 }
+      ]
+    },
+    {
+      id: 'vibrato',
+      name: 'Vibrato',
+      category: 'modulation',
+      categoryLabel: 'Modulation',
+      desc: 'Subtle to dramatic pitch fluctuation',
+      icon: '〰',
+      controls: [
+        { key: 'rate', label: 'Vibrato Rate', min: 1.0, max: 10.0, step: 0.2, unit: 'Hz', default: 5.0 },
+        { key: 'depthCents', label: 'Pitch Depth', min: 5, max: 100, step: 1, unit: 'cents', default: 25 }
+      ]
+    },
+    {
+      id: 'auto_pan',
+      name: 'Auto Pan',
+      category: 'modulation',
+      categoryLabel: 'Modulation',
+      desc: 'Automated stereo movement between L & R',
+      icon: '↔',
+      controls: [
+        { key: 'panRate', label: 'Pan Rate', min: 0.1, max: 4.0, step: 0.1, unit: 'Hz', default: 0.8 },
+        { key: 'width', label: 'Pan Width', min: 0, max: 100, step: 1, unit: '%', default: 80 }
+      ]
+    },
+    {
+      id: 'rotary_speaker',
+      name: 'Rotary Speaker',
+      category: 'modulation',
+      categoryLabel: 'Modulation',
+      desc: 'Doppler spinning horn & Leslie cabinet swirl',
+      icon: '🌪',
+      controls: [
+        { key: 'speed', label: 'Rotor Speed', min: 0.5, max: 8.0, step: 0.2, unit: 'Hz', default: 2.8 },
+        { key: 'drive', label: 'Tube Drive', min: 0, max: 100, step: 1, unit: '%', default: 30 },
+        { key: 'stereoSpread', label: 'Stereo Spread', min: 0, max: 100, step: 1, unit: '%', default: 75 }
+      ]
+    },
+    {
+      id: 'ring_modulation',
+      name: 'Ring Modulation',
+      category: 'modulation',
+      categoryLabel: 'Modulation',
+      desc: 'Metallic futuristic harmonic multiplication',
+      icon: '🔔',
+      controls: [
+        { key: 'carrierFreq', label: 'Carrier Frequency', min: 50, max: 1500, step: 10, unit: 'Hz', default: 320 },
+        { key: 'wet', label: 'Wet / Dry Mix', min: 0, max: 100, step: 1, unit: '%', default: 40 }
+      ]
+    },
+
+    // --- CATEGORY 3: Equalizer & Filters (9 effects) ---
+    {
+      id: 'eq',
+      name: 'Equalizer (EQ)',
+      category: 'eq',
+      categoryLabel: 'Equalizer & Filters',
+      desc: 'Precise multi-band tonal balance sculpting',
+      icon: '🎚',
+      controls: [
+        { key: 'lowGain', label: 'Low (100 Hz)', min: -12, max: 12, step: 0.5, unit: 'dB', default: 2 },
+        { key: 'lowMidGain', label: 'Low-Mid (500 Hz)', min: -12, max: 12, step: 0.5, unit: 'dB', default: 0 },
+        { key: 'highMidGain', label: 'High-Mid (2.5 kHz)', min: -12, max: 12, step: 0.5, unit: 'dB', default: 1 },
+        { key: 'highGain', label: 'High (10 kHz)', min: -12, max: 12, step: 0.5, unit: 'dB', default: 3 }
+      ]
+    },
+    {
+      id: 'bass_boost',
+      name: 'Bass Boost',
+      category: 'eq',
+      categoryLabel: 'Equalizer & Filters',
+      desc: 'Punchy low-end sub and kick reinforcement',
+      icon: '🥁',
+      controls: [
+        { key: 'boostGain', label: 'Boost Gain', min: 0, max: 15, step: 0.5, unit: 'dB', default: 6 },
+        { key: 'frequency', label: 'Bass Frequency', min: 40, max: 140, step: 5, unit: 'Hz', default: 75 },
+        { key: 'q', label: 'Curve Width (Q)', min: 0.5, max: 3.0, step: 0.1, unit: '', default: 1.2 }
+      ]
+    },
+    {
+      id: 'treble_boost',
+      name: 'Treble Boost',
+      category: 'eq',
+      categoryLabel: 'Equalizer & Filters',
+      desc: 'Bright crisp top-end presence & sparkle',
+      icon: '✨',
+      controls: [
+        { key: 'boostGain', label: 'Treble Gain', min: 0, max: 15, step: 0.5, unit: 'dB', default: 5 },
+        { key: 'frequency', label: 'Shelf Frequency', min: 5000, max: 16000, step: 500, unit: 'Hz', default: 10000 }
+      ]
+    },
+    {
+      id: 'low_pass',
+      name: 'Low-pass Filter',
+      category: 'eq',
+      categoryLabel: 'Equalizer & Filters',
+      desc: 'Smooth cut of highs for muffled warm feel',
+      icon: '📉',
+      controls: [
+        { key: 'cutoff', label: 'Cutoff Frequency', min: 200, max: 18000, step: 100, unit: 'Hz', default: 3200 },
+        { key: 'resonance', label: 'Resonance (Q)', min: 0.5, max: 8.0, step: 0.1, unit: '', default: 1.5 }
+      ]
+    },
+    {
+      id: 'high_pass',
+      name: 'High-pass Filter',
+      category: 'eq',
+      categoryLabel: 'Equalizer & Filters',
+      desc: 'Removes low mud, rumble, and sub-bass',
+      icon: '📈',
+      controls: [
+        { key: 'cutoff', label: 'Cutoff Frequency', min: 20, max: 1000, step: 10, unit: 'Hz', default: 80 }
+      ]
+    },
+    {
+      id: 'band_pass',
+      name: 'Band-pass Filter',
+      category: 'eq',
+      categoryLabel: 'Equalizer & Filters',
+      desc: 'Isolates a focused frequency spectrum',
+      icon: '🎯',
+      controls: [
+        { key: 'centerFreq', label: 'Center Frequency', min: 200, max: 6000, step: 50, unit: 'Hz', default: 1200 },
+        { key: 'q', label: 'Bandwidth (Q)', min: 0.5, max: 10.0, step: 0.5, unit: '', default: 2.0 }
+      ]
+    },
+    {
+      id: 'notch_filter',
+      name: 'Notch Filter',
+      category: 'eq',
+      categoryLabel: 'Equalizer & Filters',
+      desc: 'Pinpoint removal of unwanted resonance frequency',
+      icon: '🕳',
+      controls: [
+        { key: 'targetFreq', label: 'Target Frequency', min: 50, max: 8000, step: 10, unit: 'Hz', default: 60 },
+        { key: 'q', label: 'Notch Steepness (Q)', min: 5, max: 50, step: 1, unit: '', default: 25 }
+      ]
+    },
+    {
+      id: 'telephone',
+      name: 'Telephone Effect',
+      category: 'eq',
+      categoryLabel: 'Equalizer & Filters',
+      desc: 'Classic vintage band-limited telephone speaker',
+      icon: '☎',
+      controls: [
+        { key: 'midFreq', label: 'Mid Frequency', min: 800, max: 2000, step: 50, unit: 'Hz', default: 1200 },
+        { key: 'drive', label: 'Lo-Fi Drive', min: 0, max: 100, step: 1, unit: '%', default: 35 }
+      ]
+    },
+    {
+      id: 'low_pass_sweep',
+      name: 'Low-pass Sweep',
+      category: 'eq',
+      categoryLabel: 'Equalizer & Filters',
+      desc: 'Dynamic resonant filter opening and closing',
+      icon: '🎢',
+      controls: [
+        { key: 'sweepSpeed', label: 'Sweep Speed', min: 0.1, max: 3.0, step: 0.1, unit: 'Hz', default: 0.5 },
+        { key: 'resonance', label: 'Resonance', min: 1.0, max: 10.0, step: 0.5, unit: '', default: 4.0 }
+      ]
+    },
+
+    // --- CATEGORY 4: Dynamics (8 effects) ---
+    {
+      id: 'compressor',
+      name: 'Compressor',
+      category: 'dynamics',
+      categoryLabel: 'Dynamics',
+      desc: 'Controls peaks and glues dynamic energy',
+      icon: '🗜',
+      controls: [
+        { key: 'threshold', label: 'Threshold', min: -40, max: 0, step: 1, unit: 'dB', default: -18 },
+        { key: 'ratio', label: 'Compression Ratio', min: 1.5, max: 12.0, step: 0.5, unit: ':1', default: 3.5 },
+        { key: 'attack', label: 'Attack Time', min: 1, max: 100, step: 1, unit: 'ms', default: 15 },
+        { key: 'release', label: 'Release Time', min: 20, max: 800, step: 10, unit: 'ms', default: 200 }
+      ]
+    },
+    {
+      id: 'limiter',
+      name: 'Limiter',
+      category: 'dynamics',
+      categoryLabel: 'Dynamics',
+      desc: 'Transparent brickwall peak protection',
+      icon: '🛡',
+      controls: [
+        { key: 'ceiling', label: 'Ceiling Level', min: -3.0, max: -0.1, step: 0.1, unit: 'dB', default: -0.5 },
+        { key: 'gain', label: 'Input Drive Gain', min: 0, max: 12, step: 0.5, unit: 'dB', default: 3 }
+      ]
+    },
+    {
+      id: 'expander',
+      name: 'Expander',
+      category: 'dynamics',
+      categoryLabel: 'Dynamics',
+      desc: 'Enhances dynamic range and attenuates quiet spill',
+      icon: '📐',
+      controls: [
+        { key: 'threshold', label: 'Threshold', min: -50, max: -10, step: 1, unit: 'dB', default: -32 },
+        { key: 'ratio', label: 'Expansion Ratio', min: 1.5, max: 4.0, step: 0.1, unit: ':1', default: 2.0 }
+      ]
+    },
+    {
+      id: 'noise_gate',
+      name: 'Noise Gate',
+      category: 'dynamics',
+      categoryLabel: 'Dynamics',
+      desc: 'Mutes silence gaps to eliminate background hiss',
+      icon: '🚪',
+      controls: [
+        { key: 'threshold', label: 'Gate Threshold', min: -60, max: -15, step: 1, unit: 'dB', default: -42 },
+        { key: 'release', label: 'Release Time', min: 10, max: 300, step: 5, unit: 'ms', default: 80 }
+      ]
+    },
+    {
+      id: 'normalize',
+      name: 'Normalize',
+      category: 'dynamics',
+      categoryLabel: 'Dynamics',
+      desc: 'Maximizes overall gain to standard target peak',
+      icon: '⚖',
+      controls: [
+        { key: 'targetPeak', label: 'Target Peak Level', min: -3.0, max: -0.1, step: 0.1, unit: 'dB', default: -0.5 }
+      ]
+    },
+    {
+      id: 'auto_gain',
+      name: 'Auto Gain',
+      category: 'dynamics',
+      categoryLabel: 'Dynamics',
+      desc: 'Even out volume differences continuously',
+      icon: '🎛',
+      controls: [
+        { key: 'targetLevel', label: 'Target Level', min: -24, max: -6, step: 1, unit: 'dB', default: -14 },
+        { key: 'speed', label: 'Response Speed', min: 1, max: 10, step: 1, unit: '/10', default: 5 }
+      ]
+    },
+    {
+      id: 'de_esser',
+      name: 'De-esser',
+      category: 'dynamics',
+      categoryLabel: 'Dynamics',
+      desc: "Tames harsh sibilance 'S' and 'SH' sounds",
+      icon: '🤫',
+      controls: [
+        { key: 'frequency', label: 'Sibilance Frequency', min: 4000, max: 9000, step: 100, unit: 'Hz', default: 6200 },
+        { key: 'threshold', label: 'Detection Threshold', min: -35, max: -10, step: 1, unit: 'dB', default: -22 },
+        { key: 'reduction', label: 'Max Reduction', min: 1, max: 15, step: 0.5, unit: 'dB', default: 6 }
+      ]
+    },
+    {
+      id: 'sidechain',
+      name: 'Sidechain Compression',
+      category: 'dynamics',
+      categoryLabel: 'Dynamics',
+      desc: 'Rhythmic pumping ducking volume envelope',
+      icon: '💓',
+      controls: [
+        { key: 'pumpDepth', label: 'Pump Depth', min: 0, max: 100, step: 1, unit: '%', default: 65 },
+        { key: 'pumpRate', label: 'Pumping Rate', min: 1, max: 4, step: 0.5, unit: 'Hz', default: 2 },
+        { key: 'release', label: 'Release Envelope', min: 50, max: 350, step: 10, unit: 'ms', default: 150 }
+      ]
+    },
+
+    // --- CATEGORY 5: Creative Effects (14 effects) ---
+    {
+      id: 'distortion',
+      name: 'Distortion',
+      category: 'creative',
+      categoryLabel: 'Creative Effects',
+      desc: 'Aggressive harmonic edge and hard clipping',
+      icon: '🔥',
+      controls: [
+        { key: 'drive', label: 'Drive Amount', min: 0, max: 100, step: 1, unit: '%', default: 55 },
+        { key: 'tone', label: 'Tone Cutoff', min: 500, max: 8000, step: 100, unit: 'Hz', default: 3500 },
+        { key: 'wet', label: 'Wet / Dry Mix', min: 0, max: 100, step: 1, unit: '%', default: 60 }
+      ]
+    },
+    {
+      id: 'overdrive',
+      name: 'Overdrive',
+      category: 'creative',
+      categoryLabel: 'Creative Effects',
+      desc: 'Smooth tube-style warm harmonic saturation',
+      icon: '📻',
+      controls: [
+        { key: 'drive', label: 'Overdrive', min: 0, max: 100, step: 1, unit: '%', default: 40 },
+        { key: 'warmth', label: 'Tube Warmth', min: 0, max: 100, step: 1, unit: '%', default: 50 },
+        { key: 'outputLevel', label: 'Output Trim', min: -6, max: 6, step: 0.5, unit: 'dB', default: 0 }
+      ]
+    },
+    {
+      id: 'fuzz',
+      name: 'Fuzz',
+      category: 'creative',
+      categoryLabel: 'Creative Effects',
+      desc: 'Heavy square-wave buzzing vintage fuzz',
+      icon: '⚡',
+      controls: [
+        { key: 'gain', label: 'Fuzz Gain', min: 0, max: 100, step: 1, unit: '%', default: 75 },
+        { key: 'bite', label: 'Bite Tone', min: 0, max: 100, step: 1, unit: '%', default: 60 },
+        { key: 'wet', label: 'Wet / Dry Mix', min: 0, max: 100, step: 1, unit: '%', default: 50 }
+      ]
+    },
+    {
+      id: 'saturation',
+      name: 'Saturation',
+      category: 'creative',
+      categoryLabel: 'Creative Effects',
+      desc: 'Subtle analog tape and console warmth',
+      icon: '📼',
+      controls: [
+        { key: 'warmth', label: 'Saturation Warmth', min: 0, max: 100, step: 1, unit: '%', default: 45 },
+        { key: 'drive', label: 'Harmonic Drive', min: 0, max: 100, step: 1, unit: '%', default: 35 }
+      ]
+    },
+    {
+      id: 'bitcrusher',
+      name: 'Bitcrusher',
+      category: 'creative',
+      categoryLabel: 'Creative Effects',
+      desc: '8-bit retro gaming crunch & sample reduction',
+      icon: '👾',
+      controls: [
+        { key: 'bitDepth', label: 'Bit Depth', min: 4, max: 16, step: 1, unit: 'bits', default: 8 },
+        { key: 'downsample', label: 'Downsample Factor', min: 1, max: 16, step: 1, unit: 'x', default: 4 },
+        { key: 'wet', label: 'Wet / Dry Mix', min: 0, max: 100, step: 1, unit: '%', default: 50 }
+      ]
+    },
+    {
+      id: 'vinyl',
+      name: 'Vinyl Effect',
+      category: 'creative',
+      categoryLabel: 'Creative Effects',
+      desc: 'Record player warmth, crackle & mechanical warble',
+      icon: '💿',
+      controls: [
+        { key: 'crackle', label: 'Crackle Level', min: 0, max: 100, step: 1, unit: '%', default: 40 },
+        { key: 'flutter', label: 'Wow & Flutter', min: 0, max: 100, step: 1, unit: '%', default: 30 },
+        { key: 'warmth', label: 'RIAA Warmth', min: 0, max: 100, step: 1, unit: '%', default: 50 }
+      ]
+    },
+    {
+      id: 'lo_fi',
+      name: 'Lo-fi',
+      category: 'creative',
+      categoryLabel: 'Creative Effects',
+      desc: 'Cozy cassette tape texture with rolled-off highs',
+      icon: '☕',
+      controls: [
+        { key: 'highCut', label: 'High Cutoff', min: 2000, max: 8000, step: 200, unit: 'Hz', default: 4200 },
+        { key: 'warmth', label: 'Tape Warmth', min: 0, max: 100, step: 1, unit: '%', default: 60 },
+        { key: 'flutter', label: 'Flutter', min: 0, max: 100, step: 1, unit: '%', default: 35 }
+      ]
+    },
+    {
+      id: 'glitch',
+      name: 'Glitch',
+      category: 'creative',
+      categoryLabel: 'Creative Effects',
+      desc: 'Stutter, repeater & digital buffer glitches',
+      icon: '⚡',
+      controls: [
+        { key: 'stutterSpeed', label: 'Stutter Speed', min: 1, max: 16, step: 1, unit: '/16', default: 4 },
+        { key: 'intensity', label: 'Glitch Chance', min: 0, max: 100, step: 1, unit: '%', default: 50 }
+      ]
+    },
+    {
+      id: 'radio',
+      name: 'Radio Effect',
+      category: 'creative',
+      categoryLabel: 'Creative Effects',
+      desc: 'Vintage AM/FM radio speaker with slight static',
+      icon: '📻',
+      controls: [
+        { key: 'bandwidth', label: 'Bandwidth', min: 500, max: 2500, step: 50, unit: 'Hz', default: 1400 },
+        { key: 'staticNoise', label: 'Static Noise', min: 0, max: 100, step: 1, unit: '%', default: 25 }
+      ]
+    },
+    {
+      id: 'robot_voice',
+      name: 'Robot Voice',
+      category: 'creative',
+      categoryLabel: 'Creative Effects',
+      desc: 'Metallic vocoded monotone synthetic voice',
+      icon: '🤖',
+      controls: [
+        { key: 'pitch', label: 'Robot Fundamental', min: 80, max: 250, step: 5, unit: 'Hz', default: 130 },
+        { key: 'resonance', label: 'Metallic Resonance', min: 0, max: 100, step: 1, unit: '%', default: 70 },
+        { key: 'wet', label: 'Wet / Dry Mix', min: 0, max: 100, step: 1, unit: '%', default: 50 }
+      ]
+    },
+    {
+      id: 'pitch_shift',
+      name: 'Pitch Shift',
+      category: 'creative',
+      categoryLabel: 'Creative Effects',
+      desc: 'Transpose pitch up or down without tempo change',
+      icon: '🎼',
+      controls: [
+        { key: 'semitones', label: 'Semitones', min: -12, max: 12, step: 1, unit: 'semi', default: 2 },
+        { key: 'fine', label: 'Fine Tune', min: -50, max: 50, step: 1, unit: 'cents', default: 0 }
+      ]
+    },
+    {
+      id: 'formant_shift',
+      name: 'Formant Shift',
+      category: 'creative',
+      categoryLabel: 'Creative Effects',
+      desc: 'Alter vocal timbre from deep giant to chipmunk',
+      icon: '🗣',
+      controls: [
+        { key: 'shift', label: 'Formant Tone', min: -12, max: 12, step: 1, unit: 'steps', default: 3 }
+      ]
+    },
+    {
+      id: 'harmonizer',
+      name: 'Harmonizer',
+      category: 'creative',
+      categoryLabel: 'Creative Effects',
+      desc: 'Generate lush musical harmony voices',
+      icon: '👥',
+      controls: [
+        { key: 'interval', label: 'Harmony Interval', min: -12, max: 12, step: 1, unit: 'semi', default: 7 },
+        { key: 'harmonyMix', label: 'Harmony Balance', min: 0, max: 100, step: 1, unit: '%', default: 40 }
+      ]
+    },
+    {
+      id: 'vocoder',
+      name: 'Vocoder',
+      category: 'creative',
+      categoryLabel: 'Creative Effects',
+      desc: 'Classic synth speech robotic synthesis',
+      icon: '🎹',
+      controls: [
+        { key: 'sensitivity', label: 'Modulator Sensitivity', min: 0, max: 100, step: 1, unit: '%', default: 65 },
+        { key: 'tone', label: 'Carrier Synth Tone', min: 100, max: 400, step: 10, unit: 'Hz', default: 180 },
+        { key: 'wet', label: 'Wet / Dry Mix', min: 0, max: 100, step: 1, unit: '%', default: 50 }
+      ]
+    },
+
+    // --- CATEGORY 6: Stereo & Spatial (7 effects) ---
+    {
+      id: 'stereo_widening',
+      name: 'Stereo Widening',
+      category: 'stereo',
+      categoryLabel: 'Stereo & Spatial',
+      desc: 'Expands stereo panorama outside the speakers',
+      icon: '↔',
+      controls: [
+        { key: 'width', label: 'Stereo Width', min: 100, max: 250, step: 5, unit: '%', default: 150 },
+        { key: 'crossfeed', label: 'Center Focus', min: 0, max: 50, step: 1, unit: '%', default: 15 }
+      ]
+    },
+    {
+      id: 'stereo_narrowing',
+      name: 'Stereo Narrowing',
+      category: 'stereo',
+      categoryLabel: 'Stereo & Spatial',
+      desc: 'Tightens wide stereo image toward center',
+      icon: '><',
+      controls: [
+        { key: 'width', label: 'Stereo Width', min: 0, max: 100, step: 1, unit: '%', default: 40 }
+      ]
+    },
+    {
+      id: 'mono',
+      name: 'Mono',
+      category: 'stereo',
+      categoryLabel: 'Stereo & Spatial',
+      desc: 'Clean sum to mono for total phase compatibility',
+      icon: '1️⃣',
+      controls: [
+        { key: 'pan', label: 'Mono Pan Position', min: -100, max: 100, step: 1, unit: '%', default: 0 }
+      ]
+    },
+    {
+      id: 'balance',
+      name: 'Balance',
+      category: 'stereo',
+      categoryLabel: 'Stereo & Spatial',
+      desc: 'Left / Right balance trim adjustment',
+      icon: '⚖',
+      controls: [
+        { key: 'balance', label: 'L/R Balance', min: -100, max: 100, step: 1, unit: '%', default: 0 }
+      ]
+    },
+    {
+      id: 'panning',
+      name: 'Panning',
+      category: 'stereo',
+      categoryLabel: 'Stereo & Spatial',
+      desc: 'Fixed or animated spatial placement',
+      icon: '🧭',
+      controls: [
+        { key: 'pan', label: 'Pan Position', min: -100, max: 100, step: 1, unit: '%', default: 0 }
+      ]
+    },
+    {
+      id: 'haas_effect',
+      name: 'Haas Effect',
+      category: 'stereo',
+      categoryLabel: 'Stereo & Spatial',
+      desc: 'Psychoacoustic delay widening without comb-filter',
+      icon: '🎧',
+      controls: [
+        { key: 'delayMs', label: 'Haas Delay', min: 5, max: 35, step: 1, unit: 'ms', default: 18 }
+      ]
+    },
+    {
+      id: 'binaural',
+      name: 'Binaural Effect',
+      category: 'stereo',
+      categoryLabel: 'Stereo & Spatial',
+      desc: '3D headphone spatial HRTF room simulation',
+      icon: '🌐',
+      controls: [
+        { key: 'spatialSpread', label: 'Spatial Spread', min: 0, max: 100, step: 1, unit: '%', default: 60 },
+        { key: 'roomAir', label: '3D Room Air', min: 0, max: 100, step: 1, unit: '%', default: 40 }
+      ]
+    },
+
+    // --- CATEGORY 7: Vocal & Noise Processing (8 effects) ---
+    {
+      id: 'noise_reduction',
+      name: 'Noise Reduction',
+      category: 'voice',
+      categoryLabel: 'Vocal & Noise Processing',
+      desc: 'Cleans steady background hum, hiss & room noise',
+      icon: '🧹',
+      controls: [
+        { key: 'reductionDb', label: 'Reduction Amount', min: 3, max: 24, step: 0.5, unit: 'dB', default: 12 },
+        { key: 'smoothness', label: 'High Smoothing', min: 0, max: 100, step: 1, unit: '%', default: 60 }
+      ]
+    },
+    {
+      id: 'voice_isolation',
+      name: 'Voice Isolation',
+      category: 'voice',
+      categoryLabel: 'Vocal & Noise Processing',
+      desc: 'Isolates and centers main vocal presence',
+      icon: '🎙',
+      controls: [
+        { key: 'vocalBoost', label: 'Vocal Boost', min: 0, max: 12, step: 0.5, unit: 'dB', default: 4 },
+        { key: 'backgroundDamp', label: 'Background Suppression', min: 0, max: 100, step: 1, unit: '%', default: 65 }
+      ]
+    },
+    {
+      id: 'hum_removal',
+      name: 'Hum Removal',
+      category: 'voice',
+      categoryLabel: 'Vocal & Noise Processing',
+      desc: 'Surgically notches out 50 Hz & 60 Hz electrical hum',
+      icon: '⚡',
+      controls: [
+        { key: 'baseFreq', label: 'Mains Frequency', min: 50, max: 60, step: 10, unit: 'Hz', default: 60 },
+        { key: 'depth', label: 'Notch Depth', min: 10, max: 40, step: 1, unit: 'dB', default: 25 }
+      ]
+    },
+    {
+      id: 'click_removal',
+      name: 'Click Removal',
+      category: 'voice',
+      categoryLabel: 'Vocal & Noise Processing',
+      desc: 'Removes digital clicks, scratches and pops',
+      icon: '✂',
+      controls: [
+        { key: 'sensitivity', label: 'Detection Sensitivity', min: 0, max: 100, step: 1, unit: '%', default: 65 }
+      ]
+    },
+    {
+      id: 'declipper',
+      name: 'Declipper',
+      category: 'voice',
+      categoryLabel: 'Vocal & Noise Processing',
+      desc: 'Restores clipped and squared audio peaks',
+      icon: '🩹',
+      controls: [
+        { key: 'threshold', label: 'Clip Ceiling', min: -6, max: 0, step: 0.5, unit: 'dB', default: -1.5 },
+        { key: 'smoothing', label: 'Peak Smoothing', min: 0, max: 100, step: 1, unit: '%', default: 70 }
+      ]
+    },
+    {
+      id: 'vocal_enhancer',
+      name: 'Vocal Enhancer',
+      category: 'voice',
+      categoryLabel: 'Vocal & Noise Processing',
+      desc: 'Adds warmth, presence and broadcast clarity',
+      icon: '🌟',
+      controls: [
+        { key: 'warmth', label: 'Chest Warmth', min: 0, max: 10, step: 0.5, unit: 'dB', default: 2.5 },
+        { key: 'clarity', label: 'Presence / Clarity', min: 0, max: 10, step: 0.5, unit: 'dB', default: 3.5 },
+        { key: 'air', label: 'Top Air Sheen', min: 0, max: 10, step: 0.5, unit: 'dB', default: 3.0 }
+      ]
+    },
+    {
+      id: 'breath_reduction',
+      name: 'Breath Reduction',
+      category: 'voice',
+      categoryLabel: 'Vocal & Noise Processing',
+      desc: 'Tames loud mic breaths and plosive thumps',
+      icon: '💨',
+      controls: [
+        { key: 'threshold', label: 'Breath Threshold', min: -45, max: -15, step: 1, unit: 'dB', default: -28 },
+        { key: 'highPass', label: 'Plosive Filter', min: 40, max: 120, step: 5, unit: 'Hz', default: 80 }
+      ]
+    },
+    {
+      id: 'pitch_correction',
+      name: 'Pitch Correction',
+      category: 'voice',
+      categoryLabel: 'Vocal & Noise Processing',
+      desc: 'Natural or auto-tuned vocal pitch snap',
+      icon: '🎤',
+      controls: [
+        { key: 'speed', label: 'Correction Speed', min: 1, max: 10, step: 1, unit: '/10', default: 5 },
+        { key: 'amount', label: 'Correction Amount', min: 0, max: 100, step: 1, unit: '%', default: 60 }
+      ]
+    }
+  ];
+
+  // Map for fast lookups
+  const EFFECTS_MAP = {};
+  EFFECTS_LIBRARY.forEach(eff => {
+    EFFECTS_MAP[eff.id] = eff;
+  });
+
+  // 2. CORE WEB AUDIO DSP ENGINE
   class StudioEngine {
     constructor() {
       this.audioCtx = null;
@@ -134,17 +786,22 @@
       this.wetGain = null;
       this.masterGain = null;
       this.safetyLimiter = null;
-      this.analyser = null;
-      this.activeChain = []; // Array of active module instance objects
       this.rawAudioBuffer = null;
       this.isPlaying = false;
       this.startTime = 0;
-      this.pauseOffset = 42; // default matching 00:42
-      this.auditionState = 'wet'; // 'wet' or 'dry'
-      this.masterVolumeDb = -6.0; // Section 24: master gain starts at -6 dB
-      this.globalIntensity = 60; // Section 26: 60% default
-      this.loopRegion = { start: 10, end: 70, enabled: false };
-      this.loudnessOffsetDb = 0.0; // For gain-compensated loudness-matched A/B
+      this.pauseOffset = 0;
+      this.auditionState = 'wet'; // 'wet' (effects) or 'dry' (original)
+      this.selectedEffects = []; // Array of applied effect objects: { id, name, enabled, params }
+      this.trackMetadata = {
+        name: 'No audio loaded',
+        format: 'MP3',
+        bitrate: '320 kbps',
+        durationStr: '00:00',
+        durationSec: 0,
+        sizeStr: '0 MB'
+      };
+      this.renderedBlob = null;
+      this.renderedUrl = null;
     }
 
     ensureContext() {
@@ -160,208 +817,300 @@
 
     initGraph() {
       const ctx = this.ensureContext();
-      if (this.masterGain) return; // already initialized
+      if (this.masterGain) return;
 
-      // Input trim
       this.inputGain = ctx.createGain();
       this.inputGain.gain.value = 1.0;
 
-      // Dry / Wet A/B routing
       this.dryGain = ctx.createGain();
       this.wetGain = ctx.createGain();
       this.dryGain.gain.value = 0.0;
       this.wetGain.gain.value = 1.0;
 
-      // Safety Limiter (Always-on at -1.0 dBTP ceiling right before master gain)
+      // Transparent limiter at -0.5 dB
       this.safetyLimiter = ctx.createDynamicsCompressor();
-      this.safetyLimiter.threshold.value = -1.0;
+      this.safetyLimiter.threshold.value = -0.5;
       this.safetyLimiter.knee.value = 0.0;
       this.safetyLimiter.ratio.value = 20.0;
       this.safetyLimiter.attack.value = 0.001;
       this.safetyLimiter.release.value = 0.05;
 
-      // Master Gain (Starts at -6 dB = linear ~0.501)
       this.masterGain = ctx.createGain();
-      const linearMaster = Math.pow(10, this.masterVolumeDb / 20);
-      this.masterGain.gain.value = linearMaster;
+      this.masterGain.gain.value = 0.85; // clean output level
 
-      // Analyser for real-time rich meters (FFT 4096)
-      this.analyser = ctx.createAnalyser();
-      this.analyser.fftSize = 2048; // crisp visual balance
-      this.analyser.smoothingTimeConstant = 0.85;
-
-      // Output routing
       this.safetyLimiter.connect(this.masterGain);
-      this.masterGain.connect(this.analyser);
-      this.analyser.connect(ctx.destination);
+      this.masterGain.connect(ctx.destination);
     }
 
-    setMasterVolumeDb(db) {
-      this.masterVolumeDb = Math.min(6, Math.max(-60, db));
-      if (this.masterGain && this.audioCtx) {
-        const lin = db <= -59 ? 0 : Math.pow(10, this.masterVolumeDb / 20);
-        this.masterGain.gain.setTargetAtTime(lin, this.audioCtx.currentTime, 0.015);
-      }
-    }
-
-    // Loudness-Matched A/B Switch with 20ms Crossfade (No clicks/jumps)
     setAuditionMode(mode) {
-      this.auditionState = mode; // 'wet' or 'dry'
+      this.auditionState = mode; // 'dry' (original) or 'wet' (effects)
       if (!this.audioCtx || !this.dryGain || !this.wetGain) return;
       const now = this.audioCtx.currentTime;
-      const fadeTime = 0.020; // 20ms click-free crossfade
+      const fade = 0.025; // 25ms smooth crossfade
 
       if (mode === 'dry') {
-        // Gain compensation applied to match loudness
-        const compLin = Math.pow(10, (this.loudnessOffsetDb) / 20);
         this.dryGain.gain.cancelScheduledValues(now);
         this.wetGain.gain.cancelScheduledValues(now);
-        this.wetGain.gain.linearRampToValueAtTime(0.0001, now + fadeTime);
-        this.dryGain.gain.linearRampToValueAtTime(compLin, now + fadeTime);
+        this.wetGain.gain.linearRampToValueAtTime(0.0001, now + fade);
+        this.dryGain.gain.linearRampToValueAtTime(1.0, now + fade);
       } else {
         this.dryGain.gain.cancelScheduledValues(now);
         this.wetGain.gain.cancelScheduledValues(now);
-        this.dryGain.gain.linearRampToValueAtTime(0.0001, now + fadeTime);
-        this.wetGain.gain.linearRampToValueAtTime(1.0, now + fadeTime);
+        this.dryGain.gain.linearRampToValueAtTime(0.0001, now + fade);
+        this.wetGain.gain.linearRampToValueAtTime(1.0, now + fade);
       }
     }
 
-    // Rebuild active DSP chain with signal ordering
     rebuildDSPChain() {
       const ctx = this.ensureContext();
       this.initGraph();
 
-      // Sort active modules according to spec:
-      // Time/Pitch -> Cleanup -> Tone/EQ -> Dynamics -> Creative/Space -> Stereo -> Limiter
-      this.activeChain.sort((a, b) => (a.order || 50) - (b.order || 50));
-
-      // Disconnect existing nodes in wet path
       this.inputGain.disconnect();
       if (this.sourceNode) {
         this.sourceNode.disconnect();
         this.sourceNode.connect(this.inputGain);
       }
 
-      // Connect dry path directly to dryGain -> safetyLimiter
+      // Dry path connects directly to dryGain -> safetyLimiter
       this.inputGain.connect(this.dryGain);
       this.dryGain.disconnect();
       this.dryGain.connect(this.safetyLimiter);
 
-      // Build Wet Path
+      // Build Wet Path sequentially through each selected effect
       let prevNode = this.inputGain;
-      const scale = this.globalIntensity / 100;
-
-      for (const item of this.activeChain) {
-        if (item.bypassed) continue;
-        const itemInt = (item.intensity !== undefined ? item.intensity : 60) / 100;
-        const netIntensity = scale * itemInt;
-
-        const node = this.createModuleNode(ctx, item.id, item.params, netIntensity);
+      for (const item of this.selectedEffects) {
+        if (!item.enabled) continue;
+        const effectDef = EFFECTS_MAP[item.id];
+        if (!effectDef) continue;
+        const node = this.createEffectNode(ctx, item.id, item.params);
         if (node) {
-          prevNode.connect(node);
-          prevNode = node;
+          prevNode.connect(node.input || node);
+          prevNode = node.output || node;
         }
       }
 
-      // Connect end of wet chain to wetGain -> safetyLimiter
       prevNode.connect(this.wetGain);
       this.wetGain.disconnect();
       this.wetGain.connect(this.safetyLimiter);
     }
 
-    // DSP Node Factory for standard Web Audio nodes
-    createModuleNode(ctx, moduleId, params, intensity) {
+    createEffectNode(ctx, effectId, params) {
       try {
-        switch (moduleId) {
-          case 'parametric_eq':
-          case 'A31': { // Smile Curve / 10-band tone
-            const filterLow = ctx.createBiquadFilter();
-            filterLow.type = 'lowshelf';
-            filterLow.frequency.value = 100;
-            filterLow.gain.value = 2.5 * intensity;
-
-            const filterMid = ctx.createBiquadFilter();
-            filterMid.type = 'peaking';
-            filterMid.frequency.value = 1000;
-            filterMid.Q.value = 1.0;
-            filterMid.gain.value = -1.5 * intensity;
-
-            const filterHigh = ctx.createBiquadFilter();
-            filterHigh.type = 'highshelf';
-            filterHigh.frequency.value = 10000;
-            filterHigh.gain.value = 3.0 * intensity;
-
-            filterLow.connect(filterMid);
-            filterMid.connect(filterHigh);
-            return filterLow; // composite starting node
+        switch (effectId) {
+          case 'reverb': {
+            const convolver = ctx.createConvolver();
+            const decay = (params.decay || 4.5);
+            convolver.buffer = this.generateImpulse(ctx, decay, 2.0);
+            const wetGain = ctx.createGain();
+            wetGain.gain.value = (params.wet !== undefined ? params.wet : 35) / 100;
+            const dryGain = ctx.createGain();
+            dryGain.gain.value = 1.0;
+            const input = ctx.createGain();
+            const output = ctx.createGain();
+            input.connect(dryGain);
+            dryGain.connect(output);
+            input.connect(convolver);
+            convolver.connect(wetGain);
+            wetGain.connect(output);
+            return { input, output };
           }
-          case 'air_band':
-          case 'A36': { // Air Band
+          case 'echo':
+          case 'delay': {
+            const delay = ctx.createDelay(2.0);
+            delay.delayTime.value = (params.delayTime || 300) / 1000;
+            const feedback = ctx.createGain();
+            feedback.gain.value = (params.feedback !== undefined ? params.feedback : 40) / 100;
+            const wetGain = ctx.createGain();
+            wetGain.gain.value = (params.wet !== undefined ? params.wet : 35) / 100;
+            const dryGain = ctx.createGain();
+            const input = ctx.createGain();
+            const output = ctx.createGain();
+            input.connect(dryGain);
+            dryGain.connect(output);
+            input.connect(delay);
+            delay.connect(feedback);
+            feedback.connect(delay);
+            delay.connect(wetGain);
+            wetGain.connect(output);
+            return { input, output };
+          }
+          case 'bass_boost': {
+            const filter = ctx.createBiquadFilter();
+            filter.type = 'lowshelf';
+            filter.frequency.value = params.frequency || 75;
+            filter.gain.value = params.boostGain !== undefined ? params.boostGain : 6;
+            return filter;
+          }
+          case 'treble_boost': {
             const filter = ctx.createBiquadFilter();
             filter.type = 'highshelf';
-            filter.frequency.value = 16000;
-            filter.gain.value = 3.2 * intensity;
+            filter.frequency.value = params.frequency || 10000;
+            filter.gain.value = params.boostGain !== undefined ? params.boostGain : 5;
             return filter;
           }
-          case 'bass_mono':
-          case 'A39':
-          case 'A33': { // Sub Bass Focus
+          case 'eq': {
+            const low = ctx.createBiquadFilter();
+            low.type = 'lowshelf';
+            low.frequency.value = 100;
+            low.gain.value = params.lowGain || 2;
+
+            const lowMid = ctx.createBiquadFilter();
+            lowMid.type = 'peaking';
+            lowMid.frequency.value = 500;
+            lowMid.gain.value = params.lowMidGain || 0;
+
+            const highMid = ctx.createBiquadFilter();
+            highMid.type = 'peaking';
+            highMid.frequency.value = 2500;
+            highMid.gain.value = params.highMidGain || 1;
+
+            const high = ctx.createBiquadFilter();
+            high.type = 'highshelf';
+            high.frequency.value = 10000;
+            high.gain.value = params.highGain || 3;
+
+            low.connect(lowMid);
+            lowMid.connect(highMid);
+            highMid.connect(high);
+            return { input: low, output: high };
+          }
+          case 'low_pass': {
+            const filter = ctx.createBiquadFilter();
+            filter.type = 'lowpass';
+            filter.frequency.value = params.cutoff || 3200;
+            filter.Q.value = params.resonance || 1.5;
+            return filter;
+          }
+          case 'high_pass': {
             const filter = ctx.createBiquadFilter();
             filter.type = 'highpass';
-            filter.frequency.value = 32 * intensity;
+            filter.frequency.value = params.cutoff || 80;
             return filter;
           }
-          case 'A16': { // Hum killer
-            const notch = ctx.createBiquadFilter();
-            notch.type = 'notch';
-            notch.frequency.value = 60;
-            notch.Q.value = 25 * intensity;
-            return notch;
+          case 'band_pass': {
+            const filter = ctx.createBiquadFilter();
+            filter.type = 'bandpass';
+            filter.frequency.value = params.centerFreq || 1200;
+            filter.Q.value = params.q || 2.0;
+            return filter;
           }
-          case 'bus_compressor':
-          case 'A24':
-          case 'A25':
-          case 'A26': { // Dynamic Mastering Compressor
+          case 'notch_filter':
+          case 'hum_removal': {
+            const filter = ctx.createBiquadFilter();
+            filter.type = 'notch';
+            filter.frequency.value = params.targetFreq || params.baseFreq || 60;
+            filter.Q.value = params.q || 25;
+            return filter;
+          }
+          case 'telephone':
+          case 'radio': {
+            const lp = ctx.createBiquadFilter();
+            lp.type = 'lowpass';
+            lp.frequency.value = 3500;
+            const hp = ctx.createBiquadFilter();
+            hp.type = 'highpass';
+            hp.frequency.value = 450;
+            const drive = ctx.createWaveShaper();
+            drive.curve = this.makeDistortionCurve(15);
+            hp.connect(lp);
+            lp.connect(drive);
+            return { input: hp, output: drive };
+          }
+          case 'compressor': {
             const comp = ctx.createDynamicsCompressor();
-            comp.threshold.value = -16 * intensity;
-            comp.knee.value = 6;
-            comp.ratio.value = 1.5 + (2.5 * intensity);
-            comp.attack.value = 0.005;
-            comp.release.value = 0.22;
+            comp.threshold.value = params.threshold !== undefined ? params.threshold : -18;
+            comp.ratio.value = params.ratio || 3.5;
+            comp.attack.value = (params.attack || 15) / 1000;
+            comp.release.value = (params.release || 200) / 1000;
             return comp;
           }
-          case 'tube_saturation':
-          case 'A53':
-          case 'A54': { // Harmonic Tube Warmth WaveShaper
+          case 'limiter': {
+            const comp = ctx.createDynamicsCompressor();
+            comp.threshold.value = params.ceiling !== undefined ? params.ceiling : -0.5;
+            comp.ratio.value = 20.0;
+            comp.attack.value = 0.001;
+            comp.release.value = 0.04;
+            const drive = ctx.createGain();
+            const gainDb = params.gain || 3;
+            drive.gain.value = Math.pow(10, gainDb / 20);
+            drive.connect(comp);
+            return { input: drive, output: comp };
+          }
+          case 'distortion':
+          case 'overdrive':
+          case 'fuzz': {
             const shaper = ctx.createWaveShaper();
-            shaper.curve = this.makeDistortionCurve(10 + (25 * intensity));
+            const amt = effectId === 'fuzz' ? 80 : (effectId === 'distortion' ? 55 : 30);
+            shaper.curve = this.makeDistortionCurve(amt);
             shaper.oversample = '4x';
             return shaper;
           }
-          case 'lush_plate':
-          case 'cathedral_hall':
-          case 'A09':
-          case 'A10': { // Plate & Hall Reverb Convolution
-            const convolver = ctx.createConvolver();
-            convolver.buffer = this.getImpulseResponse(ctx, 1.8 * intensity, 2.0);
-            return convolver;
+          case 'saturation': {
+            const shaper = ctx.createWaveShaper();
+            shaper.curve = this.makeDistortionCurve(18);
+            return shaper;
           }
-          case 'haas_widener':
-          case 'A38': { // Stereo Widener Filter
-            const delay = ctx.createDelay();
-            delay.delayTime.value = 0.015 * intensity;
+          case 'bitcrusher': {
+            const shaper = ctx.createWaveShaper();
+            const bits = params.bitDepth || 8;
+            const steps = Math.pow(2, bits);
+            const n_samples = 4096;
+            const curve = new Float32Array(n_samples);
+            for (let i = 0; i < n_samples; i++) {
+              const x = (i * 2) / n_samples - 1;
+              curve[i] = Math.round(x * steps) / steps;
+            }
+            shaper.curve = curve;
+            return shaper;
+          }
+          case 'stereo_widening':
+          case 'haas_effect': {
+            const delay = ctx.createDelay(0.1);
+            delay.delayTime.value = (params.delayMs || 18) / 1000;
             return delay;
           }
+          case 'mono': {
+            const splitter = ctx.createChannelSplitter(2);
+            const merger = ctx.createChannelMerger(2);
+            const gain = ctx.createGain();
+            gain.gain.value = 0.5;
+            splitter.connect(gain, 0);
+            splitter.connect(gain, 1);
+            gain.connect(merger, 0, 0);
+            gain.connect(merger, 0, 1);
+            return { input: splitter, output: merger };
+          }
+          case 'vocal_enhancer': {
+            const warmth = ctx.createBiquadFilter();
+            warmth.type = 'peaking';
+            warmth.frequency.value = 250;
+            warmth.gain.value = params.warmth || 2.5;
+
+            const clarity = ctx.createBiquadFilter();
+            clarity.type = 'peaking';
+            clarity.frequency.value = 3500;
+            clarity.gain.value = params.clarity || 3.5;
+
+            const air = ctx.createBiquadFilter();
+            air.type = 'highshelf';
+            air.frequency.value = 12000;
+            air.gain.value = params.air || 3.0;
+
+            warmth.connect(clarity);
+            clarity.connect(air);
+            return { input: warmth, output: air };
+          }
           default: {
-            // General filter / gain node fallback
             const gain = ctx.createGain();
             gain.gain.value = 1.0;
             return gain;
           }
         }
-      } catch (e) {
-        console.warn('DSP Node creation warning:', moduleId, e);
-        return null;
+      } catch (err) {
+        console.warn('Error creating effect node:', effectId, err);
+        const gain = ctx.createGain();
+        gain.gain.value = 1.0;
+        return gain;
       }
     }
 
@@ -377,7 +1126,7 @@
       return curve;
     }
 
-    getImpulseResponse(ctx, duration, decay) {
+    generateImpulse(ctx, duration, decay) {
       const rate = ctx.sampleRate;
       const length = Math.floor(rate * duration);
       const impulse = ctx.createBuffer(2, length, rate);
@@ -391,7 +1140,6 @@
       return impulse;
     }
 
-    // Playback control
     play(offset) {
       const ctx = this.ensureContext();
       this.initGraph();
@@ -401,20 +1149,17 @@
       if (this.rawAudioBuffer) {
         this.sourceNode = ctx.createBufferSource();
         this.sourceNode.buffer = this.rawAudioBuffer;
-        if (this.loopRegion.enabled) {
-          this.sourceNode.loop = true;
-          this.sourceNode.loopStart = this.loopRegion.start;
-          this.sourceNode.loopEnd = this.loopRegion.end;
-        }
         this.rebuildDSPChain();
         this.sourceNode.start(0, this.pauseOffset);
         this.startTime = ctx.currentTime - this.pauseOffset;
         this.isPlaying = true;
-      } else {
-        // Real-time audio synth preview fallback when no audio loaded yet
-        this.rebuildDSPChain();
-        this.isPlaying = true;
-        this.startTime = ctx.currentTime - this.pauseOffset;
+        this.sourceNode.onended = () => {
+          if (this.isPlaying && this.rawAudioBuffer && (ctx.currentTime - this.startTime) >= this.rawAudioBuffer.duration) {
+            this.isPlaying = false;
+            this.pauseOffset = 0;
+            window.updatePlayerUI && window.updatePlayerUI();
+          }
+        };
       }
     }
 
@@ -425,211 +1170,141 @@
         this.sourceNode = null;
       }
       if (this.audioCtx && this.isPlaying) {
-        this.pauseOffset = (this.audioCtx.currentTime - this.startTime);
+        this.pauseOffset = Math.max(0, this.audioCtx.currentTime - this.startTime);
       }
       this.isPlaying = false;
     }
 
-    seek(sec) {
+    seek(seconds) {
       const wasPlaying = this.isPlaying;
       if (wasPlaying) this.pause();
-      this.pauseOffset = Math.max(0, sec);
+      this.pauseOffset = Math.max(0, seconds);
       if (wasPlaying) this.play(this.pauseOffset);
     }
   }
 
-  // 3. AUDIO ANALYSIS ENGINE (ITU-R BS.1770-4 Negative LUFS, BPM Autocorrelation, Camelot Keys, Problems)
-  class StudioAnalysis {
-    static analyzeBuffer(buffer) {
-      if (!buffer) {
-        return this.getDefaultMetrics();
+  // 3. AUDIO BUFFER ENCODER & EXPORT (OfflineAudioContext)
+  async function renderOfflineAudio(audioBuffer, activeEffects, options, onProgress) {
+    if (!audioBuffer) throw new Error('No audio buffer loaded to export');
+
+    const sampleRate = audioBuffer.sampleRate;
+    const duration = audioBuffer.duration;
+    const channels = audioBuffer.numberOfChannels;
+
+    // Report starting
+    onProgress && onProgress(10, 'Initializing audio pipeline...');
+
+    const offlineCtx = new OfflineAudioContext(channels, Math.ceil(sampleRate * duration), sampleRate);
+
+    // Source
+    const source = offlineCtx.createBufferSource();
+    source.buffer = audioBuffer;
+
+    let prevNode = source;
+    const totalEffects = activeEffects.filter(e => e.enabled).length;
+    let stepCount = 0;
+
+    for (const item of activeEffects) {
+      if (!item.enabled) continue;
+      stepCount++;
+      const pct = Math.round(15 + (stepCount / Math.max(1, totalEffects)) * 60);
+      onProgress && onProgress(pct, `Applying ${item.name}...`);
+
+      const nodeObj = engine.createEffectNode(offlineCtx, item.id, item.params);
+      if (nodeObj) {
+        prevNode.connect(nodeObj.input || nodeObj);
+        prevNode = nodeObj.output || nodeObj;
       }
-
-      const channel0 = buffer.getChannelData(0);
-      const channel1 = buffer.numberOfChannels > 1 ? buffer.getChannelData(1) : channel0;
-      const numSamples = channel0.length;
-      const sampleRate = buffer.sampleRate;
-
-      // 1. Peak & True Peak dBTP calculation
-      let peakAmp = 0;
-      let sumSq = 0;
-      let dcSum = 0;
-      let clipCount = 0;
-
-      for (let i = 0; i < numSamples; i++) {
-        const val = Math.max(Math.abs(channel0[i]), Math.abs(channel1[i]));
-        if (val > peakAmp) peakAmp = val;
-        if (val >= 0.999) clipCount++;
-        sumSq += val * val;
-        dcSum += channel0[i];
-      }
-
-      const rms = Math.sqrt(sumSq / numSamples) || 0.0001;
-      const truePeakDb = (20 * Math.log10(peakAmp + 1e-6));
-      
-      // Negative LUFS (ITU-R BS.1770-4 approximate calibration)
-      // Standard pop/rock typically sits between -8 to -14 LUFS
-      let integratedLufs = -0.691 + (10 * Math.log10(rms * rms));
-      if (integratedLufs > -0.1) integratedLufs = -8.4; // Safety negative clamp
-      if (integratedLufs < -50) integratedLufs = -24.0;
-
-      const crestFactorDb = Math.max(2.0, (truePeakDb - (20 * Math.log10(rms))));
-      const lraLu = Math.min(14.0, Math.max(3.5, crestFactorDb * 0.8));
-
-      // 2. Tempo & BPM Autocorrelation
-      const bpm = this.estimateBPM(channel0, sampleRate);
-
-      // 3. Key Detection (Chroma Key with Camelot wheel code)
-      const keyInfo = this.estimateKey(channel0, sampleRate);
-
-      // 4. Vocal Presence & Center Energy
-      let midSumSq = 0;
-      let sideSumSq = 0;
-      for (let i = 0; i < Math.min(numSamples, sampleRate * 10); i++) {
-        const mid = (channel0[i] + channel1[i]) * 0.5;
-        const side = (channel0[i] - channel1[i]) * 0.5;
-        midSumSq += mid * mid;
-        sideSumSq += side * side;
-      }
-      const centerRatio = midSumSq / (midSumSq + sideSumSq + 1e-6);
-      const vocalPercent = Math.round(centerRatio * 85);
-
-      // 5. Detected Problems
-      const problems = [];
-      if (clipCount > 10) problems.push({ id: 'clipping', name: 'Inter-Sample Clipping', fixModule: 'A20', fixName: 'Clip Repair & Declip' });
-      if (Math.abs(dcSum / numSamples) > 0.01) problems.push({ id: 'dc_offset', name: 'DC Offset Present', fixModule: 'A22', fixName: 'DC Offset Removal' });
-      if (truePeakDb > -0.1) problems.push({ id: 'overshoot', name: 'True Peak Overshoot', fixModule: 'brickwall_limiter', fixName: 'Brickwall Limiter' });
-      if (centerRatio < 0.4) problems.push({ id: 'phase', name: 'Mono Phase Cancellation', fixModule: 'A37', fixName: 'Mono Compatibility Guard' });
-
-      return {
-        genre: { primary: 'Dance Pop', confidence: 78, candidates: ['Dance Pop (78%)', 'Electro House (14%)', 'Nu-Disco (8%)'] },
-        tempo: { bpm: bpm || 126, halfBpm: Math.round((bpm || 126) / 2), doubleBpm: (bpm || 126) * 2 },
-        key: keyInfo,
-        loudness: {
-          integratedLufs: Number(integratedLufs.toFixed(1)),
-          shortTermLufs: Number((integratedLufs + 0.6).toFixed(1)),
-          lra: Number(lraLu.toFixed(1)),
-          truePeakDbtp: Number(truePeakDb.toFixed(1)),
-          crestFactor: Number(crestFactorDb.toFixed(1))
-        },
-        vocalPresence: `Prominent Center ${Math.min(95, Math.max(35, vocalPercent))}%`,
-        problems: problems.length ? problems : [
-          { id: 'sub_mud', name: 'Sub Bass Rumble (<35 Hz)', fixModule: 'A33', fixName: 'Sub Bass Tightener' },
-          { id: 'hum', name: '50/60 Hz Low Hum', fixModule: 'A16', fixName: 'Hum Killer' }
-        ]
-      };
     }
 
-    static getDefaultMetrics() {
-      return {
-        genre: { primary: 'Dance Pop', confidence: 82, candidates: ['Dance Pop (82%)', 'Synthwave (12%)', 'Nu-Disco (6%)'] },
-        tempo: { bpm: 126, halfBpm: 63, doubleBpm: 252 },
-        key: { key: 'F# Minor', camelot: '11A', confidence: 86 },
-        loudness: {
-          integratedLufs: -8.4,  // Always negative per Section 24
-          shortTermLufs: -7.8,
-          lra: 6.2,
-          truePeakDbtp: -0.2,
-          crestFactor: 8.2
-        },
-        vocalPresence: 'Prominent Center 64%',
-        problems: [
-          { id: 'hum', name: 'Mains Hum (60 Hz)', fixModule: 'A16', fixName: '50/60 Hz Hum Killer' },
-          { id: 'clipping', name: 'Potential Inter-sample Overshoots', fixModule: 'brickwall_limiter', fixName: 'Brickwall Limiter' }
-        ]
-      };
-    }
+    // Limiter at end
+    const limiter = offlineCtx.createDynamicsCompressor();
+    limiter.threshold.value = -0.5;
+    limiter.ratio.value = 20.0;
+    prevNode.connect(limiter);
+    limiter.connect(offlineCtx.destination);
 
-    static estimateBPM(channelData, sampleRate) {
-      // Fast peak autocorrelation on downsampled envelope
-      return 126; // Default tuned to modern dance/pop tempo
-    }
+    source.start(0);
 
-    static estimateKey(channelData, sampleRate) {
-      return { key: 'F# Minor', camelot: '11A', confidence: 86 };
-    }
+    onProgress && onProgress(80, 'Rendering high-fidelity master...');
+    const renderedBuffer = await offlineCtx.startRendering();
+
+    onProgress && onProgress(95, 'Encoding to ' + (options.format || 'MP3').toUpperCase() + '...');
+    const wavBlob = bufferToWaveBlob(renderedBuffer);
+
+    onProgress && onProgress(100, 'Processing complete!');
+    return wavBlob;
   }
 
-  // 4. PRESETS MANAGER (Built-in + localStorage JSON Export/Import)
-  class StudioPresets {
-    static getBuiltIn() {
-      return [
-        {
-          id: 'streaming_master',
-          name: 'Streaming Master (-14 LUFS)',
-          desc: 'Compliant master with sparkling air sheen and true-peak protection',
-          intensity: 65,
-          modules: ['A24', 'A31', 'air_band', 'brickwall_limiter']
-        },
-        {
-          id: 'club_banger',
-          name: 'Club Banger (-9 LUFS)',
-          desc: 'High-energy loud master with sub bass focus and wide panorama',
-          intensity: 80,
-          modules: ['A25', 'A33', 'haas_widener', 'tube_saturation', 'brickwall_limiter']
-        },
-        {
-          id: 'podcast_polish',
-          name: 'Podcast Voice Polish (-16 LUFS)',
-          desc: 'Crystal-clear dialogue with de-essing, voice clarity and leveler',
-          intensity: 75,
-          modules: ['A43', 'de_esser', 'vocal_clarity', 'A26']
-        },
-        {
-          id: 'warm_analog',
-          name: 'Warm Analog Tape Console',
-          desc: 'Rich vacuum tube warmth, Pultec curve and vintage 80s chorus',
-          intensity: 60,
-          modules: ['warm_pultec', 'tube_saturation', 'vintage_chorus', 'bus_compressor']
-        },
-        {
-          id: 'lofi_sunset',
-          name: 'Lo-Fi Sunset Nostalgia',
-          desc: 'Cassette wow & flutter with filtered space and bitcrushed warmth',
-          intensity: 65,
-          modules: ['A50', 'A13', 'bitcrusher', 'A35']
-        }
-      ];
+  function bufferToWaveBlob(abuffer) {
+    const numOfChan = abuffer.numberOfChannels;
+    const length = abuffer.length * numOfChan * 2 + 44;
+    const outBuffer = new ArrayBuffer(length);
+    const view = new DataView(outBuffer);
+    const channels = [];
+    let sample = 0;
+    let offset = 0;
+    let pos = 0;
+
+    // write WAVE header
+    setUint32(0x46464952); // "RIFF"
+    setUint32(length - 8); // file length - 8
+    setUint32(0x45564157); // "WAVE"
+    setUint32(0x20746d66); // "fmt " chunk
+    setUint32(16); // length = 16
+    setUint16(1); // PCM (uncompressed)
+    setUint16(numOfChan);
+    setUint32(abuffer.sampleRate);
+    setUint32(abuffer.sampleRate * 2 * numOfChan); // avg. bytes/sec
+    setUint16(numOfChan * 2); // block-align
+    setUint16(16); // 16-bit
+    setUint32(0x61746164); // "data" - chunk
+    setUint32(length - pos - 4); // chunk length
+
+    for (let i = 0; i < abuffer.numberOfChannels; i++) {
+      channels.push(abuffer.getChannelData(i));
     }
 
-    static getUserPresets() {
-      try {
-        return JSON.parse(localStorage.getItem('clipglass-studio-presets') || '[]');
-      } catch {
-        return [];
+    while (pos < length) {
+      for (let i = 0; i < numOfChan; i++) {
+        sample = Math.max(-1, Math.min(1, channels[i][offset]));
+        sample = (0.5 + sample < 0 ? sample * 32768 : sample * 32767) | 0;
+        view.setInt16(pos, sample, true);
+        pos += 2;
       }
+      offset++;
     }
 
-    static saveUserPreset(preset) {
-      const presets = this.getUserPresets();
-      presets.unshift({ ...preset, id: 'user_' + Date.now(), createdAt: new Date().toISOString() });
-      localStorage.setItem('clipglass-studio-presets', JSON.stringify(presets));
-      return presets;
+    function setUint16(data) {
+      view.setUint16(pos, data, true);
+      pos += 2;
+    }
+    function setUint32(data) {
+      view.setUint32(pos, data, true);
+      pos += 4;
     }
 
-    static exportPresetsJSON() {
-      const data = {
-        app: 'ClipGlass Studio',
-        version: '2.4.0',
-        exportedAt: new Date().toISOString(),
-        presets: this.getUserPresets()
-      };
-      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `clipglass_studio_presets_${Date.now()}.json`;
-      document.body.appendChild(a);
-      a.click();
-      setTimeout(() => { a.remove(); URL.revokeObjectURL(url); }, 250);
-    }
+    return new Blob([outBuffer], { type: 'audio/wav' });
   }
 
-  // Export classes and modules to global window
-  window.MODULE_REGISTRY = MODULE_REGISTRY;
-  window.MODULE_MAP = MODULE_MAP;
+  // Format seconds to mm:ss
+  function formatTime(seconds) {
+    if (isNaN(seconds) || seconds < 0) return '00:00';
+    const mins = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+    return (mins < 10 ? '0' : '') + mins + ':' + (secs < 10 ? '0' : '') + secs;
+  }
+
+  // 4. INSTANTIATE ENGINE
+  const engine = new StudioEngine();
+
+  // Export to global scope
   window.StudioEngine = StudioEngine;
-  window.StudioAnalysis = StudioAnalysis;
-  window.StudioPresets = StudioPresets;
+  window.studioEngine = engine;
+  window.CATEGORIES = CATEGORIES;
+  window.EFFECTS_LIBRARY = EFFECTS_LIBRARY;
+  window.EFFECTS_MAP = EFFECTS_MAP;
+  window.renderOfflineAudio = renderOfflineAudio;
+  window.formatTime = formatTime;
 
 })(window);

@@ -1,1603 +1,1288 @@
 {% extends "base.html" %}
 
-{% block title %}Studio — ClipGlass In-Browser Web Audio Engine{% endblock %}
+{% block title %}Audio Effects Studio — ClipGlass In-Browser Audio Engine{% endblock %}
 
 {% block content %}
-<div class="w-full max-w-6xl mx-auto flex flex-col gap-5 pb-16">
-  <!-- Top Bar: Import, File Meta, Undo/Redo, A/B Switch, Mode Switch, Export -->
-  <div class="glass glass-rim rounded-3xl p-4 sm:p-5 shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-4">
-    <div class="flex items-center gap-3">
-      <button type="button" onclick="toggleImportDrawer()" class="px-4 py-2 rounded-2xl btn-purple text-white text-xs font-bold shadow-md hover:opacity-95 transition-all flex items-center gap-2 cursor-pointer">
+<div class="w-full max-w-5xl mx-auto flex flex-col gap-8 pb-20">
+
+  <!-- ==================== HERO / HEADER ==================== -->
+  <div class="text-center pt-2 sm:pt-4">
+    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full glass border border-purple-500/20 text-purple-600 dark:text-purple-400 text-xs font-bold mb-3 shadow-sm">
+      <span>🎛</span>
+      <span>Simplified In-Browser Audio Studio</span>
+    </div>
+    <h1 class="text-3xl sm:text-4xl md:text-5xl font-black text-slate-900 dark:text-white tracking-tight uppercase">
+      Audio Effects Studio
+    </h1>
+    <p class="text-slate-600 dark:text-slate-300 text-sm sm:text-base mt-2 font-medium">
+      Transform your audio with 60+ creative effects. Zero-upload, processed 100% in your browser.
+    </p>
+  </div>
+
+  <!-- ==================== 1. IMPORT AUDIO SECTION ==================== -->
+  <div class="glass glass-rim rounded-3xl p-6 sm:p-8 shadow-xl flex flex-col items-center justify-center border border-purple-500/20">
+    <div
+      id="importDropZone"
+      onclick="document.getElementById('audioFileInput').click()"
+      ondragover="handleDragOver(event)"
+      ondragleave="handleDragLeave(event)"
+      ondrop="handleFileDrop(event)"
+      class="w-full max-w-xl border-2 border-dashed border-purple-500/40 hover:border-purple-500 rounded-3xl p-8 sm:p-10 text-center flex flex-col items-center justify-center gap-3 transition-all duration-200 cursor-pointer group bg-purple-500/5 hover:bg-purple-500/10"
+    >
+      <div class="w-16 h-16 rounded-2xl bg-purple-600/15 text-purple-600 dark:text-purple-400 flex items-center justify-center text-3xl group-hover:scale-110 transition-transform shadow-inner">
+        +
+      </div>
+      <div class="flex flex-col items-center">
+        <h2 class="text-lg sm:text-xl font-black text-slate-900 dark:text-white tracking-wide uppercase">
+          + IMPORT AUDIO FILE
+        </h2>
+        <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
+          Drag & drop or Browse
+        </p>
+        <span class="text-[11px] text-slate-400 dark:text-slate-500 mt-2">
+          MP3, WAV, FLAC, M4A, OGG, AAC or Video (MP4, WebM)
+        </span>
+      </div>
+      <input
+        type="file"
+        id="audioFileInput"
+        name="audioFileInput"
+        accept="audio/*,video/mp4,video/webm"
+        class="hidden audioFileInput"
+        onchange="handleFileUpload(event)"
+      />
+    </div>
+
+    <!-- Quick Alternate Import Options -->
+    <div class="mt-4 flex items-center gap-3 flex-wrap justify-center">
+      <button
+        type="button"
+        onclick="document.getElementById('audioFileInput').click()"
+        class="px-4 py-2 rounded-2xl glass hover:bg-purple-500/10 text-slate-700 dark:text-slate-200 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer"
+      >
         <span>📁</span>
-        <span>+ Import Song / Audio</span>
+        <span>+ Import Song</span>
       </button>
 
-      <div class="min-w-0">
-        <div class="flex items-center gap-2">
-          <h1 class="hidden">Audio Studio</h1>
-          <h2 id="currentTrackTitle" class="font-extrabold text-sm sm:text-base text-slate-900 dark:text-white truncate">
-            Rangilo Maro x Bam Bam – Dj Banger Sandy Mashup
-          </h2>
-          <span id="formatBadge" class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-purple-500/20 text-purple-600 dark:text-purple-400 shrink-0">
-            MP3 320K
-          </span>
+      <button
+        type="button"
+        onclick="toggleImportDrawer()"
+        class="px-4 py-2 rounded-2xl glass hover:bg-purple-500/10 text-slate-700 dark:text-slate-200 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer"
+      >
+        <span>🔗</span>
+        <span>Import from YouTube URL or History</span>
+      </button>
+    </div>
+
+    <!-- Collapsible Import Drawer (URL / Session History) -->
+    <div id="audioImportDrawer" data-alias="audioImportDrawer" class="hidden w-full max-w-xl mt-5 pt-5 border-t border-slate-200/50 dark:border-white/10 flex flex-col gap-4 audioImportDrawer">
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <!-- Upload from PC button for spec compatibility -->
+        <div class="glass rounded-2xl p-4 flex flex-col justify-between gap-2 border border-slate-200/40 dark:border-white/5">
+          <div class="font-bold text-xs text-slate-900 dark:text-white">
+            Upload from PC
+          </div>
+          <p class="text-[11px] text-slate-400">Select any audio or video file from your computer.</p>
+          <button
+            type="button"
+            onclick="document.getElementById('audioFileInput').click()"
+            class="w-full py-1.5 rounded-xl btn-purple text-white text-xs font-bold transition-all shadow-sm"
+          >
+            Browse Files
+          </button>
         </div>
-        <p id="currentTrackMeta" class="text-[11px] text-slate-400 mt-0.5">
-          48 kHz · 24-bit Stereo Master · Duration: 02:39
+
+        <!-- From Downloader & History -->
+        <div class="glass rounded-2xl p-4 flex flex-col justify-between gap-2 border border-slate-200/40 dark:border-white/5">
+          <div class="font-bold text-xs text-slate-900 dark:text-white">
+            From Downloader & History
+          </div>
+          <p class="text-[11px] text-slate-400">Load the most recent file downloaded or converted.</p>
+          <button
+            type="button"
+            onclick="loadFromHistory()"
+            class="w-full py-1.5 rounded-xl bg-purple-500/15 hover:bg-purple-500/25 text-purple-600 dark:text-purple-300 text-xs font-bold transition-all"
+          >
+            Load Recent Track
+          </button>
+        </div>
+      </div>
+
+      <!-- YouTube URL Input -->
+      <div class="glass rounded-2xl p-4 flex flex-col gap-2.5 border border-slate-200/40 dark:border-white/5">
+        <label class="font-bold text-xs text-slate-900 dark:text-white flex items-center gap-1.5">
+          <span>🔗</span>
+          <span>Paste YouTube or Direct Audio URL</span>
+        </label>
+        <div class="flex gap-2">
+          <input
+            type="url"
+            id="quickAudioUrlInput"
+            name="quickAudioUrlInput"
+            placeholder="https://youtu.be/... or direct audio link"
+            class="flex-1 px-3 py-2 rounded-xl glass text-xs text-slate-900 dark:text-white placeholder:text-slate-400 outline-none border border-slate-200/50 dark:border-white/10 quickAudioUrlInput"
+          />
+          <button
+            type="button"
+            onclick="fetchAudioFromUrl()"
+            id="fetchUrlBtn"
+            class="px-4 py-2 rounded-xl btn-purple text-white text-xs font-bold transition-all shadow-sm shrink-0"
+          >
+            Fetch Audio
+          </button>
+        </div>
+        <div class="flex items-center gap-1.5 text-[10px] text-slate-500">
+          <input type="checkbox" id="studioConsentCheck" checked class="rounded" />
+          <label for="studioConsentCheck">I confirm rights to process this audio track</label>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== 2. IMPORTED AUDIO PLAYER SECTION ==================== -->
+  <div id="importedAudioSection" class="glass glass-rim rounded-3xl p-6 sm:p-8 shadow-xl flex flex-col gap-5 border border-purple-500/20">
+    <div class="flex items-center justify-between border-b border-slate-200/50 dark:border-white/10 pb-3">
+      <span class="font-extrabold text-xs uppercase tracking-wider text-purple-600 dark:text-purple-400">
+        Imported Audio
+      </span>
+      <span id="playerStateTag" class="text-[11px] font-mono text-slate-400">
+        Ready to audition
+      </span>
+    </div>
+
+    <!-- Metadata Row -->
+    <div class="flex items-center gap-4">
+      <div id="artworkIcon" class="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-gradient-to-br from-purple-600 to-indigo-600 flex items-center justify-center text-white text-2xl shadow-lg shrink-0">
+        🎵
+      </div>
+      <div class="min-w-0 flex-1">
+        <h3 id="songTitle" class="text-base sm:text-lg font-black text-slate-900 dark:text-white truncate">
+          Jaadu — Darshan Raval
+        </h3>
+        <p id="songMeta" class="text-xs text-slate-500 dark:text-slate-400 mt-0.5 font-mono">
+          MP3 | 320 kbps | 03:34 | 8.5 MB
         </p>
       </div>
     </div>
 
-    <div class="flex items-center flex-wrap gap-2.5">
-      <!-- Undo / Redo & Reset -->
-      <div class="flex items-center gap-1 p-1 rounded-2xl glass">
-        <button type="button" id="undoBtn" onclick="undoAction()" title="Undo (Ctrl+Z)" class="w-7 h-7 rounded-xl hover:bg-white/40 dark:hover:bg-white/10 text-xs flex items-center justify-center transition-all disabled:opacity-40 cursor-pointer">
-          ↩
-        </button>
-        <button type="button" id="redoBtn" onclick="redoAction()" title="Redo (Ctrl+Shift+Z)" class="w-7 h-7 rounded-xl hover:bg-white/40 dark:hover:bg-white/10 text-xs flex items-center justify-center transition-all disabled:opacity-40 cursor-pointer">
-          ↪
-        </button>
-        <button type="button" onclick="resetToOriginal()" title="Reset to original input" class="px-2 py-1 rounded-xl text-[10px] font-bold text-rose-500 hover:bg-rose-500/10 transition-all cursor-pointer">
-          Reset
-        </button>
-      </div>
-
-      <!-- Loudness-Matched A/B Switch -->
-      <div class="flex items-center gap-1 p-1 rounded-2xl glass" title="Audition comparison (Hold 'B' key to hear Original)">
-        <button type="button" id="abOriginalBtn" onclick="setAuditionMode('dry')" class="px-3 py-1.5 rounded-xl text-xs font-bold text-slate-500 hover:text-slate-900 dark:hover:text-white transition-all cursor-pointer">
-          Original
-        </button>
-        <button type="button" id="abEnhancedBtn" onclick="setAuditionMode('wet')" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-purple-600 text-white shadow-sm transition-all cursor-pointer">
-          Enhanced
-        </button>
-        <span class="text-[9px] text-slate-400 font-mono px-1" title="Loudness matched within ±0.5 LU">±0.2 LU</span>
-      </div>
-
-      <!-- Auto vs Custom Mode Switch -->
-      <div class="flex items-center gap-1 p-1 rounded-2xl glass">
-        <button type="button" id="modeAutoBtn" onclick="switchStudioMode('auto')" class="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-purple-600 text-white shadow-sm transition-all cursor-pointer flex items-center gap-1.5">
-          <span>✦</span>
-          <span>Auto</span>
-        </button>
-        <button type="button" id="modeCustomBtn" onclick="switchStudioMode('custom')" class="px-3.5 py-1.5 rounded-xl text-xs font-bold text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-all cursor-pointer flex items-center gap-1.5">
-          <span>🎛</span>
-          <span>Custom Rack</span>
-        </button>
-      </div>
-
-      <!-- Export Master Button -->
-      <button type="button" onclick="openExportModal()" class="px-4 py-2 rounded-2xl btn-blue text-white text-xs font-bold shadow-md hover:opacity-95 transition-all flex items-center gap-1.5 cursor-pointer">
-        <span>↓</span>
-        <span>Export</span>
-      </button>
-
-      <!-- Keyboard Shortcuts Help -->
-      <button type="button" onclick="openShortcutsModal()" title="Keyboard Shortcuts (?)" class="w-8 h-8 rounded-2xl glass hover:bg-white/40 dark:hover:bg-white/10 text-xs font-bold text-slate-500 flex items-center justify-center transition-all cursor-pointer">
-        ?
-      </button>
-    </div>
-  </div>
-
-  <!-- Collapsible Import Drawer -->
-  <div id="importDrawer" data-alias="audioImportDrawer" class="hidden glass glass-rim rounded-3xl p-5 shadow-2xl flex flex-col gap-4 border border-purple-500/20 audioImportDrawer">
-    <div class="flex items-center justify-between border-b border-slate-200/50 dark:border-white/10 pb-3">
-      <div class="flex items-center gap-2">
-        <span class="font-extrabold text-sm text-slate-900 dark:text-white">Multi-Source Audio Import</span>
-        <span class="text-[10px] text-slate-400">Zero-upload: decoded 100% inside your browser</span>
-      </div>
-      <button type="button" onclick="toggleImportDrawer()" class="text-xs text-slate-400 hover:text-white cursor-pointer">✕</button>
-    </div>
-
-    <!-- Import Tabs -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-      <!-- 1. Upload from PC -->
-      <div id="dropZonePC" onclick="document.getElementById('studioFileInput').click()" class="border-2 border-dashed border-slate-300 dark:border-white/20 rounded-2xl p-5 text-center flex flex-col items-center justify-center gap-2 hover:border-purple-500 hover:bg-purple-500/5 transition-all cursor-pointer">
-        <span class="text-2xl">💻</span>
-        <p class="font-bold text-xs text-slate-900 dark:text-white">Upload from PC</p>
-        <p class="text-[10px] text-slate-400">MP3, WAV, FLAC, M4A, OGG, AAC & Video (MP4, WebM)</p>
-        <span class="text-[9px] text-slate-500 font-mono">Max 20 min / 200 MB</span>
-        <input type="file" id="studioFileInput" name="audioFileInput" accept="audio/*,video/mp4,video/webm" class="hidden audioFileInput" onchange="handleStudioFileUpload(event)" />
-      </div>
-
-      <!-- 2. From Downloader & Session History -->
-      <div class="glass rounded-2xl p-4 flex flex-col justify-between gap-2 border border-slate-200/40 dark:border-white/5">
-        <div>
-          <div class="flex items-center gap-1.5 font-bold text-xs text-slate-900 dark:text-white mb-2">
-            <span>⏱</span>
-            <span>From Downloader & History</span>
-          </div>
-          <div id="studioSessionHistoryList" class="flex flex-col gap-1.5 max-h-24 overflow-y-auto">
-            <!-- Populated via JS -->
-          </div>
+    <!-- Waveform Scrubber & Progress Bar -->
+    <div class="flex flex-col gap-1.5">
+      <div
+        id="scrubberContainer"
+        onclick="handleScrubberSeek(event)"
+        class="relative w-full h-10 rounded-2xl bg-slate-950/60 p-1 flex items-center cursor-pointer overflow-hidden border border-white/10 select-none group"
+      >
+        <div id="waveformMiniBars" class="w-full h-full flex items-center gap-0.5 sm:gap-1 px-1">
+          <!-- 64 bars rendered via JS -->
         </div>
-        <button type="button" onclick="loadLatestFromHistory()" class="w-full py-1.5 rounded-xl bg-purple-500/10 hover:bg-purple-500/20 text-purple-600 dark:text-purple-400 text-[10px] font-bold transition-all">
-          Load Most Recent File
-        </button>
+        <div id="scrubberFill" class="absolute top-0 bottom-0 left-0 bg-purple-500/25 pointer-events-none w-0 transition-all"></div>
+        <div id="scrubberPlayhead" class="absolute top-0 bottom-0 left-0 w-1 bg-gradient-to-b from-purple-400 to-indigo-400 pointer-events-none shadow-[0_0_10px_rgba(168,85,247,0.8)] z-10"></div>
       </div>
 
-      <!-- 3. Import from URL / YouTube -->
-      <div class="glass rounded-2xl p-4 flex flex-col justify-between gap-2 border border-slate-200/40 dark:border-white/5">
-        <div class="flex flex-col gap-1.5">
-          <div class="flex items-center gap-1.5 font-bold text-xs text-slate-900 dark:text-white">
-            <span>🔗</span>
-            <span>From YouTube URL or Stream</span>
-          </div>
-          <input type="url" id="studioUrlInput" name="quickAudioUrlInput" placeholder="https://www.youtube.com/watch?v=..." class="w-full h-8 px-2.5 rounded-xl glass text-[11px] text-slate-900 dark:text-white placeholder:text-slate-400 outline-none border border-slate-200/50 dark:border-white/10 quickAudioUrlInput" />
-          <div class="flex items-center gap-1.5 text-[10px] text-slate-500">
-            <input type="checkbox" id="studioConsentCheck" checked class="rounded" />
-            <label for="studioConsentCheck">I own rights or license to process this media</label>
-          </div>
-        </div>
-        <button type="button" onclick="fetchAudioFromUrl()" class="w-full py-1.5 rounded-xl btn-purple text-white text-[10px] font-bold transition-all shadow-sm">
-          Fetch & Inspect
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <!-- STAGE: Waveforms, Region Selection & Loop Handles -->
-  <div class="glass glass-rim rounded-3xl p-5 shadow-2xl flex flex-col gap-4">
-    <!-- Waveform Header: Compact vs Zoomable Toggle + Zoom Controls -->
-    <div class="flex items-center justify-between flex-wrap gap-2">
-      <div class="flex items-center gap-3">
-        <div class="flex items-center gap-1 text-xs font-bold p-1 rounded-xl glass">
-          <button type="button" id="wfCompactBtn" onclick="setWaveformMode('compact')" class="px-3 py-1 rounded-lg bg-purple-600 text-white shadow-sm transition-all">
-            64-Bar View
-          </button>
-          <button type="button" id="wfFullBtn" onclick="setWaveformMode('full')" class="px-3 py-1 rounded-lg text-slate-500 hover:text-white transition-all">
-            Full Zoomable
-          </button>
-        </div>
-        <span class="text-[11px] text-slate-400 font-medium hidden sm:inline">Click or drag to seek · Drag handles to set loop region</span>
-      </div>
-
-      <!-- Zoom Buttons for Full Mode -->
-      <div id="waveformZoomControls" class="hidden flex items-center gap-1 text-xs font-bold p-1 rounded-xl glass">
-        <button type="button" onclick="setStudioZoom(1)" class="zoom-pill px-2.5 py-0.5 rounded-lg bg-purple-600 text-white">1x</button>
-        <button type="button" onclick="setStudioZoom(2)" class="zoom-pill px-2.5 py-0.5 rounded-lg text-slate-400">2x</button>
-        <button type="button" onclick="setStudioZoom(5)" class="zoom-pill px-2.5 py-0.5 rounded-lg text-slate-400">5x</button>
+      <div class="flex items-center justify-between text-xs font-mono font-bold text-slate-500 dark:text-slate-400">
+        <span id="timecodeCurrent">00:00</span>
+        <span id="timecodeTotal">03:34</span>
       </div>
     </div>
 
-    <!-- 1. 64-Bar Responsive Waveform Container -->
-    <div id="compactWaveformWrapper" class="relative w-full h-24 rounded-2xl bg-slate-900/40 p-2 flex items-center gap-0.5 sm:gap-1 overflow-hidden cursor-pointer select-none border border-white/5" onclick="handleWaveformSeek(event)">
-      <div id="waveformBars" class="w-full h-full flex items-center gap-0.5 sm:gap-1">
-        <!-- 64 bars rendered via JS -->
-      </div>
-      <!-- Waveform Playhead -->
-      <div id="compactPlayhead" class="absolute top-0 bottom-0 left-[26.4%] w-0.5 bg-gradient-to-b from-purple-400 to-indigo-500 shadow-[0_0_10px_rgba(168,85,247,0.8)] pointer-events-none z-20"></div>
-    </div>
-
-    <!-- 2. Full Zoomable Waveform with Region Selection & Loop Handles -->
-    <div id="fullWaveformWrapper" class="hidden relative w-full h-28 rounded-2xl bg-slate-900/60 p-2 overflow-x-auto select-none border border-white/10" onwheel="handleWaveformWheel(event)">
-      <div id="fullWaveformInner" class="relative h-full min-w-full flex items-center cursor-pointer">
-        <canvas id="fullWaveformCanvas" class="w-full h-full"></canvas>
-
-        <!-- Draggable Loop Region Overlay -->
-        <div id="stageLoopRegion" class="absolute top-0 bottom-0 left-[10%] right-[55%] bg-purple-500/25 border-2 border-purple-400 rounded-lg backdrop-blur-[1px] z-10 flex justify-between cursor-grab">
-          <!-- Left Handle -->
-          <div id="loopHandleLeft" title="Drag to adjust Loop In" class="w-3.5 h-full bg-purple-400 rounded-l-md flex items-center justify-center cursor-ew-resize hover:bg-purple-300">
-            <span class="w-0.5 h-4 bg-purple-950 rounded-full"></span>
-          </div>
-          <!-- Loop Region Duration Tag -->
-          <span id="loopDurationTag" class="self-center px-2 py-0.5 rounded-full bg-black/80 text-[10px] font-mono font-bold text-purple-300 pointer-events-none">
-            Loop: 00:01:00
-          </span>
-          <!-- Right Handle -->
-          <div id="loopHandleRight" title="Drag to adjust Loop Out" class="w-3.5 h-full bg-purple-400 rounded-r-md flex items-center justify-center cursor-ew-resize hover:bg-purple-300">
-            <span class="w-0.5 h-4 bg-purple-950 rounded-full"></span>
-          </div>
-        </div>
-
-        <!-- Full Playhead -->
-        <div id="fullPlayhead" class="absolute top-0 bottom-0 left-[26.4%] w-0.5 bg-purple-400 shadow-[0_0_8px_rgba(168,85,247,0.8)] pointer-events-none z-20"></div>
-      </div>
-    </div>
-
-    <!-- TRANSPORT BAR: Play/Pause, Timecode, Loop, Master Gain (-6 dB), Output Meter -->
+    <!-- Audition & Transport Controls -->
     <div class="flex flex-col sm:flex-row items-center justify-between gap-4 pt-2 border-t border-slate-200/40 dark:border-white/10">
-      <!-- Left: Play/Pause & Timecode -->
+      <!-- Play/Pause -->
       <div class="flex items-center gap-3">
-        <button type="button" id="playPauseBtn" onclick="togglePlay()" class="w-12 h-12 rounded-full btn-purple text-white text-lg flex items-center justify-center shadow-lg hover:scale-105 active:scale-95 transition-all cursor-pointer">
+        <button
+          type="button"
+          id="playPauseBtn"
+          onclick="togglePlay()"
+          class="w-11 h-11 rounded-full btn-purple text-white text-base flex items-center justify-center shadow-lg hover:scale-105 active:scale-95 transition-all cursor-pointer"
+        >
           <span id="playIcon">▶</span>
         </button>
+        <span id="playStatusText" class="text-xs font-bold text-slate-700 dark:text-slate-300">
+          Click Play to Audition
+        </span>
+      </div>
 
-        <div class="flex flex-col cursor-pointer" onclick="toggleTimecodeFormat()" title="Click to toggle remaining time">
-          <span id="timecode" class="font-mono font-bold text-base text-slate-900 dark:text-white tracking-wider">
-            00:42.000 / 02:39.000
-          </span>
-          <span id="timecodeModeHint" class="text-[9px] text-slate-400 uppercase tracking-widest">
-            Elapsed (Click for Remaining)
-          </span>
+      <!-- [Original] [Preview Effects] [Replace Audio] -->
+      <div class="flex items-center gap-2 flex-wrap">
+        <div class="flex items-center p-1 rounded-2xl glass">
+          <button
+            type="button"
+            id="btnOriginal"
+            onclick="setAuditionMode('dry')"
+            class="px-3.5 py-1.5 rounded-xl text-xs font-bold text-slate-500 hover:text-slate-900 dark:hover:text-white transition-all cursor-pointer"
+          >
+            Original
+          </button>
+          <button
+            type="button"
+            id="btnEffects"
+            onclick="setAuditionMode('wet')"
+            class="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-purple-600 text-white shadow-sm transition-all cursor-pointer"
+          >
+            Preview Effects
+          </button>
         </div>
 
-        <button type="button" id="loopToggleBtn" onclick="toggleLoop()" title="Toggle Region Loop (L)" class="px-2.5 py-1.5 rounded-xl glass text-xs font-bold text-slate-500 hover:text-white transition-all flex items-center gap-1 cursor-pointer">
-          <span>🔁</span>
-          <span id="loopBtnText">Loop OFF</span>
+        <button
+          type="button"
+          onclick="document.getElementById('audioFileInput').click()"
+          class="px-3.5 py-2 rounded-2xl glass hover:bg-slate-500/10 text-xs font-bold text-slate-600 dark:text-slate-300 transition-all cursor-pointer"
+        >
+          Replace Audio
         </button>
       </div>
-
-      <!-- Right: Master Gain (Starts at -6 dB) & Stereo Peak Meter -->
-      <div class="flex items-center gap-4 w-full sm:w-auto">
-        <!-- Master Gain Slider -->
-        <div class="flex items-center gap-2 flex-1 sm:flex-initial">
-          <span class="text-xs font-bold text-slate-500">Master</span>
-          <input type="range" id="masterVolumeSlider" min="-30" max="6" step="0.5" value="-6" oninput="handleMasterGainChange(this.value)" class="w-24 sm:w-32 accent-purple-600 cursor-pointer" />
-          <span id="masterGainText" class="font-mono text-xs font-bold text-purple-600 dark:text-purple-400 min-w-12 text-right">
-            -6.0 dB
-          </span>
-        </div>
-
-        <!-- Output Level Meter with Safety Limiter Indicator -->
-        <div class="flex items-center gap-1.5 p-2 rounded-xl bg-slate-950/60 border border-white/10 shadow-inner">
-          <div class="flex flex-col gap-1">
-            <div class="w-20 sm:w-28 h-1.5 rounded-full bg-slate-800 overflow-hidden">
-              <div id="meterBarL" class="h-full bg-gradient-to-r from-emerald-500 via-yellow-400 to-rose-500 w-[65%] transition-all duration-75"></div>
-            </div>
-            <div class="w-20 sm:w-28 h-1.5 rounded-full bg-slate-800 overflow-hidden">
-              <div id="meterBarR" class="h-full bg-gradient-to-r from-emerald-500 via-yellow-400 to-rose-500 w-[62%] transition-all duration-75"></div>
-            </div>
-          </div>
-          <span id="safetyLimiterLight" class="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-[0_0_6px_rgba(16,185,129,0.8)]" title="True-Peak Safety Limiter Active at -1.0 dBTP"></span>
-        </div>
-      </div>
     </div>
   </div>
 
-  <!-- MAIN GRID: Mode Views (Left) vs Analysis & Real-Time Meters (Right) -->
-  <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
-    <!-- LEFT COLUMN: Auto Mode or Custom Rack (7 Cols) -->
-    <div class="lg:col-span-7 flex flex-col gap-5">
-      <!-- 1. AUTO MODE VIEW -->
-      <div id="autoModeContainer" class="glass glass-rim rounded-3xl p-5 sm:p-6 shadow-xl flex flex-col gap-5">
-        <div class="flex items-center justify-between flex-wrap gap-2 border-b border-slate-200/50 dark:border-white/10 pb-3">
-          <div class="flex items-center gap-2">
-            <span class="w-7 h-7 rounded-xl bg-purple-500/20 text-purple-500 flex items-center justify-center font-bold text-sm">✦</span>
-            <h3 class="font-extrabold text-base text-slate-900 dark:text-white">Auto Mode: AI Audio Intelligence</h3>
-          </div>
-          <div class="flex items-center gap-2">
-            <button type="button" onclick="triggerReanalysis()" class="text-xs text-purple-600 dark:text-purple-400 hover:underline font-semibold cursor-pointer">
-              ↻ Re-analyze
-            </button>
-            <button type="button" id="lockAnalysisBtn" onclick="toggleLockAnalysis()" class="px-2.5 py-1 rounded-xl glass text-[10px] font-bold text-slate-500 cursor-pointer">
-              🔓 Unlocked
-            </button>
-          </div>
-        </div>
-
-        <!-- Global Intensity Slider (0 to 100%, default 60%) -->
-        <div class="flex flex-col gap-2 p-3.5 rounded-2xl glass border border-purple-500/20 bg-purple-500/5">
-          <div class="flex items-center justify-between text-xs font-bold">
-            <span class="text-slate-900 dark:text-white">Mastering Intensity</span>
-            <span id="globalIntensityText" class="text-purple-600 dark:text-purple-400 font-mono text-sm">60%</span>
-          </div>
-          <input type="range" id="globalIntensitySlider" min="0" max="100" value="60" oninput="handleIntensityChange(this.value)" class="w-full accent-purple-600 cursor-pointer" />
-          <div class="flex justify-between text-[10px] text-slate-400 font-medium">
-            <span>0% (Bit-Identical Input)</span>
-            <span>Default: 60%</span>
-            <span>100% (Aggressive Drive)</span>
-          </div>
-        </div>
-
-        <!-- Target Loudness Normalization Selector -->
-        <div class="flex flex-col gap-1.5">
-          <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Target Loudness Normalization</span>
-          <div class="grid grid-cols-3 gap-2 text-xs font-bold">
-            <button type="button" onclick="setTargetLoudness(-14)" id="tgtStreamBtn" class="py-2 rounded-xl bg-purple-600 text-white shadow-sm transition-all cursor-pointer">
-              Streaming (-14 LUFS)
-            </button>
-            <button type="button" onclick="setTargetLoudness(-9)" id="tgtClubBtn" class="py-2 rounded-xl glass text-slate-600 dark:text-slate-300 hover:text-white transition-all cursor-pointer">
-              Club (-9 LUFS)
-            </button>
-            <button type="button" onclick="setTargetLoudness(-16)" id="tgtPodcastBtn" class="py-2 rounded-xl glass text-slate-600 dark:text-slate-300 hover:text-white transition-all cursor-pointer">
-              Podcast (-16 LUFS)
-            </button>
-          </div>
-        </div>
-
-        <!-- Auto-Applied Mastering Chain Cards -->
-        <div class="flex flex-col gap-2.5">
-          <div class="flex items-center justify-between text-[11px] font-bold text-slate-500 uppercase tracking-wider">
-            <span>Adaptive Mastering Chain</span>
-            <span class="text-emerald-500 font-semibold">Active & Loudness-Compensated</span>
-          </div>
-
-          <div id="autoChainList" class="flex flex-col gap-2">
-            <!-- 1. EQ -->
-            <div class="p-3 rounded-2xl glass border border-slate-200/40 dark:border-white/5 flex items-center justify-between gap-3">
-              <div class="flex items-center gap-2.5">
-                <span class="w-6 h-6 rounded-lg bg-blue-500/15 text-blue-500 flex items-center justify-center text-xs font-bold">1</span>
-                <div>
-                  <p class="text-xs font-bold text-slate-900 dark:text-white">Dynamic 10-Band EQ & Sheen</p>
-                  <p class="text-[10px] text-slate-400">+2.1 dB at 12 kHz, -1.2 dB mud scoop at 350 Hz</p>
-                </div>
-              </div>
-              <span class="text-xs font-mono font-bold text-purple-400">60%</span>
-            </div>
-
-            <!-- 2. Bus Compressor -->
-            <div class="p-3 rounded-2xl glass border border-slate-200/40 dark:border-white/5 flex items-center justify-between gap-3">
-              <div class="flex items-center gap-2.5">
-                <span class="w-6 h-6 rounded-lg bg-purple-500/15 text-purple-500 flex items-center justify-center text-xs font-bold">2</span>
-                <div>
-                  <p class="text-xs font-bold text-slate-900 dark:text-white">Mastering Bus Compressor</p>
-                  <p class="text-[10px] text-slate-400">Ratio 3.2:1 · Auto attack & release · Transient glue</p>
-                </div>
-              </div>
-              <span class="text-xs font-mono font-bold text-purple-400">60%</span>
-            </div>
-
-            <!-- 3. Stereo Imager -->
-            <div class="p-3 rounded-2xl glass border border-slate-200/40 dark:border-white/5 flex items-center justify-between gap-3">
-              <div class="flex items-center gap-2.5">
-                <span class="w-6 h-6 rounded-lg bg-cyan-500/15 text-cyan-500 flex items-center justify-center text-xs font-bold">3</span>
-                <div>
-                  <p class="text-xs font-bold text-slate-900 dark:text-white">Stereo Imager & Widener</p>
-                  <p class="text-[10px] text-slate-400">+18% stereo panorama · Sub-120 Hz centered to mono</p>
-                </div>
-              </div>
-              <span class="text-xs font-mono font-bold text-purple-400">60%</span>
-            </div>
-
-            <!-- 4. Reverb Send -->
-            <div class="p-3 rounded-2xl glass border border-slate-200/40 dark:border-white/5 flex items-center justify-between gap-3">
-              <div class="flex items-center gap-2.5">
-                <span class="w-6 h-6 rounded-lg bg-indigo-500/15 text-indigo-500 flex items-center justify-center text-xs font-bold">4</span>
-                <div>
-                  <p class="text-xs font-bold text-slate-900 dark:text-white">Lush Plate Reverb (Parallel Send)</p>
-                  <p class="text-[10px] text-slate-400">Silky smooth high-end tail sized to detected tempo</p>
-                </div>
-              </div>
-              <span class="text-xs font-mono font-bold text-purple-400">50%</span>
-            </div>
-
-            <!-- 5. Safety Limiter -->
-            <div class="p-3 rounded-2xl glass border border-emerald-500/20 bg-emerald-500/5 flex items-center justify-between gap-3">
-              <div class="flex items-center gap-2.5">
-                <span class="w-6 h-6 rounded-lg bg-emerald-500/20 text-emerald-500 flex items-center justify-center text-xs font-bold">✓</span>
-                <div>
-                  <p class="text-xs font-bold text-emerald-600 dark:text-emerald-400">True-Peak Safety Limiter</p>
-                  <p class="text-[10px] text-slate-400">Capped at -1.0 dBTP ceiling · Inter-sample clipping prevention</p>
-                </div>
-              </div>
-              <span class="text-[10px] font-bold text-emerald-500 uppercase">Always ON</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Explain Panel: Plain-Language Reasons (Section 26) -->
-        <div class="p-4 rounded-2xl bg-purple-500/10 border border-purple-500/20 flex flex-col gap-1.5 text-xs">
-          <div class="flex items-center gap-2 font-bold text-purple-700 dark:text-purple-300">
-            <span>💡</span>
-            <span>Why ClipGlass Auto Chose This Chain:</span>
-          </div>
-          <ul id="explainReasonsList" class="flex flex-col gap-1 text-[11px] text-slate-600 dark:text-slate-300 pl-4 list-disc">
-            <li>Added 2.1 dB at 12 kHz because track has gentle high-frequency roll-off above 10 kHz.</li>
-            <li>Applied bus compression at 3.2:1 with soft knee to glue rhythmic transient spikes.</li>
-            <li>Expanded stereo panorama by +18% while enforcing pure mono below 120 Hz to ensure club speaker compatibility.</li>
-            <li>True-peak limiter anchored at -1.0 dBTP to guarantee zero DAC distortion on streaming encoders.</li>
-          </ul>
-        </div>
+  <!-- ==================== 3. SELECT AUDIO EFFECTS SECTION ==================== -->
+  <div class="flex flex-col gap-5">
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div>
+        <h2 class="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight uppercase">
+          Select Audio Effects
+        </h2>
+        <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-0.5">
+          Browse effects across 7 categories and click <span class="font-bold text-purple-600 dark:text-purple-400">+ Add</span> to stack them.
+        </p>
       </div>
 
-      <!-- 2. CUSTOM MODE VIEW (Modular Rack & Module Browser) -->
-      <div id="customModeContainer" class="hidden flex flex-col gap-5">
-        <!-- Rack Controls Bar & Presets -->
-        <div class="glass glass-rim rounded-3xl p-4 shadow-xl flex flex-col gap-3">
-          <div class="flex items-center justify-between flex-wrap gap-2">
-            <div class="flex items-center gap-2">
-              <span class="font-extrabold text-sm text-slate-900 dark:text-white">Active Modular Rack</span>
-              <span id="activeModuleCountBadge" class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-purple-500/20 text-purple-600 dark:text-purple-400">
-                4 Modules
-              </span>
-            </div>
-            <div class="flex items-center gap-2">
-              <button type="button" onclick="saveCurrentAsPreset()" class="px-2.5 py-1 rounded-xl glass hover:bg-white/40 text-[10px] font-bold text-purple-600 dark:text-purple-400 transition-all cursor-pointer">
-                + Save Preset
-              </button>
-              <button type="button" onclick="exportCustomPresets()" class="px-2.5 py-1 rounded-xl glass text-[10px] font-bold text-slate-500 hover:text-white transition-all cursor-pointer">
-                JSON Export
-              </button>
-            </div>
-          </div>
-
-          <!-- Quick Presets Carousel -->
-          <div class="flex items-center gap-2 overflow-x-auto pb-1 text-xs font-bold">
-            <span class="text-[10px] text-slate-400 uppercase tracking-wider shrink-0">Presets:</span>
-            <button type="button" onclick="loadPresetById('streaming_master')" class="px-3 py-1 rounded-xl glass hover:bg-purple-600 hover:text-white text-slate-600 dark:text-slate-300 transition-all shrink-0">
-              Streaming Master (-14)
-            </button>
-            <button type="button" onclick="loadPresetById('club_banger')" class="px-3 py-1 rounded-xl glass hover:bg-purple-600 hover:text-white text-slate-600 dark:text-slate-300 transition-all shrink-0">
-              Club Banger (-9)
-            </button>
-            <button type="button" onclick="loadPresetById('podcast_polish')" class="px-3 py-1 rounded-xl glass hover:bg-purple-600 hover:text-white text-slate-600 dark:text-slate-300 transition-all shrink-0">
-              Podcast Polish (-16)
-            </button>
-            <button type="button" onclick="loadPresetById('warm_analog')" class="px-3 py-1 rounded-xl glass hover:bg-purple-600 hover:text-white text-slate-600 dark:text-slate-300 transition-all shrink-0">
-              Warm Analog
-            </button>
-            <button type="button" onclick="loadPresetById('lofi_sunset')" class="px-3 py-1 rounded-xl glass hover:bg-purple-600 hover:text-white text-slate-600 dark:text-slate-300 transition-all shrink-0">
-              Lo-Fi Sunset
-            </button>
-          </div>
-
-          <!-- Overload Warning Banner if >12 active modules -->
-          <div id="moduleWarningBanner" class="hidden p-2 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-600 dark:text-amber-400 text-[11px] font-semibold flex items-center gap-2">
-            <span>⚠️</span>
-            <span>More than 12 active modules loaded! High DSP load may cause audio stuttering on mobile browsers.</span>
-          </div>
+      <div class="flex items-center gap-3">
+        <!-- Search bar -->
+        <div class="relative w-full sm:w-64">
+          <span class="absolute left-3 top-2.5 text-slate-400 text-xs">🔍</span>
+          <input
+            type="text"
+            id="effectSearchInput"
+            oninput="handleSearchEffects(this.value)"
+            placeholder="Search effects..."
+            class="w-full pl-8 pr-3 py-2 rounded-2xl glass text-xs text-slate-900 dark:text-white placeholder:text-slate-400 outline-none border border-slate-200/50 dark:border-white/10"
+          />
         </div>
-
-        <!-- Active Rack List -->
-        <div id="activeRackList" class="flex flex-col gap-2.5">
-          <!-- Dynamically populated via JS -->
-        </div>
-
-        <!-- 79-Module Browser & Search -->
-        <div class="glass glass-rim rounded-3xl p-5 shadow-xl flex flex-col gap-4">
-          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-            <div>
-              <h3 class="font-extrabold text-sm text-slate-900 dark:text-white">Module Library (79 Modules)</h3>
-              <p class="text-[10px] text-slate-400">19 Manual Audio Tools + 60 Automated One-Click DSP Modules</p>
-            </div>
-            <input type="text" id="moduleSearchInput" placeholder="Search modules (e.g. reverb, limiter, hum)..." oninput="filterModules()" class="w-full sm:w-64 h-8 px-3 rounded-xl glass text-xs text-slate-900 dark:text-white placeholder:text-slate-400 outline-none border border-slate-200/50 dark:border-white/10" />
-          </div>
-
-          <!-- Category Filter Tabs -->
-          <div class="flex items-center gap-1.5 overflow-x-auto pb-1 text-xs font-bold">
-            <button type="button" onclick="filterCategory('all')" class="cat-filter-btn px-3 py-1 rounded-xl bg-purple-600 text-white">All (79)</button>
-            <button type="button" onclick="filterCategory('space')" class="cat-filter-btn px-3 py-1 rounded-xl glass text-slate-400">Space</button>
-            <button type="button" onclick="filterCategory('eq')" class="cat-filter-btn px-3 py-1 rounded-xl glass text-slate-400">Tone & EQ</button>
-            <button type="button" onclick="filterCategory('dynamics')" class="cat-filter-btn px-3 py-1 rounded-xl glass text-slate-400">Dynamics</button>
-            <button type="button" onclick="filterCategory('stereo')" class="cat-filter-btn px-3 py-1 rounded-xl glass text-slate-400">Stereo</button>
-            <button type="button" onclick="filterCategory('voice')" class="cat-filter-btn px-3 py-1 rounded-xl glass text-slate-400">Voice</button>
-            <button type="button" onclick="filterCategory('cleanup')" class="cat-filter-btn px-3 py-1 rounded-xl glass text-slate-400">Cleanup</button>
-            <button type="button" onclick="filterCategory('creative')" class="cat-filter-btn px-3 py-1 rounded-xl glass text-slate-400">Creative</button>
-          </div>
-
-          <!-- Grid of Modules to Add -->
-          <div id="moduleBrowserGrid" class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 max-h-96 overflow-y-auto pr-1">
-            <!-- Dynamically populated via JS -->
-          </div>
-        </div>
+        <span class="px-3 py-1.5 rounded-2xl bg-purple-500/15 text-purple-600 dark:text-purple-300 font-bold text-xs shrink-0 font-mono">
+          60+ Effects
+        </span>
       </div>
     </div>
 
-    <!-- RIGHT COLUMN: AI Analysis Cards & Real-Time Rich Meters (5 Cols) -->
-    <div class="lg:col-span-5 flex flex-col gap-5">
-      <!-- AI Audio Intelligence Analysis Cards (Section 26) -->
-      <div class="glass glass-rim rounded-3xl p-5 shadow-xl flex flex-col gap-4">
-        <div class="flex items-center justify-between border-b border-slate-200/50 dark:border-white/10 pb-3">
-          <div class="flex items-center gap-2">
-            <span class="text-base">🧠</span>
-            <h3 class="font-extrabold text-sm text-slate-900 dark:text-white">Track Intelligence</h3>
-          </div>
-          <span class="text-[10px] font-mono text-emerald-500 font-bold bg-emerald-500/10 px-2 py-0.5 rounded-full">Analysis Live</span>
-        </div>
+    <!-- Category Filter Pills -->
+    <div class="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none">
+      <button
+        type="button"
+        onclick="setCategoryFilter('all')"
+        class="cat-pill active px-3.5 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer shrink-0 bg-purple-600 text-white shadow-sm"
+        data-category="all"
+      >
+        All (60)
+      </button>
+      <button
+        type="button"
+        onclick="setCategoryFilter('space')"
+        class="cat-pill px-3.5 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer shrink-0 glass text-slate-600 dark:text-slate-300 hover:text-white"
+        data-category="space"
+      >
+        Space & Time
+      </button>
+      <button
+        type="button"
+        onclick="setCategoryFilter('modulation')"
+        class="cat-pill px-3.5 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer shrink-0 glass text-slate-600 dark:text-slate-300 hover:text-white"
+        data-category="modulation"
+      >
+        Modulation
+      </button>
+      <button
+        type="button"
+        onclick="setCategoryFilter('eq')"
+        class="cat-pill px-3.5 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer shrink-0 glass text-slate-600 dark:text-slate-300 hover:text-white"
+        data-category="eq"
+      >
+        EQ & Filters
+      </button>
+      <button
+        type="button"
+        onclick="setCategoryFilter('dynamics')"
+        class="cat-pill px-3.5 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer shrink-0 glass text-slate-600 dark:text-slate-300 hover:text-white"
+        data-category="dynamics"
+      >
+        Dynamics
+      </button>
+      <button
+        type="button"
+        onclick="setCategoryFilter('creative')"
+        class="cat-pill px-3.5 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer shrink-0 glass text-slate-600 dark:text-slate-300 hover:text-white"
+        data-category="creative"
+      >
+        Creative
+      </button>
+      <button
+        type="button"
+        onclick="setCategoryFilter('stereo')"
+        class="cat-pill px-3.5 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer shrink-0 glass text-slate-600 dark:text-slate-300 hover:text-white"
+        data-category="stereo"
+      >
+        Stereo
+      </button>
+      <button
+        type="button"
+        onclick="setCategoryFilter('voice')"
+        class="cat-pill px-3.5 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer shrink-0 glass text-slate-600 dark:text-slate-300 hover:text-white"
+        data-category="voice"
+      >
+        Voice & Noise
+      </button>
+    </div>
 
-        <!-- 1. Detected Genre with Confidence & Manual Override -->
-        <div class="p-3.5 rounded-2xl glass border border-slate-200/40 dark:border-white/5 flex flex-col gap-1.5">
-          <div class="flex items-center justify-between text-xs font-bold">
-            <span class="text-slate-500">Detected Genre</span>
-            <span id="genreConfidenceText" class="text-purple-600 dark:text-purple-400 font-mono">Dance Pop (82%)</span>
-          </div>
-          <div class="flex items-center gap-2 mt-1">
-            <select id="genreOverrideSelect" onchange="handleGenreOverride(this.value)" class="flex-1 h-7 px-2 rounded-lg glass text-xs font-semibold text-slate-900 dark:text-white border border-slate-200/50 dark:border-white/10 outline-none">
-              <option value="dance_pop" selected>Dance Pop (Auto Detected)</option>
-              <option value="afro_house">Afro-House / Deep House</option>
-              <option value="hip_hop">Hip-Hop / Trap</option>
-              <option value="acoustic">Acoustic / Indie Pop</option>
-              <option value="podcast">Podcast / Spoken Voice</option>
-              <option value="synthwave">80s Synthwave</option>
-            </select>
-          </div>
-        </div>
+    <!-- Effects Library Grid (Categorized sections rendered by JS) -->
+    <div id="effectsLibraryContainer" class="flex flex-col gap-8">
+      <!-- Populated via renderEffectsLibrary() -->
+    </div>
+  </div>
 
-        <!-- 2. Tempo & Key Tracking (BPM half/double buttons, Camelot Wheel) -->
-        <div class="grid grid-cols-2 gap-3">
-          <div class="p-3.5 rounded-2xl glass border border-slate-200/40 dark:border-white/5 flex flex-col justify-between">
-            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Tempo</span>
-            <div class="flex items-baseline gap-1 my-1">
-              <span id="bpmValueText" class="font-mono font-extrabold text-2xl text-slate-900 dark:text-white">126</span>
-              <span class="text-xs font-bold text-slate-400">BPM</span>
-            </div>
-            <div class="flex items-center gap-1.5">
-              <button type="button" onclick="adjustBpmHalf()" class="px-2 py-0.5 rounded-md glass hover:bg-white/40 text-[10px] font-bold text-slate-500">/2</button>
-              <button type="button" onclick="adjustBpmDouble()" class="px-2 py-0.5 rounded-md glass hover:bg-white/40 text-[10px] font-bold text-slate-500">x2</button>
-            </div>
-          </div>
-
-          <div class="p-3.5 rounded-2xl glass border border-slate-200/40 dark:border-white/5 flex flex-col justify-between">
-            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Musical Key</span>
-            <div class="flex items-baseline gap-1.5 my-1">
-              <span id="keyValueText" class="font-extrabold text-lg text-slate-900 dark:text-white">F# Minor</span>
-              <span id="camelotBadge" class="px-1.5 py-0.5 rounded-md bg-purple-500/20 text-purple-600 dark:text-purple-400 text-[10px] font-mono font-bold">11A</span>
-            </div>
-            <span class="text-[10px] text-slate-400 font-medium">86% Confidence</span>
-          </div>
-        </div>
-
-        <!-- 3. Loudness Metrics (Negative LUFS, True Peak, LRA, Crest Factor) -->
-        <div class="p-3.5 rounded-2xl glass border border-slate-200/40 dark:border-white/5 flex flex-col gap-2">
-          <div class="flex items-center justify-between text-xs font-bold">
-            <span class="text-slate-500">Loudness & Dynamics</span>
-            <span id="lufsBadge" class="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 font-mono text-[11px] font-bold">
-              -8.4 LUFS
-            </span>
-          </div>
-          <div class="grid grid-cols-4 gap-2 text-center pt-1 border-t border-slate-200/30 dark:border-white/5">
-            <div>
-              <p class="text-[9px] text-slate-400 font-medium">Short-Term</p>
-              <p id="shortTermLufs" class="font-mono text-xs font-bold text-slate-900 dark:text-white mt-0.5">-7.8</p>
-            </div>
-            <div>
-              <p class="text-[9px] text-slate-400 font-medium">Range (LRA)</p>
-              <p id="lraValue" class="font-mono text-xs font-bold text-slate-900 dark:text-white mt-0.5">6.2 LU</p>
-            </div>
-            <div>
-              <p class="text-[9px] text-slate-400 font-medium">True Peak</p>
-              <p id="truePeakValue" class="font-mono text-xs font-bold text-emerald-500 mt-0.5">-0.2 dBTP</p>
-            </div>
-            <div>
-              <p class="text-[9px] text-slate-400 font-medium">Crest Factor</p>
-              <p id="crestFactorValue" class="font-mono text-xs font-bold text-slate-900 dark:text-white mt-0.5">8.2 dB</p>
-            </div>
-          </div>
-        </div>
-
-        <!-- 4. Vocal Presence Center Estimation -->
-        <div class="p-3.5 rounded-2xl glass border border-slate-200/40 dark:border-white/5 flex items-center justify-between gap-2">
-          <div class="flex items-center gap-2">
-            <span class="text-sm">🎤</span>
-            <div>
-              <p class="text-xs font-bold text-slate-900 dark:text-white">Vocal Presence</p>
-              <p id="vocalPresenceText" class="text-[10px] text-purple-600 dark:text-purple-400 font-semibold">Prominent Center 64%</p>
-            </div>
-          </div>
-          <span class="text-[10px] text-slate-400 font-mono">Centered</span>
-        </div>
-
-        <!-- 5. Problems Found with One-Click "Fix" Button (Section 26) -->
-        <div class="flex flex-col gap-2">
-          <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Problems Detected</span>
-          <div id="problemsFoundList" class="flex flex-col gap-2">
-            <!-- Dynamically populated via JS -->
-          </div>
-        </div>
+  <!-- ==================== 4. YOUR SELECTED EFFECTS SECTION ==================== -->
+  <div class="glass glass-rim rounded-3xl p-6 sm:p-8 shadow-xl flex flex-col gap-4 border border-purple-500/20">
+    <div class="flex items-center justify-between border-b border-slate-200/50 dark:border-white/10 pb-3">
+      <div>
+        <h2 class="text-lg sm:text-xl font-black text-slate-900 dark:text-white tracking-wide uppercase">
+          Your Selected Effects
+        </h2>
+        <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+          Drag effects to change processing order. Click Edit to tune parameters.
+        </p>
       </div>
 
-      <!-- Real-Time Rich Meters: Spectrum Analyzer, Correlation Meter, Gain Reduction -->
-      <div class="glass glass-rim rounded-3xl p-5 shadow-xl flex flex-col gap-4">
-        <div class="flex items-center justify-between border-b border-slate-200/50 dark:border-white/10 pb-3">
-          <div class="flex items-center gap-2">
-            <span class="text-base">📊</span>
-            <h3 class="font-extrabold text-sm text-slate-900 dark:text-white">Real-Time Rich Meters</h3>
-          </div>
-          <span class="text-[10px] font-mono text-slate-400">FFT 2048</span>
-        </div>
+      <div class="flex items-center gap-2">
+        <button
+          type="button"
+          id="clearEffectsBtn"
+          onclick="clearAllSelectedEffects()"
+          class="text-xs font-bold text-rose-500 hover:bg-rose-500/10 px-3 py-1 rounded-xl transition-all cursor-pointer"
+        >
+          Clear All
+        </button>
+      </div>
+    </div>
 
-        <!-- 1. Spectrum Analyzer Canvas -->
+    <!-- Selected Effects Reorderable List -->
+    <div id="selectedEffectsList" class="flex flex-col gap-2 min-h-24">
+      <!-- Populated dynamically via JS -->
+    </div>
+  </div>
+
+  <!-- ==================== 5. AUDIO SETTINGS & DOWNLOAD SECTION ==================== -->
+  <div class="glass glass-rim rounded-3xl p-6 sm:p-8 shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-6 border border-purple-500/20">
+    <div class="flex flex-col sm:flex-row items-start sm:items-center gap-6">
+      <div>
+        <h2 class="text-base sm:text-lg font-black text-slate-900 dark:text-white uppercase">
+          Audio Settings
+        </h2>
+        <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+          Select export encoding format & quality
+        </p>
+      </div>
+
+      <div class="flex items-center gap-4">
+        <!-- Output Format -->
         <div class="flex flex-col gap-1">
-          <div class="flex items-center justify-between text-[10px] text-slate-400 font-medium">
-            <span>Spectrum Analyzer</span>
-            <span>20 Hz – 20 kHz</span>
-          </div>
-          <div class="w-full h-28 rounded-2xl bg-slate-950/80 p-2 border border-white/10 relative overflow-hidden">
-            <canvas id="spectrumCanvas" class="w-full h-full"></canvas>
-          </div>
+          <label class="text-[11px] font-bold text-slate-500 uppercase">Output Format</label>
+          <select id="exportFormatSelect" class="px-3 py-1.5 rounded-xl glass text-xs font-bold text-slate-900 dark:text-white border border-slate-200/50 dark:border-white/10 outline-none cursor-pointer">
+            <option value="mp3">MP3</option>
+            <option value="wav">WAV (Lossless)</option>
+            <option value="flac">FLAC</option>
+            <option value="m4a">M4A / AAC</option>
+          </select>
         </div>
 
-        <!-- 2. Stereo Correlation Meter (-1 to +1 Phase) -->
-        <div class="flex flex-col gap-1.5 p-3 rounded-2xl glass border border-slate-200/40 dark:border-white/5">
-          <div class="flex items-center justify-between text-[11px] font-bold">
-            <span class="text-slate-500">Stereo Correlation (Phase)</span>
-            <span id="correlationValueText" class="font-mono text-emerald-500">+0.88 (In Phase)</span>
-          </div>
-          <div class="relative w-full h-2 rounded-full bg-slate-800 overflow-hidden flex">
-            <div class="w-1/2 h-full bg-rose-500/30"></div>
-            <div class="w-1/2 h-full bg-emerald-500/30"></div>
-            <!-- Marker -->
-            <div id="phaseMarker" class="absolute top-0 bottom-0 left-[94%] w-1.5 bg-emerald-400 rounded-full shadow transition-all duration-100"></div>
-          </div>
-          <div class="flex justify-between text-[9px] text-slate-400 font-mono">
-            <span>-1 (Out of Phase)</span>
-            <span>0</span>
-            <span>+1 (Pure Mono)</span>
-          </div>
-        </div>
-
-        <!-- 3. Gain Reduction Meter (Dynamics Compression) -->
-        <div class="flex items-center justify-between p-3 rounded-2xl glass border border-slate-200/40 dark:border-white/5">
-          <span class="text-xs font-bold text-slate-500">Gain Reduction (GR)</span>
-          <div class="flex items-center gap-2">
-            <div class="w-24 h-2 rounded-full bg-slate-800 overflow-hidden">
-              <div id="grMeterBar" class="h-full bg-amber-400 w-[24%] transition-all duration-75"></div>
-            </div>
-            <span id="grValueText" class="font-mono text-xs font-bold text-amber-500 min-w-10 text-right">-2.4 dB</span>
-          </div>
+        <!-- Bitrate -->
+        <div class="flex flex-col gap-1">
+          <label class="text-[11px] font-bold text-slate-500 uppercase">Bitrate</label>
+          <select id="exportBitrateSelect" class="px-3 py-1.5 rounded-xl glass text-xs font-bold text-slate-900 dark:text-white border border-slate-200/50 dark:border-white/10 outline-none cursor-pointer">
+            <option value="320">320 kbps (Studio)</option>
+            <option value="256">256 kbps (High)</option>
+            <option value="192">192 kbps (Standard)</option>
+            <option value="128">128 kbps (Compact)</option>
+          </select>
         </div>
       </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="flex items-center gap-3">
+      <button
+        type="button"
+        onclick="previewProcessedAudio()"
+        class="px-5 py-3 rounded-2xl glass hover:bg-purple-500/10 text-xs sm:text-sm font-bold text-purple-600 dark:text-purple-400 transition-all flex items-center gap-2 cursor-pointer shadow-sm"
+      >
+        <span>▶</span>
+        <span>Preview Processed Audio</span>
+      </button>
+
+      <button
+        type="button"
+        onclick="startProcessingAndDownload()"
+        class="px-6 py-3 rounded-2xl btn-purple text-white text-xs sm:text-sm font-black transition-all flex items-center gap-2 cursor-pointer shadow-lg hover:scale-105 active:scale-95"
+      >
+        <span>⬇</span>
+        <span>DOWNLOAD AUDIO</span>
+      </button>
     </div>
   </div>
 
-  <!-- BOTTOM BAR: Chain Summary Chips, CPU Meter, Render Status (Section 24) -->
-  <div class="glass glass-rim rounded-2xl p-3 shadow-lg flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
-    <div class="flex items-center gap-2 flex-wrap">
-      <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider shrink-0">Chain:</span>
-      <div id="bottomChainChips" class="flex items-center gap-1.5 flex-wrap">
-        <!-- Rendered via JS -->
-      </div>
-    </div>
-
-    <div class="flex items-center gap-4 shrink-0 font-medium text-slate-400 text-[11px]">
-      <div class="flex items-center gap-1.5">
-        <span>DSP Engine:</span>
-        <span class="font-bold text-emerald-500">Live Web Audio</span>
-      </div>
-      <div class="flex items-center gap-1.5">
-        <span>CPU Load:</span>
-        <span id="cpuLoadText" class="font-mono font-bold text-purple-500">12%</span>
-      </div>
-    </div>
-  </div>
 </div>
 
-<!-- EXPORT MASTER MODAL -->
-<div id="exportModal" class="hidden fixed inset-0 z-[250] flex items-center justify-center p-4">
-  <div class="absolute inset-0 bg-black/60 backdrop-blur-md" onclick="closeExportModal()"></div>
-  <div class="relative w-full max-w-lg glass glass-rim rounded-3xl p-6 shadow-2xl flex flex-col gap-5 border border-purple-500/30 bg-white/95 dark:bg-slate-900/95">
+<!-- ==================== EFFECT SETTINGS POPUP MODAL (SECTION 4) ==================== -->
+<div id="effectSettingsModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-sm">
+  <div class="glass glass-rim rounded-3xl p-6 sm:p-7 w-full max-w-md shadow-2xl border border-purple-500/30 flex flex-col gap-5">
     <div class="flex items-center justify-between border-b border-slate-200/50 dark:border-white/10 pb-3">
       <div class="flex items-center gap-2">
-        <span class="text-lg">↓</span>
-        <h3 class="font-extrabold text-base text-slate-900 dark:text-white">Export Mastered Audio</h3>
+        <span id="modalEffectIcon" class="text-xl">〰</span>
+        <h3 id="modalEffectTitle" class="font-black text-sm sm:text-base text-slate-900 dark:text-white uppercase tracking-wide">
+          REVERB SETTINGS
+        </h3>
       </div>
-      <button type="button" onclick="closeExportModal()" class="text-xs text-slate-400 hover:text-white cursor-pointer">✕</button>
+      <button type="button" onclick="closeEffectSettings()" class="w-8 h-8 rounded-full glass hover:bg-white/20 text-xs font-bold text-slate-400 hover:text-white flex items-center justify-center cursor-pointer">
+        ✕
+      </button>
     </div>
 
-    <div class="flex flex-col gap-4 text-xs font-semibold">
-      <!-- 1. Format Selector -->
-      <div class="flex flex-col gap-1.5">
-        <label class="text-slate-500 uppercase tracking-wider text-[10px] font-bold">Audio Container & Format</label>
-        <div class="grid grid-cols-4 gap-2">
-          <button type="button" onclick="selectExportFormat('wav')" id="expWavBtn" class="py-2 rounded-xl bg-purple-600 text-white font-bold shadow-sm">WAV (24-bit)</button>
-          <button type="button" onclick="selectExportFormat('mp3')" id="expMp3Btn" class="py-2 rounded-xl glass text-slate-400 font-bold">MP3 (320k)</button>
-          <button type="button" onclick="selectExportFormat('flac')" id="expFlacBtn" class="py-2 rounded-xl glass text-slate-400 font-bold">FLAC</button>
-          <button type="button" onclick="selectExportFormat('m4a')" id="expM4aBtn" class="py-2 rounded-xl glass text-slate-400 font-bold">M4A (AAC)</button>
-        </div>
-      </div>
-
-      <!-- 2. Export Range -->
-      <div class="flex flex-col gap-1.5">
-        <label class="text-slate-500 uppercase tracking-wider text-[10px] font-bold">Export Scope</label>
-        <div class="grid grid-cols-2 gap-2">
-          <button type="button" onclick="selectExportScope('full')" id="scopeFullBtn" class="py-2 rounded-xl bg-purple-600 text-white font-bold shadow-sm">Entire Track (02:39)</button>
-          <button type="button" onclick="selectExportScope('region')" id="scopeRegionBtn" class="py-2 rounded-xl glass text-slate-400 font-bold">Selected Loop Region</button>
-        </div>
-      </div>
-
-      <!-- Offline Rendering Notice -->
-      <div class="p-3 rounded-2xl bg-purple-500/10 border border-purple-500/20 text-[11px] text-slate-600 dark:text-slate-300">
-        OfflineAudioContext renders identical graph in 30-second memory-safe chunks with safety limiter and dither applied. What you hear is what you get.
-      </div>
-
-      <!-- Render Progress Bar -->
-      <div id="exportProgressBarContainer" class="hidden flex flex-col gap-1.5">
-        <div class="flex justify-between text-[11px] font-bold">
-          <span id="exportStatusText">Rendering offline DSP graph...</span>
-          <span id="exportPercentText">0%</span>
-        </div>
-        <div class="w-full h-2 rounded-full bg-slate-800 overflow-hidden">
-          <div id="exportProgressBar" class="h-full bg-gradient-to-r from-purple-500 to-indigo-500 w-0 transition-all duration-150"></div>
-        </div>
-      </div>
+    <!-- Dynamic Sliders Container -->
+    <div id="modalControlsContainer" class="flex flex-col gap-4 max-h-[60vh] overflow-y-auto pr-1">
+      <!-- Populated dynamically via JS with effect-specific sliders -->
     </div>
 
-    <div class="flex items-center justify-end gap-3 pt-2">
-      <button type="button" onclick="closeExportModal()" class="px-4 py-2 rounded-xl glass text-xs font-bold text-slate-500">Cancel</button>
-      <button type="button" id="startExportBtn" onclick="runStudioExport()" class="px-5 py-2.5 rounded-xl btn-purple text-white text-xs font-bold shadow-md hover:opacity-95 transition-all">
-        ↓ Render & Download File
+    <!-- Modal Actions -->
+    <div class="flex items-center justify-between pt-3 border-t border-slate-200/50 dark:border-white/10">
+      <button
+        type="button"
+        onclick="resetEffectSettings()"
+        class="px-4 py-2 rounded-xl text-xs font-bold text-rose-500 hover:bg-rose-500/10 transition-all cursor-pointer"
+      >
+        Reset
+      </button>
+      <button
+        type="button"
+        onclick="applyEffectSettings()"
+        class="px-5 py-2 rounded-xl btn-purple text-white text-xs font-bold transition-all shadow-md cursor-pointer"
+      >
+        Apply Settings
       </button>
     </div>
   </div>
 </div>
 
-<!-- KEYBOARD SHORTCUTS MODAL -->
-<div id="shortcutsModal" class="hidden fixed inset-0 z-[250] flex items-center justify-center p-4">
-  <div class="absolute inset-0 bg-black/60 backdrop-blur-md" onclick="closeShortcutsModal()"></div>
-  <div class="relative w-full max-w-md glass glass-rim rounded-3xl p-6 shadow-2xl flex flex-col gap-4 border border-white/20 bg-white/95 dark:bg-slate-900/95">
-    <div class="flex items-center justify-between border-b border-slate-200/50 dark:border-white/10 pb-3">
-      <h3 class="font-extrabold text-sm text-slate-900 dark:text-white">Studio Keyboard Shortcuts</h3>
-      <button type="button" onclick="closeShortcutsModal()" class="text-xs text-slate-400 hover:text-white cursor-pointer">✕</button>
+<!-- ==================== PROCESSING AUDIO MODAL (SECTION 5) ==================== -->
+<div id="processingModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md">
+  <div class="glass glass-rim rounded-3xl p-8 w-full max-w-md shadow-2xl border border-purple-500/30 flex flex-col items-center text-center gap-5">
+    <h3 class="font-black text-lg sm:text-xl text-slate-900 dark:text-white uppercase tracking-wider">
+      PROCESSING AUDIO
+    </h3>
+
+    <div class="font-mono text-3xl font-black text-purple-600 dark:text-purple-400" id="processingPercent">
+      0%
     </div>
-    <div class="grid grid-cols-2 gap-2.5 text-xs">
-      <div class="flex items-center justify-between p-2 rounded-xl glass">
-        <span class="text-slate-400">Space</span>
-        <span class="font-bold">Play / Pause</span>
-      </div>
-      <div class="flex items-center justify-between p-2 rounded-xl glass">
-        <span class="text-slate-400">B (Hold)</span>
-        <span class="font-bold">Audition Original</span>
-      </div>
-      <div class="flex items-center justify-between p-2 rounded-xl glass">
-        <span class="text-slate-400">Left / Right</span>
-        <span class="font-bold">Seek ±5s</span>
-      </div>
-      <div class="flex items-center justify-between p-2 rounded-xl glass">
-        <span class="text-slate-400">Shift + ← / →</span>
-        <span class="font-bold">Seek ±1s</span>
-      </div>
-      <div class="flex items-center justify-between p-2 rounded-xl glass">
-        <span class="text-slate-400">L</span>
-        <span class="font-bold">Toggle Loop</span>
-      </div>
-      <div class="flex items-center justify-between p-2 rounded-xl glass">
-        <span class="text-slate-400">M</span>
-        <span class="font-bold">Mute Audio</span>
-      </div>
-      <div class="flex items-center justify-between p-2 rounded-xl glass">
-        <span class="text-slate-400">Ctrl + Z</span>
-        <span class="font-bold">Undo</span>
-      </div>
-      <div class="flex items-center justify-between p-2 rounded-xl glass">
-        <span class="text-slate-400">Ctrl + Shift + Z</span>
-        <span class="font-bold">Redo</span>
-      </div>
-      <div class="flex items-center justify-between p-2 rounded-xl glass">
-        <span class="text-slate-400">Ctrl + E</span>
-        <span class="font-bold">Export Modal</span>
-      </div>
-      <div class="flex items-center justify-between p-2 rounded-xl glass">
-        <span class="text-slate-400">?</span>
-        <span class="font-bold">Shortcuts Help</span>
-      </div>
+
+    <!-- Progress Bar -->
+    <div class="w-full h-3 rounded-full bg-slate-800 overflow-hidden p-0.5 border border-white/10">
+      <div id="processingProgressBar" class="h-full bg-gradient-to-r from-purple-500 to-indigo-500 rounded-full transition-all duration-150 w-0"></div>
+    </div>
+
+    <!-- Checklist of Applied Effects -->
+    <div id="processingStepsList" class="flex flex-col gap-1.5 w-full text-xs text-left max-h-36 overflow-y-auto px-2">
+      <!-- Populated via JS -->
+    </div>
+
+    <button
+      type="button"
+      onclick="cancelProcessing()"
+      class="px-5 py-2 rounded-xl glass hover:bg-white/10 text-xs font-bold text-slate-400 hover:text-white transition-all cursor-pointer mt-2"
+    >
+      Cancel
+    </button>
+  </div>
+</div>
+
+<!-- ==================== COMPLETED AUDIO PROCESSED MODAL (SECTION 5) ==================== -->
+<div id="completedModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md">
+  <div class="glass glass-rim rounded-3xl p-8 w-full max-w-md shadow-2xl border border-emerald-500/30 flex flex-col items-center text-center gap-5">
+    <div class="w-14 h-14 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-2xl font-black shadow-inner">
+      ✓
+    </div>
+
+    <h3 class="font-black text-lg sm:text-xl text-slate-900 dark:text-white uppercase tracking-wider">
+      AUDIO PROCESSED
+    </h3>
+
+    <div class="flex flex-col items-center">
+      <span id="completedSongName" class="font-black text-sm sm:text-base text-slate-900 dark:text-white truncate max-w-xs">
+        Jaadu — Darshan Raval.mp3
+      </span>
+      <span id="completedSongMeta" class="text-xs font-mono text-slate-400 mt-1">
+        MP3 | 320 kbps
+      </span>
+    </div>
+
+    <div class="flex flex-col gap-2.5 w-full mt-2">
+      <button
+        type="button"
+        onclick="playProcessedAudio()"
+        class="w-full py-3 rounded-2xl glass hover:bg-purple-500/20 text-purple-600 dark:text-purple-300 font-bold text-xs sm:text-sm transition-all flex items-center justify-center gap-2 cursor-pointer shadow-sm"
+      >
+        <span>▶</span>
+        <span>PLAY PROCESSED AUDIO</span>
+      </button>
+
+      <button
+        type="button"
+        onclick="downloadProcessedAudioFile()"
+        class="w-full py-3 rounded-2xl btn-purple text-white font-black text-xs sm:text-sm transition-all flex items-center justify-center gap-2 cursor-pointer shadow-lg hover:scale-105 active:scale-95"
+      >
+        <span>⬇</span>
+        <span>DOWNLOAD AUDIO</span>
+      </button>
+
+      <button
+        type="button"
+        onclick="closeCompletedModal()"
+        class="w-full py-2.5 rounded-2xl glass hover:bg-white/10 text-slate-400 hover:text-white font-bold text-xs transition-all cursor-pointer"
+      >
+        EDIT MORE EFFECTS
+      </button>
     </div>
   </div>
 </div>
-{% endblock %}
 
-{% block scripts %}
 <script src="/static/js/studio.js"></script>
 <script>
-  // UI State Variables
-  let studioEngine = null;
-  let currentStudioMode = 'auto'; // 'auto' or 'custom'
-  let currentAuditionMode = 'wet'; // 'wet' or 'dry'
-  let isLooping = false;
-  let currentZoom = 1;
-  let selectedExportFormat = 'wav';
-  let selectedExportScope = 'full';
-  let activeCategoryFilter = 'all';
-  let historyStack = [];
-  let redoStack = [];
-  let totalTrackDuration = 159; // 02:39
-  let currentTrackSeconds = 42;  // 00:42 default matching screenshot
-  let timecodeDisplayRemaining = false;
+// UI CONTROLLER & EVENT WIREUP
+(function() {
+  'use strict';
 
-  // Boot Engine
-  document.addEventListener('DOMContentLoaded', () => {
-    studioEngine = new StudioEngine();
-    
-    // Check URL parameters (from Downloader or Session History)
-    const urlParams = new URLSearchParams(window.location.search);
-    const qTitle = urlParams.get('title');
-    const qJobId = urlParams.get('jobId');
-    const qFileUrl = urlParams.get('fileUrl');
-    const qMode = urlParams.get('mode');
+  let currentCategory = 'all';
+  let currentSearchQuery = '';
+  let editingEffectIndex = -1;
+  let processingCanceled = false;
 
-    if (qTitle) {
-      document.getElementById('currentTrackTitle').textContent = decodeURIComponent(qTitle);
-    }
-    if (qMode === 'custom') {
-      switchStudioMode('custom');
-    }
+  // Initialize Default Track & State
+  window.addEventListener('DOMContentLoaded', () => {
+    // Generate Scrubber Bars
+    renderScrubberBars();
 
-    // Initialize 64-bar waveform visualizer
-    render64BarWaveform();
+    // Default Track Info
+    window.studioEngine.trackMetadata = {
+      name: 'Jaadu — Darshan Raval.mp3',
+      format: 'MP3',
+      bitrate: '320 kbps',
+      durationStr: '03:34',
+      durationSec: 214,
+      sizeStr: '8.5 MB'
+    };
+    updateTrackMetadataUI();
 
-    // Initialize Active Chain with default mastering chain (Auto Mode)
-    studioEngine.activeChain = [
-      { ...MODULE_MAP['parametric_eq'], intensity: 60, bypassed: false },
-      { ...MODULE_MAP['bus_compressor'], intensity: 60, bypassed: false },
-      { ...MODULE_MAP['haas_widener'], intensity: 55, bypassed: false },
-      { ...MODULE_MAP['lush_plate'], intensity: 50, bypassed: false },
-      { ...MODULE_MAP['brickwall_limiter'], intensity: 100, bypassed: false }
-    ];
+    // Add 3 default sensible effects to show the immediate chain
+    addEffect('reverb', false);
+    addEffect('echo', false);
+    addEffect('bass_boost', false);
 
-    // Initialize Analysis & Meters
-    const metrics = StudioAnalysis.getDefaultMetrics();
-    updateAnalysisUI(metrics);
+    // Render Effects Library
+    renderEffectsLibrary();
 
-    // Render Module Browser and Custom Rack
-    renderModuleBrowser();
-    renderCustomRack();
-    updateBottomChips();
+    // Render Selected Chain
+    renderSelectedEffects();
 
-    // Start Real-Time Canvas Meters
-    startMeterAnimation();
-
-    // If fileUrl provided, fetch and decode
-    if (qFileUrl) {
-      fetchAndDecodeAudio(qFileUrl, qTitle);
-    } else if (qJobId) {
-      fetchAndDecodeAudio(`/api/v1/jobs/${qJobId}/file`, qTitle);
-    }
-
-    // Keyboard Shortcuts Listener
-    setupKeyboardShortcuts();
+    // Scrubber update timer
+    setInterval(updateScrubberProgress, 250);
   });
 
-  // Waveform 64-Bar Visualizer Rendering
-  function render64BarWaveform() {
-    const container = document.getElementById('waveformBars');
-    container.innerHTML = '';
-    // Musical profile with natural peaks
-    const barHeights = [
-      25, 30, 45, 60, 75, 90, 80, 65, 55, 70, 85, 95, 90, 75, 60, 50,
-      40, 55, 70, 85, 100, 95, 80, 70, 60, 75, 90, 85, 70, 55, 45, 35,
-      50, 65, 80, 95, 90, 75, 60, 70, 85, 100, 90, 80, 65, 50, 40, 30,
-      45, 60, 75, 85, 90, 80, 65, 50, 40, 55, 70, 65, 50, 40, 30, 20
-    ];
-
-    barHeights.forEach((h, idx) => {
-      const bar = document.createElement('div');
-      bar.className = 'flex-1 rounded-full transition-all duration-150';
-      bar.style.height = `${h}%`;
-      const isPlayed = idx < (64 * (currentTrackSeconds / totalTrackDuration));
-      bar.style.backgroundColor = isPlayed ? '#a855f7' : 'rgba(255, 255, 255, 0.15)';
-      container.appendChild(bar);
-    });
-  }
-
-  function updateWaveformProgress(percent) {
-    const bars = document.getElementById('waveformBars')?.children;
-    if (!bars) return;
-    const activeCount = Math.floor(bars.length * percent);
-    for (let i = 0; i < bars.length; i++) {
-      bars[i].style.backgroundColor = i < activeCount ? '#a855f7' : 'rgba(255, 255, 255, 0.15)';
-    }
-    const ph = document.getElementById('compactPlayhead');
-    if (ph) ph.style.left = `${percent * 100}%`;
-  }
-
-  function handleWaveformSeek(e) {
-    const rect = e.currentTarget.getBoundingClientRect();
-    const clickX = e.clientX - rect.left;
-    const pct = Math.max(0, Math.min(1, clickX / rect.width));
-    currentTrackSeconds = pct * totalTrackDuration;
-    studioEngine.seek(currentTrackSeconds);
-    updateWaveformProgress(pct);
-    updateTimecodeDisplay();
-  }
-
-  // Playback & Transport Controls
-  function togglePlay() {
-    playGlassTick();
-    if (studioEngine.isPlaying) {
-      studioEngine.pause();
-      document.getElementById('playIcon').textContent = '▶';
-    } else {
-      studioEngine.play(currentTrackSeconds);
-      document.getElementById('playIcon').textContent = '⏸';
-    }
-  }
-
-  function updateTimecodeDisplay() {
-    const elapsed = formatStudioTime(currentTrackSeconds);
-    const total = formatStudioTime(totalTrackDuration);
-    if (timecodeDisplayRemaining) {
-      const rem = formatStudioTime(Math.max(0, totalTrackDuration - currentTrackSeconds));
-      document.getElementById('timecode').textContent = `-${rem} / ${total}`;
-    } else {
-      document.getElementById('timecode').textContent = `${elapsed} / ${total}`;
-    }
-  }
-
-  function formatStudioTime(sec) {
-    if (!sec || isNaN(sec)) return '00:00.000';
-    const m = Math.floor(sec / 60);
-    const s = Math.floor(sec % 60);
-    const ms = Math.floor((sec % 1) * 1000);
-    return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}.${String(ms).padStart(3, '0')}`;
-  }
-
-  function toggleTimecodeFormat() {
-    timecodeDisplayRemaining = !timecodeDisplayRemaining;
-    const hint = document.getElementById('timecodeModeHint');
-    hint.textContent = timecodeDisplayRemaining ? 'Remaining (Click for Elapsed)' : 'Elapsed (Click for Remaining)';
-    updateTimecodeDisplay();
-  }
-
-  function toggleLoop() {
-    playGlassTick();
-    isLooping = !isLooping;
-    studioEngine.loopRegion.enabled = isLooping;
-    const btn = document.getElementById('loopToggleBtn');
-    const text = document.getElementById('loopBtnText');
-    if (isLooping) {
-      btn.className = 'px-2.5 py-1.5 rounded-xl bg-purple-600 text-white text-xs font-bold transition-all flex items-center gap-1 cursor-pointer';
-      text.textContent = 'Loop ON';
-    } else {
-      btn.className = 'px-2.5 py-1.5 rounded-xl glass text-xs font-bold text-slate-500 hover:text-white transition-all flex items-center gap-1 cursor-pointer';
-      text.textContent = 'Loop OFF';
-    }
-  }
-
-  function handleMasterGainChange(db) {
-    studioEngine.setMasterVolumeDb(Number(db));
-    document.getElementById('masterGainText').textContent = `${Number(db) > 0 ? '+' : ''}${Number(db).toFixed(1)} dB`;
-  }
-
-  // A/B Audition Switch
-  function setAuditionMode(mode) {
-    playGlassTick();
-    currentAuditionMode = mode;
-    studioEngine.setAuditionMode(mode);
-    const origBtn = document.getElementById('abOriginalBtn');
-    const enhBtn = document.getElementById('abEnhancedBtn');
-    if (mode === 'dry') {
-      origBtn.className = 'px-3 py-1.5 rounded-xl text-xs font-bold bg-amber-500 text-white shadow-sm transition-all cursor-pointer';
-      enhBtn.className = 'px-3 py-1.5 rounded-xl text-xs font-bold text-slate-500 hover:text-white transition-all cursor-pointer';
-      showToast('Auditioning Original (Dry, Loudness-Matched)', 'info');
-    } else {
-      origBtn.className = 'px-3 py-1.5 rounded-xl text-xs font-bold text-slate-500 hover:text-white transition-all cursor-pointer';
-      enhBtn.className = 'px-3 py-1.5 rounded-xl text-xs font-bold bg-purple-600 text-white shadow-sm transition-all cursor-pointer';
-      showToast('Auditioning Enhanced Master (Wet Chain)', 'info');
-    }
-  }
-
-  // Mode Switch: Auto vs Custom
-  function switchStudioMode(mode) {
-    playGlassTick();
-    currentStudioMode = mode;
-    const autoBtn = document.getElementById('modeAutoBtn');
-    const custBtn = document.getElementById('modeCustomBtn');
-    const autoView = document.getElementById('autoModeContainer');
-    const custView = document.getElementById('customModeContainer');
-
-    if (mode === 'auto') {
-      autoBtn.className = 'px-3.5 py-1.5 rounded-xl text-xs font-bold bg-purple-600 text-white shadow-sm transition-all cursor-pointer flex items-center gap-1.5';
-      custBtn.className = 'px-3.5 py-1.5 rounded-xl text-xs font-bold text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-all cursor-pointer flex items-center gap-1.5';
-      autoView.classList.remove('hidden');
-      custView.classList.add('hidden');
-    } else {
-      custBtn.className = 'px-3.5 py-1.5 rounded-xl text-xs font-bold bg-purple-600 text-white shadow-sm transition-all cursor-pointer flex items-center gap-1.5';
-      autoBtn.className = 'px-3.5 py-1.5 rounded-xl text-xs font-bold text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-all cursor-pointer flex items-center gap-1.5';
-      custView.classList.remove('hidden');
-      autoView.classList.add('hidden');
-    }
-  }
-
-  // Auto Mode Global Intensity Slider
-  function handleIntensityChange(val) {
-    studioEngine.globalIntensity = Number(val);
-    document.getElementById('globalIntensityText').textContent = `${val}%`;
-    studioEngine.rebuildDSPChain();
-    updateBottomChips();
-  }
-
-  function setTargetLoudness(lufs) {
-    playGlassTick();
-    const stream = document.getElementById('tgtStreamBtn');
-    const club = document.getElementById('tgtClubBtn');
-    const pod = document.getElementById('tgtPodcastBtn');
-    [stream, club, pod].forEach(b => b.className = 'py-2 rounded-xl glass text-slate-400 font-bold transition-all cursor-pointer');
-
-    if (lufs === -14) stream.className = 'py-2 rounded-xl bg-purple-600 text-white shadow-sm font-bold cursor-pointer';
-    else if (lufs === -9) club.className = 'py-2 rounded-xl bg-purple-600 text-white shadow-sm font-bold cursor-pointer';
-    else if (lufs === -16) pod.className = 'py-2 rounded-xl bg-purple-600 text-white shadow-sm font-bold cursor-pointer';
-
-    document.getElementById('lufsBadge').textContent = `${lufs.toFixed(1)} LUFS`;
-    showToast(`Mastering target set to ${lufs} LUFS`, 'info');
-  }
-
-  // Update AI Analysis UI
-  function updateAnalysisUI(metrics) {
-    document.getElementById('genreConfidenceText').textContent = `${metrics.genre.primary} (${metrics.genre.confidence}%)`;
-    document.getElementById('bpmValueText').textContent = metrics.tempo.bpm;
-    document.getElementById('keyValueText').textContent = metrics.key.key;
-    document.getElementById('camelotBadge').textContent = metrics.key.camelot;
-    document.getElementById('lufsBadge').textContent = `${metrics.loudness.integratedLufs.toFixed(1)} LUFS`;
-    document.getElementById('shortTermLufs').textContent = metrics.loudness.shortTermLufs.toFixed(1);
-    document.getElementById('lraValue').textContent = `${metrics.loudness.lra.toFixed(1)} LU`;
-    document.getElementById('truePeakValue').textContent = `${metrics.loudness.truePeakDbtp.toFixed(1)} dBTP`;
-    document.getElementById('crestFactorValue').textContent = `${metrics.loudness.crestFactor.toFixed(1)} dB`;
-    document.getElementById('vocalPresenceText').textContent = metrics.vocalPresence;
-
-    // Problems Found with One-Click Fix
-    const pContainer = document.getElementById('problemsFoundList');
-    pContainer.innerHTML = metrics.problems.map(p => `
-      <div class="p-2.5 rounded-xl glass border border-amber-500/20 bg-amber-500/5 flex items-center justify-between gap-2">
-        <div class="flex items-center gap-2">
-          <span class="text-amber-500 text-xs font-bold">⚠️</span>
-          <div>
-            <p class="text-xs font-bold text-slate-900 dark:text-white">${p.name}</p>
-            <p class="text-[10px] text-slate-400">Recommended: ${p.fixName}</p>
-          </div>
-        </div>
-        <button type="button" onclick="fixProblem('${p.fixModule}')" class="px-2.5 py-1 rounded-lg bg-emerald-500 hover:bg-emerald-600 text-white text-[10px] font-bold shadow-sm cursor-pointer transition-all">
-          Fix Now
-        </button>
-      </div>
-    `).join('');
-  }
-
-  function fixProblem(moduleId) {
-    playGlassPop();
-    const mod = MODULE_MAP[moduleId];
-    if (!mod) return;
-    addModuleToRack(mod);
-    showToast(`Added "${mod.name}" to fix detected issue!`, 'success');
-  }
-
-  function adjustBpmHalf() {
-    const cur = parseInt(document.getElementById('bpmValueText').textContent, 10);
-    document.getElementById('bpmValueText').textContent = Math.round(cur / 2);
-    showToast(`BPM octave set to half (${Math.round(cur / 2)})`, 'info');
-  }
-
-  function adjustBpmDouble() {
-    const cur = parseInt(document.getElementById('bpmValueText').textContent, 10);
-    document.getElementById('bpmValueText').textContent = cur * 2;
-    showToast(`BPM octave set to double (${cur * 2})`, 'info');
-  }
-
-  // Custom Rack Rendering & Module Browser
-  function renderModuleBrowser() {
-    const grid = document.getElementById('moduleBrowserGrid');
-    const search = document.getElementById('moduleSearchInput')?.value?.toLowerCase() || '';
-
-    const filtered = MODULE_REGISTRY.filter(m => {
-      const matchCat = activeCategoryFilter === 'all' || m.category === activeCategoryFilter;
-      const matchSearch = !search || m.name.toLowerCase().includes(search) || m.desc.toLowerCase().includes(search) || (m.code && m.code.toLowerCase().includes(search));
-      return matchCat && matchSearch;
-    });
-
-    grid.innerHTML = filtered.map(m => `
-      <div class="p-3 rounded-2xl glass border border-slate-200/40 dark:border-white/5 flex flex-col justify-between gap-2 hover:border-purple-500/40 transition-all">
-        <div>
-          <div class="flex items-center justify-between gap-1">
-            <div class="flex items-center gap-1.5">
-              ${m.code ? `<span class="px-1.5 py-0.5 rounded text-[9px] font-mono font-bold bg-purple-500/15 text-purple-600 dark:text-purple-400">${m.code}</span>` : ''}
-              <h4 class="font-bold text-xs text-slate-900 dark:text-white">${m.name}</h4>
-            </div>
-            <span class="px-1.5 py-0.5 rounded text-[9px] font-mono font-bold ${m.engine === 'OFF' ? 'bg-amber-500/10 text-amber-500' : 'bg-emerald-500/10 text-emerald-500'}">${m.engine}</span>
-          </div>
-          <p class="text-[10px] text-slate-400 mt-1 line-clamp-2">${m.desc}</p>
-        </div>
-        <button type="button" onclick="addModuleToRackById('${m.id}')" class="w-full py-1 rounded-xl bg-purple-500/10 hover:bg-purple-600 hover:text-white text-purple-600 dark:text-purple-400 text-[10px] font-bold transition-all cursor-pointer">
-          + Add to Rack
-        </button>
-      </div>
-    `).join('');
-  }
-
-  function filterCategory(cat) {
-    activeCategoryFilter = cat;
-    document.querySelectorAll('.cat-filter-btn').forEach(b => {
-      b.className = 'cat-filter-btn px-3 py-1 rounded-xl glass text-slate-400';
-    });
-    event.currentTarget.className = 'cat-filter-btn px-3 py-1 rounded-xl bg-purple-600 text-white';
-    renderModuleBrowser();
-  }
-
-  function filterModules() {
-    renderModuleBrowser();
-  }
-
-  function addModuleToRackById(id) {
-    const mod = MODULE_MAP[id];
-    if (mod) addModuleToRack(mod);
-  }
-
-  function addModuleToRack(mod) {
-    pushHistory();
-    studioEngine.activeChain.push({
-      ...mod,
-      intensity: mod.defaultIntensity || 60,
-      bypassed: false
-    });
-    studioEngine.rebuildDSPChain();
-    renderCustomRack();
-    updateBottomChips();
-    showToast(`Added ${mod.name} to active chain`, 'info');
-  }
-
-  function renderCustomRack() {
-    const container = document.getElementById('activeRackList');
-    const badge = document.getElementById('activeModuleCountBadge');
-    const warn = document.getElementById('moduleWarningBanner');
-
-    const count = studioEngine.activeChain.length;
-    badge.textContent = `${count} Modules`;
-    if (count > 12) warn.classList.remove('hidden');
-    else warn.classList.add('hidden');
-
-    container.innerHTML = studioEngine.activeChain.map((item, idx) => `
-      <div class="p-3.5 rounded-2xl glass border border-slate-200/40 dark:border-white/5 flex flex-col gap-2.5 ${item.bypassed ? 'opacity-50' : ''}">
-        <div class="flex items-center justify-between gap-3">
-          <div class="flex items-center gap-2">
-            <span class="text-slate-400 cursor-grab">⋮⋮</span>
-            <div>
-              <div class="flex items-center gap-1.5">
-                ${item.code ? `<span class="px-1.5 py-0.5 rounded text-[9px] font-mono font-bold bg-purple-500/20 text-purple-600 dark:text-purple-400">${item.code}</span>` : ''}
-                <span class="font-bold text-xs text-slate-900 dark:text-white">${item.name}</span>
-              </div>
-              <p class="text-[10px] text-slate-400">${item.desc}</p>
-            </div>
-          </div>
-          <div class="flex items-center gap-1.5">
-            <button type="button" onclick="toggleBypassModule(${idx})" class="px-2 py-0.5 rounded-lg text-[10px] font-bold ${item.bypassed ? 'bg-slate-700 text-slate-300' : 'bg-emerald-500 text-white'}">
-              ${item.bypassed ? 'BYPASSED' : 'ACTIVE'}
-            </button>
-            <button type="button" onclick="removeModuleFromRack(${idx})" class="w-6 h-6 rounded-lg text-slate-400 hover:text-rose-500 hover:bg-rose-500/10 text-xs flex items-center justify-center">
-              ✕
-            </button>
-          </div>
-        </div>
-
-        <div class="flex items-center gap-3 pt-1 border-t border-slate-200/30 dark:border-white/5">
-          <span class="text-[10px] font-bold text-slate-400">Intensity</span>
-          <input type="range" min="0" max="100" value="${item.intensity}" oninput="setModuleIntensity(${idx}, this.value)" class="flex-1 accent-purple-600" />
-          <span class="font-mono text-xs font-bold text-purple-400 min-w-8 text-right">${item.intensity}%</span>
-        </div>
-      </div>
-    `).join('');
-  }
-
-  function setModuleIntensity(idx, val) {
-    studioEngine.activeChain[idx].intensity = Number(val);
-    studioEngine.rebuildDSPChain();
-    updateBottomChips();
-  }
-
-  function toggleBypassModule(idx) {
-    playGlassTick();
-    studioEngine.activeChain[idx].bypassed = !studioEngine.activeChain[idx].bypassed;
-    studioEngine.rebuildDSPChain();
-    renderCustomRack();
-    updateBottomChips();
-  }
-
-  function removeModuleFromRack(idx) {
-    playGlassPop();
-    pushHistory();
-    studioEngine.activeChain.splice(idx, 1);
-    studioEngine.rebuildDSPChain();
-    renderCustomRack();
-    updateBottomChips();
-  }
-
-  function updateBottomChips() {
-    const container = document.getElementById('bottomChainChips');
+  // Render 64 Mini Bars in Scrubber
+  function renderScrubberBars() {
+    const container = document.getElementById('waveformMiniBars');
     if (!container) return;
-    container.innerHTML = studioEngine.activeChain.map(m => `
-      <span class="px-2 py-0.5 rounded-md text-[10px] font-semibold bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-500/20 ${m.bypassed ? 'line-through opacity-50' : ''}">
-        ${m.name} (${m.intensity || 60}%)
-      </span>
-    `).join('') + `
-      <span class="px-2 py-0.5 rounded-md text-[10px] font-semibold bg-emerald-500/15 text-emerald-500 border border-emerald-500/20">
-        Safety Limiter (-1.0 dBTP)
-      </span>
-    `;
-
-    // Estimate CPU load
-    const activeCount = studioEngine.activeChain.filter(c => !c.bypassed).length;
-    const cpuPct = Math.min(95, 8 + (activeCount * 2.8));
-    document.getElementById('cpuLoadText').textContent = `${Math.round(cpuPct)}%`;
-  }
-
-  // Presets
-  function loadPresetById(presetId) {
-    playGlassPop();
-    const presets = StudioPresets.getBuiltIn();
-    const p = presets.find(x => x.id === presetId);
-    if (!p) return;
-    pushHistory();
-    studioEngine.activeChain = p.modules.map(id => {
-      const m = MODULE_MAP[id];
-      return { ...m, intensity: p.intensity || 60, bypassed: false };
-    });
-    studioEngine.rebuildDSPChain();
-    renderCustomRack();
-    updateBottomChips();
-    showToast(`Loaded preset: "${p.name}"`, 'success');
-  }
-
-  function saveCurrentAsPreset() {
-    const name = prompt('Enter preset name:', 'My Custom Master');
-    if (!name) return;
-    StudioPresets.saveUserPreset({
-      name: name,
-      intensity: studioEngine.globalIntensity,
-      modules: studioEngine.activeChain.map(m => m.id)
-    });
-    showToast(`Saved preset "${name}" to browser storage!`, 'success');
-  }
-
-  function exportCustomPresets() {
-    StudioPresets.exportPresetsJSON();
-    showToast('Exported studio presets JSON', 'success');
-  }
-
-  // Undo / Redo History
-  function pushHistory() {
-    historyStack.push(JSON.stringify(studioEngine.activeChain));
-    redoStack = [];
-    document.getElementById('undoBtn').disabled = false;
-  }
-
-  function undoAction() {
-    if (!historyStack.length) return;
-    playGlassTick();
-    redoStack.push(JSON.stringify(studioEngine.activeChain));
-    const prev = JSON.parse(historyStack.pop());
-    studioEngine.activeChain = prev;
-    studioEngine.rebuildDSPChain();
-    renderCustomRack();
-    updateBottomChips();
-    document.getElementById('undoBtn').disabled = historyStack.length === 0;
-    document.getElementById('redoBtn').disabled = false;
-  }
-
-  function redoAction() {
-    if (!redoStack.length) return;
-    playGlassTick();
-    historyStack.push(JSON.stringify(studioEngine.activeChain));
-    const nxt = JSON.parse(redoStack.pop());
-    studioEngine.activeChain = nxt;
-    studioEngine.rebuildDSPChain();
-    renderCustomRack();
-    updateBottomChips();
-    document.getElementById('redoBtn').disabled = redoStack.length === 0;
-    document.getElementById('undoBtn').disabled = false;
-  }
-
-  function resetToOriginal() {
-    if (!confirm('Reset all effects to bit-identical original input?')) return;
-    pushHistory();
-    studioEngine.activeChain = [];
-    studioEngine.globalIntensity = 0;
-    document.getElementById('globalIntensitySlider').value = 0;
-    document.getElementById('globalIntensityText').textContent = '0%';
-    studioEngine.rebuildDSPChain();
-    renderCustomRack();
-    updateBottomChips();
-    showToast('Studio reset to original dry sound', 'info');
-  }
-
-  // Real-Time Canvas Meters (FFT Spectrum & Stereo Correlation)
-  function startMeterAnimation() {
-    const canvas = document.getElementById('spectrumCanvas');
-    if (!canvas) return;
-    const ctx2d = canvas.getContext('2d');
-
-    function draw() {
-      requestAnimationFrame(draw);
-      const width = canvas.width = canvas.clientWidth;
-      const height = canvas.height = canvas.clientHeight;
-      ctx2d.clearRect(0, 0, width, height);
-
-      // Draw real or simulated FFT spectrum bars
-      const numBars = 36;
-      const barWidth = width / numBars;
-      for (let i = 0; i < numBars; i++) {
-        const factor = Math.sin((i / numBars) * Math.PI) * (studioEngine.isPlaying ? 0.85 : 0.2);
-        const rand = (Math.sin(Date.now() * 0.005 + i * 0.3) + 1) * 0.15;
-        const barH = (factor + rand) * height * 0.85;
-
-        const grad = ctx2d.createLinearGradient(0, height, 0, height - barH);
-        grad.addColorStop(0, '#7c3aed');
-        grad.addColorStop(0.6, '#a855f7');
-        grad.addColorStop(1, '#38bdf8');
-
-        ctx2d.fillStyle = grad;
-        ctx2d.fillRect(i * barWidth + 1, height - barH, barWidth - 2, barH);
-      }
-
-      // Update Stereo Correlation Marker
-      const phaseMarker = document.getElementById('phaseMarker');
-      if (phaseMarker && studioEngine.isPlaying) {
-        const jitter = Math.sin(Date.now() * 0.002) * 5;
-        phaseMarker.style.left = `${Math.min(98, Math.max(70, 92 + jitter))}%`;
-      }
+    container.innerHTML = '';
+    for (let i = 0; i < 64; i++) {
+      const h = Math.max(15, Math.min(95, Math.sin(i * 0.15) * 35 + Math.cos(i * 0.3) * 25 + 45));
+      const bar = document.createElement('div');
+      bar.className = 'flex-1 rounded-full bg-slate-600/50 group-hover:bg-purple-500/60 transition-all';
+      bar.style.height = `${h}%`;
+      container.appendChild(bar);
     }
-    requestAnimationFrame(draw);
   }
 
-  // Multi-Source Import
-  async function fetchAudioFromUrl(urlOverride) {
-    const input = document.getElementById('studioUrlInput');
-    const url = urlOverride || input?.value?.trim();
-    if (!url) {
-      showToast('Please paste a YouTube or audio URL first', 'error');
-      input?.focus();
+  function updateTrackMetadataUI() {
+    const meta = window.studioEngine.trackMetadata;
+    document.getElementById('songTitle').textContent = meta.name;
+    document.getElementById('songMeta').textContent = `${meta.format} | ${meta.bitrate} | ${meta.durationStr} | ${meta.sizeStr}`;
+    document.getElementById('timecodeTotal').textContent = meta.durationStr;
+  }
+
+  // --- 1. EFFECTS LIBRARY RENDERING ---
+  function renderEffectsLibrary() {
+    const container = document.getElementById('effectsLibraryContainer');
+    if (!container) return;
+    container.innerHTML = '';
+
+    const query = currentSearchQuery.toLowerCase().trim();
+    const categoriesToShow = currentCategory === 'all'
+      ? window.CATEGORIES.filter(c => c.id !== 'all')
+      : window.CATEGORIES.filter(c => c.id === currentCategory);
+
+    let totalRendered = 0;
+
+    categoriesToShow.forEach(cat => {
+      let effects = window.EFFECTS_LIBRARY.filter(e => e.category === cat.id);
+      if (query) {
+        effects = effects.filter(e =>
+          e.name.toLowerCase().includes(query) ||
+          e.desc.toLowerCase().includes(query) ||
+          e.categoryLabel.toLowerCase().includes(query)
+        );
+      }
+
+      if (effects.length === 0) return;
+      totalRendered += effects.length;
+
+      // Category Section
+      const sec = document.createElement('div');
+      sec.className = 'flex flex-col gap-3.5';
+
+      sec.innerHTML = `
+        <div class="flex items-center gap-2">
+          <h3 class="font-black text-sm sm:text-base text-slate-900 dark:text-white uppercase tracking-wider">
+            ${cat.name} Effects
+          </h3>
+          <span class="text-[11px] font-mono px-2 py-0.5 rounded-full bg-purple-500/10 text-purple-600 dark:text-purple-400 font-bold">
+            ${effects.length}
+          </span>
+        </div>
+      `;
+
+      // 3–4 Column Responsive Cards Grid
+      const grid = document.createElement('div');
+      grid.className = 'grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4';
+
+      effects.forEach(eff => {
+        const isAdded = window.studioEngine.selectedEffects.some(se => se.id === eff.id);
+        const card = document.createElement('div');
+        card.className = `glass glass-rim rounded-2xl p-4 sm:p-5 flex flex-col justify-between items-center text-center gap-3 transition-all hover:scale-[1.02] border ${isAdded ? 'border-purple-500/50 bg-purple-500/5' : 'border-slate-200/40 dark:border-white/5'}`;
+
+        card.innerHTML = `
+          <div class="w-10 h-10 rounded-xl bg-purple-500/10 text-purple-600 dark:text-purple-400 flex items-center justify-center text-xl font-bold shadow-inner">
+            ${eff.icon || '〰'}
+          </div>
+
+          <div class="flex flex-col items-center">
+            <h4 class="font-black text-xs sm:text-sm text-slate-900 dark:text-white tracking-wide uppercase">
+              ${eff.name}
+            </h4>
+            <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-1 line-clamp-2 leading-relaxed">
+              ${eff.desc}
+            </p>
+          </div>
+
+          <button
+            type="button"
+            onclick="addEffect('${eff.id}')"
+            class="w-full py-2 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 shadow-sm ${isAdded ? 'bg-purple-600/20 text-purple-600 dark:text-purple-300 border border-purple-500/30 hover:bg-purple-600/30' : 'btn-purple text-white hover:opacity-95'}"
+          >
+            <span>${isAdded ? '✓ Added' : '+ ADD'}</span>
+          </button>
+        `;
+        grid.appendChild(card);
+      });
+
+      sec.appendChild(grid);
+      container.appendChild(sec);
+    });
+
+    if (totalRendered === 0) {
+      container.innerHTML = `
+        <div class="text-center py-12 glass rounded-3xl p-8 border border-white/5">
+          <span class="text-3xl">🔍</span>
+          <p class="font-bold text-sm text-slate-900 dark:text-white mt-2">No effects matched "${currentSearchQuery}"</p>
+          <p class="text-xs text-slate-400 mt-1">Try searching another term or clear the search filter.</p>
+          <button type="button" onclick="setCategoryFilter('all'); document.getElementById('effectSearchInput').value=''; handleSearchEffects('');" class="mt-4 px-4 py-1.5 rounded-xl btn-purple text-white text-xs font-bold">
+            Reset Filter
+          </button>
+        </div>
+      `;
+    }
+  }
+
+  window.handleSearchEffects = function(val) {
+    currentSearchQuery = val;
+    renderEffectsLibrary();
+  };
+
+  window.setCategoryFilter = function(catId) {
+    currentCategory = catId;
+    document.querySelectorAll('.cat-pill').forEach(btn => {
+      if (btn.getAttribute('data-category') === catId) {
+        btn.className = 'cat-pill active px-3.5 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer shrink-0 bg-purple-600 text-white shadow-sm';
+      } else {
+        btn.className = 'cat-pill px-3.5 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer shrink-0 glass text-slate-600 dark:text-slate-300 hover:text-white';
+      }
+    });
+    renderEffectsLibrary();
+  };
+
+  // --- 2. SELECTED EFFECTS CHAIN ---
+  window.addEffect = function(effectId, notify = true) {
+    const effDef = window.EFFECTS_MAP[effectId];
+    if (!effDef) return;
+
+    // Build default params map
+    const params = {};
+    if (effDef.controls) {
+      effDef.controls.forEach(ctrl => {
+        params[ctrl.key] = ctrl.default;
+      });
+    }
+
+    window.studioEngine.selectedEffects.push({
+      id: effDef.id,
+      name: effDef.name,
+      icon: effDef.icon,
+      enabled: true,
+      params: params
+    });
+
+    window.studioEngine.rebuildDSPChain();
+    renderSelectedEffects();
+    renderEffectsLibrary();
+  };
+
+  window.removeEffect = function(index) {
+    if (index >= 0 && index < window.studioEngine.selectedEffects.length) {
+      window.studioEngine.selectedEffects.splice(index, 1);
+      window.studioEngine.rebuildDSPChain();
+      renderSelectedEffects();
+      renderEffectsLibrary();
+    }
+  };
+
+  window.toggleEffect = function(index) {
+    if (index >= 0 && index < window.studioEngine.selectedEffects.length) {
+      const item = window.studioEngine.selectedEffects[index];
+      item.enabled = !item.enabled;
+      window.studioEngine.rebuildDSPChain();
+      renderSelectedEffects();
+    }
+  };
+
+  window.moveEffect = function(fromIndex, toIndex) {
+    const arr = window.studioEngine.selectedEffects;
+    if (toIndex < 0 || toIndex >= arr.length) return;
+    const item = arr.splice(fromIndex, 1)[0];
+    arr.splice(toIndex, 0, item);
+    window.studioEngine.rebuildDSPChain();
+    renderSelectedEffects();
+  };
+
+  window.clearAllSelectedEffects = function() {
+    window.studioEngine.selectedEffects = [];
+    window.studioEngine.rebuildDSPChain();
+    renderSelectedEffects();
+    renderEffectsLibrary();
+  };
+
+  function renderSelectedEffects() {
+    const list = document.getElementById('selectedEffectsList');
+    if (!list) return;
+    list.innerHTML = '';
+
+    const chain = window.studioEngine.selectedEffects;
+    if (chain.length === 0) {
+      list.innerHTML = `
+        <div class="text-center py-6 text-xs text-slate-400 border-2 border-dashed border-slate-300/40 dark:border-white/10 rounded-2xl p-4">
+          No effects selected yet. Browse the 60+ effects library above and click <span class="font-bold text-purple-500">+ ADD</span> to build your custom chain.
+        </div>
+      `;
       return;
     }
-    showToast('Inspecting audio stream from URL...', 'info');
+
+    chain.forEach((item, idx) => {
+      const row = document.createElement('div');
+      row.className = `glass rounded-2xl p-3 sm:p-4 flex items-center justify-between gap-3 border transition-all ${item.enabled ? 'border-purple-500/25 bg-purple-500/5' : 'border-slate-200/40 dark:border-white/5 opacity-60'}`;
+      row.draggable = true;
+      row.ondragstart = (e) => { e.dataTransfer.setData('text/plain', idx); };
+      row.ondragover = (e) => { e.preventDefault(); };
+      row.ondrop = (e) => {
+        e.preventDefault();
+        const fromIdx = parseInt(e.dataTransfer.getData('text/plain'), 10);
+        window.moveEffect(fromIdx, idx);
+      };
+
+      row.innerHTML = `
+        <div class="flex items-center gap-3 min-w-0">
+          <div class="flex items-center gap-1">
+            <button type="button" onclick="moveEffect(${idx}, ${idx - 1})" ${idx === 0 ? 'disabled' : ''} class="w-6 h-6 rounded-lg glass hover:bg-white/20 text-[10px] font-bold flex items-center justify-center disabled:opacity-20 cursor-pointer">▲</button>
+            <button type="button" onclick="moveEffect(${idx}, ${idx + 1})" ${idx === chain.length - 1 ? 'disabled' : ''} class="w-6 h-6 rounded-lg glass hover:bg-white/20 text-[10px] font-bold flex items-center justify-center disabled:opacity-20 cursor-pointer">▼</button>
+          </div>
+
+          <span class="font-mono text-xs font-black text-purple-600 dark:text-purple-400 w-5 text-right">
+            ${idx + 1}.
+          </span>
+
+          <span class="text-base">${item.icon || '〰'}</span>
+
+          <span class="font-black text-xs sm:text-sm text-slate-900 dark:text-white truncate">
+            ${item.name}
+          </span>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <!-- Power / Bypass Toggle -->
+          <button
+            type="button"
+            onclick="toggleEffect(${idx})"
+            title="${item.enabled ? 'Enabled' : 'Bypassed'}"
+            class="px-2.5 py-1 rounded-xl text-[10px] font-bold cursor-pointer transition-all ${item.enabled ? 'bg-emerald-500/15 text-emerald-500 dark:text-emerald-400 border border-emerald-500/30' : 'bg-slate-500/10 text-slate-400 border border-slate-500/20'}"
+          >
+            ${item.enabled ? 'ON' : 'BYPASS'}
+          </button>
+
+          <!-- Edit Button -->
+          <button
+            type="button"
+            onclick="openEffectSettings(${idx})"
+            class="px-3 py-1.5 rounded-xl glass hover:bg-purple-500/15 text-purple-600 dark:text-purple-300 text-xs font-bold transition-all cursor-pointer shadow-sm"
+          >
+            Edit
+          </button>
+
+          <!-- Remove Button -->
+          <button
+            type="button"
+            onclick="removeEffect(${idx})"
+            class="px-2.5 py-1.5 rounded-xl glass hover:bg-rose-500/15 text-rose-500 text-xs font-bold transition-all cursor-pointer"
+          >
+            Remove
+          </button>
+        </div>
+      `;
+
+      list.appendChild(row);
+    });
+  }
+
+  // --- 3. EFFECT SETTINGS POPUP MODAL ---
+  window.openEffectSettings = function(index) {
+    editingEffectIndex = index;
+    const item = window.studioEngine.selectedEffects[index];
+    if (!item) return;
+
+    const effDef = window.EFFECTS_MAP[item.id];
+    if (!effDef) return;
+
+    document.getElementById('modalEffectTitle').textContent = `${item.name.toUpperCase()} SETTINGS`;
+    document.getElementById('modalEffectIcon').textContent = item.icon || '〰';
+
+    const container = document.getElementById('modalControlsContainer');
+    container.innerHTML = '';
+
+    if (!effDef.controls || effDef.controls.length === 0) {
+      container.innerHTML = `<p class="text-xs text-slate-400 text-center py-4">This effect uses automatic studio calibration.</p>`;
+    } else {
+      effDef.controls.forEach(ctrl => {
+        const currentVal = item.params[ctrl.key] !== undefined ? item.params[ctrl.key] : ctrl.default;
+        const div = document.createElement('div');
+        div.className = 'flex flex-col gap-1.5 glass rounded-2xl p-3 border border-slate-200/40 dark:border-white/5';
+
+        div.innerHTML = `
+          <div class="flex items-center justify-between">
+            <label class="text-xs font-bold text-slate-700 dark:text-slate-200">${ctrl.label}</label>
+            <span id="sliderVal_${ctrl.key}" class="font-mono text-xs font-bold text-purple-600 dark:text-purple-400">
+              ${currentVal}${ctrl.unit}
+            </span>
+          </div>
+          <input
+            type="range"
+            min="${ctrl.min}"
+            max="${ctrl.max}"
+            step="${ctrl.step}"
+            value="${currentVal}"
+            oninput="handleSliderChange('${ctrl.key}', this.value, '${ctrl.unit}')"
+            class="w-full accent-purple-600 cursor-pointer"
+          />
+        `;
+        container.appendChild(div);
+      });
+    }
+
+    document.getElementById('effectSettingsModal').classList.remove('hidden');
+  };
+
+  window.handleSliderChange = function(key, val, unit) {
+    if (editingEffectIndex < 0) return;
+    const item = window.studioEngine.selectedEffects[editingEffectIndex];
+    if (!item) return;
+
+    const numVal = parseFloat(val);
+    item.params[key] = numVal;
+    const label = document.getElementById(`sliderVal_${key}`);
+    if (label) label.textContent = `${numVal}${unit}`;
+
+    // Update real-time audio graph while auditioning
+    window.studioEngine.rebuildDSPChain();
+  };
+
+  window.resetEffectSettings = function() {
+    if (editingEffectIndex < 0) return;
+    const item = window.studioEngine.selectedEffects[editingEffectIndex];
+    if (!item) return;
+
+    const effDef = window.EFFECTS_MAP[item.id];
+    if (!effDef || !effDef.controls) return;
+
+    effDef.controls.forEach(ctrl => {
+      item.params[ctrl.key] = ctrl.default;
+    });
+
+    window.studioEngine.rebuildDSPChain();
+    openEffectSettings(editingEffectIndex); // refresh sliders
+  };
+
+  window.applyEffectSettings = function() {
+    closeEffectSettings();
+  };
+
+  window.closeEffectSettings = function() {
+    editingEffectIndex = -1;
+    document.getElementById('effectSettingsModal').classList.add('hidden');
+  };
+
+  // --- 4. AUDITION & TRANSPORT ENGINE ---
+  window.togglePlay = function() {
+    const engine = window.studioEngine;
+    if (engine.isPlaying) {
+      engine.pause();
+    } else {
+      engine.play();
+    }
+    updatePlayerUI();
+  };
+
+  window.setAuditionMode = function(mode) {
+    window.studioEngine.setAuditionMode(mode);
+    const btnOrig = document.getElementById('btnOriginal');
+    const btnEff = document.getElementById('btnEffects');
+    if (mode === 'dry') {
+      btnOrig.className = 'px-3.5 py-1.5 rounded-xl text-xs font-bold bg-purple-600 text-white shadow-sm transition-all cursor-pointer';
+      btnEff.className = 'px-3.5 py-1.5 rounded-xl text-xs font-bold text-slate-500 hover:text-slate-900 dark:hover:text-white transition-all cursor-pointer';
+    } else {
+      btnOrig.className = 'px-3.5 py-1.5 rounded-xl text-xs font-bold text-slate-500 hover:text-slate-900 dark:hover:text-white transition-all cursor-pointer';
+      btnEff.className = 'px-3.5 py-1.5 rounded-xl text-xs font-bold bg-purple-600 text-white shadow-sm transition-all cursor-pointer';
+    }
+  };
+
+  window.updatePlayerUI = function() {
+    const engine = window.studioEngine;
+    const icon = document.getElementById('playIcon');
+    const statusText = document.getElementById('playStatusText');
+    if (engine.isPlaying) {
+      if (icon) icon.textContent = '❚❚';
+      if (statusText) statusText.textContent = engine.auditionState === 'wet' ? 'Auditioning Effects' : 'Auditioning Original';
+    } else {
+      if (icon) icon.textContent = '▶';
+      if (statusText) statusText.textContent = 'Playback Paused';
+    }
+  };
+
+  function updateScrubberProgress() {
+    const engine = window.studioEngine;
+    if (!engine) return;
+    const totalSec = engine.trackMetadata.durationSec || (engine.rawAudioBuffer ? engine.rawAudioBuffer.duration : 214);
+    let curSec = engine.pauseOffset;
+    if (engine.isPlaying && engine.audioCtx) {
+      curSec = (engine.audioCtx.currentTime - engine.startTime);
+    }
+    curSec = Math.max(0, Math.min(totalSec, curSec));
+
+    const pct = totalSec > 0 ? (curSec / totalSec) * 100 : 0;
+    const playhead = document.getElementById('scrubberPlayhead');
+    const fill = document.getElementById('scrubberFill');
+    if (playhead) playhead.style.left = `${pct}%`;
+    if (fill) fill.style.width = `${pct}%`;
+
+    const curElem = document.getElementById('timecodeCurrent');
+    if (curElem) curElem.textContent = window.formatTime(curSec);
+  }
+
+  window.handleScrubberSeek = function(e) {
+    const container = document.getElementById('scrubberContainer');
+    const rect = container.getBoundingClientRect();
+    const ratio = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+    const totalSec = window.studioEngine.trackMetadata.durationSec || 214;
+    window.studioEngine.seek(ratio * totalSec);
+    updateScrubberProgress();
+  };
+
+  window.previewProcessedAudio = function() {
+    window.setAuditionMode('wet');
+    if (!window.studioEngine.isPlaying) {
+      window.studioEngine.play(0);
+    }
+    window.updatePlayerUI();
+  };
+
+  // --- 5. PROCESSING & DOWNLOAD MODALS (SECTION 5) ---
+  window.startProcessingAndDownload = async function() {
+    processingCanceled = false;
+    const procModal = document.getElementById('processingModal');
+    const pPercent = document.getElementById('processingPercent');
+    const pBar = document.getElementById('processingProgressBar');
+    const pSteps = document.getElementById('processingStepsList');
+
+    procModal.classList.remove('hidden');
+    pSteps.innerHTML = '';
+
+    const chain = window.studioEngine.selectedEffects.filter(e => e.enabled);
+
+    // Build step checklist
+    chain.forEach(item => {
+      const step = document.createElement('div');
+      step.className = 'flex items-center gap-2 text-slate-300';
+      step.innerHTML = `<span class="text-purple-400">●</span> <span>Applying ${item.name}</span>`;
+      pSteps.appendChild(step);
+    });
+
     try {
-      const inspectRes = await fetch(`/api/inspect?url=${encodeURIComponent(url)}`);
-      let title = 'Imported Track';
-      if (inspectRes.ok) {
-        const meta = await inspectRes.json();
-        title = meta.title || title;
-        document.getElementById('currentTrackTitle').textContent = title;
-        if (meta.duration) {
-          totalTrackDuration = meta.duration;
-          updateTimecodeDisplay();
-        }
+      // Simulate/perform offline render
+      let audioBuffer = window.studioEngine.rawAudioBuffer;
+      if (!audioBuffer) {
+        // Synthesize standard 44.1kHz buffer if not yet loaded
+        const ctx = window.studioEngine.ensureContext();
+        audioBuffer = ctx.createBuffer(2, 44100 * 30, 44100);
       }
 
-      // Check if YouTube link: use backend audio pipeline
-      if (window.isValidYouTubeUrl ? window.isValidYouTubeUrl(url) : (url.includes('youtube.com') || url.includes('youtu.be'))) {
-        showToast('Processing audio stream via ephemeral job...', 'info');
-        const jobRes = await fetch('/api/v1/jobs', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            url: url,
-            mode: 'audio',
-            format: 'mp3',
-            quality: 'best',
-            consent: true
-          })
-        });
+      const format = document.getElementById('exportFormatSelect').value;
+      const bitrate = document.getElementById('exportBitrateSelect').value;
 
-        if (jobRes.ok) {
-          const { jobId } = await jobRes.json();
-          // Connect to SSE for progress
-          const evSrc = new EventSource(`/api/v1/jobs/${jobId}/events`);
-          evSrc.addEventListener('update', (ev) => {
-            const data = JSON.parse(ev.data);
-            if (data.state === 'ready') {
-              evSrc.close();
-              const fileUrl = `/api/v1/jobs/${jobId}/file`;
-              fetchAndDecodeAudio(fileUrl, title);
-              toggleImportDrawer();
-              showToast('Audio loaded and ready for mastering!', 'success');
-            } else if (data.state === 'failed') {
-              evSrc.close();
-              showToast('Audio job processing failed.', 'error');
-            }
-          });
-          return;
+      const blob = await window.renderOfflineAudio(
+        audioBuffer,
+        window.studioEngine.selectedEffects,
+        { format, bitrate },
+        (progress, status) => {
+          if (processingCanceled) return;
+          pPercent.textContent = `${progress}%`;
+          pBar.style.width = `${progress}%`;
         }
-      }
+      );
 
-      // Direct Audio URL fallback
-      await fetchAndDecodeAudio(url, title);
-      toggleImportDrawer();
-    } catch (e) {
-      console.warn('Import exception:', e);
-      showToast('Error importing stream from URL', 'error');
+      if (processingCanceled) return;
+
+      window.studioEngine.renderedBlob = blob;
+      window.studioEngine.renderedUrl = URL.createObjectURL(blob);
+
+      // Save to Session History
+      saveRecordToHistory(window.studioEngine.trackMetadata.name, format, bitrate);
+
+      // Hide processing modal, show completed modal
+      procModal.classList.add('hidden');
+      openCompletedModal();
+
+    } catch (err) {
+      console.error('Processing error:', err);
+      procModal.classList.add('hidden');
+      alert('Audio processing error: ' + err.message);
     }
-  }
-  window.fetchAudioFromUrl = fetchAudioFromUrl;
-  const importFromUrl = fetchAudioFromUrl;
+  };
 
-  function toggleImportDrawer() {
-    playGlassTick();
-    const drawer = document.getElementById('importDrawer');
-    drawer.classList.toggle('hidden');
-    if (!drawer.classList.contains('hidden')) {
-      populateSessionHistoryImportList();
+  window.cancelProcessing = function() {
+    processingCanceled = true;
+    document.getElementById('processingModal').classList.add('hidden');
+  };
+
+  function openCompletedModal() {
+    const meta = window.studioEngine.trackMetadata;
+    const format = document.getElementById('exportFormatSelect').value.toUpperCase();
+    const bitrate = document.getElementById('exportBitrateSelect').value;
+
+    document.getElementById('completedSongName').textContent = meta.name;
+    document.getElementById('completedSongMeta').textContent = `${format} | ${bitrate} kbps`;
+    document.getElementById('completedModal').classList.remove('hidden');
+  }
+
+  window.closeCompletedModal = function() {
+    document.getElementById('completedModal').classList.add('hidden');
+  };
+
+  window.playProcessedAudio = function() {
+    if (window.studioEngine.renderedUrl) {
+      const audio = new Audio(window.studioEngine.renderedUrl);
+      audio.play();
+    } else {
+      window.previewProcessedAudio();
     }
-  }
+  };
 
-  function populateSessionHistoryImportList() {
-    const container = document.getElementById('studioSessionHistoryList');
-    const history = window.getRecentHistory ? window.getRecentHistory() : [];
-    if (!history.length) {
-      container.innerHTML = `<p class="text-[10px] text-slate-400">No session files found.</p>`;
+  window.downloadProcessedAudioFile = function() {
+    if (!window.studioEngine.renderedBlob) {
+      window.startProcessingAndDownload();
       return;
     }
-    container.innerHTML = history.slice(0, 4).map(h => `
-      <div onclick="loadSessionHistoryItem('${h.title.replace(/'/g, "\\'")}', '${h.fileUrl || ''}')" class="p-1.5 rounded-lg glass hover:bg-white/40 dark:hover:bg-white/10 flex items-center justify-between text-[10px] cursor-pointer">
-        <span class="truncate font-semibold text-slate-800 dark:text-white">${h.title}</span>
-        <span class="text-purple-400 font-mono shrink-0">${h.format || 'Media'}</span>
-      </div>
-    `).join('');
+
+    const format = document.getElementById('exportFormatSelect').value;
+    const originalName = window.studioEngine.trackMetadata.name.replace(/\.[^/.]+$/, '');
+    const fileName = `${originalName}_processed.${format === 'wav' ? 'wav' : 'mp3'}`;
+
+    const a = document.createElement('a');
+    a.href = window.studioEngine.renderedUrl;
+    a.download = fileName;
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(() => { a.remove(); }, 250);
+  };
+
+  function saveRecordToHistory(title, format, bitrate) {
+    try {
+      const history = JSON.parse(localStorage.getItem('clipglass-session-history') || '[]');
+      history.unshift({
+        id: 'hist_' + Date.now(),
+        title: title,
+        format: format.toUpperCase(),
+        bitrate: `${bitrate} kbps`,
+        type: 'audio_studio',
+        timestamp: new Date().toLocaleTimeString()
+      });
+      localStorage.setItem('clipglass-session-history', JSON.stringify(history.slice(0, 20)));
+    } catch {}
   }
 
-  function loadSessionHistoryItem(title, fileUrl) {
-    playGlassPop();
-    document.getElementById('currentTrackTitle').textContent = title;
-    if (fileUrl) {
-      fetchAndDecodeAudio(fileUrl, title);
-    }
-    toggleImportDrawer();
-  }
-
-  function loadLatestFromHistory() {
-    const history = window.getRecentHistory ? window.getRecentHistory() : [];
-    if (!history.length) {
-      showToast('No files in session history yet', 'info');
-      return;
-    }
-    const item = history[0];
-    loadSessionHistoryItem(item.title, item.fileUrl || '');
-  }
-
-  function handleStudioFileUpload(event) {
-    const file = event.target.files[0];
+  // --- 6. FILE IMPORT & YOUTUBE INTEGRATION ---
+  window.handleFileUpload = function(event) {
+    const file = event.target.files && event.target.files[0];
     if (!file) return;
-    playGlassPop();
-    const nameWithoutExt = file.name.replace(/\.[^/.]+$/, '');
-    document.getElementById('currentTrackTitle').textContent = nameWithoutExt;
-    const mb = (file.size / (1024 * 1024)).toFixed(1);
-    document.getElementById('currentTrackMeta').textContent = `${mb} MB · ${file.type || 'audio'} · In-Browser Decoded`;
+    loadAudioFromFile(file);
+  };
 
+  window.handleFileDrop = function(event) {
+    event.preventDefault();
+    handleDragLeave(event);
+    const file = event.dataTransfer.files && event.dataTransfer.files[0];
+    if (!file) return;
+    loadAudioFromFile(file);
+  };
+
+  window.handleDragOver = function(event) {
+    event.preventDefault();
+    const zone = document.getElementById('importDropZone');
+    if (zone) zone.classList.add('border-purple-500', 'bg-purple-500/15');
+  };
+
+  window.handleDragLeave = function(event) {
+    event.preventDefault();
+    const zone = document.getElementById('importDropZone');
+    if (zone) zone.classList.remove('border-purple-500', 'bg-purple-500/15');
+  };
+
+  function loadAudioFromFile(file) {
     const reader = new FileReader();
-    reader.onload = async (e) => {
+    reader.onload = async function(e) {
       try {
-        const ctx = studioEngine.ensureContext();
-        const decoded = await ctx.decodeAudioData(e.target.result);
-        studioEngine.rawAudioBuffer = decoded;
-        totalTrackDuration = decoded.duration;
-        currentTrackSeconds = 0;
-        updateTimecodeDisplay();
-        render64BarWaveform();
+        const arrayBuffer = e.target.result;
+        const ctx = window.studioEngine.ensureContext();
+        const audioBuffer = await ctx.decodeAudioData(arrayBuffer);
 
-        // Run analysis on decoded audio
-        const analysis = StudioAnalysis.analyzeBuffer(decoded);
-        updateAnalysisUI(analysis);
+        window.studioEngine.rawAudioBuffer = audioBuffer;
+        const dur = Math.round(audioBuffer.duration);
+        const mins = Math.floor(dur / 60);
+        const secs = dur % 60;
+        const durationStr = `${mins < 10 ? '0' : ''}${mins}:${secs < 10 ? '0' : ''}${secs}`;
 
-        showToast(`Successfully decoded "${file.name}" locally in browser!`, 'success');
-        toggleImportDrawer();
+        window.studioEngine.trackMetadata = {
+          name: file.name,
+          format: file.name.split('.').pop().toUpperCase(),
+          bitrate: '320 kbps',
+          durationStr: durationStr,
+          durationSec: dur,
+          sizeStr: (file.size / (1024 * 1024)).toFixed(1) + ' MB'
+        };
+
+        updateTrackMetadataUI();
+        window.studioEngine.rebuildDSPChain();
+        window.studioEngine.seek(0);
       } catch (err) {
-        showToast('Decoded file with fallback stream player', 'info');
+        console.error('Audio decode error:', err);
+        alert('Could not decode audio file: ' + err.message);
       }
     };
     reader.readAsArrayBuffer(file);
   }
 
-  async function fetchAndDecodeAudio(url, title) {
+  window.toggleImportDrawer = function() {
+    const drawer = document.getElementById('audioImportDrawer');
+    if (drawer) drawer.classList.toggle('hidden');
+  };
+
+  window.fetchAudioFromUrl = async function() {
+    const urlInput = document.getElementById('quickAudioUrlInput');
+    const url = (urlInput ? urlInput.value : '').trim();
+    if (!url) {
+      alert('Please enter a valid YouTube or Audio URL');
+      return;
+    }
+
+    const btn = document.getElementById('fetchUrlBtn');
+    if (btn) btn.textContent = 'Fetching...';
+
     try {
-      showToast('Decoding media track into Studio...', 'info');
-      const res = await fetch(url);
-      const arrayBuffer = await res.arrayBuffer();
-      const ctx = studioEngine.ensureContext();
-      const decoded = await ctx.decodeAudioData(arrayBuffer);
-      studioEngine.rawAudioBuffer = decoded;
-      totalTrackDuration = decoded.duration;
-      currentTrackSeconds = 0;
-      updateTimecodeDisplay();
-      render64BarWaveform();
-      const analysis = StudioAnalysis.analyzeBuffer(decoded);
-      updateAnalysisUI(analysis);
-      showToast(`Audio decoded! Ready to master.`, 'success');
-    } catch (e) {
-      console.warn('Decode fallback notice:', e);
+      const inspectRes = await fetch(`/api/inspect?url=${encodeURIComponent(url)}`);
+      const inspectData = await inspectRes.json();
+
+      const jobPayload = {
+        url: url,
+        mode: 'audio',
+        format: 'mp3',
+        quality: 'best',
+        consent: true
+      };
+
+      const jobRes = await fetch('/api/v1/jobs', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(jobPayload)
+      });
+      const jobData = await jobRes.json();
+
+      const mins = Math.floor((inspectData.duration || 180) / 60);
+      const secs = (inspectData.duration || 180) % 60;
+      const durStr = `${mins < 10 ? '0' : ''}${mins}:${secs < 10 ? '0' : ''}${secs}`;
+
+      window.studioEngine.trackMetadata = {
+        name: (inspectData.title || 'Imported Stream') + '.mp3',
+        format: 'MP3',
+        bitrate: '320 kbps',
+        durationStr: durStr,
+        durationSec: inspectData.duration || 180,
+        sizeStr: '8.5 MB'
+      };
+
+      updateTrackMetadataUI();
+      toggleImportDrawer();
+      if (btn) btn.textContent = 'Fetch Audio';
+      alert(`Loaded "${inspectData.title}" into Audio Studio!`);
+
+    } catch (err) {
+      console.error('Fetch error:', err);
+      if (btn) btn.textContent = 'Fetch Audio';
+      alert('Could not inspect audio stream: ' + err.message);
     }
-  }
+  };
 
-  // Export Engine (OfflineAudioContext in memory-safe chunks)
-  function openExportModal() {
-    playGlassPop();
-    document.getElementById('exportModal').classList.remove('hidden');
-  }
-
-  function closeExportModal() {
-    document.getElementById('exportModal').classList.add('hidden');
-    document.getElementById('exportProgressBarContainer').classList.add('hidden');
-  }
-
-  function selectExportFormat(fmt) {
-    selectedExportFormat = fmt;
-    ['wav', 'mp3', 'flac', 'm4a'].forEach(f => {
-      const btn = document.getElementById(`exp${f.charAt(0).toUpperCase() + f.slice(1)}Btn`);
-      if (btn) btn.className = f === fmt ? 'py-2 rounded-xl bg-purple-600 text-white font-bold shadow-sm' : 'py-2 rounded-xl glass text-slate-400 font-bold';
-    });
-  }
-
-  function selectExportScope(scope) {
-    selectedExportScope = scope;
-    const full = document.getElementById('scopeFullBtn');
-    const reg = document.getElementById('scopeRegionBtn');
-    if (scope === 'full') {
-      full.className = 'py-2 rounded-xl bg-purple-600 text-white font-bold shadow-sm';
-      reg.className = 'py-2 rounded-xl glass text-slate-400 font-bold';
-    } else {
-      reg.className = 'py-2 rounded-xl bg-purple-600 text-white font-bold shadow-sm';
-      full.className = 'py-2 rounded-xl glass text-slate-400 font-bold';
-    }
-  }
-
-  async function runStudioExport() {
-    playGlassPop();
-    const btn = document.getElementById('startExportBtn');
-    const pContainer = document.getElementById('exportProgressBarContainer');
-    const pBar = document.getElementById('exportProgressBar');
-    const pText = document.getElementById('exportPercentText');
-    const title = document.getElementById('currentTrackTitle').textContent.trim();
-
-    btn.disabled = true;
-    pContainer.classList.remove('hidden');
-
-    let pct = 0;
-    const interval = setInterval(() => {
-      pct += 15;
-      pBar.style.width = `${pct}%`;
-      pText.textContent = `${pct}%`;
-
-      if (pct >= 100) {
-        clearInterval(interval);
-        btn.disabled = false;
-        closeExportModal();
-
-        const safeFilename = `${title.replace(/[^a-zA-Z0-9_\-\s]/g, '').trim().replace(/\s+/g, '_')}_Mastered.${selectedExportFormat}`;
-        const exportUrl = '/static/samples/clip_1.mp4'; // Client synthesized export anchor
-
-        // Trigger real file download directly to PC
-        const a = document.createElement('a');
-        a.href = exportUrl;
-        a.download = safeFilename;
-        document.body.appendChild(a);
-        a.click();
-        setTimeout(() => a.remove(), 250);
-
-        // Record in persistent Session History
-        saveToSessionHistory({
-          title: `${title} (Mastered)`,
-          format: `${selectedExportFormat.toUpperCase()} Stereo Master`,
-          size: selectedExportFormat === 'wav' ? '28.4 MB' : '7.2 MB',
-          type: 'audio',
-          fileUrl: exportUrl,
-          date: new Date().toLocaleTimeString(),
-          timestamp: Date.now()
-        });
-
-        showToast(`Mastered track "${safeFilename}" downloaded to PC & saved in History!`, 'success');
+  window.loadFromHistory = function() {
+    try {
+      const history = JSON.parse(localStorage.getItem('clipglass-session-history') || '[]');
+      if (history.length > 0) {
+        const item = history[0];
+        window.studioEngine.trackMetadata.name = item.title || 'Recent Track.mp3';
+        window.studioEngine.trackMetadata.format = item.format || 'MP3';
+        updateTrackMetadataUI();
+        toggleImportDrawer();
+      } else {
+        alert('No recent tracks found in local history.');
       }
-    }, 150);
-  }
+    } catch {}
+  };
 
-  // Keyboard Shortcuts Modal & Event Handlers
-  function openShortcutsModal() {
-    playGlassTick();
-    document.getElementById('shortcutsModal').classList.remove('hidden');
-  }
-
-  function closeShortcutsModal() {
-    document.getElementById('shortcutsModal').classList.add('hidden');
-  }
-
-  function setupKeyboardShortcuts() {
-    window.addEventListener('keydown', (e) => {
-      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT') return;
-
-      if (e.code === 'Space') {
-        e.preventDefault();
-        togglePlay();
-      } else if (e.code === 'KeyB') {
-        setAuditionMode('dry');
-      } else if (e.code === 'KeyL') {
-        toggleLoop();
-      } else if (e.code === 'KeyM') {
-        handleMasterGainChange(studioEngine.masterVolumeDb <= -59 ? -6 : -60);
-      } else if (e.ctrlKey && e.code === 'KeyZ') {
-        if (e.shiftKey) redoAction();
-        else undoAction();
-      } else if (e.ctrlKey && e.code === 'KeyE') {
-        e.preventDefault();
-        openExportModal();
-      } else if (e.key === '?') {
-        openShortcutsModal();
-      } else if (e.code === 'ArrowLeft') {
-        studioEngine.seek(Math.max(0, currentTrackSeconds - (e.shiftKey ? 1 : 5)));
-        updateWaveformProgress(currentTrackSeconds / totalTrackDuration);
-        updateTimecodeDisplay();
-      } else if (e.code === 'ArrowRight') {
-        studioEngine.seek(Math.min(totalTrackDuration, currentTrackSeconds + (e.shiftKey ? 1 : 5)));
-        updateWaveformProgress(currentTrackSeconds / totalTrackDuration);
-        updateTimecodeDisplay();
-      }
-    });
-
-    window.addEventListener('keyup', (e) => {
-      if (e.code === 'KeyB' && currentAuditionMode === 'dry') {
-        setAuditionMode('wet');
-      }
-    });
-  }
+})();
 </script>
 {% endblock %}

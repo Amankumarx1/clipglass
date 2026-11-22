@@ -8,17 +8,22 @@ client = TestClient(app)
 YOUTUBE_TEST_URL = "https://youtu.be/DXw_OjhxrzQ?si=dB0G4fJqLih8Kg5g"
 
 def test_studio_page_routes():
-    # Both /studio and /audio-studio must serve the Studio template with 200 OK
+    # Both /studio and /audio-studio must serve the Simplified Audio Effects Studio with 200 OK
     for route in ["/studio", "/audio-studio"]:
         res = client.get(route)
         assert res.status_code == 200
         assert "Studio" in res.text
         assert "studio.js" in res.text
-        assert "Auto Mode: AI Audio Intelligence" in res.text
-        assert "Dynamic 10-Band EQ" in res.text
-        assert "Mastering Bus Compressor" in res.text
-        assert "True-Peak Safety Limiter" in res.text
-        assert "Loudness &amp; Dynamics" in res.text or "Loudness & Dynamics" in res.text
+        assert "Audio Effects Studio" in res.text
+        assert "Transform your audio with 60+ creative effects" in res.text
+        assert "IMPORT AUDIO FILE" in res.text
+        assert "Select Audio Effects" in res.text
+        assert "Your Selected Effects" in res.text
+        assert "Audio Settings" in res.text
+        assert "DOWNLOAD AUDIO" in res.text
+        assert "effectSettingsModal" in res.text
+        assert "processingModal" in res.text
+        assert "completedModal" in res.text
 
 def test_studio_inspect_real_youtube_url():
     # Inspect the user-provided YouTube URL
@@ -52,32 +57,52 @@ def test_studio_audio_job_creation_and_file():
     assert s_data["jobId"] == job_id
     assert s_data["state"] in ["queued", "downloading", "converting", "ready"]
 
-def test_studio_all_79_modules_registered_in_js():
-    # Verify studio.js has all 79 modules (19 manual + 60 automated A01-A60)
+def test_studio_all_60_effects_registered_in_js():
+    # Verify studio.js has all 60 effects across the 7 categories
     js_res = client.get("/static/js/studio.js")
     assert js_res.status_code == 200
     js_text = js_res.text
 
-    # Verify 19 Manual Modules
-    manual_modules = [
-        "lush_plate", "cathedral_hall", "ping_pong_delay", "tape_echo",
-        "vintage_chorus", "optical_flanger", "harmonic_tremolo",
-        "parametric_eq", "warm_pultec", "air_band",
-        "bus_compressor", "brickwall_limiter", "optical_leveler",
-        "tube_saturation", "bitcrusher",
-        "haas_widener", "bass_mono",
-        "de_esser", "vocal_clarity"
-    ]
-    for mod_id in manual_modules:
-        assert mod_id in js_text, f"Manual module {mod_id} missing from studio.js"
+    # Category 1: Space & Time (6 effects)
+    space_effects = ["reverb", "echo", "delay", "slowed_reverb", "reverse", "pre_delay"]
+    for eff in space_effects:
+        assert f"id: '{eff}'" in js_text, f"Space effect {eff} missing"
 
-    # Verify 60 Automated Modules A01 to A60
-    for i in range(1, 61):
-        code = f"A{i:02d}"
-        assert f"code: '{code}'" in js_text or f'code: "{code}"' in js_text, f"Automated module {code} missing from studio.js"
+    # Category 2: Modulation (8 effects)
+    modulation_effects = ["chorus", "flanger", "phaser", "tremolo", "vibrato", "auto_pan", "rotary_speaker", "ring_modulation"]
+    for eff in modulation_effects:
+        assert f"id: '{eff}'" in js_text, f"Modulation effect {eff} missing"
 
-    # Verify Core Specs: Safety Limiter -1.0 dBTP, Master Gain -6.0 dB, Loudness Matched A/B
-    assert "-1.0" in js_text  # Safety limiter ceiling
-    assert "-6.0" in js_text  # Master gain default
+    # Category 3: Equalizer & Filters (9 effects)
+    eq_effects = ["eq", "bass_boost", "treble_boost", "low_pass", "high_pass", "band_pass", "notch_filter", "telephone", "low_pass_sweep"]
+    for eff in eq_effects:
+        assert f"id: '{eff}'" in js_text, f"EQ effect {eff} missing"
+
+    # Category 4: Dynamics (8 effects)
+    dynamics_effects = ["compressor", "limiter", "expander", "noise_gate", "normalize", "auto_gain", "de_esser", "sidechain"]
+    for eff in dynamics_effects:
+        assert f"id: '{eff}'" in js_text, f"Dynamics effect {eff} missing"
+
+    # Category 5: Creative Effects (14 effects)
+    creative_effects = ["distortion", "overdrive", "fuzz", "saturation", "bitcrusher", "vinyl", "lo_fi", "glitch", "radio", "robot_voice", "pitch_shift", "formant_shift", "harmonizer", "vocoder"]
+    for eff in creative_effects:
+        assert f"id: '{eff}'" in js_text, f"Creative effect {eff} missing"
+
+    # Category 6: Stereo & Spatial (7 effects)
+    stereo_effects = ["stereo_widening", "stereo_narrowing", "mono", "balance", "panning", "haas_effect", "binaural"]
+    for eff in stereo_effects:
+        assert f"id: '{eff}'" in js_text, f"Stereo effect {eff} missing"
+
+    # Category 7: Vocal & Noise Processing (8 effects)
+    vocal_effects = ["noise_reduction", "voice_isolation", "hum_removal", "click_removal", "declipper", "vocal_enhancer", "breath_reduction", "pitch_correction"]
+    for eff in vocal_effects:
+        assert f"id: '{eff}'" in js_text, f"Vocal effect {eff} missing"
+
+    # Check Total Count = 6 + 8 + 9 + 8 + 14 + 7 + 8 = 60 effects
+    total_expected = len(space_effects) + len(modulation_effects) + len(eq_effects) + len(dynamics_effects) + len(creative_effects) + len(stereo_effects) + len(vocal_effects)
+    assert total_expected == 60
+
+    # Verify Core Audio Engine primitives
+    assert "StudioEngine" in js_text
+    assert "renderOfflineAudio" in js_text
     assert "setAuditionMode" in js_text
-    assert "integratedLufs" in js_text
