@@ -56,10 +56,11 @@
       const icon = isAudio ? '♫' : '🎬';
       const colorBg = isAudio ? 'bg-purple-500/15 text-purple-500' : 'bg-emerald-500/15 text-emerald-500';
 
-      const studioAction = isAudio
-        ? `<a href="/audio-studio?title=${encodeURIComponent(item.title)}" class="px-3 py-1.5 rounded-xl glass hover:bg-purple-500/20 text-purple-600 dark:text-purple-400 text-xs font-bold transition-all flex items-center gap-1"><span>♫</span><span>Audio Studio</span></a>`
-        : `<a href="/video-trimmer?title=${encodeURIComponent(item.title)}" class="px-3 py-1.5 rounded-xl glass hover:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-xs font-bold transition-all flex items-center gap-1"><span>✂</span><span>Trimmer</span></a>
-           <a href="/auto-clip?title=${encodeURIComponent(item.title)}" class="px-3 py-1.5 rounded-xl glass hover:bg-orange-500/20 text-orange-600 dark:text-orange-400 text-xs font-bold transition-all flex items-center gap-1"><span>✨</span><span>Auto Clip</span></a>`;
+      const studioLink = `<a href="/studio?title=${encodeURIComponent(item.title)}${item.jobId ? '&jobId=' + item.jobId : ''}${item.fileUrl ? '&fileUrl=' + encodeURIComponent(item.fileUrl) : ''}" class="px-3 py-1.5 rounded-xl glass hover:bg-purple-500/20 text-purple-600 dark:text-purple-400 text-xs font-bold transition-all flex items-center gap-1"><span>♫</span><span>Open in Studio</span></a>`;
+      const trimmerLink = `<a href="/video-trimmer?title=${encodeURIComponent(item.title)}" class="px-3 py-1.5 rounded-xl glass hover:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-xs font-bold transition-all flex items-center gap-1"><span>✂</span><span>Trimmer</span></a>`;
+      const clipLink = `<a href="/auto-clip?title=${encodeURIComponent(item.title)}" class="px-3 py-1.5 rounded-xl glass hover:bg-orange-500/20 text-orange-600 dark:text-orange-400 text-xs font-bold transition-all flex items-center gap-1"><span>✨</span><span>Auto Clip</span></a>`;
+
+      const studioAction = isAudio ? studioLink : `${studioLink} ${trimmerLink} ${clipLink}`;
 
       const card = document.createElement('div');
       card.className = 'glass glass-rim rounded-3xl p-5 shadow-lg flex flex-col justify-between';

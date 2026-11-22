@@ -17,9 +17,10 @@ async def home_page(request: Request):
 async def downloader_page(request: Request):
     return templates.TemplateResponse(request=request, name="downloader.html", context={"active_page": "downloader"})
 
+@router.get("/studio", response_class=HTMLResponse)
 @router.get("/audio-studio", response_class=HTMLResponse)
 async def audio_studio_page(request: Request):
-    return templates.TemplateResponse(request=request, name="audio_studio.html", context={"active_page": "audio_studio"})
+    return templates.TemplateResponse(request=request, name="audio_studio.html", context={"active_page": "studio"})
 
 @router.get("/video-trimmer", response_class=HTMLResponse)
 async def video_trimmer_page(request: Request):

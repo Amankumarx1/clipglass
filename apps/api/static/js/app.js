@@ -67,4 +67,88 @@
     }, 3200);
   }
   window.showToast = showToast;
+
+  // Session Drawer Functions (Section 24)
+  function renderSessionDrawer() {
+    const list = document.getElementById('sessionDrawerList');
+    if (!list) return;
+    const history = getRecentHistory();
+    if (!history.length) {
+      list.innerHTML = `<div class="p-6 text-center text-xs text-slate-400 font-medium">No files in this session yet.</div>`;
+      return;
+    }
+
+    list.innerHTML = history.map((item, idx) => {
+      const isAudio = !item.type || item.type === 'audio' || (item.format && (item.format.includes('MP3') || item.format.includes('FLAC') || item.format.includes('WAV') || item.format.includes('M4A')));
+      const icon = isAudio ? '♫' : '🎬';
+      const color = isAudio ? 'bg-purple-500/15 text-purple-500' : 'bg-emerald-500/15 text-emerald-500';
+      const fileUrl = item.fileUrl || (item.jobId ? `/api/v1/jobs/${item.jobId}/file` : '');
+
+      return `
+        <div class="p-3 rounded-2xl glass glass-rim border border-slate-200/40 dark:border-white/5 flex flex-col gap-2">
+          <div class="flex items-start justify-between gap-2">
+            <div class="flex items-center gap-2.5 min-w-0">
+              <div class="w-8 h-8 rounded-xl ${color} flex items-center justify-center font-bold text-xs shrink-0">${icon}</div>
+              <div class="min-w-0">
+                <p class="text-xs font-bold text-slate-900 dark:text-white truncate">${item.title}</p>
+                <p class="text-[10px] text-slate-400">${item.format || 'Media'} · ${item.size || 'Saved'}</p>
+              </div>
+            </div>
+            <span class="text-[9px] font-mono font-bold text-amber-500 bg-amber-500/10 px-1.5 py-0.5 rounded-full shrink-0">15m</span>
+          </div>
+          <div class="flex items-center justify-between gap-1.5 pt-1.5 border-t border-slate-200/30 dark:border-white/5">
+            <a href="/studio?title=${encodeURIComponent(item.title)}${item.jobId ? '&jobId=' + item.jobId : ''}${fileUrl ? '&fileUrl=' + encodeURIComponent(fileUrl) : ''}" 
+               class="px-2.5 py-1 rounded-lg bg-purple-500/10 hover:bg-purple-500/20 text-purple-600 dark:text-purple-400 text-[10px] font-bold flex items-center gap-1 transition-all">
+              <span>♫</span>
+              <span>Open in Studio</span>
+            </a>
+            ${fileUrl ? `
+              <a href="${fileUrl}" download class="px-2.5 py-1 rounded-lg btn-blue text-white text-[10px] font-bold flex items-center gap-1 shadow-sm">
+                <span>↓</span>
+                <span>Download</span>
+              </a>
+            ` : ''}
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+  window.renderSessionDrawer = renderSessionDrawer;
+
+  function toggleSessionDrawer() {
+    const drawer = document.getElementById('sessionHistoryDrawer');
+    if (!drawer) return;
+    const isHidden = drawer.classList.contains('hidden');
+    if (isHidden) {
+      renderSessionDrawer();
+      drawer.classList.remove('hidden');
+    } else {
+      drawer.classList.add('hidden');
+    }
+  }
+  window.toggleSessionDrawer = toggleSessionDrawer;
+
+  function clearSessionHistory() {
+    sessionStorage.removeItem('clipglass-history');
+    localStorage.removeItem('clipglass-history');
+    renderSessionDrawer();
+    if (window.updateRecentBadge) window.updateRecentBadge();
+    showToast('Session history cleared', 'info');
+  }
+  window.clearSessionHistory = clearSessionHistory;
+
+  function updateRecentBadge() {
+    const badges = document.querySelectorAll('[data-history-count]');
+    const count = getRecentHistory().length;
+    badges.forEach(b => {
+      b.textContent = count;
+      if (count > 0) b.classList.remove('hidden');
+      else b.classList.add('hidden');
+    });
+  }
+  window.updateRecentBadge = updateRecentBadge;
+
+  document.addEventListener('DOMContentLoaded', () => {
+    updateRecentBadge();
+  });
 })();

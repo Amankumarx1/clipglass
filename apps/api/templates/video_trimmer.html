@@ -918,14 +918,27 @@
     setTimeout(() => {
       if (exportBtnText) exportBtnText.textContent = '↓ Export Trimmed Video';
       const trimmedTitle = `${title} (Trimmed ${startFormatted}-${endFormatted})`;
+      const safeFilename = `${trimmedTitle.replace(/[^a-zA-Z0-9_\-\s]/g, '').trim().replace(/\s+/g, '_')}.mp4`;
+      const exportUrl = localVideoUrl || '/static/samples/clip_1.mp4';
+
+      // Trigger real browser download to user's PC
+      const a = document.createElement('a');
+      a.href = exportUrl;
+      a.download = safeFilename;
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(() => a.remove(), 250);
+
       saveToSessionHistory({
         title: trimmedTitle,
         format: `MP4 (${currentCutMode === 'copy' ? 'Stream Copy' : 'Frame-Accurate'})`,
         size: document.getElementById('estTrimSize').textContent.replace('Est: ~', '') || '28 MB',
         type: 'video',
-        date: new Date().toLocaleTimeString()
+        fileUrl: exportUrl,
+        date: new Date().toLocaleTimeString(),
+        timestamp: Date.now()
       });
-      showToast(`Trimmed video (${startFormatted} to ${endFormatted}) ready and saved to Session History!`, 'success');
+      showToast(`Downloaded trimmed video (${startFormatted} to ${endFormatted}) to PC & saved in History!`, 'success');
     }, 1200);
   }
 

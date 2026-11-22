@@ -19,16 +19,18 @@ def test_downloader_page():
     assert "handleDownloaderPasteClick" in response.text
 
 def test_audio_studio_page():
-    response = client.get("/audio-studio")
-    assert response.status_code == 200
-    assert "Audio Studio" in response.text
-    assert "+ Import Song" in response.text
-    assert "audioFileInput" in response.text
-    assert "audioImportDrawer" in response.text
-    assert "Upload from PC" in response.text
-    assert "quickAudioUrlInput" in response.text
-    assert "fetchAudioFromUrl" in response.text
-    assert "From Downloader &amp; History" in response.text or "From Downloader & History" in response.text
+    # Test both /studio and legacy alias /audio-studio
+    for route in ["/studio", "/audio-studio"]:
+        response = client.get(route)
+        assert response.status_code == 200
+        assert "Studio" in response.text
+        assert "+ Import Song" in response.text
+        assert "audioFileInput" in response.text
+        assert "audioImportDrawer" in response.text
+        assert "Upload from PC" in response.text
+        assert "quickAudioUrlInput" in response.text
+        assert "fetchAudioFromUrl" in response.text
+        assert "From Downloader &amp; History" in response.text or "From Downloader & History" in response.text
 
 def test_video_trimmer_page():
     response = client.get("/video-trimmer")

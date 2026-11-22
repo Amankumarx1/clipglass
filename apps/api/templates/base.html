@@ -103,17 +103,17 @@
           </div>
         </div>
 
-        <!-- Audio Studio Dropdown -->
+        <!-- Studio Dropdown -->
         <div class="relative nav-dropdown">
-          <a href="/audio-studio" onclick="playGlassTick()" class="dropdown-trigger flex items-center gap-1.5 px-3.5 py-2 rounded-full transition-all {% if active_page == 'audio_studio' %}text-white font-bold bg-gradient-to-r from-purple-600 to-indigo-600 shadow-sm{% else %}hover:text-slate-900 dark:hover:text-white hover:bg-white/30 dark:hover:bg-white/10{% endif %}">
-            <span>Audio Studio</span>
+          <a href="/studio" onclick="playGlassTick()" class="dropdown-trigger flex items-center gap-1.5 px-3.5 py-2 rounded-full transition-all {% if active_page == 'studio' or active_page == 'audio_studio' %}text-white font-bold bg-gradient-to-r from-purple-600 to-indigo-600 shadow-sm{% else %}hover:text-slate-900 dark:hover:text-white hover:bg-white/30 dark:hover:bg-white/10{% endif %}">
+            <span>Studio</span>
             <svg class="w-3.5 h-3.5 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
           </a>
           <!-- Dropdown Card -->
           <div class="dropdown-menu hidden absolute top-full left-1/2 -translate-x-1/2 pt-5 z-[100]">
             <div class="w-80 rounded-3xl p-2.5 dropdown-card flex flex-col gap-1 relative">
               <div class="absolute -top-1.5 left-1/2 -translate-x-1/2 w-3.5 h-3.5 rotate-45 dropdown-arrow pointer-events-none"></div>
-              <a href="/audio-studio" onclick="playGlassTick()" class="p-3 rounded-2xl flex items-start gap-3 transition-all hover:bg-slate-100/90 dark:hover:bg-white/10 group">
+              <a href="/studio" onclick="playGlassTick()" class="p-3 rounded-2xl flex items-start gap-3 transition-all hover:bg-slate-100/90 dark:hover:bg-white/10 group">
                 <div class="w-8 h-8 rounded-xl bg-purple-500/15 text-purple-600 dark:text-purple-400 flex items-center justify-center shrink-0 mt-0.5 group-hover:scale-105 transition-transform font-bold">
                   ✦
                 </div>
@@ -125,7 +125,7 @@
                   <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-1 leading-snug font-normal">Auto BPM, genre detection & intelligent balance</p>
                 </div>
               </a>
-              <a href="/audio-studio?mode=custom" onclick="playGlassTick()" class="p-3 rounded-2xl flex items-start gap-3 transition-all hover:bg-slate-100/90 dark:hover:bg-white/10 group">
+              <a href="/studio?mode=custom" onclick="playGlassTick()" class="p-3 rounded-2xl flex items-start gap-3 transition-all hover:bg-slate-100/90 dark:hover:bg-white/10 group">
                 <div class="w-8 h-8 rounded-xl bg-indigo-500/15 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shrink-0 mt-0.5 group-hover:scale-105 transition-transform font-bold">
                   🎛
                 </div>
@@ -134,7 +134,7 @@
                     <p class="text-xs font-bold text-slate-900 dark:text-white leading-tight">Custom FX Rack</p>
                     <span class="text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-indigo-500/10 text-indigo-600 dark:text-indigo-400">Modular</span>
                   </div>
-                  <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-1 leading-snug font-normal">60+ DSP audio effects, EQ, reverb & dynamics</p>
+                  <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-1 leading-snug font-normal">79 DSP audio modules, EQ, reverb & dynamics</p>
                 </div>
               </a>
             </div>
@@ -192,11 +192,11 @@
 
       <!-- Right: Controls & Actions -->
       <div class="flex items-center gap-1.5 sm:gap-2">
-        <!-- Recent Downloads -->
-        <a href="/recent" onclick="playGlassTick()" title="Recent session downloads" class="relative w-9 h-9 rounded-full flex items-center justify-center glass glass-rim text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-all {% if active_page == 'recent' %}ring-2 ring-blue-500{% endif %}">
+        <!-- Recent Session Drawer -->
+        <button type="button" onclick="event.preventDefault(); playGlassTick(); toggleSessionDrawer()" title="Recent session downloads" class="relative w-9 h-9 rounded-full flex items-center justify-center glass glass-rim text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-all cursor-pointer {% if active_page == 'recent' %}ring-2 ring-blue-500{% endif %}">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
           <span data-history-count class="hidden absolute -top-1 -right-1 w-4 h-4 rounded-full bg-red-500 text-white text-[9px] font-bold items-center justify-center shadow-sm">0</span>
-        </a>
+        </button>
 
         <!-- Settings -->
         <a href="/settings" onclick="playGlassTick()" title="ClipGlass settings" class="w-9 h-9 rounded-full flex items-center justify-center glass glass-rim text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-all {% if active_page == 'settings' %}ring-2 ring-blue-500 text-blue-500{% endif %}">
@@ -231,9 +231,9 @@
         <span>↓</span>
         <span>Downloader</span>
       </a>
-      <a href="/audio-studio" onclick="playGlassTick()" class="py-2.5 px-3 rounded-2xl hover:bg-white/40 dark:hover:bg-white/10 flex items-center gap-2.5 text-purple-500">
+      <a href="/studio" onclick="playGlassTick()" class="py-2.5 px-3 rounded-2xl hover:bg-white/40 dark:hover:bg-white/10 flex items-center gap-2.5 text-purple-500">
         <span>♫</span>
-        <span>Audio Studio (Auto & Custom FX)</span>
+        <span>Studio (Auto & Custom FX)</span>
       </a>
       <a href="/video-trimmer" onclick="playGlassTick()" class="py-2.5 px-3 rounded-2xl hover:bg-white/40 dark:hover:bg-white/10 flex items-center gap-2.5 text-emerald-500">
         <span>✂</span>
@@ -274,15 +274,67 @@
       <div class="flex flex-wrap items-center justify-center gap-4 text-xs font-medium">
         <a href="/faq" class="hover:text-blue-500 transition-colors">Help & FAQ</a>
         <a href="/downloader" class="hover:text-blue-500 transition-colors">Downloader</a>
-        <a href="/audio-studio" class="hover:text-blue-500 transition-colors">Audio Studio</a>
+        <a href="/studio" class="hover:text-blue-500 transition-colors">Studio</a>
+        <a href="/video-trimmer" class="hover:text-blue-500 transition-colors">Trimmer</a>
         <a href="/auto-clip" class="hover:text-blue-500 transition-colors">Auto Clip</a>
+        <a href="/recent" class="hover:text-blue-500 transition-colors">Recent</a>
         <a href="/settings" class="hover:text-blue-500 transition-colors">Settings</a>
       </div>
     </div>
-    <p class="text-[11px] opacity-75 max-w-2xl mx-auto">
+    <p class="text-[11px] opacity-75 max-w-2xl mx-auto pb-14">
       Disclaimer: ClipGlass is an independent open-source media tool. All processing is ephemeral and deleted after 15 minutes. Users are responsible for copyright compliance.
     </p>
   </footer>
+
+  <!-- Persistent Session History Slide-out Drawer (Section 24) -->
+  <div id="sessionHistoryDrawer" class="hidden fixed inset-0 z-[200]">
+    <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" onclick="toggleSessionDrawer()"></div>
+    <div class="absolute top-0 right-0 bottom-0 w-full max-w-md bg-white/90 dark:bg-slate-900/95 backdrop-blur-2xl p-6 shadow-2xl flex flex-col justify-between border-l border-white/20 overflow-y-auto">
+      <div>
+        <div class="flex items-center justify-between pb-4 border-b border-slate-200/50 dark:border-white/10">
+          <div class="flex items-center gap-2">
+            <span class="w-8 h-8 rounded-xl bg-amber-500/20 text-amber-500 flex items-center justify-center font-bold">⏱</span>
+            <div>
+              <h2 class="font-extrabold text-base text-slate-900 dark:text-white">Session Drawer</h2>
+              <p class="text-[11px] text-slate-400">15-minute ephemeral files</p>
+            </div>
+          </div>
+          <button type="button" onclick="toggleSessionDrawer()" class="w-7 h-7 rounded-full glass hover:bg-white/40 dark:hover:bg-white/10 flex items-center justify-center text-xs text-slate-500 cursor-pointer">✕</button>
+        </div>
+        <div id="sessionDrawerList" class="mt-4 flex flex-col gap-3">
+          <!-- Populated dynamically with Open in Studio on every row -->
+        </div>
+      </div>
+      <div class="pt-4 border-t border-slate-200/50 dark:border-white/10 flex items-center justify-between">
+        <a href="/recent" class="text-xs font-bold text-blue-500 hover:underline">View All History →</a>
+        <button type="button" onclick="clearSessionHistory()" class="text-[11px] font-semibold text-rose-500 hover:underline cursor-pointer">Clear Session</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Dev Screen-Switcher Dock (Section 24) -->
+  <aside id="screenSwitcherDock" aria-label="Dev screen switcher dock" class="fixed bottom-3 left-1/2 -translate-x-1/2 z-50 px-2 py-1.5 rounded-full glass glass-rim shadow-2xl flex items-center gap-1 text-[11px] font-bold border border-white/40 dark:border-white/10 backdrop-blur-xl">
+    <a href="/downloader" title="Screen 01: Media Downloader" class="px-3 py-1 rounded-full transition-all flex items-center gap-1 {% if active_page == 'downloader' %}bg-blue-600 text-white shadow-sm{% else %}text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-white/20{% endif %}">
+      <span>01</span>
+      <span class="hidden sm:inline">DOWNLOADER</span>
+    </a>
+    <a href="/video-trimmer" title="Screen 02: Video Trimmer" class="px-3 py-1 rounded-full transition-all flex items-center gap-1 {% if active_page == 'video_trimmer' %}bg-emerald-600 text-white shadow-sm{% else %}text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-white/20{% endif %}">
+      <span>02</span>
+      <span class="hidden sm:inline">TRIMMER</span>
+    </a>
+    <a href="/auto-clip" title="Screen 03: Auto Clip 9:16" class="px-3 py-1 rounded-full transition-all flex items-center gap-1 {% if active_page == 'auto_clip' %}bg-orange-600 text-white shadow-sm{% else %}text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-white/20{% endif %}">
+      <span>03</span>
+      <span class="hidden sm:inline">AUTO CLIP</span>
+    </a>
+    <a href="/recent" title="Screen 04: Session History" class="px-3 py-1 rounded-full transition-all flex items-center gap-1 {% if active_page == 'recent' %}bg-amber-600 text-white shadow-sm{% else %}text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-white/20{% endif %}">
+      <span>04</span>
+      <span class="hidden sm:inline">RECENT</span>
+    </a>
+    <a href="/studio" title="Screen 05: Audio Studio" class="px-3 py-1 rounded-full transition-all flex items-center gap-1 {% if active_page == 'studio' or active_page == 'audio_studio' %}bg-purple-600 text-white shadow-sm{% else %}text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-white/20{% endif %}">
+      <span>05</span>
+      <span class="hidden sm:inline">STUDIO</span>
+    </a>
+  </aside>
 
   <script src="/static/js/navbar.js"></script>
   <script src="/static/js/app.js"></script>
