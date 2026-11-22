@@ -1,268 +1,237 @@
 # PLAN.md: ClipGlass Auto Clip Architecture & Implementation Plan
 
-> **Feature Goal:** Add an "Auto Clip" system to ClipGlass that ingests a YouTube URL, analyzes transcripts and multimodal signals, scores viral moments with an LLM (with heuristic fallback), reframes to 9:16 using face tracking, burns word-synced animated ASS captions, polishes with design-time visual assets, and exports ready-to-post vertical clips with metadata and ZIP packaging.
+> **Goal:** Deliver a high-performance, explainable, zero-install "Auto Clip" system for ClipGlass. Users paste a YouTube URL (or import media), and the system generates ranked 9:16 vertical clips with word-synced animated captions, opening hook titles, hashtags, and evidence-backed virality scores.
+>
+> Combines the best design principles of three open-source references (**Clips Kitty**, **SupoClip**, and **Lemo-Opuscar**) using clean-room re-implementation, while outperforming them in privacy, speed, explainability, and single-process simplicity.
 
 ---
 
-## 1. System Architecture & Pipeline Design
+## 1. System Architecture & End-to-End Pipeline
 
-The Auto Clip pipeline runs asynchronously as a background task managed by FastAPI with real-time SSE telemetry, strict duration caps, in-memory queue management, and automatic 15-minute ephemeral file deletion.
+The Auto Clip pipeline runs asynchronously as a background task inside FastAPI, communicating via Server-Sent Events (SSE), strictly enforcing a 15-minute ephemeral lifecycle, and maintaining zero permanent database storage.
 
 ```
-YouTube URL
-    │
-    ▼
-[Stage 1: Ingest] ───────► yt-dlp metadata first (dur <= 60m)
-    │                      Download 1080p H.264 + audio; extract chapters & heatmap
-    ▼
-[Stage 2: Transcribe] ───► Fast Path: YouTube official / auto-captions with word alignment
-    │                      Fallback: faster-whisper (CPU int8 / CUDA, cached per job)
-    ▼
-[Stage 3: Signals] ──────► 1-second bins normalized [0.0 - 1.0]:
-    │                      - Loudness spikes (EBU R128 / RMS audio envelope)
-    │                      - Silence-to-burst transitions (dramatic audio shifts)
-    │                      - Scene changes (FFmpeg scene detection threshold)
-    │                      - Chapter boundaries (thematic transitions)
-    │                      - Heatmap replay intensity (YouTube community retention peaks)
-    ▼
-[Stage 4: Scoring] ──────► LLM Interface (Anthropic API / OpenRouter / local Ollama)
-    │                      - Clean-room prompts sending transcript + signal timeline
-    │                      - Strict JSON output schema {start, end, score, hook, title, hashtags, reason}
-    │                      - Head-to-head tournament reranking of top N candidates
-    │                      - Word-accurate boundary snapping to sentence ends
-    │                      - Heuristic Scorer Fallback (composite signal weights when no LLM key)
-    ▼
-[Stage 5: Reframe 9:16] ──► OpenCV YuNet / MediaPipe Face Tracking (Apache 2.0 / BSD)
-    │                      - Modes: center, follow-face (EMA smoothed), split (speaker + content)
-    │                      - Speaker cuts (clean camera switching on speaker change, no jarring pans)
-    ▼
-[Stage 6: Captions] ─────► Word-synced ASS (Advanced SubStation Alpha) generation
-    │                      - 5 Presets: Viral Pop Yellow, Clean Minimalist, Neon Cyber,
-    │                        Karaoke Bounce, Impact Headline
-    │                      - Pre-render editing drawer allowing text & time adjustment
-    ▼
-[Stage 7: Polish] ───────► Overlay pre-rendered Lemo-Opuscar design-time assets:
-    │                      - 3-5s intro/outro stings, animated hook title cards, looping backgrounds
-    ▼
-[Stage 8: Export] ───────► 1080x1920 MP4 (NVENC/VAAPI/CPU fallback), .srt, metadata.json,
-                           and bundle .zip with single-click download
+                  ┌───────────────────────────────────────────┐
+                  │          YouTube URL / PC Media           │
+                  └─────────────────────┬─────────────────────┘
+                                        │
+                                        ▼
+┌───────────────────────────────────────────────────────────────────────────────────────────┐
+│ STAGE 1: INGEST (clip_ingest_service.py)                                                  │
+│ • yt-dlp metadata inspection (duration cap: 60 minutes)                                   │
+│ • Download up to 1080p H.264 video + AAC audio                                            │
+│ • Extract official YouTube captions, chapter markers, and most-replayed heatmap data       │
+└───────────────────────────────────────┬───────────────────────────────────────────────────┘
+                                        │
+                                        ▼
+┌───────────────────────────────────────────────────────────────────────────────────────────┐
+│ STAGE 2: TRANSCRIBE (transcription_service.py)                                            │
+│ • Fast Path: If YouTube official/auto-captions exist, parse word timings immediately     │
+│ • Fallback Path: faster-whisper (CPU int8 / CUDA) with word-level timestamps              │
+│ • Per-job transcript caching with deduplication                                           │
+└───────────────────────────────────────┬───────────────────────────────────────────────────┘
+                                        │
+                                        ▼
+┌───────────────────────────────────────────────────────────────────────────────────────────┐
+│ STAGE 3: MULTIMODAL SIGNALS (signal_analysis_service.py)                                  │
+│ • 1-second normalized temporal bins [0.0 - 1.0]:                                          │
+│   - Loudness spikes (RMS audio envelope)                                                  │
+│   - Silence-to-burst transitions (sudden volume spikes after quieter baseline)             │
+│   - Visual scene changes (FFmpeg scene detection threshold > 0.35)                        │
+│   - Chapter boundaries (thematic topic transitions)                                       │
+│   - YouTube heatmap intensity (community audience retention curve)                        │
+└───────────────────────────────────────┬───────────────────────────────────────────────────┘
+                                        │
+                                        ▼
+┌───────────────────────────────────────────────────────────────────────────────────────────┐
+│ STAGE 4: SCORING & SELECTION (clip_scoring_service.py)                                     │
+│ • Provider-agnostic LLM interface (Anthropic API, OpenRouter, local Ollama)               │
+│ • Strict JSON output schema: {start, end, score, hook_score, engagement_score,            │
+│   value_score, shareability_score, hook_title, hashtags, reason, evidence[]}              │
+│ • Sentence boundary snapping: reach up to 8.0s, pause threshold 2.0s                      │
+│ • Tournament head-to-head reranking of top candidate finalists                            │
+│ • Heuristic Fallback Scorer: composite signal weighting when no LLM key is configured     │
+└───────────────────────────────────────┬───────────────────────────────────────────────────┘
+                                        │
+                                        ▼
+┌───────────────────────────────────────────────────────────────────────────────────────────┐
+│ STAGE 5: 9:16 REFRAME & SPEAKER TRACKING (face_tracking_service.py)                       │
+│ • MediaPipe / OpenCV YuNet face detection (Apache-2.0 / BSD-3-Clause)                      │
+│ • Framing modes: center, follow-face (EMA smoothed), split-screen                         │
+│ • Cut-vs-Pan Rule: instantaneous cut when speaker shifts >25% of frame width              │
+└───────────────────────────────────────┬───────────────────────────────────────────────────┘
+                                        │
+                                        ▼
+┌───────────────────────────────────────────────────────────────────────────────────────────┐
+│ STAGE 6: WORD-SYNCED CAPTIONS & HOOK TITLE (ass_caption_service.py)                       │
+│ • Word-synced ASS (Advanced SubStation Alpha) subtitle generation                         │
+│ • 6 Animated style presets: Viral Pop, Clean Minimalist, Neon Cyber, Karaoke Bounce,      │
+│   Impact Headline, Dynamic Box                                                            │
+│ • Opening hook title banner burned into top 20% of frame for first 3.5 seconds            │
+│ • Interactive pre-burn editing drawer in UI                                               │
+└───────────────────────────────────────┬───────────────────────────────────────────────────┘
+                                        │
+                                        ▼
+┌───────────────────────────────────────────────────────────────────────────────────────────┐
+│ STAGE 7: DESIGN POLISH PACK (clip_render_service.py)                                      │
+│ • Design-time pre-rendered assets: intro/outro stings, animated hook cards, backgrounds   │
+│ • Asset manifests (`manifest.json`) defining safe zones, durations, and keying modes     │
+│ • Fast FFmpeg overlay / colorkey composition                                              │
+└───────────────────────────────────────┬───────────────────────────────────────────────────┘
+                                        │
+                                        ▼
+┌───────────────────────────────────────────────────────────────────────────────────────────┐
+│ STAGE 8: EXPORT & BUNDLING (clip_render_service.py)                                       │
+│ • Hardware encoder auto-detection (NVENC, QSV, VAAPI) with CPU libx264 fallback           │
+│ • 1080x1920 MP4 video + companion .srt + metadata.json                                    │
+│ • Platform export presets: YouTube Shorts (60s), TikTok (60s), Instagram Reels (90s)       │
+│ • Single-click all-clips ZIP bundle export                                                │
+└───────────────────────────────────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## 2. Licensing Decisions & Clean-Room Guardrails
+## 2. Licensing Decisions & Clean-Room Boundaries
 
-| Reference / Component | License | Policy & Guardrail Implementation |
+| Dependency / Reference | License | Clean-Room Implementation & Safety Policy |
 |---|---|---|
-| **Clips Kitty** (`ColinGPT9/clips-studio`) | **AGPL-3.0** | **Design Reference Only.** Strict clean-room implementation. **Zero copied code, zero copied prompt templates.** All schemas, signal extraction algorithms, scoring prompts, and reframing logic are newly written from original principles using MIT/Apache/BSD libraries. |
-| **Object / Face Detection** | **Strict NO to YOLOv8** (`ultralytics` is AGPL-3.0) | Use **MediaPipe** (Apache-2.0) and **OpenCV YuNet** (BSD-3-Clause) for face detection and tracking. Completely compliant with commercial and permissive use. |
-| **Lemo-Opuscar** (`lemomo-ai/lemo-opuscar`) | Code: **MIT**<br>Guides: **CC BY-NC 4.0** | **Design-Time Asset Generator Only.** Never executed at runtime in the app. Visual assets (bumpers, stings, looping backgrounds) are pre-rendered at 1080x1920 during design phase and bundled with manifests. MIT code attribution recorded in `THIRD_PARTY.md`. Zero copying or paraphrasing of CC BY-NC guide text. |
-| **faster-whisper** / **CTranslate2** | **MIT** | Permissive, local-first inference with CPU int8 quantization and optional CUDA. |
-| **FFmpeg / yt-dlp** | **LGPL / Unlicense** | Standard permissive CLI and library use via sanitized subprocesses without static linking issues. |
-| **Clips Kitty Local Adapter** (Stretch) | **Local API call** | Off by default. If enabled by user flag (`ENABLE_LOCAL_CLIPS_KITTY_ADAPTER=true`), communicates purely over loopback HTTP to a user-run daemon on `127.0.0.1:8765`. |
+| **Clips Kitty** (`ColinGPT9/clips-studio`) | **AGPL-3.0** | **Design reference only.** Zero copied code, zero prompt files, zero config schemas. Clean-room re-implementation of 1s signal bins, sentence boundary snapping, cut-vs-pan heuristic, and plain-language edit operation parsing. |
+| **Object / Face Detection** | **Strict NO to YOLOv8** (`ultralytics` is AGPL-3.0) | **Permissive replacement:** Use **MediaPipe** (Apache-2.0) and **OpenCV YuNet** (`face_detection_yunet`, BSD-3-Clause) for face detection and tracking. Completely compliant with commercial and permissive distribution. |
+| **SupoClip** (`FujiwaraChoki/supoclip`) | **Noncommercial Source License v1.1** | **Design reference only.** Zero copied code, zero prompt text. Re-implement the 4-subscore taxonomy, hook title banner, animated caption presets, and SSE streaming natively in Python/FastAPI. |
+| **Lemo-Opuscar** (`lemomo-ai/lemo-opuscar`) | Code: **MIT**<br>Guides: **CC BY-NC 4.0** | **Design-time asset reference only.** Visual assets (intro stings, bumpers, looping 9:16 backgrounds) are pre-rendered at design time at 1080x1920 and bundled with manifests. MIT code attribution recorded in `THIRD_PARTY.md`. Zero copying of CC BY-NC guide text. |
+| **faster-whisper / CTranslate2** | **MIT** | Permissive local speech recognition with CPU int8 quantization and optional CUDA. |
+| **FFmpeg / yt-dlp** | **LGPL / Unlicense** | Permissive CLI invocation via sanitized subprocesses without static linking. |
+| **Optional Clips Kitty Local Adapter** | **Loopback HTTP** | Off by default. Communicates strictly over loopback HTTP to a user-run engine at `127.0.0.1:8765` without embedding AGPL code. |
 
 ---
 
 ## 3. Detailed File List & Module Organization
 
-### A. Backend (`apps/api/`)
+### 3.1 Backend Modules (`apps/api/`)
 ```
 apps/api/
+├── app/
+│   ├── config.py                   # Extended settings (CLIP_DURATION_CAP, WHISPER_MODEL, LLM API keys)
+│   └── main.py                     # FastAPI app with sweeper startup, CORS, and router registrations
 ├── schemas/
-│   ├── clip.py                     # ClipJobCreateRequest, ClipMoment, ClipRenderConfig, CaptionStyleConfig
+│   ├── clip.py                     # ClipJobCreateRequest, ClipMoment, MultimodalSignals, 4-Subscores,
+│   │                               # EditBoxCommandRequest, FeedbackRequest, PlatformPreset
 │   └── (existing schemas preserved: inspect.py, jobs.py, explainer.py)
 ├── services/
-│   ├── clip_ingest_service.py      # yt-dlp download, 60m cap, YouTube caption extraction, heatmap parsing
-│   ├── transcription_service.py    # YouTube caption parser + faster-whisper word-timestamp engine & cache
-│   ├── signal_analysis_service.py  # 1-sec bin analysis: loudness, silence-burst, FFmpeg scene cuts, heatmap
-│   ├── clip_scoring_service.py     # LLM provider interface (Anthropic/OpenRouter/Ollama), JSON validation,
-│   │                               # tournament reranker, sentence boundary snapper, heuristic fallback
-│   ├── face_tracking_service.py    # MediaPipe/OpenCV YuNet face tracking, EMA smoothing, speaker cut logic
-│   ├── ass_caption_service.py      # Word-synced ASS subtitle compiler with 5 style presets
-│   ├── clip_render_service.py      # 9:16 crop, ASS burning, polish overlays, hardware/CPU encoder fallback
-│   ├── clip_queue_service.py       # ClipJobManager, 1 active job/IP limiter, progress events, cancel handling
-│   └── clips_kitty_adapter.py      # Optional local adapter for 127.0.0.1:8765 (off by default)
+│   ├── clip_ingest_service.py      # yt-dlp ingestion, duration cap check, captions and heatmap parser
+│   ├── transcription_service.py    # YouTube caption fast path + faster-whisper fallback with cache
+│   ├── signal_analysis_service.py  # 1s temporal bins: RMS loudness, silence-burst, scene cuts, heatmap
+│   ├── clip_scoring_service.py     # LLM provider interface (Anthropic/OpenRouter/Ollama), strict JSON,
+│   │                               # sentence boundary snapping, tournament reranker, heuristic fallback
+│   ├── face_tracking_service.py    # MediaPipe/OpenCV YuNet face tracker, EMA smoothing, Cut-vs-Pan logic
+│   ├── ass_caption_service.py      # Word-synced ASS subtitle compiler with 6 animation styles & hook title
+│   ├── clip_render_service.py      # FFmpeg 9:16 render, ASS burning, polish overlay, NVENC/CPU encoder
+│   ├── clip_queue_service.py       # In-process job queue, 1-job/IP limiter, SSE listener broadcasting
+│   ├── edit_box_service.py         # Plain-language edit parser ("make it 5s longer" -> validated ops)
+│   ├── polish_pack_service.py      # Manifest loader & FFmpeg colorkey/overlay filter chain generator
+│   └── sweeper_service.py          # 15-minute ephemeral job directory cleaner
 ├── routers/
-│   ├── clip.py                     # Endpoints: POST /api/clip/jobs, GET .../events, GET .../clips,
-│   │                               # PATCH .../clips/{cid}, POST .../clips/{cid}/render, GET .../download
-│   └── (existing routers preserved: health.py, inspect.py, jobs.py, explainer.py)
-├── app/
-│   └── config.py                   # Extended with CLIP_DURATION_CAP, WHISPER_MODEL, LLM keys, etc.
+│   ├── clip.py                     # Endpoints: POST /jobs, GET /events, GET /clips, PATCH /clips/{cid},
+│   │                               # POST /render, GET /download, POST /feedback, GET /export-all
+│   └── (existing routers preserved: health.py, inspect.py, jobs.py, web_pages.py)
+├── static/
+│   └── polish_pack/                # Pre-rendered 1080x1920 design-time assets & manifest.json files
 └── tests/
-    ├── test_clip_signals.py        # Unit tests for signal binning and normalization
-    ├── test_clip_scoring.py        # Sentence boundary snapping, LLM response parsing, heuristic scorer
-    ├── test_ass_captions.py        # ASS subtitle generation and style presets
-    ├── test_clip_security.py       # SSRF validation, rate limiting, and 15-min sweeper deletion
+    ├── test_clip_signals.py        # Signal binning, normalization, and heatmap extraction
+    ├── test_clip_scoring.py        # Sentence boundary snapping, LLM JSON validation, 4 sub-scores
+    ├── test_ass_captions.py        # ASS generator, karaoke tags, and hook title banners
+    ├── test_edit_box.py            # Natural language command parser and operation validation
+    ├── test_face_tracking.py       # OpenCV YuNet/MediaPipe tracking and cut-vs-pan snapping
+    ├── test_clip_security.py       # SSRF prevention, rate limiting, and 15-min sweeper purge
     └── test_clip_pipeline_e2e.py   # Synthetic video end-to-end integration test
 ```
 
-### B. Frontend (`apps/web/`)
+### 3.2 Frontend & UI Templates (`apps/api/`)
 ```
-apps/web/
-├── components/
-│   ├── ScreenAutoClip.tsx          # Main Auto Clip screen: URL bar, preset options, live timeline, clip grid
-│   ├── GlassClipCard.tsx           # 3D-tilt liquid glass card with score ring, hook preview, play/pause
-│   ├── GlassCaptionEditorDrawer.tsx# Slide-in glass drawer to edit words, timings, and ASS style presets
-│   ├── GlassStageTimeline.tsx      # Multi-stage live progress bar (Ingest -> Transcribe -> Signals -> Score -> Render)
-│   ├── ScreenSwitcher.tsx          # Updated dev dock switcher adding "05 AUTO CLIP"
-│   └── (existing components preserved: Screen01-04, GlassAudioPreview, GlassTrimmer, GlassPresets, etc.)
-├── lib/
-│   ├── clipStore.ts                # Zustand store slice for Auto Clip state, clip candidate list, active edits
-│   ├── clipApi.ts                  # Typed client for /api/clip/* endpoints and SSE streaming
-│   └── (existing lib preserved: store.ts, api.ts, soundEffects.ts, validation.ts)
-└── public/
-    └── polish/                     # Pre-rendered Lemo-Opuscar polish assets and manifest.json files
-```
-
-### C. Root & Repository Level
-```
-├── PLAN.md                         # This architecture and plan specification
-├── THIRD_PARTY.md                  # Comprehensive dependency & license inventory
-├── README.md                       # Auto Clip documentation, workflow guide, and configuration
-├── .env.example                    # Added LLM, Whisper, and Auto Clip config variables
-└── polish_pack/                    # Source directory of pre-generated design-time visual assets
-    ├── manifests/                  # manifest.json for bumpers, hook title cards, looping backgrounds
-    └── assets/                     # 1080x1920 MP4/WebM pre-rendered code animations
+apps/api/
+├── templates/
+│   ├── auto_clip.html              # Auto Clip screen: URL input, consent check, option controls,
+│   │                               # live stage timeline, streaming clip cards, sub-score bars,
+│   │                               # "why this moment" popovers, inline preview, lightbox modal, edit box
+│   └── recent.html                 # Session history drawer backed by localStorage/sessionStorage
+└── static/
+    ├── js/app.js                   # Client controller: SSE listener, card streaming, edit-box dispatcher,
+    │                               # preview audio/video sync, thumbs up/down feedback handler
+    └── css/style.css               # Liquid-glass design tokens, 3D tilt effects, dark/light themes
 ```
 
 ---
 
-## 4. API Endpoints Specification
+## 4. Key Engineering Implementations
 
-All endpoints enforce SSRF validation, rate limits, and sanitize all parameters:
+### 4.1 Sub-Score Taxonomy & Explainability
+Every candidate moment produces:
+- **Composite Score (0-100):** Weighted combination of signals and virality sub-scores.
+- **Hook Score (0-100):** Strength of opening 3 seconds in arresting scroll.
+- **Engagement Score (0-100):** Dynamic speech pacing, audio energy, and tension.
+- **Value Score (0-100):** Informational or entertainment takeaway density.
+- **Shareability Score (0-100):** Relatability and impulse to share.
+- **Evidence Tags:** Specific multimodal justification (e.g. `Heatmap Peak at 01:24`, `Audio Energy Spike +14dB`, `Scene Cut Transition`, `Key Quotable Hook`).
+- **"Why This Moment":** A concise, one-sentence plain-English justification for the creator.
 
-| Method | Path | Description |
-|---|---|---|
-| `POST` | `/api/clip/jobs` | Creates a new Auto Clip job. Accepts `{ url, minLength, maxLength, clipCount, language, reframeMode, captionPreset, polishStyle, consent }`. Returns `{ jobId }`. |
-| `GET` | `/api/clip/jobs/{id}/events` | Server-Sent Events (SSE) streaming live stage (`ingest`, `transcribe`, `signals`, `scoring`, `ready`), percent, and telemetry. |
-| `GET` | `/api/clip/jobs/{id}/clips` | Returns array of candidate clips `{ clipId, start, end, score, hook, title, hashtags, reason, reframeMode, captionPreset, previewUrl }`. |
-| `PATCH` | `/api/clip/jobs/{id}/clips/{cid}` | Allows user to update clip boundaries (`start`, `end`), transcript text/timings, hook title, or caption style before final burn. |
-| `POST` | `/api/clip/jobs/{id}/clips/{cid}/render` | Triggers final 1080x1920 9:16 rendering with burned ASS subtitles, face tracking, and polish overlays. |
-| `GET` | `/api/clip/jobs/{id}/clips/{cid}/download` | Direct file stream supporting HTTP Range requests (`206 Partial Content`) for instant save. |
-| `GET` | `/api/clip/jobs/{id}/export-all` | Packages all rendered clips, .srt files, and metadata.json into an ephemeral `.zip`. |
+### 4.2 Plain-Language Edit Box
+The edit box translates creator commands into safe, non-destructive operations:
+- *"Make it 5 seconds longer"* ➔ `{op: "extend_end", delta: 5.0}`
+- *"Start 3 seconds earlier"* ➔ `{op: "extend_start", delta: -3.0}`
+- *"Switch caption style to Neon Cyber"* ➔ `{op: "set_caption_preset", preset: "neon_cyber"}`
+- *"Change reframe to split screen"* ➔ `{op: "set_reframe_mode", mode: "split"}`
+- Commands are strictly validated against duration caps and never generate raw shell strings.
 
----
+### 4.3 Polish Pack Integration (Design Time Only)
+Visual styles (*Caption News*, *Swiss Motion Graphics*, *Neon Tubes*, *Dark Tech Keynote*) are pre-rendered at design time as 1080x1920 video assets. Each style directory contains:
+- `manifest.json`: Defines asset type (`intro_sting`, `outro_sting`, `hook_card`, `looping_background`), duration, safe zones, text bounding boxes, and FFmpeg keying parameters (`colorkey=0x00FF00:0.3:0.1`).
+- Clean FFmpeg filter graph application without requiring a headless browser at runtime.
 
-## 5. Algorithmic Detail & Core Logic
-
-### 2.1 Ingest & YouTube Data
-- Validate URL using SSRF-safe DNS resolver (blocks private CIDRs, 127.0.0.1, 169.254.169.254).
-- Fetch metadata with `yt-dlp --dump-json`. Reject video if `duration > CLIP_DURATION_CAP` (default 3600s / 60 min).
-- Extract YouTube automatic or manual captions (`vtt` / `json3`) for immediate zero-GPU transcription.
-- Parse `heatmap` array from yt-dlp metadata representing viewer replay density.
-
-### 2.2 Transcription & Word Timestamps
-- **Fast Path:** If YouTube captions contain word-level markers, parse them into uniform `TranscriptWord(word, start, end)`.
-- **Fallback:** Run `faster-whisper` (`base` / `small`, `int8` quantization). Model runs in a worker thread. Cache transcript to disk per job ID so re-edits never re-transcribe.
-
-### 2.3 Multimodal Signal Processing (1-Second Bins)
-For a video of $T$ seconds, construct an array of length $T$ where each second $t \in [0, T-1]$ has normalized features:
-- **Loudness ($L_t$):** FFmpeg `ebur128` or short-term RMS normalized relative to the video average.
-- **Silence-to-Burst ($B_t$):** $\max(0, L_t - \bar{L}_{t-3..t-1})$. Detects punchlines, shouts, sudden laughter.
-- **Scene Change ($S_t$):** Frame difference metric via FFmpeg `select='gt(scene,0.3)'`.
-- **Chapter Boundary ($C_t$):** $1.0$ at chapter start $\pm 3\text{s}$, decaying outward.
-- **Heatmap ($H_t$):** YouTube replay intensity normalized $0.0 \to 1.0$.
-
-### 2.4 LLM Scoring & Boundary Snapping
-- **Prompt:** Provider-agnostic format sent to Anthropic Claude 3.5 Sonnet, OpenRouter, or local Ollama:
-  - Input: System prompt instructing viral Short curation, chronological transcript with timestamps, and high-signal moments flagged.
-  - Output: Strict JSON schema validated by Pydantic.
-- **Head-to-head Reranking:** If top candidates exceed target count, prompt conducts a pairwise comparison to keep the most engaging, self-contained hooks.
-- **Boundary Snapping:** Clip start and end timestamps are snapped to the nearest preceding sentence start and following sentence end from `TranscriptWord` list. Minimum clip duration: 15s; maximum: 60s.
-- **Heuristic Fallback:** If LLM is unreachable or unconfigured:
-  $$\text{Score}_t = 0.30 H_t + 0.25 L_t + 0.20 B_t + 0.15 S_t + 0.10 C_t$$
-  Sliding window aggregator finds peak candidate segments with non-maximum suppression (NMS) to eliminate overlaps.
-
-### 2.5 9:16 Face Tracking & Reframing
-- Detect face bounding boxes using **OpenCV YuNet** (lightweight 300KB model) or **MediaPipe**.
-- Apply Exponential Moving Average (EMA) smoothing to crop center $X_c$:
-  $$X_{\text{smooth}}(t) = \alpha X_{\text{detected}}(t) + (1 - \alpha) X_{\text{smooth}}(t-1)$$
-- **Speaker Cut Rule:** If detected face position shifts by $> 25\%$ frame width or disappears and reappears on the other side, perform an instantaneous camera cut (reset $X_c$) rather than an unnatural pan.
-- **Modes:**
-  - `center`: Fixed 9:16 crop from middle.
-  - `follow-face`: Dynamic crop tracking active speaker.
-  - `split`: Vertical stack (top 50% speaker close-up, bottom 50% widescreen content or procedural visualizer).
-
-### 2.6 Word-Synced ASS Captions
-- Generate `.ass` file with styling tags:
-  - `{\k<duration_cs>}` or `{\c&H00FFFF&}` for syllable/word active color switching.
-- 5 Styles:
-  1. *Viral Pop:* Bold Impact / Montserrat, primary color #00FFFF / #FFD700, heavy black border (4px), bounce scale.
-  2. *Clean Minimalist:* Inter / Helvetica, white text, subtle semi-transparent dark box background.
-  3. *Neon Cyber:* Cyan / Magenta glowing borders with uppercase font.
-  4. *Karaoke Bounce:* White text turning electric yellow word-by-word with small scale pop.
-  5. *Impact Headline:* Top-third sticky hook title card with bottom active captions.
-- Burned via FFmpeg filter `ass=subtitles.ass` with font fallback.
-
-### 2.7 Polish Pack (Lemo-Opuscar Design-Time Assets)
-- Pre-generated at design time at 1080x1920:
-  - 3-second hook title card animation overlays with green/black colorkey or transparent alpha.
-  - Looping bottom visualizers for split mode.
-  - 2-second outro follow-up bumper.
-- Manifest defines safe margins, key color, and overlay duration.
-
-### 2.8 Export Engine
-- Auto-detects hardware acceleration:
-  - NVIDIA: `h264_nvenc`
-  - Intel/AMD: `h264_qsv` or `h264_vaapi`
-  - Fallback: `libx264 -preset fast -crf 22`
-- Produces final `.mp4`, `.srt`, `metadata.json` (title, description, viral hashtags), and `.zip` archive.
+### 4.4 Hardware-Accelerated Export
+- `get_best_h264_encoder()` dynamically probes for NVIDIA NVENC (`h264_nvenc`), Intel QuickSync (`h264_qsv`), and AMD AMF (`h264_amf`), with automatic graceful fallback to CPU `libx264`.
+- Produces optimized MP4 containers (`-movflags +faststart`) for instant streaming playback.
 
 ---
 
-## 6. Frontend Liquid Glass Design
+## 5. Security, Privacy & Rate-Limiting Guarantees
 
-- New `ScreenAutoClip.tsx` adhering to Section 18 liquid glass system:
-  - Frosted liquid glass panels: `backdrop-filter: blur(24px) saturate(165%)`, `.glass-rim`.
-  - 3D-tilt glass clip cards (`Glass3DCard.tsx`) tilting up to 8 degrees with cursor-following glare.
-  - Interactive SVG score gauge (0-100) with color gradient (emerald for 90+, cyan for 75-89, amber for <75).
-  - Integrated waveform audio preview and segment trimmer for instant manual adjustments.
-  - Slide-in Caption Editor Drawer (`GlassCaptionEditorDrawer.tsx`) to edit word timestamps, correct transcript typos, and toggle caption style presets before rendering.
-  - Dev Screen-Switcher dock updated with `05 AUTO CLIP` shortcut.
+1. **Mandatory Rights Confirmation:** `consent: true` required on `POST /api/clip/jobs`.
+2. **SSRF Guardrails:** URL parser restricts inputs strictly to valid YouTube domains (`youtube.com`, `youtu.be`); blocks local hostnames, private IPs, loopback, and cloud metadata endpoints.
+3. **In-Memory Rate Limiting:** 1 active job per client IP; job requests exceeding concurrency limits enter a FIFO queue or receive HTTP 429.
+4. **15-Minute Ephemeral Sweeper:** Background sweeper thread deletes all downloaded media, transcripts, ASS subtitle files, and rendered MP4s 15 minutes after creation. Zero persistent server storage.
+5. **No Shell Injection:** All FFmpeg and yt-dlp calls use list-based arguments with `shell=False`, sanitized filenames, and strict process timeouts.
 
 ---
 
-## 7. Testing & Quality Bar
+## 6. Evaluation Harness (`EVAL.md` & Script)
 
-1. **Unit Tests:**
-   - Word boundary snapping edge cases (empty timestamps, punctuation handling).
-   - Signal normalization (zero variance handling, spike detection).
-   - LLM JSON parser and schema validator with broken/malformed LLM mock inputs.
-   - ASS subtitle syntax generation with special characters escaping.
-   - URL validation and SSRF boundary testing.
-2. **Integration Test:**
-   - 10-second synthetic test video end-to-end run: Ingest -> Signals -> Heuristic Score -> Face Crop -> ASS Burn -> Export.
-3. **Benchmarks:**
-   - Benchmark throughput per 10 minutes of video: Ingest (~15s), Fast-path Captions (~0.5s), Whisper CPU (~45s), Signal analysis (~8s), Face tracking & ASS burn (~35s).
-4. **Degradation Verification:**
-   - Verify graceful fallback when no GPU is present.
-   - Verify fallback to heuristic scorer when no LLM API key is present.
+An evaluation script (`apps/api/tests/eval_harness.py`) and protocol (`EVAL.md`) will benchmark 5 representative test video categories:
+1. Podcast / Two-Speaker Discussion
+2. Single-Subject Interview / Monologue
+3. Gaming Stream VOD
+4. Lecture / Technical Presentation
+5. Fast-Paced Vlog
 
----
-
-## 8. Risks & Mitigations
-
-| Risk | Impact | Mitigation Strategy |
-|---|---|---|
-| **AGPL License Infection** | High | Strictly zero code or prompt copying from Clips Kitty. Use Apache-2.0 MediaPipe / BSD OpenCV YuNet instead of AGPL YOLOv8. Maintain `THIRD_PARTY.md`. |
-| **High CPU usage on Transcription** | Medium | Prioritize YouTube auto-captions/subtitles first (zero CPU). Use `faster-whisper` with `int8` quantization on CPU, limit to 60m max video duration. |
-| **Face Tracking Jitter / Stutter** | Medium | Apply Exponential Moving Average (EMA) smoothing to crop coordinates. Perform clean speaker camera cuts when face shifts $> 25\%$ instead of rapid panning. |
-| **LLM Output Formatting Errors** | Medium | Use Pydantic schema validation with automatic JSON repair, fallback to heuristic scoring if LLM fails. |
-| **Ephemeral Disk Exhaustion** | High | 15-minute background sweeper automatically unlinks temporary files. Limit concurrent jobs to 1 per IP and 10 total on the server. |
-| **FFmpeg ASS Missing Fonts** | Low | Bundle cross-platform OpenType/TrueType fonts (Inter, Montserrat) and specify `fontsdir` in FFmpeg filter chain. |
+**Metrics Scored (1 to 5 scale):**
+- Hook Strength (0-3s retention viability)
+- Boundary Cleanliness (sentence start/end precision)
+- Framing Accuracy (speaker centered, no cut-off faces)
+- Caption Sync (word timestamp alignment)
+- Time-to-First-Clip (seconds from ingest to rendered card)
+- Job Failure Rate (%)
 
 ---
 
-## 9. Implementation Phases & Commit Roadmap
+## 7. Delivery Plan & Verification Checkpoints
 
-- **Phase 1 (Current Step):** PLAN.md & Architecture review. **STOP and wait for user approval.**
-- **Phase 2.1:** Backend Data Models, Config & Ingestion (`schemas/clip.py`, `services/clip_ingest_service.py`, `app/config.py`).
-- **Phase 2.2:** Transcription & Signal Processing (`services/transcription_service.py`, `services/signal_analysis_service.py`).
-- **Phase 2.3:** Scoring Engine & Boundary Snapper (`services/clip_scoring_service.py` with LLM + heuristic fallback).
-- **Phase 2.4:** Face Tracking & 9:16 Reframe Engine (`services/face_tracking_service.py` with OpenCV YuNet / MediaPipe).
-- **Phase 2.5:** ASS Word-Synced Captions & Render Engine (`services/ass_caption_service.py`, `services/clip_render_service.py`).
-- **Phase 2.6:** Background Queue Manager & API Router (`services/clip_queue_service.py`, `routers/clip.py`, `apps/api/app/main.py`).
-- **Phase 2.7:** Lemo-Opuscar Design-Time Polish Pack & Manifests (`polish_pack/`).
-- **Phase 2.8:** Frontend Liquid Glass Auto Clip Studio (`ScreenAutoClip.tsx`, `GlassClipCard.tsx`, `GlassCaptionEditorDrawer.tsx`, `GlassStageTimeline.tsx`, `ScreenSwitcher.tsx`, `clipStore.ts`, `clipApi.ts`).
-- **Phase 2.9:** Test Suite, Benchmarks, Documentation (`tests/`, `THIRD_PARTY.md`, `README.md`, `.env.example`).
-
+- **Phase 0:** Complete comparative analysis (`COMPARISON.md`). *(Done)*
+- **Phase 1:** Architectural plan (`PLAN.md`) and license inventory (`THIRD_PARTY.md`). *(Done - Awaiting User Approval)*
+- **Phase 2:** Implementation in modular steps:
+  - Step 1: Extended schemas & plain-language edit operation validator.
+  - Step 2: Signal fusion & LLM 4-subscore scoring engine with heuristic fallback.
+  - Step 3: Face tracking with MediaPipe/OpenCV YuNet & cut-vs-pan heuristic.
+  - Step 4: ASS caption compiler with 6 styles & hook title banners.
+  - Step 5: Polish pack asset manifests & FFmpeg overlay integration.
+  - Step 6: REST API extensions (feedback, edit box, export presets).
+  - Step 7: Frontend liquid-glass UI enhancements (evidence badges, edit box, sub-score bars).
+  - Step 8: Comprehensive test suite & evaluation harness (`EVAL.md`).

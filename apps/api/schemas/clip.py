@@ -3,6 +3,13 @@ from typing import List, Optional, Literal, Dict, Any
 import re
 from .inspect import FriendlyError
 
+CaptionPresetType = Literal[
+    'viral_pop', 'minimalist', 'neon_cyber', 'karaoke', 'headline', 'dynamic_box'
+]
+ReframeModeType = Literal['center', 'follow-face', 'split']
+PlatformPresetType = Literal['shorts', 'reels', 'tiktok', 'custom']
+PolishStyleType = Literal['none', 'caption_news', 'swiss_motion', 'neon_tubes', 'dark_tech']
+
 class TranscriptWord(BaseModel):
     word: str
     start: float
@@ -29,16 +36,24 @@ class ClipMoment(BaseModel):
     end: float
     duration: float
     score: int = Field(..., ge=0, le=100)
+    hookScore: int = Field(default=85, ge=0, le=100)
+    engagementScore: int = Field(default=85, ge=0, le=100)
+    valueScore: int = Field(default=85, ge=0, le=100)
+    shareabilityScore: int = Field(default=85, ge=0, le=100)
     hook: str
     title: str
     hashtags: List[str] = Field(default_factory=list)
     reason: str
-    reframeMode: Literal['center', 'follow-face', 'split'] = 'follow-face'
-    captionPreset: Literal['viral_pop', 'minimalist', 'neon_cyber', 'karaoke', 'headline'] = 'viral_pop'
+    evidence: List[str] = Field(default_factory=list)
+    reframeMode: ReframeModeType = 'follow-face'
+    captionPreset: CaptionPresetType = 'viral_pop'
+    platformPreset: PlatformPresetType = 'shorts'
+    polishStyle: PolishStyleType = 'none'
     status: Literal['discovered', 'rendering', 'ready', 'failed'] = 'discovered'
     videoUrl: Optional[str] = None
     transcriptText: Optional[str] = None
     words: List[TranscriptWord] = Field(default_factory=list)
+    feedback: Optional[Literal['up', 'down']] = None
 
 class ClipJobCreateRequest(BaseModel):
     url: str = Field(..., max_length=2048)
@@ -46,9 +61,10 @@ class ClipJobCreateRequest(BaseModel):
     maxLength: int = Field(60, ge=20, le=180)
     clipCount: int = Field(3, ge=1, le=10)
     language: str = Field("en", max_length=10)
-    reframeMode: Literal['center', 'follow-face', 'split'] = 'follow-face'
-    captionPreset: Literal['viral_pop', 'minimalist', 'neon_cyber', 'karaoke', 'headline'] = 'viral_pop'
-    polishStyle: Literal['none', 'caption_news', 'swiss_motion', 'neon_tubes', 'dark_tech'] = 'none'
+    reframeMode: ReframeModeType = 'follow-face'
+    captionPreset: CaptionPresetType = 'viral_pop'
+    platformPreset: PlatformPresetType = 'shorts'
+    polishStyle: PolishStyleType = 'none'
     consent: bool = Field(..., description="User confirms rights/permission to clip media")
 
     @field_validator('url')
@@ -65,10 +81,29 @@ class ClipMomentUpdateRequest(BaseModel):
     hook: Optional[str] = None
     title: Optional[str] = None
     hashtags: Optional[List[str]] = None
-    reframeMode: Optional[Literal['center', 'follow-face', 'split']] = None
-    captionPreset: Optional[Literal['viral_pop', 'minimalist', 'neon_cyber', 'karaoke', 'headline']] = None
+    reframeMode: Optional[ReframeModeType] = None
+    captionPreset: Optional[CaptionPresetType] = None
+    platformPreset: Optional[PlatformPresetType] = None
+    polishStyle: Optional[PolishStyleType] = None
     transcriptText: Optional[str] = None
     words: Optional[List[TranscriptWord]] = None
+    command: Optional[str] = None
+    feedback: Optional[Literal['up', 'down']] = None
+
+class ClipFeedbackRequest(BaseModel):
+    thumb: Literal['up', 'down']
+
+class EditBoxCommandRequest(BaseModel):
+    command: str = Field(..., min_length=1, max_length=256)
+
+class EditBoxOperationResult(BaseModel):
+    success: bool
+    operation: str
+    delta: Optional[float] = None
+    newStart: float
+    newEnd: float
+    newDuration: float
+    message: str
 
 class ClipJobEventData(BaseModel):
     jobId: str
@@ -78,4 +113,3 @@ class ClipJobEventData(BaseModel):
     eta: Optional[int] = None
     clips: List[ClipMoment] = Field(default_factory=list)
     error: Optional[FriendlyError] = None
-
