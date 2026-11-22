@@ -8,22 +8,23 @@ client = TestClient(app)
 YOUTUBE_TEST_URL = "https://youtu.be/DXw_OjhxrzQ?si=dB0G4fJqLih8Kg5g"
 
 def test_studio_page_routes():
-    # Both /studio and /audio-studio must serve the Simplified Audio Effects Studio with 200 OK
+    # Both /studio and /audio-studio must serve the Simplified Custom Mode Studio with 200 OK
     for route in ["/studio", "/audio-studio"]:
         res = client.get(route)
         assert res.status_code == 200
         assert "Studio" in res.text
         assert "studio.js" in res.text
-        assert "Audio Effects Studio" in res.text
-        assert "Transform your audio with 60+ creative effects" in res.text
-        assert "IMPORT AUDIO FILE" in res.text
-        assert "Select Audio Effects" in res.text
-        assert "Your Selected Effects" in res.text
-        assert "Audio Settings" in res.text
-        assert "DOWNLOAD AUDIO" in res.text
+        assert "Audio Track" in res.text
+        assert "Audio Player" in res.text
+        assert "Your Effect Chain" in res.text
+        assert "Quick Presets" in res.text
+        assert "Effect Library" in res.text
+        assert "Export Settings" in res.text
+        assert "Download Audio" in res.text
         assert "effectSettingsModal" in res.text
         assert "processingModal" in res.text
         assert "completedModal" in res.text
+        assert "Intensity" in res.text
 
 def test_studio_inspect_real_youtube_url():
     # Inspect the user-provided YouTube URL
@@ -58,7 +59,7 @@ def test_studio_audio_job_creation_and_file():
     assert s_data["state"] in ["queued", "downloading", "converting", "ready"]
 
 def test_studio_all_60_effects_registered_in_js():
-    # Verify studio.js has all 60 effects across the 7 categories
+    # Verify studio.js has all 60 effects across the 7 categories and quick presets
     js_res = client.get("/static/js/studio.js")
     assert js_res.status_code == 200
     js_text = js_res.text
@@ -98,9 +99,17 @@ def test_studio_all_60_effects_registered_in_js():
     for eff in vocal_effects:
         assert f"id: '{eff}'" in js_text, f"Vocal effect {eff} missing"
 
-    # Check Total Count = 6 + 8 + 9 + 8 + 14 + 7 + 8 = 60 effects
     total_expected = len(space_effects) + len(modulation_effects) + len(eq_effects) + len(dynamics_effects) + len(creative_effects) + len(stereo_effects) + len(vocal_effects)
     assert total_expected == 60
+
+    # Verify Quick Presets
+    assert "QUICK_PRESETS" in js_text
+    assert "clean_audio" in js_text
+    assert "deep_bass" in js_text
+    assert "dreamy_reverb" in js_text
+    assert "club_music" in js_text
+    assert "podcast" in js_text
+    assert "vintage" in js_text
 
     # Verify Core Audio Engine primitives
     assert "StudioEngine" in js_text
