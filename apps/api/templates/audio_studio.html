@@ -1315,25 +1315,66 @@
     }
     showToast('Inspecting audio stream from URL...', 'info');
     try {
-      const res = await fetch(`/api/inspect?url=${encodeURIComponent(url)}`);
-      if (res.ok) {
-        const data = await res.json();
-        if (data.title) document.getElementById('currentTrackTitle').textContent = data.title;
-        if (data.duration) {
-          totalTrackDuration = data.duration;
+      const inspectRes = await fetch(`/api/inspect?url=${encodeURIComponent(url)}`);
+      let title = 'Imported Track';
+      if (inspectRes.ok) {
+        const meta = await inspectRes.json();
+        title = meta.title || title;
+        document.getElementById('currentTrackTitle').textContent = title;
+        if (meta.duration) {
+          totalTrackDuration = meta.duration;
           updateTimecodeDisplay();
         }
-        showToast('Stream inspected! Loading track...', 'success');
-        toggleImportDrawer();
-      } else {
-        showToast('Direct stream loaded', 'info');
       }
+
+      // Check if YouTube link: use backend audio pipeline
+      if (window.isValidYouTubeUrl ? window.isValidYouTubeUrl(url) : (url.includes('youtube.com') || url.includes('youtu.be'))) {
+        showToast('Processing audio stream via ephemeral job...', 'info');
+        const jobRes = await fetch('/api/v1/jobs', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            url: url,
+            mode: 'audio',
+            format: 'mp3',
+            quality: 'best',
+            consent: true
+          })
+        });
+
+        if (jobRes.ok) {
+          const { jobId } = await jobRes.json();
+          // Connect to SSE for progress
+          const evSrc = new EventSource(`/api/v1/jobs/${jobId}/events`);
+          evSrc.addEventListener('update', (ev) => {
+            const data = JSON.parse(ev.data);
+            if (data.state === 'ready') {
+              evSrc.close();
+              const fileUrl = `/api/v1/jobs/${jobId}/file`;
+              fetchAndDecodeAudio(fileUrl, title);
+              toggleImportDrawer();
+              showToast('Audio loaded and ready for mastering!', 'success');
+            } else if (data.state === 'failed') {
+              evSrc.close();
+              showToast('Audio job processing failed.', 'error');
+            }
+          });
+          return;
+        }
+      }
+
+      // Direct Audio URL fallback
+      await fetchAndDecodeAudio(url, title);
+      toggleImportDrawer();
     } catch (e) {
-      console.warn('Inspect fallback:', e);
+      console.warn('Import exception:', e);
+      showToast('Error importing stream from URL', 'error');
     }
   }
   window.fetchAudioFromUrl = fetchAudioFromUrl;
   const importFromUrl = fetchAudioFromUrl;
+
+  function toggleImportDrawer() {
     playGlassTick();
     const drawer = document.getElementById('importDrawer');
     drawer.classList.toggle('hidden');
@@ -1355,6 +1396,25 @@
         <span class="text-purple-400 font-mono shrink-0">${h.format || 'Media'}</span>
       </div>
     `).join('');
+  }
+
+  function loadSessionHistoryItem(title, fileUrl) {
+    playGlassPop();
+    document.getElementById('currentTrackTitle').textContent = title;
+    if (fileUrl) {
+      fetchAndDecodeAudio(fileUrl, title);
+    }
+    toggleImportDrawer();
+  }
+
+  function loadLatestFromHistory() {
+    const history = window.getRecentHistory ? window.getRecentHistory() : [];
+    if (!history.length) {
+      showToast('No files in session history yet', 'info');
+      return;
+    }
+    const item = history[0];
+    loadSessionHistoryItem(item.title, item.fileUrl || '');
   }
 
   function handleStudioFileUpload(event) {
