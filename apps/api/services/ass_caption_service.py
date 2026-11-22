@@ -1,6 +1,6 @@
 import os
-from typing import List
-from schemas.clip import TranscriptWord
+from typing import List, Optional
+from schemas.clip import TranscriptWord, CaptionPresetType
 
 def format_ass_time(seconds: float) -> str:
     """Formats float seconds into ASS timestamp format: H:MM:SS.cs"""
@@ -16,11 +16,14 @@ def generate_ass_subtitles(
     words: List[TranscriptWord],
     out_path: str,
     preset: str = 'viral_pop',
-    clip_offset: float = 0.0
+    clip_offset: float = 0.0,
+    hook_title: Optional[str] = None,
+    hook_duration: float = 3.5
 ) -> str:
     """
     Generates a word-synced Advanced SubStation Alpha (.ass) subtitle file
-    with styled typography and active karaoke highlights.
+    with styled typography, active karaoke highlights, and opening hook title banner.
+    Target resolution: 1080x1920 (9:16 vertical).
     """
     # 1. Preset Style Configurations
     # Color format in ASS is &HAABBGGRR& (Hex alpha-blue-green-red)
@@ -35,20 +38,20 @@ def generate_ass_subtitles(
             'bold': 1,
             'outline': 4,
             'shadow': 2,
-            'margin_v': 240,
-            'alignment': 2,                    # Bottom center
+            'margin_v': 260,
+            'alignment': 2,                    # Bottom center (safe zone above TikTok/Shorts UI)
         },
         'minimalist': {
             'font': 'Helvetica',
-            'fontsize': 38,
+            'fontsize': 40,
             'primary_color': '&H00F0F0F0&',
-            'secondary_color': '&H0000D2FF&',
+            'secondary_color': '&H0000D2FF&',  # Cyan
             'outline_color': '&H00101010&',
             'back_color': '&H90000000&',
             'bold': 0,
             'outline': 1.5,
             'shadow': 0,
-            'margin_v': 180,
+            'margin_v': 240,
             'alignment': 2,
         },
         'neon_cyber': {
@@ -59,9 +62,9 @@ def generate_ass_subtitles(
             'outline_color': '&H00330033&',
             'back_color': '&H00000000&',
             'bold': 1,
-            'outline': 3,
+            'outline': 3.5,
             'shadow': 3,
-            'margin_v': 220,
+            'margin_v': 260,
             'alignment': 2,
         },
         'karaoke': {
@@ -74,7 +77,7 @@ def generate_ass_subtitles(
             'bold': 1,
             'outline': 4,
             'shadow': 2,
-            'margin_v': 250,
+            'margin_v': 270,
             'alignment': 2,
         },
         'headline': {
@@ -87,7 +90,20 @@ def generate_ass_subtitles(
             'bold': 1,
             'outline': 4.5,
             'shadow': 1,
-            'margin_v': 280,
+            'margin_v': 290,
+            'alignment': 2,
+        },
+        'dynamic_box': {
+            'font': 'Arial',
+            'fontsize': 44,
+            'primary_color': '&H00000000&',    # Dark text
+            'secondary_color': '&H00111111&',
+            'outline_color': '&H00FFFFFF&',    # White solid box border
+            'back_color': '&H00FFFFFF&',       # Opaque white background box
+            'bold': 1,
+            'outline': 0,
+            'shadow': 0,
+            'margin_v': 260,
             'alignment': 2,
         }
     }
@@ -102,7 +118,8 @@ ScaledBorderAndShadow: yes
 
 [V4+ Styles]
 Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
-Style: Default,{conf['font']},{conf['fontsize']},{conf['primary_color']},{conf['secondary_color']},{conf['outline_color']},{conf['back_color']},{conf['bold']},0,0,0,100,100,1,0,1,{conf['outline']},{conf['shadow']},{conf['alignment']},40,40,{conf['margin_v']},1
+Style: Default,{conf['font']},{conf['fontsize']},{conf['primary_color']},{conf['secondary_color']},{conf['outline_color']},{conf['back_color']},{conf['bold']},0,0,0,100,100,1,0,1,{conf['outline']},{conf['shadow']},{conf['alignment']},50,50,{conf['margin_v']},1
+Style: HookTitle,Impact,52,&H00FFFFFF&,&H0000FFFF&,&H00000000&,&H90000000&,1,0,0,0,100,100,1,0,1,4.5,2.5,8,50,50,280,1
 
 [Events]
 Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
@@ -110,7 +127,15 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
 
     events = []
 
-    # Group words into chunks of 3-5 words for viral fast-paced display
+    # 1. Opening Hook Title Banner (burned at Top Center for first 3.5s)
+    if hook_title and hook_title.strip():
+        clean_hook = hook_title.strip().upper()
+        h_start = "0:00:00.00"
+        h_end = format_ass_time(hook_duration)
+        # Fade in 150ms, fade out 250ms
+        events.append(f"Dialogue: 1,{h_start},{h_end},HookTitle,,0,0,0,,{{\\fad(150,250)}}{clean_hook}")
+
+    # 2. Group words into chunks of 3-5 words for viral fast-paced display
     chunk_size = 4
     for i in range(0, len(words), chunk_size):
         chunk = words[i : i + chunk_size]
@@ -140,4 +165,3 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
         f.write(full_ass_content)
 
     return out_path
-
