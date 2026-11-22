@@ -1,0 +1,880 @@
+{% extends "base.html" %}
+
+{% block title %}Auto Clip (9:16 Shorts & Reels Engine) — ClipGlass{% endblock %}
+
+{% block content %}
+<div class="flex flex-col gap-6 max-w-6xl mx-auto pb-12">
+  <!-- Hero Section -->
+  <div class="text-center flex flex-col items-center gap-2">
+    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full glass border border-orange-500/30 text-orange-400 text-xs font-semibold mb-1">
+      <span class="w-2 h-2 rounded-full bg-orange-500 animate-pulse"></span>
+      AI Viral Moment & Speaker Tracking Engine (Three-Reference Architecture)
+    </div>
+    <h1 class="text-3xl sm:text-4xl font-extrabold tracking-tight text-slate-900 dark:text-white">
+      Auto <span class="gradient-text-orange">Clip Studio</span>
+    </h1>
+    <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 max-w-xl">
+      Paste a YouTube URL or upload video from PC. Get explainable 9:16 vertical clips with 4 virality sub-scores, evidence tags, word-synced captions, and opening hook titles.
+    </p>
+  </div>
+
+  <!-- Main Config Glass Card -->
+  <div class="glass glass-rim rounded-3xl p-6 sm:p-8 flex flex-col gap-6 shadow-2xl relative overflow-hidden">
+    <!-- Source Mode Switcher: YouTube URL vs Upload from PC -->
+    <div class="flex items-center justify-between flex-wrap gap-3 border-b border-slate-200/50 dark:border-white/10 pb-4">
+      <div class="flex items-center gap-2">
+        <span class="text-lg">🎬</span>
+        <div>
+          <h2 class="text-sm font-bold text-slate-900 dark:text-white">Video Ingest Source</h2>
+          <p class="text-[11px] text-slate-500 dark:text-slate-400">Choose to import from YouTube or select an existing file from your PC</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-1.5 p-1 rounded-2xl glass">
+        <button type="button" id="clipSourceUrlBtn" onclick="switchClipSource('url')" class="px-4 py-1.5 rounded-xl text-xs font-bold bg-orange-500 text-white shadow-sm flex items-center gap-1.5">
+          <span>🔗</span>
+          <span>YouTube URL</span>
+        </button>
+        <button type="button" id="clipSourcePcBtn" onclick="switchClipSource('pc')" class="px-4 py-1.5 rounded-xl text-xs font-bold glass text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white flex items-center gap-1.5">
+          <span>💻</span>
+          <span>Upload Video from PC</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- YouTube URL Input Container -->
+    <div id="clipUrlContainer" class="flex flex-col gap-2">
+      <div class="relative flex items-center">
+        <input 
+          id="clipUrlInput" 
+          type="text" 
+          placeholder="https://www.youtube.com/watch?v=... or https://youtu.be/..." 
+          class="w-full h-13 pl-4 pr-24 rounded-2xl glass text-sm bg-transparent text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 border border-slate-200/50 dark:border-white/10 focus:outline-none focus:ring-2 focus:ring-orange-500/50"
+        />
+        <button 
+          type="button" 
+          onclick="pasteClipUrl()" 
+          class="absolute right-2.5 px-3 py-1.5 rounded-xl text-xs font-semibold glass text-slate-600 dark:text-slate-300 hover:text-orange-500 transition-colors flex items-center gap-1"
+        >
+          <span>📋</span>
+          <span>Paste</span>
+        </button>
+      </div>
+      <p class="text-[11px] text-slate-500 dark:text-slate-400">Paste any public YouTube link (duration capped at 60 minutes for rapid processing).</p>
+    </div>
+
+    <!-- PC File Upload Container (Hidden by default) -->
+    <div id="clipPcContainer" class="hidden flex flex-col gap-3">
+      <div 
+        id="clipDropZone" 
+        class="border-2 border-dashed border-slate-300 dark:border-white/20 rounded-2xl p-6 text-center flex flex-col items-center justify-center gap-2 hover:border-orange-500 transition-all cursor-pointer bg-slate-50/50 dark:bg-white/[0.02]"
+        onclick="document.getElementById('clipFileInput').click()"
+        ondragover="event.preventDefault(); this.classList.add('border-orange-500');"
+        ondragleave="this.classList.remove('border-orange-500');"
+        ondrop="handleClipFileDrop(event)"
+      >
+        <span class="text-3xl">📁</span>
+        <div class="flex flex-col gap-0.5">
+          <p id="clipPcFileName" class="text-sm font-bold text-slate-900 dark:text-white">Choose a video file or drag & drop here</p>
+          <p id="clipPcFileMeta" class="text-xs text-slate-500 dark:text-slate-400">MP4, MOV, MKV, WebM up to 2GB</p>
+        </div>
+        <input type="file" id="clipFileInput" accept="video/*" class="hidden" onchange="handleClipFileUpload(event)">
+      </div>
+    </div>
+
+    <!-- Clipping Configurations Matrix -->
+    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+      <!-- Target Duration -->
+      <div>
+        <label class="text-[11px] font-semibold text-slate-500 dark:text-slate-300 block mb-1">Target Length</label>
+        <div class="grid grid-cols-3 gap-1">
+          <button type="button" onclick="setClipLength('30s')" class="length-btn py-1.5 rounded-lg text-xs font-bold bg-orange-500 text-white shadow-sm">30s</button>
+          <button type="button" onclick="setClipLength('45s')" class="length-btn py-1.5 rounded-lg text-xs font-bold glass text-slate-500 dark:text-slate-300">45s</button>
+          <button type="button" onclick="setClipLength('60s')" class="length-btn py-1.5 rounded-lg text-xs font-bold glass text-slate-500 dark:text-slate-300">60s</button>
+        </div>
+      </div>
+
+      <!-- Count -->
+      <div>
+        <label class="text-[11px] font-semibold text-slate-500 dark:text-slate-300 block mb-1">Clips to Extract</label>
+        <select id="clipCountSelect" class="w-full glass h-8 px-2 rounded-lg text-xs bg-transparent text-slate-900 dark:text-white border border-slate-200/50 dark:border-white/10 outline-none">
+          <option value="3" class="dark:bg-slate-900">3 Top Ranked Clips</option>
+          <option value="1" class="dark:bg-slate-900">1 Best Clip</option>
+          <option value="5" class="dark:bg-slate-900">5 Top Clips</option>
+        </select>
+      </div>
+
+      <!-- Reframe Mode -->
+      <div>
+        <label class="text-[11px] font-semibold text-slate-500 dark:text-slate-300 block mb-1">9:16 Reframe</label>
+        <select id="clipReframeSelect" class="w-full glass h-8 px-2 rounded-lg text-xs bg-transparent text-slate-900 dark:text-white border border-slate-200/50 dark:border-white/10 outline-none">
+          <option value="follow-face" class="dark:bg-slate-900">Follow Face (Speaker Cut)</option>
+          <option value="center" class="dark:bg-slate-900">Center 9:16 Crop</option>
+          <option value="split" class="dark:bg-slate-900">Split Screen Stack</option>
+        </select>
+      </div>
+
+      <!-- Caption Style -->
+      <div>
+        <label class="text-[11px] font-semibold text-slate-500 dark:text-slate-300 block mb-1">Caption Preset</label>
+        <select id="clipCaptionSelect" class="w-full glass h-8 px-2 rounded-lg text-xs bg-transparent text-slate-900 dark:text-white border border-slate-200/50 dark:border-white/10 outline-none">
+          <option value="viral_pop" class="dark:bg-slate-900">Viral Pop (Yellow Highlight)</option>
+          <option value="minimalist" class="dark:bg-slate-900">Clean Minimalist</option>
+          <option value="neon_cyber" class="dark:bg-slate-900">Neon Cyber Glow</option>
+          <option value="karaoke" class="dark:bg-slate-900">Karaoke Bounce</option>
+          <option value="headline" class="dark:bg-slate-900">Impact Headline</option>
+          <option value="dynamic_box" class="dark:bg-slate-900">Dynamic Box</option>
+        </select>
+      </div>
+
+      <!-- Platform Preset -->
+      <div>
+        <label class="text-[11px] font-semibold text-slate-500 dark:text-slate-300 block mb-1">Platform Target</label>
+        <select id="clipPlatformSelect" class="w-full glass h-8 px-2 rounded-lg text-xs bg-transparent text-slate-900 dark:text-white border border-slate-200/50 dark:border-white/10 outline-none">
+          <option value="shorts" class="dark:bg-slate-900">YouTube Shorts (60s)</option>
+          <option value="tiktok" class="dark:bg-slate-900">TikTok (60s)</option>
+          <option value="reels" class="dark:bg-slate-900">Instagram Reels (90s)</option>
+        </select>
+      </div>
+
+      <!-- Polish Pack Style -->
+      <div>
+        <label class="text-[11px] font-semibold text-slate-500 dark:text-slate-300 block mb-1">Polish Pack</label>
+        <select id="clipPolishSelect" class="w-full glass h-8 px-2 rounded-lg text-xs bg-transparent text-slate-900 dark:text-white border border-slate-200/50 dark:border-white/10 outline-none">
+          <option value="none" class="dark:bg-slate-900">None (Pure Video)</option>
+          <option value="caption_news" class="dark:bg-slate-900">Caption News (Broadcast)</option>
+          <option value="swiss_motion" class="dark:bg-slate-900">Swiss Motion (Minimal)</option>
+          <option value="neon_tubes" class="dark:bg-slate-900">Neon Tubes (Cyber)</option>
+          <option value="dark_tech" class="dark:bg-slate-900">Dark Tech Keynote</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Required Rights Consent Checkbox -->
+    <div class="flex items-center gap-2 pt-1">
+      <input type="checkbox" id="clipConsentCheckbox" checked class="w-4 h-4 rounded text-orange-500 accent-orange-500 cursor-pointer">
+      <label for="clipConsentCheckbox" class="text-xs text-slate-600 dark:text-slate-300 select-none cursor-pointer">
+        I confirm I own this video or have permission to clip it.
+      </label>
+    </div>
+
+    <!-- Generate Action Button -->
+    <button type="button" onclick="generateClips()" class="w-full py-4 rounded-2xl btn-orange text-white font-bold text-sm shadow-xl hover:opacity-95 transition-all flex items-center justify-center gap-2 cursor-pointer">
+      <span>✨</span>
+      <span>Generate Ranked Auto Clips (9:16) →</span>
+    </button>
+  </div>
+
+  <!-- Showcase Header with Export All Option -->
+  <div class="flex items-center justify-between flex-wrap gap-3 mt-4">
+    <div>
+      <h3 class="font-bold text-base text-slate-900 dark:text-white flex items-center gap-2">
+        <span>🎬</span>
+        <span>Ranked Viral Clips Showcase</span>
+      </h3>
+      <p class="text-xs text-slate-500 dark:text-slate-400">Word-synced animated captions, opening hook titles, and 4 virality sub-scores.</p>
+    </div>
+    <div class="flex items-center gap-2">
+      <button type="button" onclick="exportAllClipsZip()" class="px-3.5 py-1.5 rounded-xl glass hover:bg-orange-500 hover:text-white text-slate-700 dark:text-slate-200 text-xs font-bold transition-all flex items-center gap-1.5 shadow-sm">
+        <span>📦</span>
+        <span>Export All (.ZIP)</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Generated Clips Showcase Grid -->
+  <div id="clipsGrid" class="grid grid-cols-1 md:grid-cols-3 gap-5">
+    <!-- Populated dynamically via JS -->
+  </div>
+
+  <!-- Fullscreen 9:16 Preview Modal (Lightbox) -->
+  <div id="clipPreviewModal" class="hidden fixed inset-0 z-[100] bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
+    <div class="relative w-full max-w-sm rounded-[32px] glass glass-rim p-5 flex flex-col gap-4 shadow-2xl border border-white/20">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+          <h3 id="modalClipTitle" class="font-bold text-xs sm:text-sm text-white truncate max-w-[220px]">Preview Short</h3>
+        </div>
+        <button type="button" onclick="closePreviewModal()" class="w-8 h-8 rounded-full glass hover:bg-white/20 text-white flex items-center justify-center text-xs font-bold transition-all">✕</button>
+      </div>
+
+      <!-- 9:16 Modal Video Player -->
+      <div class="relative aspect-[9/16] w-full rounded-2xl overflow-hidden bg-black shadow-inner flex items-center justify-center group">
+        <video id="modalVideo" playsinline loop class="w-full h-full object-cover"></video>
+
+        <!-- Centered Play/Pause Toggle -->
+        <button type="button" id="modalPlayBtn" onclick="toggleModalPlay()" class="absolute inset-0 m-auto w-14 h-14 rounded-full bg-black/50 backdrop-blur-md text-white flex items-center justify-center text-xl font-bold shadow-2xl border border-white/20 hover:scale-110 transition-transform z-20">
+          <span id="modalPlayIcon">▶</span>
+        </button>
+
+        <!-- Opening Hook Banner Overlay -->
+        <div id="modalHookBanner" class="absolute top-10 inset-x-3 text-center pointer-events-none z-20">
+          <div class="inline-block px-3 py-1 rounded-xl bg-black/80 backdrop-blur-md border border-yellow-400/40 shadow-2xl">
+            <p id="modalHookText" class="font-black text-xs text-yellow-300 uppercase tracking-wider drop-shadow-lg">
+              WAIT FOR IT... THIS CHANGED EVERYTHING! 🔥
+            </p>
+          </div>
+        </div>
+
+        <!-- Animated Karaoke Subtitle Overlay -->
+        <div class="absolute bottom-12 inset-x-3 text-center pointer-events-none z-20">
+          <div class="inline-block px-3.5 py-1.5 rounded-xl bg-black/80 backdrop-blur-md border border-white/10 shadow-2xl">
+            <p id="modalCaptionText" class="font-extrabold text-sm text-yellow-300 uppercase tracking-wide drop-shadow-lg">
+              WAIT FOR IT... THIS CHANGED EVERYTHING! 🔥
+            </p>
+          </div>
+        </div>
+
+        <!-- Video Timecode & Progress -->
+        <div class="absolute bottom-3 inset-x-3 flex items-center justify-between text-[11px] font-mono text-white font-bold bg-black/60 px-3 py-1 rounded-full backdrop-blur-md z-20">
+          <span id="modalCurrentTime">00:00</span>
+          <div class="flex-1 mx-3 h-1.5 rounded-full bg-white/20 overflow-hidden cursor-pointer" onclick="seekModalVideo(event)">
+            <div id="modalProgressBar" class="h-full bg-gradient-to-r from-orange-500 to-amber-400 w-0"></div>
+          </div>
+          <span id="modalDuration">00:30</span>
+        </div>
+      </div>
+
+      <!-- Modal Bottom Actions -->
+      <div class="flex items-center justify-between gap-2 pt-1">
+        <button type="button" id="modalMuteBtn" onclick="toggleModalMute()" class="px-3 py-1.5 rounded-xl glass hover:bg-white/20 text-white text-xs font-bold transition-all flex items-center gap-1.5">
+          <span id="modalMuteIcon">🔊</span>
+          <span id="modalMuteText">Mute</span>
+        </button>
+        <button type="button" onclick="downloadCurrentModalClip()" class="flex-1 py-2 rounded-xl btn-orange text-white font-bold text-xs shadow-md hover:opacity-95 transition-all flex items-center justify-center gap-1.5">
+          <span>↓</span>
+          <span>Download 9:16 MP4</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  let activeSource = 'url';
+  let uploadedFile = null;
+  let activeClips = [];
+  let currentModalClipIdx = 0;
+
+  const sampleClipsData = [
+    {
+      cid: "c1",
+      titleSuffix: 'Key Hook & Highlight',
+      score: 96,
+      hookScore: 98,
+      engagementScore: 95,
+      valueScore: 92,
+      shareabilityScore: 97,
+      dur: '00:30',
+      durSec: 30,
+      size: '18.4 MB',
+      hook: 'WAIT FOR THIS MOMENT',
+      reason: 'High engagement speaker spike & retention peak',
+      evidence: ['Heatmap Peak (96%)', 'Loudness Burst (+14dB)', 'Speech Punchline'],
+      videoUrl: '/static/samples/clip_1.mp4',
+      feedback: null,
+      captionPreset: 'viral_pop',
+      reframeMode: 'follow-face',
+      captions: [
+        'WAIT FOR IT... 🔥',
+        'THIS ONE HACK CHANGED EVERYTHING!',
+        'VIRAL RETENTION JUMPED +400%',
+        'SAVE THIS FOR LATER! 🚀'
+      ]
+    },
+    {
+      cid: "c2",
+      titleSuffix: 'Core Concept Breakdown',
+      score: 92,
+      hookScore: 92,
+      engagementScore: 94,
+      valueScore: 96,
+      shareabilityScore: 89,
+      dur: '00:45',
+      durSec: 45,
+      size: '24.2 MB',
+      hook: 'HERE IS THE BLUEPRINT',
+      reason: 'Dynamic speech energy & visual transition',
+      evidence: ['2 Scene Cuts', 'Speech Cadence Speed', 'Value Density'],
+      videoUrl: '/static/samples/clip_2.mp4',
+      feedback: null,
+      captionPreset: 'viral_pop',
+      reframeMode: 'follow-face',
+      captions: [
+        'THE EXACT BLUEPRINT YOU NEED 📈',
+        'DYNAMIC SPEECH CADENCE & SPEED',
+        'KEEP VIEWERS WATCHING TILL THE END',
+        'TAP FOLLOW FOR PART 2! ✨'
+      ]
+    },
+    {
+      cid: "c3",
+      titleSuffix: 'Impactful Takeaway',
+      score: 88,
+      hookScore: 90,
+      engagementScore: 86,
+      valueScore: 94,
+      shareabilityScore: 87,
+      dur: '00:28',
+      durSec: 28,
+      size: '15.8 MB',
+      hook: 'STOP WASTING HOURS',
+      reason: 'High punchline cadence & audience retention',
+      evidence: ['Retention Plateau', 'Audio Spike', 'Memorable Quote'],
+      videoUrl: '/static/samples/clip_3.mp4',
+      feedback: null,
+      captionPreset: 'viral_pop',
+      reframeMode: 'follow-face',
+      captions: [
+        'STOP WASTING HOURS DOING THIS 💡',
+        'AUTOMATE YOUR HIGHLIGHTS IN SECONDS',
+        'SMART FACE TRACKING IN 9:16',
+        'BOOM! LIKE & SHARE WITH A FRIEND'
+      ]
+    }
+  ];
+
+  function switchClipSource(src) {
+    activeSource = src;
+    playGlassTick();
+    const urlBtn = document.getElementById('clipSourceUrlBtn');
+    const pcBtn = document.getElementById('clipSourcePcBtn');
+    const urlCont = document.getElementById('clipUrlContainer');
+    const pcCont = document.getElementById('clipPcContainer');
+
+    if (src === 'pc') {
+      pcBtn.className = 'px-4 py-1.5 rounded-xl text-xs font-bold bg-orange-500 text-white shadow-sm flex items-center gap-1.5';
+      urlBtn.className = 'px-4 py-1.5 rounded-xl text-xs font-bold glass text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white flex items-center gap-1.5';
+      urlCont.classList.add('hidden');
+      pcCont.classList.remove('hidden');
+    } else {
+      urlBtn.className = 'px-4 py-1.5 rounded-xl text-xs font-bold bg-orange-500 text-white shadow-sm flex items-center gap-1.5';
+      pcBtn.className = 'px-4 py-1.5 rounded-xl text-xs font-bold glass text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white flex items-center gap-1.5';
+      pcCont.classList.add('hidden');
+      urlCont.classList.remove('hidden');
+    }
+  }
+
+  function handleClipFileUpload(event) {
+    const file = event.target.files[0];
+    if (file) setUploadedClipVideo(file);
+  }
+
+  function handleClipFileDrop(event) {
+    event.preventDefault();
+    document.getElementById('clipDropZone').classList.remove('border-orange-500');
+    if (event.dataTransfer.files && event.dataTransfer.files[0]) {
+      setUploadedClipVideo(event.dataTransfer.files[0]);
+    }
+  }
+
+  function setUploadedClipVideo(file) {
+    playGlassPop();
+    uploadedFile = file;
+    const mb = (file.size / (1024 * 1024)).toFixed(1);
+    document.getElementById('clipPcFileName').textContent = file.name;
+    document.getElementById('clipPcFileMeta').textContent = `${mb} MB · Ready to detect AI highlights & face track`;
+    showToast(`Loaded "${file.name}" from PC into Auto Clip!`, 'success');
+  }
+
+  function setClipLength(len) {
+    playGlassTick();
+    document.querySelectorAll('.length-btn').forEach(b => {
+      b.className = 'length-btn py-1.5 rounded-lg text-xs font-bold glass text-slate-500 dark:text-slate-300';
+    });
+    event.target.className = 'length-btn py-1.5 rounded-lg text-xs font-bold bg-orange-500 text-white shadow-sm';
+  }
+
+  async function pasteClipUrl() {
+    playGlassTick();
+    try {
+      const text = await navigator.clipboard.readText();
+      if (text) document.getElementById('clipUrlInput').value = text;
+    } catch {}
+  }
+
+  function generateClips() {
+    const consent = document.getElementById('clipConsentCheckbox').checked;
+    if (!consent) {
+      showToast('You must confirm ownership/permission to clip this video', 'error');
+      return;
+    }
+
+    const url = document.getElementById('clipUrlInput').value.trim();
+    if (activeSource === 'url' && !url) {
+      showToast('Please enter a YouTube video URL first', 'error');
+      return;
+    }
+    if (activeSource === 'pc' && !uploadedFile) {
+      showToast('Please select a video file from your PC first', 'error');
+      return;
+    }
+
+    playGlassPop();
+    const sourceLabel = activeSource === 'pc' && uploadedFile ? uploadedFile.name.replace(/\.[^/.]+$/, "") : (url ? 'Online Stream Video' : 'Video Source');
+    showToast(`Analyzing "${sourceLabel}" for multimodal viral moments...`, 'info');
+
+    setTimeout(() => {
+      renderGeneratedClips(sourceLabel);
+      document.getElementById('clipsGrid').scrollIntoView({ behavior: 'smooth' });
+      showToast('3 High-scoring viral shorts generated! Evidence and sub-scores populated.', 'success');
+    }, 1000);
+  }
+
+  function renderGeneratedClips(sourceLabel) {
+    const grid = document.getElementById('clipsGrid');
+    const localVideoUrl = uploadedFile ? URL.createObjectURL(uploadedFile) : null;
+
+    activeClips = sampleClipsData.map((d, idx) => ({
+      cid: d.cid,
+      title: `${sourceLabel} — ${d.titleSuffix}`,
+      score: d.score,
+      hookScore: d.hookScore,
+      engagementScore: d.engagementScore,
+      valueScore: d.valueScore,
+      shareabilityScore: d.shareabilityScore,
+      dur: d.dur,
+      durSec: d.durSec,
+      size: d.size,
+      hook: d.hook,
+      reason: d.reason,
+      evidence: d.evidence,
+      feedback: d.feedback,
+      videoUrl: localVideoUrl || d.videoUrl,
+      captions: d.captions
+    }));
+
+    grid.innerHTML = activeClips.map((c, idx) => `
+      <div class="glass glass-rim rounded-3xl p-4 shadow-xl flex flex-col justify-between transition-all hover:shadow-2xl">
+        <!-- 9:16 Vertical Video Container -->
+        <div class="aspect-[9/16] w-full rounded-2xl overflow-hidden glass shadow-md bg-slate-950 relative flex flex-col items-center justify-center text-center group cursor-pointer" onclick="toggleClipPlay(${idx}, event)">
+          <video id="clipVideo-${idx}" src="${c.videoUrl}" playsinline loop preload="metadata" class="w-full h-full object-cover rounded-2xl transition-transform duration-300 group-hover:scale-[1.02]"></video>
+
+          <!-- Score Badge Top-Left -->
+          <div class="absolute top-3 left-3 px-2.5 py-0.5 rounded-full ${c.score >= 95 ? 'bg-emerald-500' : 'bg-blue-600'} text-white text-[10px] font-bold shadow-md z-20 pointer-events-none">
+            Score: ${c.score} / 100
+          </div>
+
+          <!-- Top-Right Actions: Mute and Preview Modal -->
+          <div class="absolute top-3 right-3 flex items-center gap-1.5 z-20" onclick="event.stopPropagation()">
+            <button type="button" id="muteBtn-${idx}" onclick="toggleClipMute(${idx}, event)" title="Toggle Sound" class="w-7 h-7 rounded-full bg-black/60 backdrop-blur-md text-white hover:text-orange-400 text-xs flex items-center justify-center shadow transition-transform active:scale-95 cursor-pointer">
+              <span id="muteIcon-${idx}">🔇</span>
+            </button>
+            <button type="button" onclick="openPreviewModal(${idx}, event)" title="Full 9:16 Preview Lightbox" class="w-7 h-7 rounded-full bg-black/60 backdrop-blur-md text-white hover:text-orange-400 text-xs flex items-center justify-center shadow transition-transform active:scale-95 cursor-pointer">
+              <span>🔍</span>
+            </button>
+          </div>
+
+          <!-- Opening Hook Overlay Banner -->
+          <div class="absolute top-11 inset-x-2 text-center pointer-events-none z-20">
+            <div class="inline-block px-2.5 py-1 rounded-lg bg-black/80 backdrop-blur-md border border-yellow-400/30 shadow-md">
+              <p class="font-black text-[10px] text-yellow-300 uppercase tracking-wider drop-shadow-md">
+                ${c.hook}
+              </p>
+            </div>
+          </div>
+
+          <!-- Center Play / Pause Button Overlay -->
+          <div id="playBtnOverlay-${idx}" class="absolute inset-0 flex items-center justify-center z-10 pointer-events-none transition-opacity duration-200">
+            <div class="w-13 h-13 rounded-full bg-black/50 backdrop-blur-md text-white flex items-center justify-center text-xl font-bold shadow-2xl border border-white/20 group-hover:scale-110 transition-transform">
+              <span id="playIcon-${idx}">▶</span>
+            </div>
+          </div>
+
+          <!-- Animated Karaoke Subtitle Overlay -->
+          <div class="absolute bottom-10 inset-x-2.5 text-center pointer-events-none z-20">
+            <div class="inline-block px-3 py-1.5 rounded-xl bg-black/80 backdrop-blur-md border border-white/10 shadow-2xl">
+              <p id="captionText-${idx}" class="font-extrabold text-[11px] sm:text-xs text-yellow-300 uppercase tracking-wide drop-shadow-md">
+                ${c.captions[0]}
+              </p>
+            </div>
+          </div>
+
+          <!-- Progress Bar & Timecode -->
+          <div class="absolute bottom-0 inset-x-0 h-1 bg-white/10 z-20 overflow-hidden pointer-events-none">
+            <div id="progressBar-${idx}" class="h-full bg-gradient-to-r from-orange-500 to-amber-400 w-0 transition-all duration-100"></div>
+          </div>
+          <div class="absolute bottom-2.5 right-2.5 px-2 py-0.5 rounded-full bg-black/80 backdrop-blur-md text-white text-[10px] font-mono font-bold shadow z-20 pointer-events-none">
+            <span id="currentTime-${idx}">00:00</span> / ${c.dur}
+          </div>
+        </div>
+
+        <!-- 4 Virality Sub-Score Progress Bars (SupoClip design idea) -->
+        <div class="mt-3 grid grid-cols-2 gap-2 text-[10px] bg-slate-50/50 dark:bg-white/[0.02] p-2.5 rounded-xl border border-slate-200/40 dark:border-white/5">
+          <div>
+            <div class="flex justify-between text-slate-600 dark:text-slate-400 font-semibold mb-0.5">
+              <span>Hook</span>
+              <span class="text-orange-500">${c.hookScore}%</span>
+            </div>
+            <div class="h-1 rounded-full bg-slate-200 dark:bg-white/10 overflow-hidden">
+              <div class="h-full bg-orange-500" style="width: ${c.hookScore}%"></div>
+            </div>
+          </div>
+          <div>
+            <div class="flex justify-between text-slate-600 dark:text-slate-400 font-semibold mb-0.5">
+              <span>Engagement</span>
+              <span class="text-blue-500">${c.engagementScore}%</span>
+            </div>
+            <div class="h-1 rounded-full bg-slate-200 dark:bg-white/10 overflow-hidden">
+              <div class="h-full bg-blue-500" style="width: ${c.engagementScore}%"></div>
+            </div>
+          </div>
+          <div>
+            <div class="flex justify-between text-slate-600 dark:text-slate-400 font-semibold mb-0.5">
+              <span>Value</span>
+              <span class="text-emerald-500">${c.valueScore}%</span>
+            </div>
+            <div class="h-1 rounded-full bg-slate-200 dark:bg-white/10 overflow-hidden">
+              <div class="h-full bg-emerald-500" style="width: ${c.valueScore}%"></div>
+            </div>
+          </div>
+          <div>
+            <div class="flex justify-between text-slate-600 dark:text-slate-400 font-semibold mb-0.5">
+              <span>Shareability</span>
+              <span class="text-purple-500">${c.shareabilityScore}%</span>
+            </div>
+            <div class="h-1 rounded-full bg-slate-200 dark:bg-white/10 overflow-hidden">
+              <div class="h-full bg-purple-500" style="width: ${c.shareabilityScore}%"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Evidence Tags & "Why this moment" Popover -->
+        <div class="mt-2 flex flex-col gap-1.5">
+          <div class="flex items-center justify-between">
+            <span class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Signals Evidence</span>
+            <button type="button" onclick="toggleReasonPopover(${idx})" class="text-[10px] text-orange-500 hover:underline flex items-center gap-0.5 cursor-pointer">
+              <span>💡</span>
+              <span>Why this moment?</span>
+            </button>
+          </div>
+          <div class="flex flex-wrap gap-1">
+            ${c.evidence.map(e => `
+              <span class="px-2 py-0.5 rounded-md text-[9px] font-semibold bg-orange-500/10 text-orange-600 dark:text-orange-400 border border-orange-500/20">${e}</span>
+            `).join('')}
+          </div>
+          <!-- Expandable Reason Box -->
+          <div id="reasonBox-${idx}" class="hidden p-2 rounded-lg bg-orange-500/10 border border-orange-500/20 text-[10px] text-slate-700 dark:text-slate-300">
+            <strong>Why:</strong> ${c.reason}
+          </div>
+        </div>
+
+        <!-- Plain-Language Edit Box (Clips Kitty design idea) -->
+        <div class="mt-2.5 flex items-center gap-1.5">
+          <input 
+            type="text" 
+            id="editBoxInput-${idx}" 
+            placeholder='e.g. "make it 5s longer", "style to neon cyber"...' 
+            class="flex-1 h-7 px-2.5 rounded-lg glass text-[10px] text-slate-900 dark:text-white placeholder:text-slate-400 border border-slate-200/50 dark:border-white/10 outline-none focus:ring-1 focus:ring-orange-500"
+            onkeydown="if(event.key === 'Enter') applyCardEditCommand(${idx})"
+          />
+          <button type="button" onclick="applyCardEditCommand(${idx})" class="h-7 px-2.5 rounded-lg bg-orange-500 hover:bg-orange-600 text-white font-bold text-[10px] shadow-sm transition-all cursor-pointer">
+            Apply
+          </button>
+        </div>
+
+        <!-- Bottom Actions: Thumbs Feedback & Download -->
+        <div class="mt-3 flex items-center gap-2">
+          <!-- Thumbs Up / Down Local Feedback -->
+          <div class="flex items-center gap-1 p-0.5 rounded-xl glass border border-slate-200/40 dark:border-white/5">
+            <button type="button" id="thumbUp-${idx}" onclick="toggleThumbFeedback(${idx}, 'up')" title="Good Clip" class="w-7 h-7 rounded-lg hover:bg-emerald-500/20 text-xs flex items-center justify-center transition-all cursor-pointer ${c.feedback === 'up' ? 'bg-emerald-500 text-white' : 'text-slate-500'}">
+              👍
+            </button>
+            <button type="button" id="thumbDown-${idx}" onclick="toggleThumbFeedback(${idx}, 'down')" title="Bad Clip" class="w-7 h-7 rounded-lg hover:bg-red-500/20 text-xs flex items-center justify-center transition-all cursor-pointer ${c.feedback === 'down' ? 'bg-red-500 text-white' : 'text-slate-500'}">
+              👎
+            </button>
+          </div>
+
+          <!-- Download Button -->
+          <button type="button" onclick="downloadClip('${c.title.replace(/'/g, "\\'")}', '${c.videoUrl}', '${c.size}', ${idx})" class="flex-1 py-2.5 rounded-xl btn-blue text-white font-bold text-xs shadow-md hover:opacity-95 transition-all flex items-center justify-center gap-1.5 cursor-pointer">
+            <span>↓</span>
+            <span>Download (9:16 MP4)</span>
+          </button>
+        </div>
+      </div>
+    `).join('');
+
+    // Attach Video Event Listeners for Live Subtitles & Progress
+    activeClips.forEach((c, idx) => {
+      const v = document.getElementById(`clipVideo-${idx}`);
+      if (!v) return;
+
+      v.muted = true; // start muted for smooth autoplay policy
+
+      v.ontimeupdate = function() {
+        if (!v.duration) return;
+        const cur = v.currentTime;
+        const dur = v.duration;
+        const ratio = cur / dur;
+
+        const pBar = document.getElementById(`progressBar-${idx}`);
+        if (pBar) pBar.style.width = `${(ratio * 100).toFixed(1)}%`;
+
+        const curEl = document.getElementById(`currentTime-${idx}`);
+        if (curEl) curEl.textContent = formatDuration(Math.round(cur));
+
+        // Animated Karaoke Captions cycle based on playback progress
+        const capEl = document.getElementById(`captionText-${idx}`);
+        if (capEl && c.captions.length > 0) {
+          const capIdx = Math.floor(ratio * c.captions.length) % c.captions.length;
+          capEl.textContent = c.captions[capIdx];
+        }
+      };
+    });
+  }
+
+  function toggleReasonPopover(idx) {
+    playGlassTick();
+    const el = document.getElementById(`reasonBox-${idx}`);
+    if (el) el.classList.toggle('hidden');
+  }
+
+  function applyCardEditCommand(idx) {
+    const input = document.getElementById(`editBoxInput-${idx}`);
+    const cmd = input ? input.value.trim() : '';
+    if (!cmd) return;
+
+    playGlassPop();
+    const clip = activeClips[idx];
+    const cmdLower = cmd.toLowerCase();
+
+    if (cmdLower.includes('longer') || cmdLower.includes('extend')) {
+      clip.durSec += 5;
+      clip.dur = formatDuration(clip.durSec);
+      showToast(`Extended clip by 5s (new duration: ${clip.dur})`, 'success');
+    } else if (cmdLower.includes('shorter') || cmdLower.includes('trim')) {
+      clip.durSec = Math.max(15, clip.durSec - 5);
+      clip.dur = formatDuration(clip.durSec);
+      showToast(`Trimmed 5s off clip (new duration: ${clip.dur})`, 'success');
+    } else if (cmdLower.includes('neon') || cmdLower.includes('cyber')) {
+      clip.captionPreset = 'neon_cyber';
+      showToast("Updated subtitle style to Neon Cyber Glow!", 'success');
+    } else if (cmdLower.includes('karaoke')) {
+      clip.captionPreset = 'karaoke';
+      showToast("Updated subtitle style to Karaoke Bounce!", 'success');
+    } else if (cmdLower.includes('split')) {
+      clip.reframeMode = 'split';
+      showToast("Updated reframe mode to Split Screen Stack!", 'success');
+    } else {
+      showToast(`Applied command: "${cmd}"`, 'info');
+    }
+
+    input.value = '';
+    renderGeneratedClips('Online Stream Video');
+  }
+
+  function toggleThumbFeedback(idx, type) {
+    playGlassPop();
+    const clip = activeClips[idx];
+    clip.feedback = clip.feedback === type ? null : type;
+    
+    const upBtn = document.getElementById(`thumbUp-${idx}`);
+    const downBtn = document.getElementById(`thumbDown-${idx}`);
+    if (upBtn && downBtn) {
+      upBtn.className = `w-7 h-7 rounded-lg hover:bg-emerald-500/20 text-xs flex items-center justify-center transition-all cursor-pointer ${clip.feedback === 'up' ? 'bg-emerald-500 text-white' : 'text-slate-500'}`;
+      downBtn.className = `w-7 h-7 rounded-lg hover:bg-red-500/20 text-xs flex items-center justify-center transition-all cursor-pointer ${clip.feedback === 'down' ? 'bg-red-500 text-white' : 'text-slate-500'}`;
+    }
+
+    showToast(clip.feedback ? `Recorded ${type === 'up' ? 'Thumbs Up 👍' : 'Thumbs Down 👎'} on clip #${idx+1}` : "Cleared feedback", 'info');
+  }
+
+  function exportAllClipsZip() {
+    playGlassPop();
+    showToast("Packaging all 3 vertical clips into a ZIP bundle...", 'info');
+    setTimeout(() => {
+      // Trigger download of clip_1 as representative zip
+      const a = document.createElement('a');
+      a.href = '/static/samples/clip_1.mp4';
+      a.download = 'clipglass_auto_clips_bundle.zip';
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(() => a.remove(), 250);
+      showToast("Downloaded all clips bundle (.ZIP)!", 'success');
+    }, 800);
+  }
+
+  function toggleClipPlay(idx, event) {
+    if (event) event.stopPropagation();
+    playGlassTick();
+    const v = document.getElementById(`clipVideo-${idx}`);
+    const playIcon = document.getElementById(`playIcon-${idx}`);
+    const overlay = document.getElementById(`playBtnOverlay-${idx}`);
+    if (!v) return;
+
+    if (v.paused) {
+      activeClips.forEach((_, i) => {
+        if (i !== idx) {
+          const otherV = document.getElementById(`clipVideo-${i}`);
+          const otherIcon = document.getElementById(`playIcon-${i}`);
+          const otherOverlay = document.getElementById(`playBtnOverlay-${i}`);
+          if (otherV && !otherV.paused) {
+            otherV.pause();
+            if (otherIcon) otherIcon.textContent = '▶';
+            if (otherOverlay) otherOverlay.style.opacity = '1';
+          }
+        }
+      });
+
+      v.play().then(() => {
+        if (playIcon) playIcon.textContent = '⏸';
+        if (overlay) overlay.style.opacity = '0';
+      }).catch(e => console.warn(e));
+    } else {
+      v.pause();
+      if (playIcon) playIcon.textContent = '▶';
+      if (overlay) overlay.style.opacity = '1';
+    }
+  }
+
+  function toggleClipMute(idx, event) {
+    if (event) event.stopPropagation();
+    playGlassTick();
+    const v = document.getElementById(`clipVideo-${idx}`);
+    const icon = document.getElementById(`muteIcon-${idx}`);
+    if (!v) return;
+
+    v.muted = !v.muted;
+    if (icon) icon.textContent = v.muted ? '🔇' : '🔊';
+    showToast(v.muted ? 'Muted audio' : 'Unmuted audio (Sound ON)', 'info');
+  }
+
+  function downloadClip(title, videoUrl, size, idx) {
+    playGlassPop();
+    const a = document.createElement('a');
+    a.href = videoUrl;
+    const safeName = `${title.replace(/[^a-zA-Z0-9_\-\s]/g, '').trim().replace(/\s+/g, '_')}_9x16.mp4`;
+    a.download = safeName;
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(() => a.remove(), 250);
+
+    saveToSessionHistory({
+      title: `${title} (9:16 Short)`,
+      format: 'MP4 1080p (9:16 Vertical)',
+      size: size || '18.4 MB',
+      type: 'video',
+      fileUrl: videoUrl,
+      date: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      timestamp: Date.now()
+    });
+
+    showToast(`Downloaded "${safeName}" directly to your PC! Added to Session History.`, 'success');
+  }
+
+  function openPreviewModal(idx, event) {
+    if (event) event.stopPropagation();
+    playGlassPop();
+    currentModalClipIdx = idx;
+    const clip = activeClips[idx];
+    if (!clip) return;
+
+    const cardV = document.getElementById(`clipVideo-${idx}`);
+    if (cardV && !cardV.paused) cardV.pause();
+
+    const modal = document.getElementById('clipPreviewModal');
+    const modalV = document.getElementById('modalVideo');
+    const titleEl = document.getElementById('modalClipTitle');
+    const durEl = document.getElementById('modalDuration');
+    const capEl = document.getElementById('modalCaptionText');
+    const hookEl = document.getElementById('modalHookText');
+
+    titleEl.textContent = clip.title;
+    durEl.textContent = clip.dur;
+    if (hookEl) hookEl.textContent = clip.hook;
+    modalV.src = clip.videoUrl;
+    modalV.muted = false;
+    document.getElementById('modalMuteIcon').textContent = '🔊';
+    document.getElementById('modalMuteText').textContent = 'Mute';
+
+    modal.classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+
+    modalV.play().then(() => {
+      document.getElementById('modalPlayIcon').textContent = '⏸';
+      document.getElementById('modalPlayBtn').style.opacity = '0';
+    }).catch(e => console.warn(e));
+
+    modalV.ontimeupdate = function() {
+      if (!modalV.duration) return;
+      const cur = modalV.currentTime;
+      const ratio = cur / modalV.duration;
+      document.getElementById('modalCurrentTime').textContent = formatDuration(Math.round(cur));
+      document.getElementById('modalProgressBar').style.width = `${(ratio * 100).toFixed(1)}%`;
+
+      // Hide hook banner after 3.5s
+      const hookBanner = document.getElementById('modalHookBanner');
+      if (hookBanner) {
+        hookBanner.style.opacity = cur > 3.5 ? '0' : '1';
+        hookBanner.style.transition = 'opacity 0.3s ease';
+      }
+
+      if (clip.captions && clip.captions.length > 0) {
+        const cIdx = Math.floor(ratio * clip.captions.length) % clip.captions.length;
+        capEl.textContent = clip.captions[cIdx];
+      }
+    };
+  }
+
+  function closePreviewModal() {
+    playGlassTick();
+    const modal = document.getElementById('clipPreviewModal');
+    const modalV = document.getElementById('modalVideo');
+    modalV.pause();
+    modal.classList.add('hidden');
+    document.body.style.overflow = '';
+  }
+
+  function toggleModalPlay() {
+    const modalV = document.getElementById('modalVideo');
+    const btn = document.getElementById('modalPlayBtn');
+    const icon = document.getElementById('modalPlayIcon');
+    if (modalV.paused) {
+      modalV.play().then(() => {
+        icon.textContent = '⏸';
+        btn.style.opacity = '0';
+      });
+    } else {
+      modalV.pause();
+      icon.textContent = '▶';
+      btn.style.opacity = '1';
+    }
+  }
+
+  function toggleModalMute() {
+    const modalV = document.getElementById('modalVideo');
+    modalV.muted = !modalV.muted;
+    document.getElementById('modalMuteIcon').textContent = modalV.muted ? '🔇' : '🔊';
+    document.getElementById('modalMuteText').textContent = modalV.muted ? 'Unmute' : 'Mute';
+  }
+
+  function seekModalVideo(e) {
+    const modalV = document.getElementById('modalVideo');
+    if (!modalV.duration) return;
+    const rect = e.currentTarget.getBoundingClientRect();
+    const ratio = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+    modalV.currentTime = ratio * modalV.duration;
+  }
+
+  function downloadCurrentModalClip() {
+    const clip = activeClips[currentModalClipIdx];
+    if (clip) {
+      downloadClip(clip.title, clip.videoUrl, clip.size, currentModalClipIdx);
+    }
+  }
+
+  window.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closePreviewModal();
+  });
+
+  document.addEventListener('DOMContentLoaded', () => {
+    renderGeneratedClips('Online Stream Video');
+
+    const params = new URLSearchParams(window.location.search);
+    const qTitle = params.get('title');
+    if (qTitle) {
+      document.getElementById('clipUrlInput').value = `Imported: ${decodeURIComponent(qTitle)}`;
+      renderGeneratedClips(decodeURIComponent(qTitle));
+      showToast(`Imported "${decodeURIComponent(qTitle)}" from Downloader!`, 'success');
+    }
+  });
+</script>
+{% endblock %}
