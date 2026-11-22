@@ -900,7 +900,11 @@
               });
 
               showToast('Trim complete! Downloading your video...', 'success');
-              window.location.href = fileUrl;
+              if (window.downloadFileToPc) {
+                window.downloadFileToPc(fileUrl, trimmedTitle);
+              } else {
+                window.location.href = fileUrl;
+              }
             } else if (data.state === 'failed') {
               trimEvents.close();
               if (exportBtnText) exportBtnText.textContent = '↓ Export Trimmed Video';

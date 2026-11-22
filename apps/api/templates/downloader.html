@@ -340,14 +340,44 @@
 
   function downloadCompletedFile() {
     playGlassPop();
+    const title = document.getElementById('mediaTitle')?.textContent?.trim() || 'clipglass_download';
     if (activeJobId) {
-      window.location.href = `/api/v1/jobs/${activeJobId}/file`;
+      if (window.downloadFileToPc) {
+        window.downloadFileToPc(`/api/v1/jobs/${activeJobId}/file`, title);
+      } else {
+        window.location.href = `/api/v1/jobs/${activeJobId}/file`;
+      }
     } else {
       showToast('Downloading file...', 'success');
     }
   }
 
+  // Global Ctrl+V paste support for quick workflow
+  window.addEventListener('paste', (e) => {
+    const activeEl = document.activeElement;
+    if (activeEl && (activeEl.tagName === 'INPUT' || activeEl.tagName === 'TEXTAREA')) return;
+    const pasted = e.clipboardData?.getData('text')?.trim();
+    if (pasted && (pasted.includes('youtube.com') || pasted.includes('youtu.be') || pasted.startsWith('http'))) {
+      const input = document.getElementById('downloaderUrlInput');
+      if (input) {
+        input.value = pasted;
+        inspectDownloaderUrl();
+      }
+    }
+  });
+
   document.addEventListener('DOMContentLoaded', () => {
+    // Apply user media preferences from settings
+    const prefRes = localStorage.getItem('clipglass-default-res');
+    if (prefRes) {
+      const resBtn = Array.from(document.querySelectorAll('.res-btn')).find(b => b.textContent.includes(prefRes.replace('p', '')));
+      if (resBtn) resBtn.click();
+    }
+    const prefFmt = localStorage.getItem('clipglass-default-fmt');
+    if (prefFmt) {
+      const fmtBtn = Array.from(document.querySelectorAll('.fmt-btn')).find(b => b.textContent.toLowerCase() === prefFmt.toLowerCase());
+      if (fmtBtn) fmtBtn.click();
+    }
     const params = new URLSearchParams(window.location.search);
     const qUrl = params.get('url');
     const qType = params.get('type');

@@ -4,45 +4,103 @@
 
 {% block content %}
 <div class="w-full max-w-5xl mx-auto flex flex-col gap-6">
-  <!-- Header -->
-  <div class="flex items-center gap-3 px-2">
-    <div class="w-8 h-8 rounded-xl bg-amber-500/20 text-amber-500 flex items-center justify-center font-bold">
-      ⏱
+  <!-- Header & Metrics -->
+  <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 px-2">
+    <div class="flex items-center gap-3">
+      <div class="w-9 h-9 rounded-2xl bg-amber-500/20 text-amber-500 flex items-center justify-center font-bold text-base">
+        ⏱
+      </div>
+      <div>
+        <h1 class="font-extrabold text-2xl text-slate-900 dark:text-white tracking-tight">Recent Session Downloads</h1>
+        <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Private ephemeral session storage · Auto-purged after 15 minutes</p>
+      </div>
     </div>
-    <div>
-      <h1 class="font-extrabold text-2xl text-slate-900 dark:text-white tracking-tight">Recent Session Downloads</h1>
-      <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Ephemeral 15-Minute Session Storage · Auto-wipes when closed</p>
+
+    <div class="flex items-center gap-2 self-start sm:self-auto">
+      <button type="button" onclick="clearAllHistory()" class="px-3.5 py-1.5 rounded-xl glass border border-rose-500/30 text-rose-500 hover:bg-rose-500/10 text-xs font-bold shadow-sm transition-all flex items-center gap-1.5 cursor-pointer">
+        <span>🗑</span>
+        <span>Clear Session</span>
+      </button>
     </div>
   </div>
 
-  <!-- Disclaimer Banner -->
-  <div class="glass glass-rim rounded-2xl p-4 text-xs text-amber-600 dark:text-amber-400 font-medium flex items-center gap-2">
-    <span>⏱</span>
-    <span>Files are kept in private ephemeral storage and automatically deleted 15 minutes after generation.</span>
+  <!-- Search & Category Filters -->
+  <div class="glass glass-rim rounded-2xl p-3 shadow-md flex flex-col sm:flex-row items-center justify-between gap-3">
+    <!-- Search Bar -->
+    <div class="relative w-full sm:w-72">
+      <span class="absolute inset-y-0 left-3 flex items-center text-slate-400 text-xs pointer-events-none">🔍</span>
+      <input type="text" id="recentSearchInput" oninput="filterRecentList()" placeholder="Search session files..." class="w-full pl-8 pr-3 py-1.5 rounded-xl bg-white/40 dark:bg-black/20 border border-white/20 text-xs font-medium text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-blue-500" />
+    </div>
+
+    <!-- Category Tabs -->
+    <div class="flex items-center gap-1 p-1 rounded-xl glass text-xs font-bold self-stretch sm:self-auto overflow-x-auto">
+      <button type="button" onclick="setCategoryFilter('all')" id="tab-all" class="recent-tab-btn px-3 py-1 rounded-lg bg-blue-600 text-white shadow-sm">All</button>
+      <button type="button" onclick="setCategoryFilter('audio')" id="tab-audio" class="recent-tab-btn px-3 py-1 rounded-lg text-slate-500 dark:text-slate-400">Audio</button>
+      <button type="button" onclick="setCategoryFilter('video')" id="tab-video" class="recent-tab-btn px-3 py-1 rounded-lg text-slate-500 dark:text-slate-400">Video</button>
+      <button type="button" onclick="setCategoryFilter('trim')" id="tab-trim" class="recent-tab-btn px-3 py-1 rounded-lg text-slate-500 dark:text-slate-400">Trimmer</button>
+      <button type="button" onclick="setCategoryFilter('clip')" id="tab-clip" class="recent-tab-btn px-3 py-1 rounded-lg text-slate-500 dark:text-slate-400">Auto Clip</button>
+    </div>
   </div>
 
   <!-- Downloads Grid Container -->
   <div id="recentContainer" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-    <!-- Populated by JS from sessionStorage -->
+    <!-- Populated by JS from sessionStorage and localStorage -->
   </div>
 
-  <div id="noHistoryNotice" class="hidden text-center py-12 glass rounded-3xl">
-    <p class="text-sm font-bold text-slate-500 dark:text-slate-400">No active files in this session.</p>
-    <a href="/downloader" class="mt-3 inline-block px-4 py-2 rounded-xl btn-blue text-white text-xs font-bold shadow">Start a Download →</a>
+  <!-- Empty Notice -->
+  <div id="noHistoryNotice" class="hidden text-center py-16 glass rounded-3xl p-6">
+    <div class="w-12 h-12 rounded-2xl bg-slate-500/10 text-slate-400 flex items-center justify-center text-2xl mx-auto mb-3">📁</div>
+    <h3 class="text-sm font-bold text-slate-700 dark:text-slate-300">No session media found</h3>
+    <p class="text-xs text-slate-400 mt-1 max-w-sm mx-auto">Downloaded videos, audio masters, and vertical shorts will appear here during your active session.</p>
+    <a href="/downloader" class="mt-4 inline-block px-4 py-2 rounded-xl btn-blue text-white text-xs font-bold shadow">Open Universal Downloader →</a>
   </div>
 </div>
 {% endblock %}
 
 {% block scripts %}
 <script>
+  let activeTab = 'all';
+
   document.addEventListener('DOMContentLoaded', () => {
     renderRecentList();
   });
 
+  function setCategoryFilter(tab) {
+    activeTab = tab;
+    if (window.playGlassTick) window.playGlassTick();
+    document.querySelectorAll('.recent-tab-btn').forEach(b => {
+      b.className = 'recent-tab-btn px-3 py-1 rounded-lg text-slate-500 dark:text-slate-400';
+    });
+    const activeBtn = document.getElementById(`tab-${tab}`);
+    if (activeBtn) activeBtn.className = 'recent-tab-btn px-3 py-1 rounded-lg bg-blue-600 text-white shadow-sm';
+    renderRecentList();
+  }
+
+  function filterRecentList() {
+    renderRecentList();
+  }
+
   function renderRecentList() {
     const container = document.getElementById('recentContainer');
     const emptyNotice = document.getElementById('noHistoryNotice');
+    const searchQuery = (document.getElementById('recentSearchInput')?.value || '').toLowerCase().trim();
     let history = window.getRecentHistory ? window.getRecentHistory() : [];
+
+    // Filter by search query
+    if (searchQuery) {
+      history = history.filter(item => (item.title || '').toLowerCase().includes(searchQuery));
+    }
+
+    // Filter by tab
+    if (activeTab === 'audio') {
+      history = history.filter(item => !item.type || item.type === 'audio' || (item.format && (item.format.includes('MP3') || item.format.includes('FLAC') || item.format.includes('WAV') || item.format.includes('M4A'))));
+    } else if (activeTab === 'video') {
+      history = history.filter(item => item.type === 'video' || (item.format && item.format.includes('MP4')));
+    } else if (activeTab === 'trim') {
+      history = history.filter(item => item.type === 'trim' || (item.title && item.title.toLowerCase().includes('trim')));
+    } else if (activeTab === 'clip') {
+      history = history.filter(item => item.type === 'autoclip' || item.type === 'clip' || (item.title && item.title.toLowerCase().includes('clip')));
+    }
 
     container.innerHTML = '';
     if (history.length === 0) {
@@ -52,74 +110,86 @@
     emptyNotice.classList.add('hidden');
 
     history.forEach((item, idx) => {
-      const isAudio = !item.type || item.type === 'audio' || item.format.includes('MP3') || item.format.includes('FLAC') || item.format.includes('WAV') || item.format.includes('M4A');
+      const isAudio = !item.type || item.type === 'audio' || (item.format && (item.format.includes('MP3') || item.format.includes('FLAC') || item.format.includes('WAV') || item.format.includes('M4A')));
       const icon = isAudio ? '♫' : '🎬';
       const colorBg = isAudio ? 'bg-purple-500/15 text-purple-500' : 'bg-emerald-500/15 text-emerald-500';
 
-      const studioLink = `<a href="/studio?title=${encodeURIComponent(item.title)}${item.jobId ? '&jobId=' + item.jobId : ''}${item.fileUrl ? '&fileUrl=' + encodeURIComponent(item.fileUrl) : ''}" class="px-3 py-1.5 rounded-xl glass hover:bg-purple-500/20 text-purple-600 dark:text-purple-400 text-xs font-bold transition-all flex items-center gap-1"><span>♫</span><span>Open in Studio</span></a>`;
-      const trimmerLink = `<a href="/video-trimmer?title=${encodeURIComponent(item.title)}" class="px-3 py-1.5 rounded-xl glass hover:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-xs font-bold transition-all flex items-center gap-1"><span>✂</span><span>Trimmer</span></a>`;
-      const clipLink = `<a href="/auto-clip?title=${encodeURIComponent(item.title)}" class="px-3 py-1.5 rounded-xl glass hover:bg-orange-500/20 text-orange-600 dark:text-orange-400 text-xs font-bold transition-all flex items-center gap-1"><span>✨</span><span>Auto Clip</span></a>`;
+      const studioLink = `<a href="/studio?title=${encodeURIComponent(item.title)}${item.jobId ? '&jobId=' + item.jobId : ''}${item.fileUrl ? '&fileUrl=' + encodeURIComponent(item.fileUrl) : ''}" class="px-2.5 py-1 rounded-lg glass hover:bg-purple-500/20 text-purple-600 dark:text-purple-400 text-[11px] font-bold transition-all flex items-center gap-1"><span>♫</span><span>Studio</span></a>`;
+      const trimmerLink = `<a href="/video-trimmer?title=${encodeURIComponent(item.title)}" class="px-2.5 py-1 rounded-lg glass hover:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-[11px] font-bold transition-all flex items-center gap-1"><span>✂</span><span>Trimmer</span></a>`;
+      const clipLink = `<a href="/auto-clip?title=${encodeURIComponent(item.title)}" class="px-2.5 py-1 rounded-lg glass hover:bg-orange-500/20 text-orange-600 dark:text-orange-400 text-[11px] font-bold transition-all flex items-center gap-1"><span>✨</span><span>Auto Clip</span></a>`;
 
       const studioAction = isAudio ? studioLink : `${studioLink} ${trimmerLink} ${clipLink}`;
+      const fileUrl = item.fileUrl || (item.jobId ? `/api/v1/jobs/${item.jobId}/file` : '');
 
       const card = document.createElement('div');
-      card.className = 'glass glass-rim rounded-3xl p-5 shadow-lg flex flex-col justify-between';
+      card.className = 'glass glass-rim rounded-3xl p-5 shadow-lg flex flex-col justify-between relative group';
       card.innerHTML = `
         <div class="flex items-start justify-between gap-3">
-          <div class="flex items-center gap-3">
-            <div class="w-10 h-10 rounded-2xl ${colorBg} flex items-center justify-center font-bold text-base">
+          <div class="flex items-center gap-3 min-w-0">
+            <div class="w-10 h-10 rounded-2xl ${colorBg} flex items-center justify-center font-bold text-base shrink-0">
               ${icon}
             </div>
-            <div>
-              <h3 class="font-bold text-xs text-slate-900 dark:text-white line-clamp-1">${item.title}</h3>
-              <p class="text-[11px] text-slate-400 mt-0.5">${item.format} · ${item.size}</p>
+            <div class="min-w-0">
+              <h3 class="font-bold text-xs text-slate-900 dark:text-white truncate" title="${item.title}">${item.title}</h3>
+              <p class="text-[11px] text-slate-400 mt-0.5">${item.format || 'Media'} · ${item.size || 'Session'}</p>
             </div>
           </div>
-          <span class="px-2.5 py-0.5 rounded-full bg-amber-500/15 text-amber-600 dark:text-amber-400 text-[10px] font-mono font-bold">⏱ 14:00</span>
+          <div class="flex items-center gap-1.5 shrink-0">
+            <span class="px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-600 dark:text-amber-400 text-[10px] font-mono font-bold">⏱ 15m</span>
+            <button type="button" onclick="deleteHistoryItem(${idx})" title="Remove item" class="w-6 h-6 rounded-full glass hover:bg-rose-500/20 text-slate-400 hover:text-rose-500 flex items-center justify-center text-xs transition-colors cursor-pointer">✕</button>
+          </div>
         </div>
         <div class="mt-4 pt-3 border-t border-slate-200/50 dark:border-white/10 flex flex-wrap items-center justify-between gap-2">
-          <div class="flex items-center gap-2">
+          <div class="flex items-center gap-1.5 flex-wrap">
             ${studioAction}
           </div>
           <div class="flex items-center gap-2">
-            <button type="button" onclick="navigator.clipboard.writeText('${item.title.replace(/'/g, "\\'")}'); showToast('Copied filename!', 'info');" class="text-xs font-semibold text-slate-500 hover:text-slate-900 dark:hover:text-white">📋 Copy</button>
-            <button type="button" onclick="downloadFromHistory('${item.title.replace(/'/g, "\\'")}', '${item.fileUrl || ''}')" class="px-3.5 py-1.5 rounded-xl btn-blue text-white text-xs font-bold shadow">↓ Download</button>
+            <button type="button" onclick="copyItemTitle('${item.title.replace(/'/g, "\\'")}')" class="text-xs font-semibold text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors cursor-pointer">📋 Copy</button>
+            <button type="button" onclick="downloadItem('${item.title.replace(/'/g, "\\'")}', '${fileUrl}')" class="px-3.5 py-1.5 rounded-xl btn-blue text-white text-xs font-bold shadow flex items-center gap-1 cursor-pointer">
+              <span>↓</span><span>Save to PC</span>
+            </button>
           </div>
         </div>
       `;
       container.appendChild(card);
     });
+
+    if (window.initCardTilt) window.initCardTilt();
   }
 
-  async function downloadFromHistory(title, fileUrl) {
-    playGlassPop();
-    const url = fileUrl || '/static/samples/clip_1.mp4';
-    const safeName = `${title.replace(/[^a-zA-Z0-9_\-\s]/g, '').trim().replace(/\s+/g, '_')}.mp4`;
-    showToast(`Downloading "${safeName}" to your PC...`, 'info');
+  function copyItemTitle(title) {
+    navigator.clipboard.writeText(title);
+    if (window.showToast) window.showToast('Copied title to clipboard!', 'info');
+  }
 
+  function deleteHistoryItem(index) {
+    if (window.playGlassTick) window.playGlassTick();
     try {
-      const res = await fetch(url);
-      if (!res.ok) throw new Error('Fetch failed');
-      const blob = await res.blob();
-      const blobUrl = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = blobUrl;
-      a.download = safeName;
-      document.body.appendChild(a);
-      a.click();
-      setTimeout(() => {
-        a.remove();
-        URL.revokeObjectURL(blobUrl);
-      }, 1500);
-      showToast(`Downloaded "${safeName}" to your PC!`, 'success');
-    } catch {
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = safeName;
-      document.body.appendChild(a);
-      a.click();
-      setTimeout(() => a.remove(), 200);
-      showToast(`Downloading "${safeName}" to your PC...`, 'success');
+      let history = window.getRecentHistory ? window.getRecentHistory() : [];
+      history.splice(index, 1);
+      sessionStorage.setItem('clipglass-history', JSON.stringify(history));
+      localStorage.setItem('clipglass-history', JSON.stringify(history));
+      if (window.updateRecentBadge) window.updateRecentBadge();
+      renderRecentList();
+      if (window.showToast) window.showToast('Item removed from session', 'info');
+    } catch {}
+  }
+
+  function clearAllHistory() {
+    if (window.playGlassPop) window.playGlassPop();
+    sessionStorage.removeItem('clipglass-history');
+    localStorage.removeItem('clipglass-history');
+    if (window.updateRecentBadge) window.updateRecentBadge();
+    renderRecentList();
+    if (window.showToast) window.showToast('Session history wiped successfully!', 'success');
+  }
+
+  function downloadItem(title, fileUrl) {
+    const url = fileUrl || '/static/samples/clip_1.mp4';
+    if (window.downloadFileToPc) {
+      window.downloadFileToPc(url, title);
+    } else {
+      window.location.href = url;
     }
   }
 </script>

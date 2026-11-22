@@ -6,7 +6,7 @@
 <div class="w-full max-w-4xl mx-auto flex flex-col gap-6">
   <!-- Header -->
   <div class="flex items-center gap-3 px-2">
-    <div class="w-8 h-8 rounded-xl bg-indigo-500/20 text-indigo-500 flex items-center justify-center font-bold">
+    <div class="w-9 h-9 rounded-2xl bg-indigo-500/20 text-indigo-500 flex items-center justify-center font-bold text-base">
       ?
     </div>
     <div>
@@ -15,42 +15,150 @@
     </div>
   </div>
 
-  <!-- Accordion Cards -->
-  <div class="flex flex-col gap-3">
-    <div class="glass glass-rim rounded-2xl p-5 shadow-md">
-      <h3 class="font-bold text-sm text-slate-900 dark:text-white mb-2">Why does ClipGlass recommend "Original" for audio instead of MP3 320?</h3>
-      <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
-        YouTube streams native audio in AAC (128 kbps) or Opus (160 kbps). Converting these to MP3 320 kbps creates a larger file without adding acoustic fidelity. Selecting "Original" preserves the bitstream bit-for-bit without lossy recompression.
-      </p>
-    </div>
+  <!-- Search Filter -->
+  <div class="glass glass-rim rounded-2xl p-3 shadow-md flex items-center gap-3">
+    <span class="text-slate-400 text-sm ml-2">🔍</span>
+    <input type="text" id="faqSearchInput" oninput="filterFaqs()" placeholder="Type to search questions, shortcuts, effects..." class="w-full bg-transparent border-none text-xs font-medium text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none" />
+  </div>
 
-    <div class="glass glass-rim rounded-2xl p-5 shadow-md">
-      <h3 class="font-bold text-sm text-slate-900 dark:text-white mb-2">How long are my processed files stored?</h3>
-      <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
-        All extracted videos, mastered audios, and trimmed shorts are strictly ephemeral. Files are automatically unlinked and permanently purged from server memory/disk after exactly 15 minutes.
-      </p>
+  <!-- Keyboard Shortcuts Cheatsheet -->
+  <div class="glass glass-rim rounded-[32px] p-6 shadow-xl flex flex-col gap-4">
+    <div class="flex items-center gap-2">
+      <span class="text-base">⌨️</span>
+      <h3 class="font-extrabold text-sm text-slate-900 dark:text-white tracking-tight">Keyboard Shortcuts Cheatsheet</h3>
     </div>
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+      <div class="glass rounded-xl p-3 flex flex-col gap-1.5">
+        <span class="text-[10px] uppercase font-bold text-blue-500">Universal Downloader</span>
+        <div class="flex items-center justify-between text-slate-600 dark:text-slate-300">
+          <span>Quick Paste Link</span>
+          <kbd class="px-1.5 py-0.5 rounded bg-black/10 dark:bg-white/10 font-mono text-[10px]">Ctrl+V</kbd>
+        </div>
+        <div class="flex items-center justify-between text-slate-600 dark:text-slate-300">
+          <span>Start Inspect</span>
+          <kbd class="px-1.5 py-0.5 rounded bg-black/10 dark:bg-white/10 font-mono text-[10px]">Enter</kbd>
+        </div>
+      </div>
 
-    <div class="glass glass-rim rounded-2xl p-5 shadow-md">
-      <h3 class="font-bold text-sm text-slate-900 dark:text-white mb-2">What are the processing duration and file size limits?</h3>
-      <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
-        Videos up to 3 hours in length and up to 4K resolution (2160p60) are fully supported. For lossless trimming and stream copying, exports finish almost instantaneously regardless of size.
-      </p>
-    </div>
+      <div class="glass rounded-xl p-3 flex flex-col gap-1.5">
+        <span class="text-[10px] uppercase font-bold text-emerald-500">Video Trimmer</span>
+        <div class="flex items-center justify-between text-slate-600 dark:text-slate-300">
+          <span>Play / Pause</span>
+          <kbd class="px-1.5 py-0.5 rounded bg-black/10 dark:bg-white/10 font-mono text-[10px]">Space</kbd>
+        </div>
+        <div class="flex items-center justify-between text-slate-600 dark:text-slate-300">
+          <span>Set In / Out Point</span>
+          <kbd class="px-1.5 py-0.5 rounded bg-black/10 dark:bg-white/10 font-mono text-[10px]">[ / ]</kbd>
+        </div>
+        <div class="flex items-center justify-between text-slate-600 dark:text-slate-300">
+          <span>Step Frame</span>
+          <kbd class="px-1.5 py-0.5 rounded bg-black/10 dark:bg-white/10 font-mono text-[10px]">← / →</kbd>
+        </div>
+      </div>
 
-    <div class="glass glass-rim rounded-2xl p-5 shadow-md">
-      <h3 class="font-bold text-sm text-slate-900 dark:text-white mb-2">Can I download private, live streams, or members-only videos?</h3>
-      <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
-        No. In compliance with security standards, ClipGlass only processes publicly accessible media and active stream feeds.
-      </p>
-    </div>
-
-    <div class="glass glass-rim rounded-2xl p-5 shadow-md">
-      <h3 class="font-bold text-sm text-slate-900 dark:text-white mb-2">Are there any ads, pop-ups, or user accounts?</h3>
-      <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
-        Never. ClipGlass has zero third-party tracking scripts, zero redirects, zero banner ads, and requires no registration or login.
-      </p>
+      <div class="glass rounded-xl p-3 flex flex-col gap-1.5">
+        <span class="text-[10px] uppercase font-bold text-purple-500">Audio Studio</span>
+        <div class="flex items-center justify-between text-slate-600 dark:text-slate-300">
+          <span>Play / Stop</span>
+          <kbd class="px-1.5 py-0.5 rounded bg-black/10 dark:bg-white/10 font-mono text-[10px]">Space</kbd>
+        </div>
+        <div class="flex items-center justify-between text-slate-600 dark:text-slate-300">
+          <span>A/B Bypass Compare</span>
+          <kbd class="px-1.5 py-0.5 rounded bg-black/10 dark:bg-white/10 font-mono text-[10px]">B</kbd>
+        </div>
+        <div class="flex items-center justify-between text-slate-600 dark:text-slate-300">
+          <span>Undo FX Change</span>
+          <kbd class="px-1.5 py-0.5 rounded bg-black/10 dark:bg-white/10 font-mono text-[10px]">Ctrl+Z</kbd>
+        </div>
+      </div>
     </div>
   </div>
+
+  <!-- Interactive Accordion FAQs -->
+  <div id="faqList" class="flex flex-col gap-3">
+    <!-- Q1 -->
+    <details class="faq-item glass glass-rim rounded-2xl p-4 shadow-md transition-all group open:border-blue-500/30">
+      <summary class="font-bold text-xs sm:text-sm text-slate-900 dark:text-white cursor-pointer list-none flex items-center justify-between gap-2">
+        <span>Why does ClipGlass recommend "Original" for audio instead of converting to MP3 320?</span>
+        <span class="text-slate-400 group-open:rotate-180 transition-transform text-xs">▼</span>
+      </summary>
+      <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed mt-3 pt-3 border-t border-slate-200/40 dark:border-white/10">
+        YouTube streams native audio in AAC (128 kbps) or Opus (160 kbps). Converting these to MP3 320 kbps creates a larger file without adding acoustic fidelity. Selecting "Original" preserves the bitstream bit-for-bit without lossy recompression.
+      </p>
+    </details>
+
+    <!-- Q2 -->
+    <details class="faq-item glass glass-rim rounded-2xl p-4 shadow-md transition-all group open:border-blue-500/30">
+      <summary class="font-bold text-xs sm:text-sm text-slate-900 dark:text-white cursor-pointer list-none flex items-center justify-between gap-2">
+        <span>How does the 79-Module Audio Studio work in Auto vs Custom Mode?</span>
+        <span class="text-slate-400 group-open:rotate-180 transition-transform text-xs">▼</span>
+      </summary>
+      <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed mt-3 pt-3 border-t border-slate-200/40 dark:border-white/10">
+        In <strong>Auto Mode</strong>, you pick whichever creative and mastering effects you want (e.g. 8D Audio, Deep Bass, Shimmer Reverb), and ClipGlass automatically calculates harmonious parameters, gain staging, and True-Peak safety limiting. In <strong>Custom Mode</strong>, you have a modular rack with sliders and knobs to adjust every single parameter manually.
+      </p>
+    </details>
+
+    <!-- Q3 -->
+    <details class="faq-item glass glass-rim rounded-2xl p-4 shadow-md transition-all group open:border-blue-500/30">
+      <summary class="font-bold text-xs sm:text-sm text-slate-900 dark:text-white cursor-pointer list-none flex items-center justify-between gap-2">
+        <span>How long are my processed files stored on the server?</span>
+        <span class="text-slate-400 group-open:rotate-180 transition-transform text-xs">▼</span>
+      </summary>
+      <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed mt-3 pt-3 border-t border-slate-200/40 dark:border-white/10">
+        All extracted videos, mastered audios, and trimmed shorts are strictly ephemeral. Files are automatically unlinked and permanently purged from server memory/disk after exactly 15 minutes.
+      </p>
+    </details>
+
+    <!-- Q4 -->
+    <details class="faq-item glass glass-rim rounded-2xl p-4 shadow-md transition-all group open:border-blue-500/30">
+      <summary class="font-bold text-xs sm:text-sm text-slate-900 dark:text-white cursor-pointer list-none flex items-center justify-between gap-2">
+        <span>What makes the Video Trimmer "lossless"?</span>
+        <span class="text-slate-400 group-open:rotate-180 transition-transform text-xs">▼</span>
+      </summary>
+      <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed mt-3 pt-3 border-t border-slate-200/40 dark:border-white/10">
+        ClipGlass uses stream-copying (<code class="font-mono text-blue-500">-c copy</code>) with keyframe-accurate cuts when possible. This means the video stream is not re-encoded, avoiding generational quality loss and completing exports in under 1 second.
+      </p>
+    </details>
+
+    <!-- Q5 -->
+    <details class="faq-item glass glass-rim rounded-2xl p-4 shadow-md transition-all group open:border-blue-500/30">
+      <summary class="font-bold text-xs sm:text-sm text-slate-900 dark:text-white cursor-pointer list-none flex items-center justify-between gap-2">
+        <span>How does the Auto Clip viral shorts algorithm work?</span>
+        <span class="text-slate-400 group-open:rotate-180 transition-transform text-xs">▼</span>
+      </summary>
+      <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed mt-3 pt-3 border-t border-slate-200/40 dark:border-white/10">
+        Auto Clip analyzes multimodal signals: energy volume peaks, pitch shifts, speech transcript sentiment, and speaker activity. It scores segments from 0-100 on Hook, Flow, Engagement, and Trend, selects optimal 15-60 second moments, and formats them in 9:16 vertical cards with karaoke-style captions.
+      </p>
+    </details>
+
+    <!-- Q6 -->
+    <details class="faq-item glass glass-rim rounded-2xl p-4 shadow-md transition-all group open:border-blue-500/30">
+      <summary class="font-bold text-xs sm:text-sm text-slate-900 dark:text-white cursor-pointer list-none flex items-center justify-between gap-2">
+        <span>Are there any ads, pop-ups, or user accounts?</span>
+        <span class="text-slate-400 group-open:rotate-180 transition-transform text-xs">▼</span>
+      </summary>
+      <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed mt-3 pt-3 border-t border-slate-200/40 dark:border-white/10">
+        Never. ClipGlass is completely free, open-source, and has zero tracking scripts, zero redirects, zero banner ads, and requires no registration or login.
+      </p>
+    </details>
+  </div>
 </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  function filterFaqs() {
+    const query = (document.getElementById('faqSearchInput')?.value || '').toLowerCase().trim();
+    const items = document.querySelectorAll('.faq-item');
+    items.forEach(item => {
+      const text = item.textContent.toLowerCase();
+      if (!query || text.includes(query)) {
+        item.style.display = 'block';
+        if (query) item.open = true;
+      } else {
+        item.style.display = 'none';
+      }
+    });
+  }
+</script>
 {% endblock %}
