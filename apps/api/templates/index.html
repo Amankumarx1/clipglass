@@ -3,296 +3,408 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>ClipGlass – paste a link. pick a quality. done.</title>
+<title>ClipGlass – Designed for sound</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Rubik:ital,wght@0,300;0,400;0,500;0,700;1,700&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#eceef6;--text:#12142a;--muted:#5b607a;--glass:rgba(255,255,255,.5);--edge:rgba(255,255,255,.85);--blue:#2f5bff;--pink:#e0489a;--hi:rgba(255,255,255,.75);--shadow:0 24px 60px rgba(60,70,140,.16);--ease:cubic-bezier(.16,1,.3,1)}
-@media (prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#0b0d1c;--text:#f1f2ff;--muted:#a3a8c6;--glass:rgba(34,38,76,.5);--edge:rgba(255,255,255,.16);--hi:rgba(255,255,255,.14);--shadow:0 24px 60px rgba(0,0,0,.5)}}
-:root[data-theme=dark]{--bg:#0b0d1c;--text:#f1f2ff;--muted:#a3a8c6;--glass:rgba(34,38,76,.5);--edge:rgba(255,255,255,.16);--hi:rgba(255,255,255,.14);--shadow:0 24px 60px rgba(0,0,0,.5)}
 *{box-sizing:border-box;margin:0}
-html.lenis,html.lenis body{height:auto}.lenis.lenis-smooth{scroll-behavior:auto!important}
-body{font-family:'Plus Jakarta Sans',system-ui,sans-serif;background:var(--bg);color:var(--text);overflow-x:hidden;transition:background-color .6s,color .6s;
-background-image:radial-gradient(60vw 50vh at 0% 0%,rgba(90,130,255,.28),transparent),radial-gradient(50vw 50vh at 100% 45%,rgba(200,120,255,.22),transparent)}
-#gl{position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none;opacity:0;transition:opacity 1.6s ease}#gl.on{opacity:1}
-.glass{background:var(--glass);border:1px solid var(--edge);backdrop-filter:blur(20px) saturate(170%);-webkit-backdrop-filter:blur(20px) saturate(170%);box-shadow:var(--shadow),inset 0 1px 0 var(--hi)}
+html{scroll-behavior:smooth}
+body{min-height:100vh;overflow-x:hidden;overflow-y:auto;background:#101114;color:#fff;font-family:'Rubik',system-ui,sans-serif}
 a{color:inherit;text-decoration:none}
-:focus-visible{outline:2px solid var(--blue);outline-offset:3px}
-nav{position:fixed;top:14px;left:50%;translate:-50% 0;width:min(1060px,94vw);z-index:10;display:flex;align-items:center;justify-content:space-between;padding:8px 8px 8px 22px;border-radius:999px;transition:width .7s var(--ease),top .6s var(--ease)}
-nav.min{width:min(800px,92vw);top:10px}
-.logo{font-size:20px;font-weight:800;letter-spacing:-.03em;display:flex;gap:8px;align-items:center}
-.logo i{width:0;height:0;border-left:16px solid #6a4dff;border-top:10px solid transparent;border-bottom:10px solid transparent}
-.links{position:relative;display:flex;gap:2px;padding:4px;border-radius:999px;background:rgba(127,127,170,.12)}
-.links a{position:relative;z-index:1;padding:8px 16px;font-size:14px;font-weight:600;border-radius:999px;transition:color .3s}
-.links a.on{color:#fff}
-.ind{position:absolute;top:4px;left:0;height:calc(100% - 8px);width:0;border-radius:999px;background:linear-gradient(135deg,#2f5bff,#6a4dff);box-shadow:0 6px 18px rgba(47,91,255,.4);transition:transform .7s cubic-bezier(.34,1.35,.5,1),width .6s var(--ease)}
-.nr{display:flex;gap:8px;align-items:center}
-.ib{width:40px;height:40px;border-radius:50%;border:1px solid var(--edge);background:var(--glass);color:var(--text);cursor:font-size:16px;transition:transform .6s var(--ease)}
-.ib:hover{transform:rotate(25deg) scale(1.08)}
-.open{padding:11px 18px;border-radius:999px;background:var(--text);color:var(--bg);font-weight:700;font-size:14px;transition:transform .4s var(--ease)}
-.open:hover{transform:translateY(-2px)}
-.rail{position:fixed;right:18px;top:50%;translate:0 -50%;z-index:9;display:flex;flex-direction:column;gap:10px;padding:12px 7px;border-radius:999px;background:var(--glass);border:1px solid var(--edge);backdrop-filter:blur(14px)}
-.rail button{width:8px;height:8px;border-radius:99px;border:0;padding:0;background:var(--muted);opacity:.45;cursor:pointer;transition:height .6s var(--ease),opacity .3s,background .3s}
-.rail button.on{height:26px;opacity:1;background:linear-gradient(var(--blue),var(--pink))}
-main{position:relative;z-index:1}
-section{min-height:100vh;display:flex;flex-direction:column;justify-content:center;padding:110px max(5vw,24px) 60px}
-.col{width:min(560px,100%);will-change:transform}
-.right{margin-left:auto}
-.tag{display:inline-block;font-size:13px;font-weight:600;color:var(--blue);padding:7px 16px;border-radius:999px;margin-bottom:22px}
-h1{font-size:clamp(42px,6.4vw,92px);font-weight:800;letter-spacing:-.045em;line-height:1}
-.ln{display:block;overflow:hidden;padding-bottom:.1em;margin-bottom:-.1em}
-.ln>span{display:block;translate:0 110%;transition:translate 1.2s var(--ease) calc(.14s*var(--i))}
+button{font:inherit;color:inherit}
+:focus-visible{outline:2px solid #fff;outline-offset:4px}
+
+/* Geometric Opening Experience */
+#geomIntro{position:fixed;inset:0;z-index:9999;background:#101114;display:flex;align-items:center;justify-content:center;pointer-events:all;cursor:pointer;overflow:hidden;transition:opacity .7s cubic-bezier(.16,1,.3,1),visibility .7s}
+#geomIntro.intro-done{opacity:0;visibility:hidden;pointer-events:none}
+.shutter-l,.shutter-r{position:absolute;top:0;bottom:0;width:55%;background:#101114;transition:transform 1.1s cubic-bezier(.16,1,.3,1);z-index:1}
+.shutter-l{left:0;clip-path:polygon(0 0,100% 0,82% 100%,0 100%);border-right:2px solid #ff2d6f;box-shadow:10px 0 50px rgba(255,45,111,.45)}
+.shutter-r{right:0;clip-path:polygon(18% 0,100% 0,100% 100%,0 100%);border-left:2px solid #1f66ff;box-shadow:-10px 0 50px rgba(31,102,255,.45)}
+.intro-open .shutter-l{transform:translateX(-105%) skewX(-10deg)}
+.intro-open .shutter-r{transform:translateX(105%) skewX(-10deg)}
+.geom-badge{position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;gap:14px;transition:opacity .5s ease,transform .8s cubic-bezier(.16,1,.3,1)}
+.intro-open .geom-badge{opacity:0;transform:scale(1.35)}
+.geom-logo{width:46px;height:46px;border-radius:50%;background:#e9202f;display:grid;place-items:center;box-shadow:0 0 35px rgba(233,32,47,.8);animation:pulse 2s infinite ease-in-out}
+.geom-logo::after{content:"";margin-left:3px;border-left:14px solid #fff;border-top:9px solid transparent;border-bottom:9px solid transparent}
+.geom-title{font-size:22px;font-weight:700;letter-spacing:-.02em}
+.geom-sub{font-size:11px;letter-spacing:.25em;text-transform:uppercase;color:#8e90a0}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
+
+/* 3D Stage Section */
+.stage{--a1:#ff2d6f;--a2:#1f66ff;--a3:#ff7355;--ease:cubic-bezier(.16,1,.3,1);position:relative;height:100vh;min-height:640px;overflow:hidden;touch-action:none;cursor:grab;
+background:radial-gradient(55vw 60vh at 44% 52%,#232537 0,#18191e 55%,#111216 100%)}
+.stage.drag{cursor:grabbing}
+.pill{position:absolute;top:50%;height:36vh;translate:0 -50%;border-radius:999px;transition:background .8s}
+.p1{left:14vw;width:30vw;background:#222328;box-shadow:inset 0 0 50px rgba(0,0,0,.45)}
+.p2{left:46vw;width:40vw;background:linear-gradient(90deg,#2b2c32,#393a41);opacity:.85}
+.num{position:absolute;left:18vw;top:50%;translate:0 -50%;font:italic 700 clamp(64px,9vw,140px)/1 'Rubik',sans-serif;letter-spacing:-.04em;color:#383940;transition:opacity .45s,translate .6s var(--ease);user-select:none}
+#gl{position:absolute;inset:0;width:100%;height:100%;z-index:1;pointer-events:none;opacity:0;transition:opacity 1.4s}#gl.on{opacity:1}
+header{position:absolute;z-index:4;top:0;left:0;right:0;display:flex;justify-content:space-between;align-items:center;padding:4vh 8vw}
+.logo{display:flex;align-items:center;gap:10px;font-weight:700;font-size:15px;letter-spacing:-.02em}
+.logo i{width:26px;height:26px;border-radius:50%;background:#e9202f;display:grid;place-items:center;box-shadow:0 6px 18px rgba(233,32,47,.5)}
+.logo i::after{content:"";margin-left:2px;border-left:9px solid #fff;border-top:6px solid transparent;border-bottom:6px solid transparent}
+nav{display:flex;align-items:center;gap:26px;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:#9a9ca8}
+nav a{transition:color .3s}nav a:hover{color:#fff}
+nav .app{background:#1f66ff;color:#fff;padding:9px 18px;border-radius:999px;letter-spacing:.1em;box-shadow:0 8px 22px rgba(31,102,255,.45);transition:transform .4s var(--ease),background .3s}
+nav .app:hover{transform:translateY(-2px);background:#3377ff}
+.cats{position:absolute;z-index:4;left:5vw;top:50%;translate:0 -50%;display:flex;flex-direction:column;gap:26px}
+.cats button{display:flex;flex-direction:column;align-items:center;gap:10px;background:none;border:0;cursor:pointer;color:#6a6c78;transition:color .4s}
+.cats .t{writing-mode:vertical-rl;rotate:180deg;font-size:10px;letter-spacing:.2em;text-transform:uppercase}
+.cats .mk{width:6px;height:6px;background:var(--a2);opacity:0;scale:.2;transition:opacity .4s,scale .5s var(--ease),background .6s}
+.cats button.on{color:#fff}.cats button.on .mk{opacity:1;scale:1}
+.cats button:hover{color:#fff}
+.arr{position:absolute;z-index:4;top:50%;translate:0 -50%;width:48px;height:48px;border-radius:50%;border:0;background:none;font-size:34px;line-height:1;cursor:pointer;transition:transform .4s var(--ease),opacity .3s}
+.arr.l{left:1.5vw;opacity:.35}.arr.r{right:1.5vw}
+.arr:hover{opacity:1}.arr.r:hover{transform:translateX(4px)}.arr.l:hover{transform:translateX(-4px)}
+.copy{position:absolute;z-index:3;left:calc(44vw + 31vh);top:50%;translate:0 -50%;max-width:calc(100vw - 44vw - 31vh - 6vw);font-weight:300;font-size:clamp(28px,3.9vw,64px);line-height:1.12;letter-spacing:-.01em}
+.copy b{font-weight:700;color:var(--a2);transition:color .6s}
+.sub{margin-top:18px;font-size:clamp(12px,1.05vw,16px);line-height:1.55;font-weight:300;color:#9a9ca8;max-width:32ch}
+.ln{display:block;overflow:hidden;padding-bottom:.12em;margin-bottom:-.12em}
+.ln>span{display:block;translate:0 110%;transition:translate 1.2s var(--ease) calc(.12s*var(--i,0))}
 .ready .ln>span{translate:0 0}
-h1 em{font-style:normal;background:linear-gradient(90deg,var(--blue),var(--pink));-webkit-background-clip:text;background-clip:text;color:transparent}
-h2{font-size:clamp(30px,4vw,48px);font-weight:800;letter-spacing:-.035em;margin-bottom:10px}
-.sub{color:var(--muted);font-size:18px;line-height:1.6;margin:22px 0 30px}
-.fd{opacity:0;translate:0 26px;transition:opacity 1s var(--ease) var(--d,0s),translate 1s var(--ease) var(--d,0s)}
-.ready .fd{opacity:1;translate:0 0}
-.bar{display:flex;align-items:center;gap:8px;padding:8px;border-radius:999px;transition:box-shadow .4s}
-.bar:focus-within{box-shadow:var(--shadow),0 0 0 3px rgba(47,91,255,.35)}
-.bar.err{animation:shake .45s}
-@keyframes shake{20%,60%{transform:translateX(-7px)}40%,80%{transform:translateX(7px)}}
-.bar input{flex:1;min-width:0;border:0;background:none;padding:0 6px 0 14px;font:inherit;font-size:15px;color:var(--text);outline:0}
-.bar .pst{width:40px;height:40px;border-radius:50%;border:0;background:rgba(127,127,170,.14);cursor:pointer;font-size:15px;transition:transform .4s var(--ease)}
-.bar .pst:hover{transform:scale(1.1)}
-.go{border:0;font:inherit;font-weight:700;color:#fff;padding:14px 26px;border-radius:999px;cursor:pointer;background:linear-gradient(135deg,#2f7bff,#26b5ff);box-shadow:0 8px 24px rgba(47,123,255,.45),inset 0 1px 0 rgba(255,255,255,.5);transition:transform .4s var(--ease),box-shadow .4s}
-.go:hover{transform:translateY(-2px);box-shadow:0 14px 30px rgba(47,123,255,.5),inset 0 1px 0 rgba(255,255,255,.5)}
-.go.busy{opacity:.7;pointer-events:none}
-.msg{min-height:22px;margin:10px 0 0 18px;font-size:13px;font-weight:600;color:var(--pink)}
-.hear{display:inline-flex;align-items:center;gap:10px;margin-top:6px;padding:10px 18px 10px 14px;border-radius:999px;border:1px solid var(--edge);background:var(--glass);backdrop-filter:blur(14px);color:var(--text);font:inherit;font-size:14px;font-weight:600;cursor:pointer}
-.eq{display:flex;gap:2px;align-items:flex-end;height:16px;width:20px}
-.eq i{flex:1;height:30%;background:linear-gradient(var(--pink),var(--blue));border-radius:2px}
-.hear.on .eq i{animation:eq .7s ease-in-out infinite alternate}.eq i:nth-child(2){animation-delay:.15s}.eq i:nth-child(3){animation-delay:.3s}.eq i:nth-child(4){animation-delay:.45s}
-@keyframes eq{to{height:100%}}
-.grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:26px}
-.card{position:relative;padding:22px;border-radius:26px;overflow:hidden;transition:transform .5s var(--ease),opacity 1s var(--ease) var(--d,0s),translate 1s var(--ease) var(--d,0s),scale 1s var(--ease) var(--d,0s)}
-.card::before{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(260px circle at var(--mx,50%) var(--my,0%),var(--hi),transparent 70%);opacity:0;transition:opacity .4s}
-.card:hover::before{opacity:1}
-.rv{opacity:0;translate:0 44px;scale:.96}
-.rv.in{opacity:1;translate:0 0;scale:1}
-.ic{width:46px;height:46px;border-radius:15px;display:grid;place-items:center;margin-bottom:14px;transition:transform .6s var(--ease)}
-.card:hover .ic{transform:scale(1.12) rotate(-6deg)}
-.ic svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
-.card h3{font-size:18px;margin-bottom:6px}
-.card p{font-size:14px;line-height:1.55;color:var(--muted)}
-.card a.l{display:flex;justify-content:space-between;margin-top:14px;font-size:14px;font-weight:700}
-.card a.l span{transition:transform .5s var(--ease)}.card a.l:hover span{transform:translateX(5px)}
-.steps{display:flex;flex-direction:column;gap:14px;margin-top:22px}
-.steps .card{display:flex;gap:18px;align-items:flex-start}
-.steps strong{font-size:30px;font-weight:800;letter-spacing:-.04em;opacity:.5}
-.center{justify-content:flex-end}
-.privacy{display:flex;gap:18px;align-items:center;max-width:760px;margin:0 auto}
-.pill{white-space:nowrap;padding:8px 14px;border-radius:999px;background:rgba(40,190,140,.16);color:#13946a;font-weight:700;font-size:13px}
-.cta{display:block;width:max-content;margin:26px auto 0;padding:18px 38px;border-radius:999px;font-weight:800;font-size:17px;color:#fff;background:linear-gradient(120deg,#2f5bff,#8a4dff,#e0489a);background-size:200% 100%;box-shadow:0 14px 40px rgba(110,80,255,.45),inset 0 1px 0 rgba(255,255,255,.4);transition:background-position .8s var(--ease),transform .5s var(--ease)}
-.cta:hover{background-position:100% 0;transform:translateY(-3px) scale(1.03)}
-footer{position:relative;z-index:1;padding:30px max(5vw,24px);display:flex;flex-wrap:wrap;gap:12px 28px;justify-content:space-between;color:var(--muted);font-size:13px}
-footer nav{all:unset;display:flex;gap:18px;flex-wrap:wrap}footer nav a:hover{color:var(--text)}
-@media(max-width:820px){section{justify-content:flex-end;padding-top:46vh}.right{margin-left:0}.grid{grid-template-columns:1fr}.links,.rail{display:none}.privacy{flex-direction:column;text-align:center}}
-@media(prefers-reduced-motion:reduce){*{transition-duration:.01s!important;animation:none!important}.fd,.rv,.ln>span{opacity:1;translate:0 0;scale:1}}
+.out .ln>span{translate:0 110%;transition:translate .45s cubic-bezier(.5,0,.8,.4) calc(.05s*var(--i,0))}
+.out .num{opacity:0;translate:-24px -50%}
+.buy{position:absolute;z-index:4;left:50%;bottom:6vh;translate:-50% 0;display:flex;align-items:center;gap:14px}
+.sw{width:13px;height:13px;border-radius:50%;border:1px solid rgba(255,255,255,.25);background:var(--c);cursor:pointer;padding:0;outline:2px solid transparent;outline-offset:4px;transition:transform .4s var(--ease),outline-color .3s}
+.sw:hover{transform:scale(1.35)}.sw.on{outline-color:rgba(255,255,255,.6)}
+.go{margin:0 10px;padding:13px 30px;border-radius:999px;background:#e9202f;font-weight:700;font-size:11px;letter-spacing:.1em;text-transform:uppercase;box-shadow:0 10px 30px rgba(233,32,47,.55);transition:transform .5s var(--ease),box-shadow .5s}
+.go:hover{transform:translateY(-3px) scale(1.04);box-shadow:0 16px 40px rgba(233,32,47,.7)}
+.hint{position:absolute;z-index:4;bottom:6.5vh;right:8vw;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#5d5f6b}
+.fade{opacity:0;transition:opacity 1.4s ease .9s}.ready .fade{opacity:1}
+
+/* Scroll Indicator */
+.scroll-indicator{position:absolute;bottom:2vh;left:50%;translate:-50% 0;z-index:4;display:flex;flex-direction:column;align-items:center;gap:6px;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:#6a6c78;cursor:pointer;transition:color .3s}
+.scroll-indicator:hover{color:#fff}
+.scroll-indicator span{display:inline-block;animation:bounce 1.6s infinite ease-in-out}
+@keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(5px)}}
+
+/* Scrollable Content Section */
+.content-wrapper{position:relative;z-index:2;background:#101114;border-top:1px solid rgba(255,255,255,.08);padding:80px 8vw 60px}
+.section-title{text-align:center;max-width:700px;margin:0 auto 40px}
+.section-title h2{font-size:clamp(28px,3.5vw,46px);font-weight:700;letter-spacing:-.02em;margin-bottom:12px}
+.section-title p{font-size:14px;color:#8e90a0;line-height:1.6}
+
+/* Instant URL Search Console */
+.search-console{max-width:760px;margin:0 auto 80px;background:rgba(26,27,33,.8);border:1px solid rgba(255,255,255,.12);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);padding:10px 12px;border-radius:999px;display:flex;align-items:center;gap:12px;box-shadow:0 24px 60px rgba(0,0,0,.5),0 0 40px rgba(31,102,255,.15);transition:border-color .3s,box-shadow .3s}
+.search-console:focus-within{border-color:#1f66ff;box-shadow:0 24px 60px rgba(0,0,0,.5),0 0 50px rgba(31,102,255,.35)}
+.search-icon{width:38px;height:38px;border-radius:50%;background:rgba(255,255,255,.06);display:grid;place-items:center;font-size:16px;color:#8e90a0;shrink:0}
+.search-input{flex:1;background:none;border:none;color:#fff;font-size:14px;font-family:'Rubik',sans-serif;outline:none}
+.search-input::placeholder{color:#626472}
+.paste-btn{width:38px;height:38px;border-radius:50%;background:rgba(255,255,255,.08);border:0;cursor:pointer;display:grid;place-items:center;font-size:14px;color:#fff;transition:transform .3s,background .3s}
+.paste-btn:hover{transform:scale(1.1);background:rgba(255,255,255,.16)}
+.submit-btn{padding:12px 28px;border-radius:999px;background:#e9202f;border:0;color:#fff;font-weight:700;font-size:11px;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;box-shadow:0 8px 24px rgba(233,32,47,.45);transition:transform .4s cubic-bezier(.16,1,.3,1),box-shadow .4s}
+.submit-btn:hover{transform:translateY(-2px);box-shadow:0 12px 30px rgba(233,32,47,.65)}
+
+/* Workstations Grid */
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:24px;max-width:1160px;margin:0 auto 80px}
+.card{background:linear-gradient(135deg,rgba(26,27,34,.7),rgba(18,19,23,.8));border:1px solid rgba(255,255,255,.08);border-radius:28px;padding:32px 28px;transition:transform .4s cubic-bezier(.16,1,.3,1),border-color .4s,box-shadow .4s;position:relative;overflow:hidden}
+.card:hover{transform:translateY(-6px);border-color:rgba(255,255,255,.2);box-shadow:0 24px 60px rgba(0,0,0,.6)}
+.card-num{font-size:11px;letter-spacing:.18em;font-weight:700;text-transform:uppercase;color:#626472;margin-bottom:16px}
+.card-title{font-size:20px;font-weight:700;margin-bottom:10px}
+.card-desc{font-size:13px;color:#8e90a0;line-height:1.6;margin-bottom:24px;font-weight:300}
+.card-link{display:inline-flex;align-items:center;gap:8px;font-size:11px;letter-spacing:.12em;font-weight:700;text-transform:uppercase;color:#fff;transition:gap .3s}
+.card-link:hover{gap:12px}
+
+/* Audio Wave Visualizer Showcase */
+.audio-showcase{max-width:1160px;margin:0 auto 80px;background:radial-gradient(ellipse at 50% 50%,#1c1e28 0,#14151a 100%);border:1px solid rgba(255,255,255,.1);border-radius:32px;padding:48px;display:flex;flex-direction:column;align-items:center;text-align:center;gap:24px;box-shadow:0 30px 80px rgba(0,0,0,.6)}
+.bars-wrap{display:flex;align-items:center;justify-content:center;gap:4px;height:64px;width:100%;max-width:540px;margin:12px 0}
+.v-bar{flex:1;background:linear-gradient(180deg,#ff2d6f,#1f66ff);border-radius:999px;height:20%;animation:wave 1.4s ease-in-out infinite alternate}
+@keyframes wave{0%{height:15%}100%{height:95%}}
+
+/* Footer */
+footer{border-top:1px solid rgba(255,255,255,.08);padding:40px 8vw;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:20px;font-size:12px;color:#6a6c78}
+footer .brand{display:flex;align-items:center;gap:10px;font-weight:700;color:#fff}
+footer .links{display:flex;align-items:center;gap:24px}
+footer .links a:hover{color:#fff}
+
+@media(max-width:820px){
+  .pill,.num,.hint,.cats{display:none}
+  .copy{left:7vw;right:7vw;top:62%;max-width:none;font-size:32px}
+  nav a:not(.app){display:none}
+  .arr{top:42%}
+  .buy{bottom:4vh}
+  header{padding:3vh 6vw}
+  .search-console{flex-direction:column;border-radius:24px;padding:16px}
+  .search-input{width:100%;text-align:center}
+  .submit-btn{width:100%}
+  footer{flex-direction:column;text-align:center}
+}
+@media(prefers-reduced-motion:reduce){
+  *{transition-duration:.01s!important}
+  .ln>span{translate:0 0}
+}
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@studio-freight/lenis@1.0.42/dist/lenis.min.js"></script>
 </head>
 <body>
-<canvas id="gl" aria-hidden="true"></canvas>
-<nav class="glass" id="nav" aria-label="Main">
-  <a class="logo" href="#top"><i></i>ClipGlass</a>
-  <div class="links" id="links"><span class="ind"></span><a href="#top">Home</a><a href="#tools">Tools</a><a href="#how">How it works</a><a href="#privacy">Privacy</a></div>
-  <div class="nr"><button class="ib" id="theme" aria-label="Toggle dark mode">☾</button><a class="open" href="/downloader">Open app</a></div>
-</nav>
-<div class="rail" id="rail" aria-label="Page sections"></div>
-<main>
-  <section id="top" data-label="Home" data-x="2.4" data-y="-.1" data-ry="-.5" data-s="1">
-    <div class="col">
-      <span class="tag glass fd" style="--d:.1s">✨ Next-Gen Liquid Glass Processing Engine</span>
-      <h1><span class="ln" style="--i:1"><span>paste a link.</span></span><span class="ln" style="--i:2"><span>pick a quality.</span></span><span class="ln" style="--i:3"><span><em>done.</em></span></span></h1>
-      <p class="sub fd" style="--d:.6s">Your all-in-one workspace for downloading, editing, mastering audio, and creating viral shorts from any video.</p>
-      <form class="bar glass fd" id="f" style="--d:.75s" novalidate>
-        <input id="url" aria-label="YouTube or music URL" placeholder="Paste YouTube or Music URL…" autocomplete="off">
-        <button type="button" class="pst" id="pst" aria-label="Paste from clipboard">📋</button>
-        <button class="go" id="go">Fetch video</button>
-      </form>
-      <p class="msg" id="msg" role="status"></p>
-      <button class="hear fd" id="hear" aria-pressed="false" style="--d:.95s"><span class="eq"><i></i><i></i><i></i><i></i></span><span id="hearT">Hear the headphones react</span></button>
-    </div>
-  </section>
 
-  <section id="tools" data-label="Tools" data-x="-2.5" data-y="0" data-ry="1.0" data-s="1">
-    <div class="col right">
-      <h2>Media Workspaces</h2>
-      <p style="color:var(--muted)">Pick a specialized workstation to process your media.</p>
-      <div class="grid">
-        <div class="card glass rv"><div class="ic" style="background:#dbe4ff;color:#2f5bff"><svg viewBox="0 0 24 24"><path d="M12 4v10m0 0l-4-4m4 4l4-4M5 19h14"/></svg></div><h3>Downloader</h3><p>Extract 4K to 360p MP4/WebM video and MP3 up to 320 kbps.</p><a class="l" style="color:#2f5bff" href="/downloader">Open Downloader <span>→</span></a></div>
-        <div class="card glass rv"><div class="ic" style="background:#eadcff;color:#8b3fe0"><svg viewBox="0 0 24 24"><path d="M9 18V6l10-2v12"/><circle cx="6" cy="18" r="3"/><circle cx="16" cy="16" r="3"/></svg></div><h3>Audio Studio</h3><p>60+ audio DSP effects, Auto and Custom modes, loudness normalization.</p><a class="l" style="color:#8b3fe0" href="/studio">Open Audio Studio <span>→</span></a></div>
-        <div class="card glass rv"><div class="ic" style="background:#d4f5e6;color:#0f9a6a"><svg viewBox="0 0 24 24"><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M8.1 8.1L20 20M8.1 15.9L20 4"/></svg></div><h3>Video Trimmer</h3><p>Visual timeline and timestamp cutting with lossless stream copying.</p><a class="l" style="color:#0f9a6a" href="/video-trimmer">Open Trimmer <span>→</span></a></div>
-        <div class="card glass rv"><div class="ic" style="background:#ffe6d8;color:#e0601f"><svg viewBox="0 0 24 24"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/><path d="M19 16l.7 2 2 .7-2 .7-.7 2-.7-2-2-.7 2-.7z"/></svg></div><h3>Auto Clip Studio</h3><p>AI viral highlight detection, auto 9:16 crop, animated karaoke captions.</p><a class="l" style="color:#e0601f" href="/auto-clip">Open Auto Clip <span>→</span></a></div>
-      </div>
-    </div>
-  </section>
+<!-- Geometric Opening Shutter -->
+<div id="geomIntro" onclick="dismissIntro()">
+  <div class="shutter-l"></div>
+  <div class="shutter-r"></div>
+  <div class="geom-badge">
+    <div class="geom-logo"></div>
+    <div class="geom-title">ClipGlass</div>
+    <div class="geom-sub">Designed for sound · Opening Studio</div>
+  </div>
+</div>
 
-  <section id="how" data-label="How it works" data-x="2.4" data-y="0" data-ry="-1.0" data-s="1">
-    <div class="col">
-      <h2>how it works</h2>
-      <div class="steps">
-        <div class="card glass rv"><strong>01</strong><div><h3>paste link</h3><p>Drop in any YouTube video, Short, or Music URL. Stream inspection takes under 2 seconds.</p></div></div>
-        <div class="card glass rv"><strong>02</strong><div><h3>pick quality</h3><p>Select MP4 or WebM up to 4K, or extract tagged audio in MP3, M4A, Opus, FLAC, or WAV.</p></div></div>
-        <div class="card glass rv"><strong>03</strong><div><h3>download</h3><p>High-speed FFmpeg assembly. Direct download with automatic 15-minute deletion.</p></div></div>
-      </div>
-    </div>
-  </section>
+<div class="stage" id="stage">
+  <div class="pill p1"></div><div class="pill p2"></div>
+  <div class="num" id="num" aria-hidden="true">01</div>
+  <canvas id="gl" aria-hidden="true"></canvas>
 
-  <section id="privacy" class="center" data-label="Privacy" data-x="0" data-y="1.15" data-ry="6.283" data-s=".95">
-    <div class="col" style="width:min(760px,100%);margin:0 auto">
-      <div class="card glass privacy rv"><div><h3>Privacy-conscious by architecture</h3><p>No accounts, no ads, no trackers. Downloaded files live in temporary storage and are deleted after 15 minutes.</p></div><span class="pill">15-min auto purge</span></div>
-      <a class="cta" href="/downloader">Start downloading</a>
+  <header>
+    <a class="logo" href="/" aria-label="ClipGlass home"><i></i>ClipGlass</a>
+    <nav aria-label="Main">
+      <a href="/downloader">Downloader</a>
+      <a href="/studio">Studio</a>
+      <a href="/video-trimmer">Trimmer</a>
+      <a href="/auto-clip">Auto Clip</a>
+      <a href="/recent">Recent</a>
+      <a class="app" href="/downloader">Open app</a>
+    </nav>
+  </header>
+
+  <div class="cats" id="cats" aria-label="Workspaces"></div>
+  <button class="arr l" id="prev" aria-label="Previous workspace">‹</button>
+  <button class="arr r" id="next" aria-label="Next workspace">›</button>
+
+  <h1 class="copy" aria-live="polite">
+    <span class="ln" style="--i:1"><span id="l1">Download in</span></span>
+    <span class="ln" style="--i:2"><span><b id="l2">seconds.</b></span></span>
+    <p class="sub"><span class="ln" style="--i:3"><span id="l3">paste a link. pick a quality. done. Up to 4K or MP3.</span></span></p>
+  </h1>
+
+  <div class="buy fade" id="buy">
+    <button class="sw on" data-k="0" style="--c:#17181c" aria-label="Black"></button>
+    <button class="sw" data-k="1" style="--c:#e9e9ec" aria-label="White"></button>
+    <button class="sw" data-k="2" style="--c:#e6d9b5" aria-label="Cream"></button>
+    <a class="go" id="try" href="/downloader">Try it</a>
+    <button class="sw" data-k="3" style="--c:#5a3cb4" aria-label="Purple"></button>
+    <button class="sw" data-k="4" style="--c:#c9202b" aria-label="Red"></button>
+    <button class="sw" data-k="5" style="--c:#e98bb5" aria-label="Pink"></button>
+  </div>
+
+  <div class="hint fade">Drag to rotate</div>
+
+  <a href="#explore" class="scroll-indicator fade" aria-label="Scroll to explore">
+    <span>↓</span>
+    <div>Explore</div>
+  </a>
+</div>
+
+<!-- Scrollable Content Section -->
+<main class="content-wrapper" id="explore">
+  <!-- Section Title -->
+  <div class="section-title">
+    <h2>All-in-One Studio Workspaces</h2>
+    <p>paste a link. pick a quality. done. Zero install, ephemeral 15-minute privacy, pure in-browser and local processing.</p>
+  </div>
+
+  <!-- Instant URL Search Console -->
+  <form class="search-console" onsubmit="event.preventDefault(); submitLandingUrl();">
+    <div class="search-icon">🔗</div>
+    <input type="url" id="urlInput" class="search-input" placeholder="Paste YouTube link to download, master, or trim..." required autocomplete="off" />
+    <button type="button" class="paste-btn" onclick="pasteClipboardUrl()" title="Paste from clipboard">📋</button>
+    <button type="submit" class="submit-btn">Inspect &amp; Download</button>
+  </form>
+
+  <!-- Workstations Grid -->
+  <div class="grid">
+    <div class="card">
+      <div class="card-num">01 / Universal Downloader</div>
+      <h3 class="card-title">Downloader</h3>
+      <p class="card-desc">Download YouTube videos in exact resolutions (4K to 360p) and studio audio (MP3 320k, FLAC, WAV).</p>
+      <a href="/downloader" class="card-link" style="color:#ff2d6f">Open Downloader <span>→</span></a>
     </div>
-  </section>
+
+    <div class="card">
+      <div class="card-num">02 / Audio Studio</div>
+      <h3 class="card-title">Audio Studio</h3>
+      <p class="card-desc">79 DSP creative effects, intelligent Auto Mode, modular Custom FX rack, and True-Peak safety limiting.</p>
+      <a href="/studio" class="card-link" style="color:#19e3b1">Open Studio <span>→</span></a>
+    </div>
+
+    <div class="card">
+      <div class="card-num">03 / Precision Trimmer</div>
+      <h3 class="card-title">Video Trimmer</h3>
+      <p class="card-desc">Dual-handle visual scrub timeline with lossless stream-copying (-c copy) for instantaneous video cutting.</p>
+      <a href="/video-trimmer" class="card-link" style="color:#ffd23f">Open Trimmer <span>→</span></a>
+    </div>
+
+    <div class="card">
+      <div class="card-num">04 / Auto Clip 9:16</div>
+      <h3 class="card-title">Auto Clip Studio</h3>
+      <p class="card-desc">Multimodal AI signals detect viral moments and generate 9:16 vertical shorts with styled karaoke subtitles.</p>
+      <a href="/auto-clip" class="card-link" style="color:#1f66ff">Open Auto Clip <span>→</span></a>
+    </div>
+  </div>
+
+  <!-- Audio Waveform Showcase -->
+  <div class="audio-showcase">
+    <div style="font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:#ff2d6f;font-weight:700">Studio Audio Engine</div>
+    <h3 style="font-size:clamp(22px,2.8vw,36px);font-weight:700">Real-time Web Audio API Processing</h3>
+    <p style="color:#8e90a0;max-width:540px;font-size:13px;line-height:1.6">Master audio with real LUFS loudness metrics, A/B bypass comparison, and zero server uploads. Files remain private to your local browser.</p>
+    <div class="bars-wrap" id="waveformBars"></div>
+    <a href="/studio" class="submit-btn" style="background:#1f66ff;box-shadow:0 8px 24px rgba(31,102,255,.5)">Launch Audio Studio</a>
+  </div>
 </main>
-<footer><span><b style="color:var(--text)">ClipGlass</b> Pure Python &amp; Liquid Glass Media Engine</span>
-  <nav aria-label="Footer"><a href="/faq">Help &amp; FAQ</a><a href="/downloader">Downloader</a><a href="/studio">Studio</a><a href="/video-trimmer">Trimmer</a><a href="/auto-clip">Auto Clip</a><a href="/recent">Recent</a><a href="/settings">Settings</a></nav>
-  <span style="width:100%;text-align:center;font-size:12px">ClipGlass is an independent open-source media tool. All processing is ephemeral and deleted after 15 minutes. You are responsible for copyright compliance.</span></footer>
+
+<footer>
+  <div class="brand">
+    <div style="width:22px;height:22px;border-radius:50%;background:#e9202f;display:grid;place-items:center;box-shadow:0 4px 12px rgba(233,32,47,.45)">
+      <div style="width:0;height:0;margin-left:2px;border-left:8px solid #fff;border-top:5px solid transparent;border-bottom:5px solid transparent"></div>
+    </div>
+    <span>ClipGlass</span>
+    <span style="color:#555">· Ephemeral Media Processing Engine</span>
+  </div>
+  <div class="links">
+    <a href="/downloader">Downloader</a>
+    <a href="/studio">Studio</a>
+    <a href="/video-trimmer">Trimmer</a>
+    <a href="/auto-clip">Auto Clip</a>
+    <a href="/recent">Recent</a>
+    <a href="/jobs">Jobs</a>
+    <a href="/settings">Settings</a>
+    <a href="/faq">Help &amp; FAQ</a>
+  </div>
+  <div style="color:#555;font-size:11px">All media ephemeral &amp; purged after 15 minutes.</div>
+</footer>
 
 <script>
+// --- Geometric Opening Controller ---
+function dismissIntro(){
+  const intro = document.getElementById('geomIntro');
+  if(!intro || intro.classList.contains('intro-done')) return;
+  intro.classList.add('intro-open');
+  setTimeout(()=>intro.classList.add('intro-done'), 700);
+}
+window.addEventListener('DOMContentLoaded', ()=>{
+  setTimeout(()=>{
+    const intro = document.getElementById('geomIntro');
+    if(intro) intro.classList.add('intro-open');
+    setTimeout(()=>{ if(intro) intro.classList.add('intro-done'); }, 750);
+  }, 400);
+
+  // Generate wave bars
+  const wb = document.getElementById('waveformBars');
+  if(wb){
+    for(let i=0; i<32; i++){
+      const bar = document.createElement('div');
+      bar.className = 'v-bar';
+      bar.style.animationDelay = (i * 0.045) + 's';
+      wb.appendChild(bar);
+    }
+  }
+});
+window.addEventListener('keydown', dismissIntro);
+
+// --- URL Search Form ---
+async function pasteClipboardUrl(){
+  try{
+    const text = await navigator.clipboard.readText();
+    if(text){
+      document.getElementById('urlInput').value = text.trim();
+    }
+  }catch(e){
+    document.getElementById('urlInput').focus();
+  }
+}
+function submitLandingUrl(){
+  const url = document.getElementById('urlInput').value.trim();
+  if(url){
+    window.location.href = `/downloader?url=${encodeURIComponent(url)}`;
+  }
+}
+
+// --- Slider & 3D Stage Logic ---
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
-const CG=window.CG={level:0},still=matchMedia('(prefers-reduced-motion:reduce)').matches;
-requestAnimationFrame(()=>requestAnimationFrame(()=>document.body.classList.add('ready')));
-
-// Inertial smooth scrolling (falls back to native if the library can't load)
-let lenis=null;
-if(window.Lenis&&!still){lenis=new Lenis({lerp:.085});(function r(t){lenis.raf(t);requestAnimationFrame(r)})(0)}
-const go=el=>lenis?lenis.scrollTo(el,{duration:1.5}):el.scrollIntoView({behavior:still?'auto':'smooth'});
-
-// Theme
-const root=document.documentElement,tb=$('#theme');
-const isDark=()=>root.dataset.theme?root.dataset.theme==='dark':matchMedia('(prefers-color-scheme:dark)').matches;
-const paint=()=>tb.textContent=isDark()?'☀':'☾';paint();
-tb.onclick=()=>{root.dataset.theme=isDark()?'light':'dark';paint()};
-
-// Nav: sliding indicator, section rail, condensed bar
-const secs=$$('section[data-label]'),links=$$('#links a'),ind=$('.ind'),nav=$('#nav'),rail=$('#rail');
-secs.forEach(s=>{const b=document.createElement('button');b.setAttribute('aria-label',s.dataset.label);b.title=s.dataset.label;b.onclick=()=>go(s);rail.appendChild(b)});
-const dots=[...rail.children];let act=-1;
-function setAct(i){if(i===act)return;act=i;links.forEach((a,j)=>a.classList.toggle('on',j===i));dots.forEach((d,j)=>d.classList.toggle('on',j===i));
-  const a=links[i];ind.style.width=a.offsetWidth+'px';ind.style.transform='translateX('+a.offsetLeft+'px)'}
-links.forEach((a,i)=>a.onclick=e=>{e.preventDefault();go(secs[i])});
-addEventListener('resize',()=>{const i=act;act=-1;setAct(i)});
-if(document.fonts)document.fonts.ready.then(()=>{const i=act;act=-1;setAct(i<0?0:i)});
-const cols=$$('.col');
-(function frame(){
-  const mid=innerHeight/2;let bi=0,bd=1e9;
-  secs.forEach((s,i)=>{const r=s.getBoundingClientRect(),c=Math.abs(r.top+r.height/2-mid);if(c<bd){bd=c;bi=i}});
-  setAct(bi);nav.classList.toggle('min',scrollY>40);
-  if(!still)cols.forEach(c=>{const r=c.parentElement.getBoundingClientRect();c.style.transform='translate3d(0,'+((r.top+r.height/2-mid)*.07).toFixed(1)+'px,0)'});
-  requestAnimationFrame(frame)})();
-
-// Staggered reveal + 3D tilt on cards
-const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}}),{threshold:.2});
-$$('.rv').forEach(el=>{el.style.setProperty('--d',[...el.parentElement.children].indexOf(el)*.1+'s');io.observe(el)});
-$$('.card').forEach(c=>{
-  c.addEventListener('pointermove',e=>{const r=c.getBoundingClientRect(),x=(e.clientX-r.left)/r.width,y=(e.clientY-r.top)/r.height;
-    c.style.setProperty('--mx',x*100+'%');c.style.setProperty('--my',y*100+'%');
-    if(!still)c.style.transform='perspective(900px) rotateX('+((.5-y)*7).toFixed(2)+'deg) rotateY('+((x-.5)*9).toFixed(2)+'deg) translateY(-6px)'});
-  c.addEventListener('pointerleave',()=>c.style.transform='')});
-
-// Link bar: validate, paste, go to the downloader
-const f=$('#f'),url=$('#url'),msg=$('#msg'),goB=$('#go');
-$('#pst').onclick=async()=>{try{url.value=await navigator.clipboard.readText();url.focus();msg.textContent=''}catch(e){msg.textContent='Clipboard is blocked. Paste with Ctrl+V instead.'}};
-url.addEventListener('input',()=>msg.textContent='');
-f.onsubmit=e=>{e.preventDefault();const v=url.value.trim();
-  if(!/^(https?:\/\/)?((www|m|music)\.)?(youtube\.com|youtu\.be)\/\S+/i.test(v)){msg.textContent='Paste a YouTube or YouTube Music link to continue.';f.classList.remove('err');void f.offsetWidth;f.classList.add('err');return}
-  goB.classList.add('busy');goB.textContent='Fetching…';location.href='/downloader?url='+encodeURIComponent(v)};
-
-// Sound demo: the headphones react to a synthesized beat
-let ac,an,out,on=false,step=0,iv;
-const hear=$('#hear'),chords=[[110,130.8,164.8],[87.3,110,130.8],[98,123.5,146.8],[82.4,98,123.5]];
-function kick(){const t=ac.currentTime,o=ac.createOscillator(),g=ac.createGain();o.frequency.setValueAtTime(150,t);o.frequency.exponentialRampToValueAtTime(42,t+.18);
-  g.gain.setValueAtTime(1,t);g.gain.exponentialRampToValueAtTime(.001,t+.35);o.connect(g);g.connect(out);o.start(t);o.stop(t+.4)}
-function pad(fr){const t=ac.currentTime;[-6,6].forEach(d=>{const o=ac.createOscillator(),g=ac.createGain(),fl=ac.createBiquadFilter();
-  o.type='sawtooth';o.frequency.value=fr;o.detune.value=d;fl.type='lowpass';fl.frequency.value=900;
-  g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(.05,t+.4);g.gain.linearRampToValueAtTime(0,t+4);o.connect(fl);fl.connect(g);g.connect(out);o.start(t);o.stop(t+4.1)})}
-function beat(){kick();if(step%8===0)chords[(step/8)%4].forEach(pad);step++}
-function lvl(){if(an&&on){const d=new Uint8Array(an.frequencyBinCount);an.getByteFrequencyData(d);let s=0;for(let i=0;i<6;i++)s+=d[i];CG.level+=(Math.min(1,s/6/200)-CG.level)*.35}else CG.level*=.9;
-  if(on||CG.level>.01)requestAnimationFrame(lvl);else CG.level=0}
-hear.onclick=()=>{
-  if(!on){const AC=window.AudioContext||window.webkitAudioContext;ac=ac||new AC();
-    if(!an){an=ac.createAnalyser();an.fftSize=256;out=ac.createGain();out.gain.value=.55;out.connect(an);an.connect(ac.destination)}
-    ac.resume();on=true;step=0;beat();iv=setInterval(beat,520);lvl()}
-  else{on=false;clearInterval(iv)}
-  hear.classList.toggle('on',on);hear.setAttribute('aria-pressed',on);$('#hearT').textContent=on?'Playing. Tap to stop':'Hear the headphones react'};
-</script>
-<script>
-// Put a real headphone model (.glb) at this path to replace the built-in one.
 const MODEL_URL='/static/models/headphones.glb', MODEL_ROT_Y=0;
+const SL=[
+ {n:'01',cat:'Downloader',l1:'Download in',l2:'seconds.',sub:'paste a link. pick a quality. done. Up to 4K or MP3.',href:'/downloader',yaw:-.55,hex:['#ff2d6f','#1f66ff','#ff7355'],acc:[0xff2d6f,0x1f66ff,0xff7355]},
+ {n:'02',cat:'Studio',l1:'Master your',l2:'sound.',sub:'79+ audio effects with Auto and Custom modular rack.',href:'/studio',yaw:.6,hex:['#19e3b1','#8a5cff','#ffd23f'],acc:[0x19e3b1,0x8a5cff,0xffd23f]},
+ {n:'03',cat:'Auto Clip',l1:'Shorts made',l2:'for you.',sub:'AI finds the best moments and crops them to 9:16.',href:'/auto-clip',yaw:-.95,hex:['#ff8a1f','#17c8ff','#ff3bd4'],acc:[0xff8a1f,0x17c8ff,0xff3bd4]}];
+const SW=[[0x17181c,0x2a2c33],[0xe9e9ec,0xb9bcc4],[0xe6d9b5,0xc9b98a],[0x5a3cb4,0x8a74d6],[0xc9202b,0xe0707a],[0xe98bb5,0xf3b5cf]];
+let cur=0,lock=false;
 
+requestAnimationFrame(()=>requestAnimationFrame(()=>document.body.classList.add('ready')));
+const st=$('#stage'),cats=$('#cats'),catB=[];
+SL.map((s,i)=>i).reverse().forEach(i=>{const b=document.createElement('button');b.innerHTML='<span class="t">'+SL[i].cat+'</span><i class="mk"></i>';b.onclick=()=>go(i);cats.appendChild(b);catB[i]=b});
+function go(i){
+  i=(i+SL.length)%SL.length;if(i===cur||lock)return;lock=true;const dir=i>cur?1:-1,s=SL[i];cur=i;
+  catB.forEach((b,j)=>b.classList.toggle('on',j===i));
+  st.classList.add('out');
+  if(window.GL)GL.change(i,dir);
+  setTimeout(()=>{
+    $('#l1').textContent=s.l1;$('#l2').textContent=s.l2;$('#l3').textContent=s.sub;$('#num').textContent=s.n;$('#try').href=s.href;
+    s.hex.forEach((h,k)=>st.style.setProperty('--a'+(k+1),h));
+    st.classList.remove('out')},480);
+  setTimeout(()=>lock=false,1100)}
+catB[0].classList.add('on');
+$('#next').onclick=()=>go(cur+1);$('#prev').onclick=()=>go(cur-1);
+addEventListener('keydown',e=>{if(e.key==='ArrowRight')go(cur+1);if(e.key==='ArrowLeft')go(cur-1)});
+$$('.sw').forEach(b=>b.onclick=()=>{$$('.sw').forEach(x=>x.classList.toggle('on',x===b));if(window.GL)GL.color(+b.dataset.k)});
+</script>
 
+<script>
 try{
-const cv=document.getElementById('gl');
-const R=new THREE.WebGLRenderer({canvas:cv,alpha:true,antialias:true,powerPreference:'high-performance'});
+const cv=$('#gl');
+const R=new THREE.WebGLRenderer({canvas:cv,alpha:true,antialias:true});
 R.setPixelRatio(Math.min(devicePixelRatio,2));
-R.outputEncoding=THREE.sRGBEncoding;R.toneMapping=THREE.ACESFilmicToneMapping;R.toneMappingExposure=1.2;
-const S=new THREE.Scene(),C=new THREE.PerspectiveCamera(34,1,.1,60);C.position.set(0,0,9);
-const AN=R.capabilities.getMaxAnisotropy();
+R.outputEncoding=THREE.sRGBEncoding;R.toneMapping=THREE.ACESFilmicToneMapping;R.toneMappingExposure=1.1;
+const S=new THREE.Scene(),C=new THREE.PerspectiveCamera(30,1,.1,60);C.position.set(0,0,10.5);
+const AN=R.capabilities.getMaxAnisotropy(),lin=h=>new THREE.Color(h).convertSRGBToLinear();
 
-// ---- Studio environment: softboxes give metal and leather real-looking reflections ----
+// Studio lighting: softboxes for reflections, blue/pink rim lights like the reference
 const pm=new THREE.PMREMGenerator(R),env=new THREE.Scene();
-env.add(new THREE.Mesh(new THREE.BoxGeometry(26,15,26),new THREE.MeshBasicMaterial({color:0x7d86c4,side:THREE.BackSide})));
-[[0xffffff,10,4,0,7,0,5],[0xffffff,6,6,-8,5,6,4],[0x5b86ff,3,10,-10,0,2,4],[0xff6fb8,3,10,10,0,2,4],[0xffffff,10,2.5,0,2,-11,3],[0xb08cff,9,3,0,-6,3,2.5],[0xffd6ec,2,10,7,0,-7,3]].forEach(p=>{
+env.add(new THREE.Mesh(new THREE.BoxGeometry(26,15,26),new THREE.MeshBasicMaterial({color:0x6d76b8,side:THREE.BackSide})));
+[[0xffffff,10,4,0,7,0,5],[0xffffff,6,6,-8,5,6,4],[0x5b86ff,3,10,-10,0,2,5],[0xff6fb8,3,10,10,0,2,5],[0xffffff,10,2.5,0,2,-11,3],[0xb08cff,9,3,0,-6,3,2.5]].forEach(p=>{
   const m=new THREE.Mesh(new THREE.PlaneGeometry(p[1],p[2]),new THREE.MeshBasicMaterial({color:new THREE.Color(p[0]).multiplyScalar(p[6]),side:THREE.DoubleSide}));
   m.position.set(p[3],p[4],p[5]);m.lookAt(0,0,0);env.add(m)});
 S.environment=pm.fromScene(env,.02).texture;
-const key=new THREE.DirectionalLight(0xffffff,1.1);key.position.set(-3,5,6);S.add(key);
-[[0x5b86ff,-5,2,-3],[0xff6fb8,5,-1,-3]].forEach(l=>{const p=new THREE.PointLight(l[0],1.4,25);p.position.set(l[1],l[2],l[3]);S.add(p)});
+const key=new THREE.DirectionalLight(0xffffff,1);key.position.set(-3,5,6);S.add(key);
+[[0x2f6bff,-5,2,-3],[0xff3b7a,5,-1,-3]].forEach(l=>{const p=new THREE.PointLight(l[0],1.6,25);p.position.set(l[1],l[2],l[3]);S.add(p)});
 
-// ---- Procedural PBR textures ----
+// Materials (colors change with the swatches)
 function T(w,h,fn,rep){const c=document.createElement('canvas');c.width=w;c.height=h;fn(c.getContext('2d'),w,h);const t=new THREE.CanvasTexture(c);t.wrapS=t.wrapT=THREE.RepeatWrapping;t.anisotropy=AN;if(rep)t.repeat.set(rep[0],rep[1]);return t}
-const grainFn=(x,w,h)=>{x.fillStyle='#808080';x.fillRect(0,0,w,h);for(let i=0;i<10000;i++){const v=80+Math.random()*100|0;x.fillStyle='rgb('+v+','+v+','+v+')';x.beginPath();x.arc(Math.random()*w,Math.random()*h,.8+Math.random()*1.7,0,7);x.fill()}};
-const brushed=T(8,1024,(x,w,h)=>{for(let y=0;y<h;y++){const v=40+Math.random()*75|0;x.fillStyle='rgb('+v+','+v+','+v+')';x.fillRect(0,y,w,1)}});
+const grain=(x,w,h)=>{x.fillStyle='#808080';x.fillRect(0,0,w,h);for(let i=0;i<9000;i++){const v=80+Math.random()*100|0;x.fillStyle='rgb('+v+','+v+','+v+')';x.beginPath();x.arc(Math.random()*w,Math.random()*h,.8+Math.random()*1.6,0,7);x.fill()}};
 const grille=T(128,128,(x,w,h)=>{x.fillStyle='#fff';x.fillRect(0,0,w,h);x.fillStyle='#000';for(let i=0;i<w;i+=8)for(let j=0;j<h;j+=8){x.beginPath();x.arc(i+4,j+4,2.5,0,7);x.fill()}},[5,5]);
+const paint=new THREE.MeshPhysicalMaterial({color:lin(SW[0][0]),roughness:.5,metalness:.1,clearcoat:.25,clearcoatRoughness:.45});
+const gloss=new THREE.MeshPhysicalMaterial({color:lin(SW[0][0]),roughness:.15,metalness:.2,clearcoat:1,clearcoatRoughness:.05});
+const cush=new THREE.MeshPhysicalMaterial({color:lin(SW[0][0]),roughness:.62,bumpMap:T(256,256,grain,[8,3]),bumpScale:1.8,clearcoat:.15,clearcoatRoughness:.6});
+const padM=new THREE.MeshPhysicalMaterial({color:lin(SW[0][0]),roughness:.62,bumpMap:T(256,256,grain,[14,2]),bumpScale:1.8,clearcoat:.15,clearcoatRoughness:.6});
+const trim=new THREE.MeshPhysicalMaterial({color:lin(SW[0][1]),metalness:.85,roughness:.3,clearcoat:.4});
+const fab=new THREE.MeshStandardMaterial({color:0x07070a,roughness:.9,bumpMap:grille,bumpScale:3});
+const bodyMats=[paint,gloss,cush,padM],M=(g,m)=>new THREE.Mesh(g,m);
 
-const metal=new THREE.MeshPhysicalMaterial({color:0xe6eaf8,metalness:1,roughness:1,roughnessMap:brushed,clearcoat:.5,clearcoatRoughness:.1});
-const leather=new THREE.MeshPhysicalMaterial({color:0x1b1e3c,roughness:.58,bumpMap:T(256,256,grainFn,[8,3]),bumpScale:2.4,clearcoat:.3,clearcoatRoughness:.45});
-const padM=new THREE.MeshPhysicalMaterial({color:0x1b1e3c,roughness:.58,bumpMap:T(256,256,grainFn,[14,2]),bumpScale:2.4,clearcoat:.3,clearcoatRoughness:.45});
-const capM=new THREE.MeshPhysicalMaterial({color:0x0f1126,metalness:.5,roughness:.28,clearcoat:1,clearcoatRoughness:.05});
-const fabM=new THREE.MeshStandardMaterial({color:0x0e1020,roughness:.9,bumpMap:grille,bumpScale:3});
-const dark=new THREE.MeshStandardMaterial({color:0x14162c,metalness:.4,roughness:.5});
-const accent=new THREE.MeshPhysicalMaterial({color:0x6a4dff,metalness:.7,roughness:.25,clearcoat:1,emissive:0x3a22b0,emissiveIntensity:.7});
-const glowM=new THREE.MeshBasicMaterial({color:0xff7cc0});
-const M=(g,m)=>new THREE.Mesh(g,m);
-
-// ---- Over-ear headphones ----
-const H=new THREE.Group(),inner=new THREE.Group();H.add(inner);S.add(H);inner.position.y=.55;
+// Headphones
+const H=new THREE.Group(),inner=new THREE.Group();H.add(inner);S.add(H);inner.position.y=.5;
 const X=1.72,bandG=new THREE.Group();inner.add(bandG);
 const arch=new THREE.CatmullRomCurve3([[-X,-.35],[-X+.02,.5],[-1.2,1.3],[0,1.78],[1.2,1.3],[X-.02,.5],[X,-.35]].map(p=>new THREE.Vector3(p[0],p[1],0)));
-const band=M(new THREE.TubeGeometry(arch,160,.065,20,false),metal);band.scale.z=2.2;bandG.add(band);
+const band=M(new THREE.TubeGeometry(arch,160,.07,20,false),paint);band.scale.z=2.3;bandG.add(band);
 const padC=new THREE.CatmullRomCurve3([[-1,1.12],[-.5,1.5],[0,1.66],[.5,1.5],[1,1.12]].map(p=>new THREE.Vector3(p[0],p[1]-.17,0)));
-const pad=M(new THREE.TubeGeometry(padC,80,.125,24,false),padM);pad.scale.z=2.4;bandG.add(pad);
+const pad=M(new THREE.TubeGeometry(padC,80,.13,24,false),padM);pad.scale.z=2.5;bandG.add(pad);
 [-1,1].forEach(s=>{
-  const arm=M(new THREE.CylinderGeometry(.07,.07,.34,32),metal);arm.position.set(s*X,-.22,0);bandG.add(arm);
-  const sl=M(new THREE.CylinderGeometry(.095,.095,.14,32),accent);sl.position.set(s*X,.05,0);bandG.add(sl);
-  for(let k=0;k<4;k++){const n=M(new THREE.TorusGeometry(.073,.01,8,32),dark);n.rotation.x=Math.PI/2;n.position.set(s*X,-.12-k*.07,0);bandG.add(n)}
-});
-
+  const arm=M(new THREE.CylinderGeometry(.075,.075,.34,32),trim);arm.position.set(s*X,-.22,0);bandG.add(arm);
+  for(let k=0;k<4;k++){const n=M(new THREE.TorusGeometry(.078,.01,8,32),fab);n.rotation.x=Math.PI/2;n.position.set(s*X,-.12-k*.07,0);bandG.add(n)}});
 const cupPts=new THREE.SplineCurve([[0,.32],[.36,.32],[.52,.3],[.64,.24],[.72,.12],[.74,0],[.72,-.1],[.64,-.18],[.5,-.22],[0,-.22]].map(p=>new THREE.Vector2(p[0],p[1]))).getPoints(90).map(p=>new THREE.Vector2(Math.max(0,p.x),p.y));
-const pillow=[];for(let i=0;i<=56;i++){const a=i/56*Math.PI*2;pillow.push(new THREE.Vector2(.52+.2*Math.cos(a),.15*Math.sin(a)))}
-const cupGs=[],waves=[];
+const pillow=[];for(let i=0;i<=56;i++){const a=i/56*Math.PI*2;pillow.push(new THREE.Vector2(.52+.21*Math.cos(a),.16*Math.sin(a)))}
+const cupGs=[];
 [-1,1].forEach(s=>{
   const A=new THREE.Group();A.position.set(s*X,-1.05,0);inner.add(A);cupGs.push(A);
-  const yoke=M(new THREE.TorusGeometry(.94,.05,16,96,Math.PI),metal);yoke.rotation.y=Math.PI/2;A.add(yoke);
-  [-1,1].forEach(z=>{const pin=M(new THREE.CylinderGeometry(.06,.06,.3,24),accent);pin.rotation.x=Math.PI/2;pin.position.z=z*.82;A.add(pin)});
-  const C2=new THREE.Group();C2.rotation.z=-s*Math.PI/2;A.add(C2);   // local +Y = outside of the cup
-  const shell=M(new THREE.LatheGeometry(cupPts,96),metal);shell.scale.x=1.18;C2.add(shell);
-  const cap=M(new THREE.CylinderGeometry(.5,.5,.04,72),capM);cap.position.y=.325;cap.scale.x=1.18;C2.add(cap);
-  const ring=M(new THREE.TorusGeometry(.4,.016,12,120),glowM);ring.rotation.x=Math.PI/2;ring.position.y=.35;ring.scale.x=1.18;C2.add(ring);
-  const logo=M(new THREE.CylinderGeometry(.13,.13,.02,3),accent);logo.rotation.y=Math.PI/2;logo.position.y=.355;C2.add(logo);
-  const rim=M(new THREE.TorusGeometry(.69,.028,14,120),metal);rim.rotation.x=Math.PI/2;rim.position.y=-.21;rim.scale.x=1.18;C2.add(rim);
-  const cush=M(new THREE.LatheGeometry(pillow,96),leather);cush.position.y=-.34;cush.scale.x=1.18;C2.add(cush);
-  const fab=M(new THREE.CylinderGeometry(.34,.34,.03,48),fabM);fab.position.y=-.4;fab.scale.x=1.18;C2.add(fab);
-  for(let i=0;i<3;i++){const w=M(new THREE.RingGeometry(.52,.545,96),new THREE.MeshBasicMaterial({color:i%2?0x4f7bff:0xff6fb8,transparent:true,side:THREE.DoubleSide,depthWrite:false}));
-    w.rotation.x=-Math.PI/2;w.scale.x=1.18;w.userData.o=i/3;C2.add(w);waves.push(w)}
-});
+  const yoke=M(new THREE.TorusGeometry(.94,.055,16,96,Math.PI),paint);yoke.rotation.y=Math.PI/2;A.add(yoke);
+  [-1,1].forEach(z=>{const pin=M(new THREE.CylinderGeometry(.06,.06,.3,24),trim);pin.rotation.x=Math.PI/2;pin.position.z=z*.82;A.add(pin)});
+  const C2=new THREE.Group();C2.rotation.z=-s*Math.PI/2;A.add(C2);
+  const shell=M(new THREE.LatheGeometry(cupPts,96),paint);shell.scale.x=1.18;C2.add(shell);
+  const cap=M(new THREE.CylinderGeometry(.5,.5,.04,72),gloss);cap.position.y=.325;cap.scale.x=1.18;C2.add(cap);
+  const logo=M(new THREE.CylinderGeometry(.15,.15,.02,3),trim);logo.rotation.y=Math.PI/2;logo.position.y=.35;C2.add(logo);
+  const rim=M(new THREE.TorusGeometry(.69,.028,14,120),trim);rim.rotation.x=Math.PI/2;rim.position.y=-.21;rim.scale.x=1.18;C2.add(rim);
+  const cu=M(new THREE.LatheGeometry(pillow,96),cush);cu.position.y=-.34;cu.scale.x=1.18;C2.add(cu);
+  const fb=M(new THREE.CylinderGeometry(.34,.34,.03,48),fab);fb.position.y=-.4;fb.scale.x=1.18;C2.add(fb)});
 
-// ---- Real model: auto-load from MODEL_URL, or drag a .glb file onto the page ----
+// Optional real model: auto-load, or drop a .glb file on the page
 let real=null,realS=1;
 function useModel(g){
   if(real)H.remove(real);
@@ -302,65 +414,64 @@ function useModel(g){
 if(THREE.GLTFLoader){
   new THREE.GLTFLoader().load(MODEL_URL,useModel,undefined,()=>{});
   addEventListener('dragover',e=>e.preventDefault());
-  addEventListener('drop',e=>{e.preventDefault();const f=e.dataTransfer.files[0];
-    if(f&&/\.glb$/i.test(f.name))f.arrayBuffer().then(b=>new THREE.GLTFLoader().parse(b,'',useModel,()=>{}))});
-}
+  addEventListener('drop',e=>{e.preventDefault();const f=e.dataTransfer.files[0];if(f&&/\.glb$/i.test(f.name))f.arrayBuffer().then(b=>new THREE.GLTFLoader().parse(b,'',useModel,()=>{}))})}
 
-// ---- Depth: glow, ground shadow, orbs, particles ----
-function spr(stops,w,h,sx,sy,z){const c=document.createElement('canvas');c.width=w;c.height=h;const x=c.getContext('2d'),g=x.createRadialGradient(w/2,h/2,0,w/2,h/2,w/2);
-  stops.forEach(s=>g.addColorStop(s[0],s[1]));x.fillStyle=g;x.fillRect(0,0,w,h);
-  const p=new THREE.Sprite(new THREE.SpriteMaterial({map:new THREE.CanvasTexture(c),depthWrite:false,transparent:true}));p.scale.set(sx,sy,1);p.position.z=z;S.add(p);return p}
-const glow=spr([[0,'rgba(130,110,255,.55)'],[.5,'rgba(224,72,154,.18)'],[1,'rgba(224,72,154,0)']],256,256,9,9,-3);
-const shadow=spr([[0,'rgba(25,20,70,.38)'],[1,'rgba(25,20,70,0)']],256,256,5.5,1.1,-1);
-const orbs=[];
-[[.45,-3.6,1.6,1.5,0x6a8cff],[.3,3.8,-1.6,.5,0xff6fb8],[.6,-4.4,-2,-1.5,0xa77bff],[.25,4.6,2,2,0x4fd0ff],[.38,.5,-3.4,-.5,0xff9ad0],[.2,-1.5,3.4,2.4,0x8c7bff]].forEach(o=>{
-  const m=M(new THREE.SphereGeometry(o[0],48,48),new THREE.MeshPhysicalMaterial({color:o[4],metalness:.1,roughness:.04,clearcoat:1,transparent:true,opacity:.6}));
-  m.userData={x:o[1],y:o[2],z:o[3],p:Math.random()*6};S.add(m);orbs.push(m)});
-const N=160,pg=new THREE.BufferGeometry(),pp=new Float32Array(N*3);
-for(let i=0;i<N*3;i++)pp[i]=(Math.random()-.5)*(i%3==2?8:18);
-pg.setAttribute('position',new THREE.BufferAttribute(pp,3));
-const pts=new THREE.Points(pg,new THREE.PointsMaterial({color:0x8c7bff,size:.05,transparent:true,opacity:.6}));S.add(pts);
+// Glow behind the headphones
+const gc=document.createElement('canvas');gc.width=gc.height=256;const gx=gc.getContext('2d'),gr=gx.createRadialGradient(128,128,0,128,128,128);
+gr.addColorStop(0,'rgba(255,255,255,.5)');gr.addColorStop(.5,'rgba(255,255,255,.12)');gr.addColorStop(1,'rgba(255,255,255,0)');gx.fillStyle=gr;gx.fillRect(0,0,256,256);
+const glow=new THREE.Sprite(new THREE.SpriteMaterial({map:new THREE.CanvasTexture(gc),depthWrite:false,transparent:true,opacity:.55,color:lin(SL[0].acc[1])}));glow.scale.setScalar(9);glow.position.z=-2.5;S.add(glow);
 
-// ---- Animation ----
-const secs=[...document.querySelectorAll('section[data-x]')];
-const cur={x:0,y:0,ry:0,s:1};let mx=0,my=0,asp=1,t0=null;
-const still=matchMedia('(prefers-reduced-motion:reduce)').matches;
-const ease=t=>1-Math.pow(1-t,4);
-function size(){const w=innerWidth,h=innerHeight;R.setSize(w,h,false);C.aspect=w/h;C.updateProjectionMatrix();asp=Math.min(1,w/h/1.5)}
+// Slanted accent bars (real 3D, so the headphones sit in front of some and behind others)
+const ANG=.56,bars=[];
+[[3.5,.17,-1.6,-.25,-.6,1,.5],[2,.15,-1.5,.3,-1.1,0,.3],[1.5,.13,1.45,1.5,-.7,2,.4],[.34,.1,-3.4,-1.5,.6,3,.8]].forEach((d,k)=>{
+  const m=new THREE.Mesh(new THREE.BoxGeometry(d[0],d[1],.06),new THREE.MeshBasicMaterial({transparent:true,toneMapped:false,color:d[5]===3?0xffffff:lin(SL[0].acc[d[5]])}));
+  m.rotation.z=ANG;m.userData={x:d[2],y:d[3],z:d[4],ci:d[5],par:d[6],p:0,dir:1,wait:.35+k*.12,delay:.12*k};S.add(m);bars.push(m)});
+
+// Animation
+let slide=0,spin=0,sw=0,mx=0,my=0,t0=null,last=0,drag=0,dragging=false,px=0;
+const cr={yaw:SL[0].yaw,x:0,y:0,s:.75},still=matchMedia('(prefers-reduced-motion:reduce)').matches;
+const ease=t=>1-Math.pow(1-t,4),clamp=(v,a,b)=>Math.min(b,Math.max(a,v));
+function size(){const w=innerWidth,h=innerHeight;R.setSize(w,h,false);C.aspect=w/h;C.updateProjectionMatrix()}
 addEventListener('resize',size);size();
-addEventListener('pointermove',e=>{mx=e.clientX/innerWidth-.5;my=e.clientY/innerHeight-.5});
+addEventListener('pointermove',e=>{mx=e.clientX/innerWidth-.5;my=e.clientY/innerHeight-.5;if(dragging){drag+=(e.clientX-px)*.012;px=e.clientX}});
+$('#stage').addEventListener('pointerdown',e=>{if(e.target.closest('button,a'))return;dragging=true;px=e.clientX;$('#stage').classList.add('drag')});
+addEventListener('pointerup',()=>{dragging=false;$('#stage').classList.remove('drag')});
+
+window.GL={
+  change(i,dir){slide=i;spin+=dir;bars.forEach(b=>{b.userData.dir=-1;b.userData.wait=.5+b.userData.delay})},
+  color(k){sw=k}};
 
 function tick(t){
-  if(t0===null)t0=t;
-  const sec=t*.001,dt=Math.min(.05,(t-(tick.l||t))*.001);tick.l=t;
-  const mid=innerHeight/2,m=innerWidth<820,cs=secs.map(s=>{const r=s.getBoundingClientRect();return r.top+r.height/2-mid});
-  let i=0;while(i<secs.length-1&&cs[i+1]<=0)i++;
-  let f=i<secs.length-1&&cs[i]<0?-cs[i]/(cs[i+1]-cs[i]):0;f=f*f*(3-2*f);
-  const A0=secs[i].dataset,B0=secs[Math.min(i+1,secs.length-1)].dataset,L=(u,v)=>+u+(+v-+u)*f;
-  const tx=m?0:L(A0.x,B0.x)*asp,ty=(m?1.7:0)+L(A0.y,B0.y),tr=L(A0.ry,B0.ry),ts=L(A0.s,B0.s)*(m?.68:1),k=still?1:1-Math.exp(-dt*6);
-  const lv=window.CG?CG.level:0;tick.ph=(tick.ph||0)+dt*(.45+lv*1.4);
-  tick.sy=tick.sy??scrollY;tick.v=(tick.v||0)+((scrollY-tick.sy)-(tick.v||0))*.12;tick.sy=scrollY;const vl=Math.max(-1,Math.min(1,tick.v*.02));
-  cur.x+=(tx-cur.x)*k;cur.y+=(ty-cur.y)*k;cur.ry+=(tr-cur.ry)*k;cur.s+=(ts-cur.s)*k;
+  if(t0===null)t0=t;const dt=Math.min(.05,(t-(last||t))*.001);last=t;const sec=t*.001;
+  const m=innerWidth<820,halfH=Math.tan(C.fov*Math.PI/360)*C.position.z,visW=2*halfH*C.aspect;
+  const tx=m?0:(.43-.5)*visW,ty=m?.95:0,ts=m?.55:.75,k=still?1:1-Math.exp(-dt*5),ky=still?1:1-Math.exp(-dt*2.6);
+  cr.x+=(tx-cr.x)*k;cr.y+=(ty-cr.y)*k;cr.s+=(ts-cr.s)*k;cr.yaw+=(SL[slide].yaw+spin*Math.PI*2-cr.yaw)*ky;
+  if(!dragging)drag*=Math.exp(-dt*1.3);
 
-  const p=still?1:Math.min(1,(t-t0)/2400),e=ease(p);   // intro: parts fly in and assemble
+  const e=ease(still?1:Math.min(1,(t-t0)/2400));   // intro assembly
   bandG.position.y=(1-e)*3.2;bandG.rotation.z=(1-e)*.5;
   cupGs.forEach((A,i)=>{const s=i?1:-1;A.position.x=s*X+s*(1-e)*4.5;A.position.y=-1.05-(1-e)*1.2;A.rotation.y=s*(1-e)*2.4});
   inner.scale.setScalar(.6+.4*e);
-  if(real){real.scale.setScalar(realS*(.6+.4*e));real.rotation.y=MODEL_ROT_Y+(1-e)*Math.PI*1.2}
+  if(real){real.scale.setScalar(realS*(.6+.4*e));real.rotation.y=MODEL_ROT_Y}
 
-  H.position.set(cur.x,cur.y+(still?0:Math.sin(sec*1.1)*.12),0);
-  H.scale.setScalar(cur.s*(1+lv*.04));
-  H.rotation.y=cur.ry+mx*.7+(still?0:Math.sin(sec*.45)*.1);
-  H.rotation.x=my*.35-vl*.1;H.rotation.z=-mx*.07+vl*.12;
-  waves.forEach(w=>{const q=(tick.ph+w.userData.o)%1;w.position.y=.38+q*1.5;w.scale.set(1.18*(.7+q*.8),1,.7+q*.8);w.material.opacity=(1-q)*(.55+lv*.45)*e});
-  orbs.forEach(o=>{const u=o.userData;o.position.set(u.x+mx*u.z*.5+Math.sin(sec*.5+u.p)*.2,u.y-my*u.z*.3+Math.cos(sec*.6+u.p)*.25,u.z)});
-  glow.position.x=cur.x;glow.position.y=cur.y;glow.scale.setScalar(9+lv*3);
-  shadow.position.x=cur.x;shadow.position.y=cur.y-3.1*cur.s;shadow.scale.x=5.5*cur.s*(.8+.2*e);shadow.material.opacity=e;
-  pts.rotation.y=sec*.02;pts.position.y=-scrollY*.002;
-  C.position.x=mx*.5;C.position.y=-my*.3;C.lookAt(0,0,0);
+  H.position.set(cr.x,cr.y-.35*cr.s+(still?0:Math.sin(sec*1.1)*.1),0);
+  H.scale.setScalar(cr.s);
+  H.rotation.y=cr.yaw+drag+mx*.45;H.rotation.x=my*.25;H.rotation.z=-mx*.05;
+
+  const kc=1-Math.exp(-dt*6);   // swatch color tween
+  bodyMats.forEach(mt=>mt.color.lerp(lin(SW[sw][0]),kc));trim.color.lerp(lin(SW[sw][1]),kc);
+  glow.material.color.lerp(lin(SL[slide].acc[1]),1-Math.exp(-dt*3));glow.position.set(cr.x,cr.y,-2.5);
+
+  bars.forEach(b=>{const u=b.userData;
+    if(u.dir<0){u.p-=dt*3;if(u.p<=0){u.p=0;u.dir=1;b.material.color.copy(u.ci===3?new THREE.Color(1,1,1):lin(SL[slide].acc[u.ci]))}}
+    else if(u.wait>0)u.wait-=dt;else u.p=Math.min(1,u.p+dt*1.2);
+    const q=ease(clamp(u.p,0,1)),off=-3*(1-q);
+    b.position.set(cr.x+u.x*(cr.s/.75)+Math.cos(ANG)*off+mx*u.par*1.2,cr.y+u.y*(cr.s/.75)+Math.sin(ANG)*off-my*u.par*.6,u.z);
+    b.material.opacity=q;b.visible=!m||u.ci!==3});
+
+  C.position.x=mx*.35;C.position.y=-my*.2;C.lookAt(0,0,0);
   if(!tick.on){cv.classList.add('on');tick.on=1}
-  R.render(S,C);requestAnimationFrame(tick);
-}
+  R.render(S,C);requestAnimationFrame(tick)}
 requestAnimationFrame(tick);
 }catch(err){console.warn('3D unavailable',err)}
 </script>

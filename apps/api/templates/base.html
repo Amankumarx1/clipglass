@@ -28,59 +28,74 @@
   {% block head %}{% endblock %}
 </head>
 <body class="relative min-h-screen flex flex-col justify-between selection:bg-blue-500 selection:text-white">
-  <!-- Ambient Morphing Gradient Blobs -->
-  <div class="fixed inset-0 pointer-events-none -z-10 overflow-hidden">
-    <div class="absolute -top-40 -left-40 w-96 h-96 rounded-full bg-blue-500/20 dark:bg-blue-600/15 blur-[120px] fluid-blob-lavender"></div>
-    <div class="absolute top-1/3 -right-32 w-[30rem] h-[30rem] rounded-full bg-purple-500/15 dark:bg-purple-600/15 blur-[140px] fluid-blob-iceblue"></div>
-    <div class="absolute -bottom-40 left-1/4 w-[28rem] h-[28rem] rounded-full bg-cyan-400/15 dark:bg-blue-500/10 blur-[130px] fluid-blob-lavender"></div>
+  <!-- Geometric Opening Shutter (Runs once on first app load) -->
+  <div id="geomIntroGlobal" onclick="dismissGlobalIntro()" style="display:none">
+    <div class="shutter-l"></div>
+    <div class="shutter-r"></div>
+    <div class="geom-badge">
+      <div class="geom-logo"></div>
+      <div class="geom-title">ClipGlass</div>
+      <div class="geom-sub">Designed for sound · Media Workstations</div>
+    </div>
   </div>
 
-  <!-- Global Floating Liquid Glass Navbar -->
+  <!-- Ambient Morphing Gradient Blobs -->
+  <div class="fixed inset-0 pointer-events-none -z-10 overflow-hidden">
+    <div class="absolute -top-40 -left-40 w-96 h-96 rounded-full bg-blue-600/15 blur-[120px] fluid-blob-lavender"></div>
+    <div class="absolute top-1/3 -right-32 w-[30rem] h-[30rem] rounded-full bg-pink-600/10 blur-[140px] fluid-blob-iceblue"></div>
+    <div class="absolute -bottom-40 left-1/4 w-[28rem] h-[28rem] rounded-full bg-cyan-500/10 blur-[130px] fluid-blob-lavender"></div>
+  </div>
+
+  <!-- Global Floating Navbar (Beats Aesthetic) -->
   <header class="sticky top-3 z-50 w-full max-w-6xl mx-auto px-3 sm:px-6 select-none">
     <nav class="glass glass-rim rounded-full h-16 px-4 sm:px-6 flex items-center justify-between shadow-xl backdrop-blur-2xl relative">
       <!-- Left: Brand Logo -->
-      <a href="/" onclick="playGlassTick()" class="logo flex items-center gap-2.5 font-extrabold text-lg tracking-tight text-slate-900 dark:text-white shrink-0 group">
-        <i class="w-0 h-0 border-l-[14px] border-l-[#6a4dff] border-t-[8px] border-t-transparent border-b-[8px] border-b-transparent inline-block group-hover:scale-110 transition-transform"></i>
+      <a href="/" onclick="playGlassTick()" class="logo flex items-center gap-2.5 font-bold text-base tracking-tight text-white shrink-0 group">
+        <span class="logo-beats group-hover:scale-105 transition-transform"></span>
         <span>ClipGlass</span>
       </a>
 
-      <!-- Center: Desktop Nav Links -->
-      <div class="links hidden lg:flex items-center relative p-1 rounded-full bg-slate-500/10 dark:bg-white/5 border border-white/20 dark:border-white/10 text-xs font-semibold">
-        <a href="/" onclick="playGlassTick()" class="px-3.5 py-1.5 rounded-full transition-all {% if active_page == 'home' %}text-white font-bold bg-gradient-to-r from-blue-600 to-indigo-600 shadow-sm{% else %}text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white{% endif %}">Home</a>
-        <a href="/downloader" onclick="playGlassTick()" class="px-3.5 py-1.5 rounded-full transition-all {% if active_page == 'downloader' %}text-white font-bold bg-gradient-to-r from-blue-600 to-indigo-600 shadow-sm{% else %}text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white{% endif %}">Downloader</a>
-        <a href="/studio" onclick="playGlassTick()" class="px-3.5 py-1.5 rounded-full transition-all {% if active_page in ['studio', 'audio_studio'] %}text-white font-bold bg-gradient-to-r from-purple-600 to-indigo-600 shadow-sm{% else %}text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white{% endif %}">Studio</a>
-        <a href="/video-trimmer" onclick="playGlassTick()" class="px-3.5 py-1.5 rounded-full transition-all {% if active_page == 'video_trimmer' %}text-white font-bold bg-gradient-to-r from-emerald-600 to-teal-600 shadow-sm{% else %}text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white{% endif %}">Trimmer</a>
-        <a href="/auto-clip" onclick="playGlassTick()" class="px-3.5 py-1.5 rounded-full transition-all {% if active_page == 'auto_clip' %}text-white font-bold bg-gradient-to-r from-orange-500 to-pink-500 shadow-sm{% else %}text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white{% endif %}">Auto Clip</a>
-        <a href="/recent" onclick="playGlassTick()" class="px-3.5 py-1.5 rounded-full transition-all {% if active_page == 'recent' %}text-white font-bold bg-gradient-to-r from-amber-500 to-orange-500 shadow-sm{% else %}text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white{% endif %}">Recent</a>
-        <a href="/jobs" onclick="playGlassTick()" class="px-3 py-1.5 rounded-full transition-all {% if active_page == 'jobs' %}text-white font-bold bg-gradient-to-r from-blue-600 to-indigo-600 shadow-sm{% else %}text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white{% endif %}">Jobs</a>
+      <!-- Center: Desktop Nav Links (Tracked Uppercase) -->
+      <div class="links hidden lg:flex items-center gap-6 text-[10px] font-bold tracking-[0.16em] uppercase text-[#9a9ca8]">
+        <a href="/" onclick="playGlassTick()" class="transition-colors hover:text-white {% if active_page == 'home' %}text-white font-extrabold border-b-2 border-[#e9202f] pb-0.5{% endif %}">Home</a>
+        <a href="/downloader" onclick="playGlassTick()" class="transition-colors hover:text-white {% if active_page == 'downloader' %}text-white font-extrabold border-b-2 border-[#e9202f] pb-0.5{% endif %}">Downloader</a>
+        <a href="/studio" onclick="playGlassTick()" class="transition-colors hover:text-white {% if active_page in ['studio', 'audio_studio'] %}text-white font-extrabold border-b-2 border-[#e9202f] pb-0.5{% endif %}">Studio</a>
+        <a href="/video-trimmer" onclick="playGlassTick()" class="transition-colors hover:text-white {% if active_page == 'video_trimmer' %}text-white font-extrabold border-b-2 border-[#e9202f] pb-0.5{% endif %}">Trimmer</a>
+        <a href="/auto-clip" onclick="playGlassTick()" class="transition-colors hover:text-white {% if active_page == 'auto_clip' %}text-white font-extrabold border-b-2 border-[#e9202f] pb-0.5{% endif %}">Auto Clip</a>
+        <a href="/recent" onclick="playGlassTick()" class="transition-colors hover:text-white {% if active_page == 'recent' %}text-white font-extrabold border-b-2 border-[#e9202f] pb-0.5{% endif %}">Recent</a>
+        <a href="/jobs" onclick="playGlassTick()" class="transition-colors hover:text-white {% if active_page == 'jobs' %}text-white font-extrabold border-b-2 border-[#e9202f] pb-0.5{% endif %}">Jobs</a>
       </div>
 
       <!-- Right: Controls & Actions -->
       <div class="r flex items-center gap-1.5 sm:gap-2">
+        <a href="/downloader" class="hidden sm:inline-flex items-center px-3.5 py-1.5 rounded-full text-[10px] font-bold tracking-wider uppercase bg-[#1f66ff] text-white shadow-[0_4px_16px_rgba(31,102,255,0.4)] hover:scale-105 transition-all">
+          Open App
+        </a>
+
         <!-- Recent Session Drawer -->
-        <button type="button" onclick="event.preventDefault(); playGlassTick(); toggleSessionDrawer()" title="Recent session downloads" class="ib relative w-9 h-9 rounded-full flex items-center justify-center glass glass-rim text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-all cursor-pointer {% if active_page == 'recent' %}ring-2 ring-blue-500{% endif %}">
+        <button type="button" onclick="event.preventDefault(); playGlassTick(); toggleSessionDrawer()" title="Recent session downloads" class="ib relative w-9 h-9 rounded-full flex items-center justify-center glass glass-rim text-slate-400 hover:text-white transition-all cursor-pointer {% if active_page == 'recent' %}ring-2 ring-blue-500{% endif %}">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
           <span data-history-count class="hidden absolute -top-1 -right-1 w-4 h-4 rounded-full bg-red-500 text-white text-[9px] font-bold items-center justify-center shadow-sm">0</span>
         </button>
 
         <!-- Settings -->
-        <a href="/settings" onclick="playGlassTick()" title="ClipGlass settings" class="ib w-9 h-9 rounded-full flex items-center justify-center glass glass-rim text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-all {% if active_page == 'settings' %}ring-2 ring-blue-500 text-blue-500{% endif %}">
+        <a href="/settings" onclick="playGlassTick()" title="ClipGlass settings" class="ib w-9 h-9 rounded-full flex items-center justify-center glass glass-rim text-slate-400 hover:text-white transition-all {% if active_page == 'settings' %}ring-2 ring-blue-500 text-blue-500{% endif %}">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
         </a>
 
         <!-- Sound Toggle -->
-        <button type="button" data-toggle-sound title="Toggle glass audio feedback" class="ib w-9 h-9 rounded-full hidden sm:flex items-center justify-center glass glass-rim text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-all">
+        <button type="button" data-toggle-sound title="Toggle audio feedback" class="ib w-9 h-9 rounded-full hidden sm:flex items-center justify-center glass glass-rim text-slate-400 hover:text-white transition-all">
           <svg data-sound-icon class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"></path></svg>
         </button>
 
         <!-- Theme Toggle -->
-        <button type="button" data-toggle-theme aria-label="Toggle theme" class="ib w-9 h-9 rounded-full flex items-center justify-center glass glass-rim text-slate-700 dark:text-amber-300 hover:border-white transition-all shadow-sm">
-          <span class="dark:hidden text-slate-600 text-sm">🌙</span>
-          <span class="hidden dark:inline text-amber-300 text-sm">☀️</span>
+        <button type="button" data-toggle-theme aria-label="Toggle theme" class="ib w-9 h-9 rounded-full flex items-center justify-center glass glass-rim text-slate-400 hover:text-amber-300 transition-all shadow-sm">
+          <span class="dark:hidden text-slate-400 text-xs">🌙</span>
+          <span class="hidden dark:inline text-amber-300 text-xs">☀️</span>
         </button>
 
         <!-- Mobile Hamburger -->
-        <button type="button" id="mobileMenuBtn" aria-label="Toggle mobile menu" class="lg:hidden ib w-9 h-9 rounded-full flex items-center justify-center glass glass-rim text-slate-800 dark:text-white ml-1">
+        <button type="button" id="mobileMenuBtn" aria-label="Toggle mobile menu" class="lg:hidden ib w-9 h-9 rounded-full flex items-center justify-center glass glass-rim text-white ml-1">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
         </button>
       </div>
@@ -129,24 +144,26 @@
     {% block content %}{% endblock %}
   </main>
 
-  <!-- Global Liquid Glass Footer -->
-  <footer class="w-full max-w-5xl mx-auto px-4 py-8 border-t border-slate-200/40 dark:border-white/10 mt-12 text-center text-xs text-slate-500 dark:text-slate-400">
+  <!-- Global Liquid Glass Footer (Beats Aesthetic) -->
+  <footer class="w-full max-w-5xl mx-auto px-4 py-8 border-t border-slate-200/20 dark:border-white/10 mt-12 text-center text-xs text-slate-400">
     <div class="flex flex-col sm:flex-row items-center justify-between gap-4 mb-3">
       <div class="flex items-center gap-2">
-        <span class="font-extrabold text-sm text-slate-800 dark:text-white">ClipGlass</span>
-        <span>· Pure Python & Liquid Glass Media Engine</span>
+        <span class="logo-beats !w-5 !h-5 !shadow-none"></span>
+        <span class="font-bold text-sm text-white">ClipGlass</span>
+        <span class="text-slate-500">· Designed for Sound · Ephemeral Media Engine</span>
       </div>
-      <div class="flex flex-wrap items-center justify-center gap-4 text-xs font-medium">
-        <a href="/faq" class="hover:text-blue-500 transition-colors">Help & FAQ</a>
-        <a href="/downloader" class="hover:text-blue-500 transition-colors">Downloader</a>
-        <a href="/studio" class="hover:text-blue-500 transition-colors">Studio</a>
-        <a href="/video-trimmer" class="hover:text-blue-500 transition-colors">Trimmer</a>
-        <a href="/auto-clip" class="hover:text-blue-500 transition-colors">Auto Clip</a>
-        <a href="/recent" class="hover:text-blue-500 transition-colors">Recent</a>
-        <a href="/settings" class="hover:text-blue-500 transition-colors">Settings</a>
+      <div class="flex flex-wrap items-center justify-center gap-4 text-xs font-semibold tracking-wider uppercase text-slate-400">
+        <a href="/downloader" class="hover:text-white transition-colors">Downloader</a>
+        <a href="/studio" class="hover:text-white transition-colors">Studio</a>
+        <a href="/video-trimmer" class="hover:text-white transition-colors">Trimmer</a>
+        <a href="/auto-clip" class="hover:text-white transition-colors">Auto Clip</a>
+        <a href="/recent" class="hover:text-white transition-colors">Recent</a>
+        <a href="/jobs" class="hover:text-white transition-colors">Jobs</a>
+        <a href="/settings" class="hover:text-white transition-colors">Settings</a>
+        <a href="/faq" class="hover:text-white transition-colors">Help &amp; FAQ</a>
       </div>
     </div>
-    <p class="text-[11px] opacity-75 max-w-2xl mx-auto">
+    <p class="text-[11px] text-slate-500 max-w-2xl mx-auto">
       Disclaimer: ClipGlass is an independent open-source media tool. All processing is ephemeral and deleted after 15 minutes. Users are responsible for copyright compliance.
     </p>
   </footer>

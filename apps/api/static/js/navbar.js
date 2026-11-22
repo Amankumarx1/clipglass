@@ -103,6 +103,36 @@
     }
     updateSoundIcons();
 
+    // Global Geometric Intro Shutter
+    function initGlobalIntro() {
+      const el = document.getElementById('geomIntroGlobal');
+      if (!el) return;
+      const hasSeen = sessionStorage.getItem('clipglass-intro-shown');
+      if (hasSeen) {
+        el.remove();
+        return;
+      }
+      el.style.display = 'flex';
+      setTimeout(() => {
+        el.classList.add('intro-open');
+        setTimeout(() => {
+          el.classList.add('intro-done');
+          sessionStorage.setItem('clipglass-intro-shown', 'true');
+        }, 700);
+      }, 350);
+    }
+    function dismissGlobalIntro() {
+      const el = document.getElementById('geomIntroGlobal');
+      if (!el || el.classList.contains('intro-done')) return;
+      el.classList.add('intro-open');
+      setTimeout(() => {
+        el.classList.add('intro-done');
+        sessionStorage.setItem('clipglass-intro-shown', 'true');
+      }, 700);
+    }
+    window.dismissGlobalIntro = dismissGlobalIntro;
+    initGlobalIntro();
+
     // Session History Count Badge
     function updateRecentBadge() {
       try {
