@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% block title %}Help & FAQ — ClipGlass{% endblock %}
+
+{% block content %}
+<div class="w-full max-w-4xl mx-auto flex flex-col gap-6">
+  <!-- Header -->
+  <div class="flex items-center gap-3 px-2">
+    <div class="w-8 h-8 rounded-xl bg-indigo-500/20 text-indigo-500 flex items-center justify-center font-bold">
+      ?
+    </div>
+    <div>
+      <h1 class="font-extrabold text-2xl text-slate-900 dark:text-white tracking-tight">Frequently Asked Questions</h1>
+      <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Everything you need to know about ClipGlass audio mastering, video trimming, and formats.</p>
+    </div>
+  </div>
+
+  <!-- Accordion Cards -->
+  <div class="flex flex-col gap-3">
+    <div class="glass glass-rim rounded-2xl p-5 shadow-md">
+      <h3 class="font-bold text-sm text-slate-900 dark:text-white mb-2">Why does ClipGlass recommend "Original" for audio instead of MP3 320?</h3>
+      <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+        YouTube streams native audio in AAC (128 kbps) or Opus (160 kbps). Converting these to MP3 320 kbps creates a larger file without adding acoustic fidelity. Selecting "Original" preserves the bitstream bit-for-bit without lossy recompression.
+      </p>
+    </div>
+
+    <div class="glass glass-rim rounded-2xl p-5 shadow-md">
+      <h3 class="font-bold text-sm text-slate-900 dark:text-white mb-2">How long are my processed files stored?</h3>
+      <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+        All extracted videos, mastered audios, and trimmed shorts are strictly ephemeral. Files are automatically unlinked and permanently purged from server memory/disk after exactly 15 minutes.
+      </p>
+    </div>
+
+    <div class="glass glass-rim rounded-2xl p-5 shadow-md">
+      <h3 class="font-bold text-sm text-slate-900 dark:text-white mb-2">What are the processing duration and file size limits?</h3>
+      <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+        Videos up to 3 hours in length and up to 4K resolution (2160p60) are fully supported. For lossless trimming and stream copying, exports finish almost instantaneously regardless of size.
+      </p>
+    </div>
+
+    <div class="glass glass-rim rounded-2xl p-5 shadow-md">
+      <h3 class="font-bold text-sm text-slate-900 dark:text-white mb-2">Can I download private, live streams, or members-only videos?</h3>
+      <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+        No. In compliance with security standards, ClipGlass only processes publicly accessible media and active stream feeds.
+      </p>
+    </div>
+
+    <div class="glass glass-rim rounded-2xl p-5 shadow-md">
+      <h3 class="font-bold text-sm text-slate-900 dark:text-white mb-2">Are there any ads, pop-ups, or user accounts?</h3>
+      <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+        Never. ClipGlass has zero third-party tracking scripts, zero redirects, zero banner ads, and requires no registration or login.
+      </p>
+    </div>
+  </div>
+</div>
+{% endblock %}

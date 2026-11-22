@@ -2,13 +2,11 @@
   "name": "clipglass",
   "version": "1.0.0",
   "private": true,
-  "description": "ClipGlass - Liquid Glass Media Extraction & Processing Engine",
+  "description": "ClipGlass - Lightweight Liquid Glass Media Processing Workspace (Python + HTML + CSS + Tailwind)",
   "scripts": {
-    "dev": "python start.py",
     "start": "python start.py",
-    "test:web": "npm --prefix apps/web test",
-    "test:api": "pytest apps/api/tests",
-    "test:e2e": "npm --prefix apps/web run test:e2e"
+    "dev": "python start.py",
+    "test": "pytest apps/api/tests"
   }
 }
 

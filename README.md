@@ -21,6 +21,21 @@ The UI implements the exact materials, component shapes, and color tokens from t
 
 ---
 
+## 🎬 Auto Clip (Three-Reference Build)
+
+ClipGlass features a state-of-the-art **Auto Clip** studio that turns long YouTube videos into ranked, explainable, ready-to-post 9:16 vertical shorts, synthesizing the best open-source ideas from **Clips Kitty**, **SupoClip**, and **Lemo-Opuscar**:
+
+- **Multimodal Signal Fusion**: 1-second normalized temporal bins for RMS loudness, silence-to-burst transitions, visual scene changes, chapters, and YouTube most-replayed heatmap data.
+- **Explainable 4-Subscore Virality Framework**: Every clip features individual progress bars for **Hook** (0-100), **Engagement** (0-100), **Value** (0-100), and **Shareability** (0-100) plus multimodal evidence badges.
+- **Sentence Boundary Snapping**: Start and end boundaries snap to spoken sentence limits (up to 8s reach, 2s pause), preventing dialogue from being truncated mid-word or mid-sentence.
+- **Speaker Cut-vs-Pan Tracking**: 9:16 reframing using MediaPipe / OpenCV YuNet with exponential moving average smoothing and an instantaneous camera cut when speaker position shifts >25% of frame width.
+- **Burned Hook Titles & Word-Synced Captions**: AI-generated opening hook headline burned for the first 3.5 seconds, paired with 6 animated ASS subtitle presets (*Viral Pop*, *Clean Minimalist*, *Neon Cyber*, *Karaoke Bounce*, *Impact Headline*, *Dynamic Box*).
+- **Design-Time Polish Pack**: 4 pre-rendered motion styles (*Caption News*, *Swiss Motion Graphics*, *Neon Tubes*, *Dark Tech Keynote*) with manifests and zero-runtime-browser bumper muxing.
+- **Plain-Language Edit Box**: Edit clips directly by typing plain English instructions (e.g. *"make it 5 seconds longer"*, *"style to neon cyber"*).
+- **Zero-Install & Private**: Zero user accounts or permanent storage. An automated 15-minute ephemeral sweeper permanently purges all files.
+
+---
+
 ## 📋 Sensible Defaults Recorded (Section 1)
 Where requirements permitted discretion, sensible defaults were selected and recorded:
 1. **Video Height**: Defaults to `1080p` (or the highest standard resolution offered by the video if below 1080p).

@@ -27,6 +27,60 @@ def validate_job_id(job_id: str) -> str:
         )
     return job_id
 
+@router.get("")
+async def list_jobs():
+    """List all real-time and completed jobs managed by ClipGlass."""
+    all_jobs = []
+    active = 0
+    queued = 0
+    completed = 0
+    failed = 0
+
+    for job_id, rec in list(job_manager.jobs.items()):
+        event_data = rec.to_event_data().model_dump()
+        clean_title = rec.filename or (getattr(rec.request, "filename", None) if rec.request else None) or "Media Stream"
+        event_data["title"] = clean_title
+
+        if rec.request:
+            req_mode = getattr(rec.request, "mode", "video")
+            if req_mode == "audio":
+                req_fmt = getattr(rec.request, "audioFormat", "mp3") or "mp3"
+            else:
+                req_fmt = getattr(rec.request, "container", "mp4") or "mp4"
+            req_height = getattr(rec.request, "height", None)
+            req_quality = f"{req_height}P" if req_height else "BEST"
+        else:
+            req_mode = "video"
+            req_fmt = "mp4"
+            req_quality = "BEST"
+
+        event_data["mode"] = req_mode
+        event_data["format"] = req_fmt.upper()
+        event_data["quality"] = req_quality
+        event_data["createdAt"] = rec.created_at.isoformat() if rec.created_at else None
+
+        if rec.state in ("downloading", "merging", "converting", "trimming", "embedding"):
+            active += 1
+        elif rec.state == "queued":
+            queued += 1
+        elif rec.state == "ready":
+            completed += 1
+        elif rec.state in ("failed", "cancelled"):
+            failed += 1
+
+        all_jobs.append(event_data)
+
+    all_jobs.sort(key=lambda x: x.get("createdAt") or "", reverse=True)
+    return {
+        "jobs": all_jobs,
+        "counts": {
+            "active": active,
+            "queued": queued,
+            "completed": completed,
+            "failed": failed
+        }
+    }
+
 @router.post("", response_model=JobCreateResponse)
 async def create_job(request: Request, body: JobCreateRequest):
     if not body.consent:
@@ -171,12 +225,28 @@ async def download_job_file(job_id: str, request: Request):
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access denied: file path is outside storage sandbox.")
 
     clean_fn = sanitize_filename(record.filename or "download")
-    ext = record.file_path.split(".")[-1]
+    ext = record.file_path.split(".")[-1].lower()
     if not clean_fn.endswith(f".{ext}"):
         clean_fn = f"{clean_fn}.{ext}"
-    
+
+    content_types = {
+        "mp3": "audio/mpeg",
+        "m4a": "audio/mp4",
+        "aac": "audio/aac",
+        "flac": "audio/flac",
+        "wav": "audio/wav",
+        "ogg": "audio/ogg",
+        "opus": "audio/opus",
+        "mp4": "video/mp4",
+        "webm": "video/webm",
+        "mkv": "video/x-matroska",
+    }
+    media_type = content_types.get(ext, "application/octet-stream")
+
+    inline = request.query_params.get("inline") == "1" or request.query_params.get("stream") == "1"
+    disposition_type = "inline" if inline else "attachment"
     encoded_fn = urllib.parse.quote(clean_fn)
-    content_disp = f'attachment; filename="{clean_fn}"; filename*=UTF-8\'\'{encoded_fn}'
+    content_disp = f'{disposition_type}; filename="{clean_fn}"; filename*=UTF-8\'\'{encoded_fn}'
     file_size = os.path.getsize(record.file_path)
 
     # Support Resumable Downloads via HTTP 206 Partial Content Range Requests
@@ -207,16 +277,17 @@ async def download_job_file(job_id: str, request: Request):
                         "Content-Range": f"bytes {start}-{end}/{file_size}",
                         "Accept-Ranges": "bytes",
                         "Content-Length": str(chunk_size),
+                        "Content-Type": media_type,
                         "Content-Disposition": content_disp,
                     }
-                    return StreamingResponse(iter_range(), status_code=status.HTTP_206_PARTIAL_CONTENT, headers=headers)
+                    return StreamingResponse(iter_range(), status_code=status.HTTP_206_PARTIAL_CONTENT, headers=headers, media_type=media_type)
         except Exception:
             pass
 
     return FileResponse(
         path=record.file_path,
         filename=clean_fn,
-        media_type="application/octet-stream",
+        media_type=media_type,
         headers={
             "Content-Disposition": content_disp,
             "Accept-Ranges": "bytes",

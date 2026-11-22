@@ -1,0 +1,601 @@
+{% extends "base.html" %}
+
+{% block title %}Universal Downloader — ClipGlass{% endblock %}
+
+{% block content %}
+<div class="w-full max-w-4xl mx-auto flex flex-col gap-6">
+  <!-- Header -->
+  <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-2">
+    <div>
+      <div class="flex items-center gap-2">
+        <div class="w-8 h-8 rounded-xl bg-blue-500/20 text-blue-500 flex items-center justify-center font-bold">
+          ↓
+        </div>
+        <h1 class="font-extrabold text-2xl text-slate-900 dark:text-white tracking-tight">
+          Universal Downloader
+        </h1>
+      </div>
+      <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">
+        Download YouTube videos & audios in exact resolutions (4K to 360p) and studio formats (MP3 320k, FLAC, MP4).
+      </p>
+    </div>
+
+    <div class="flex items-center gap-2 flex-wrap self-start sm:self-auto">
+      <button type="button" onclick="openActiveInStudio()"
+        class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full glass glass-rim text-xs font-semibold text-purple-600 dark:text-purple-300 hover:opacity-90 transition-all shadow-sm">
+        <span>♫</span>
+        <span>Open in Audio Studio</span>
+      </button>
+      <button type="button" onclick="openActiveInTrimmer()"
+        class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full glass glass-rim text-xs font-semibold text-emerald-600 dark:text-emerald-300 hover:opacity-90 transition-all shadow-sm">
+        <span>✂</span>
+        <span>Open in Trimmer</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Main Card -->
+  <div class="w-full glass glass-rim rounded-[36px] p-6 sm:p-8 shadow-2xl flex flex-col gap-6">
+    <!-- Media Preview & URL Input -->
+    <div class="flex flex-col md:flex-row items-start md:items-center gap-5">
+      <div
+        onclick="handleDownloaderPasteClick()"
+        title="Click to paste URL"
+        class="relative aspect-video w-full md:w-64 rounded-2xl overflow-hidden glass shadow-md shrink-0 bg-slate-900 flex items-center justify-center cursor-pointer hover:border-blue-500/40 border border-transparent transition-all group">
+        <img id="mediaThumbnail" src="" alt="Video thumbnail" class="hidden w-full h-full object-cover" />
+        <div id="mediaThumbnailPlaceholder"
+          class="flex flex-col items-center justify-center text-slate-400 p-4 text-center group-hover:text-blue-400 transition-colors">
+          <span class="text-3xl mb-1 group-hover:scale-110 transition-transform">🎬</span>
+          <span class="text-[11px] font-semibold">Click to Paste URL</span>
+        </div>
+        <div
+          class="absolute bottom-2.5 right-2.5 px-2 py-0.5 rounded-full bg-black/75 backdrop-blur-md text-white text-[11px] font-mono font-medium shadow-md">
+          <span id="mediaDuration">--:--</span>
+        </div>
+      </div>
+
+      <div class="flex flex-col gap-2 flex-1 w-full">
+        <div class="flex items-center justify-between flex-wrap gap-2">
+          <h2 id="mediaTitle" class="font-bold text-xl md:text-2xl text-slate-900 dark:text-white tracking-tight">
+            Ready to Inspect & Download
+          </h2>
+          <button
+            type="button"
+            onclick="handleDownloaderPasteClick()"
+            class="px-3.5 py-1.5 rounded-full glass hover:bg-white/40 dark:hover:bg-white/10 text-xs font-bold text-blue-600 dark:text-blue-400 transition-all flex items-center gap-1.5 shadow-sm border border-blue-500/20 cursor-pointer"
+          >
+            <span>📋</span>
+            <span>Paste Link</span>
+          </button>
+        </div>
+
+        <div class="flex items-center gap-4 text-xs md:text-sm text-slate-500 dark:text-slate-400 font-medium">
+          <span class="flex items-center gap-1.5">
+            <span>👤</span>
+            <span id="mediaChannel">Paste any YouTube URL</span>
+          </span>
+          <span class="flex items-center gap-1.5">
+            <span>⏱</span>
+            <span id="mediaDurationText">--:--</span>
+          </span>
+        </div>
+
+        <!-- Inline URL Input & Action Buttons -->
+        <div class="mt-1 w-full glass rounded-2xl p-1.5 pl-3.5 flex items-center gap-2 border border-slate-200/50 dark:border-white/10 shadow-sm focus-within:border-blue-500/50 transition-colors">
+          <span class="text-blue-500 text-xs font-bold">🔗</span>
+          <input
+            type="url"
+            id="downloaderUrlInput"
+            placeholder="Paste YouTube or YouTube Music link (e.g. https://www.youtube.com/watch?v=...)"
+            class="flex-1 bg-transparent text-xs sm:text-sm text-slate-900 dark:text-white outline-none font-medium placeholder:text-slate-400"
+            onkeydown="if(event.key === 'Enter') { event.preventDefault(); inspectDownloaderUrl(); }"
+          />
+          <button
+            type="button"
+            onclick="handleDownloaderPasteClick()"
+            title="Paste link from clipboard"
+            class="h-8 px-3 rounded-xl glass hover:bg-white/40 dark:hover:bg-white/10 text-slate-700 dark:text-slate-300 text-xs font-bold transition-all flex items-center gap-1.5 shrink-0 cursor-pointer"
+          >
+            <span>📋</span>
+            <span>Paste</span>
+          </button>
+          <button
+            type="button"
+            id="inspectBtn"
+            onclick="inspectDownloaderUrl()"
+            class="h-8 px-4 rounded-xl btn-blue text-white text-xs font-bold transition-all shadow hover:opacity-95 flex items-center gap-1 shrink-0 cursor-pointer"
+          >
+            <span id="inspectBtnText">Inspect</span>
+            <span>→</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Mode Selector Tabs -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+      <div class="lg:col-span-8 flex flex-col gap-5">
+        <!-- Output Mode Selection -->
+        <div>
+          <label class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider block mb-2">Output
+            Mode</label>
+          <div
+            class="grid grid-cols-3 gap-2 p-1 rounded-2xl bg-black/5 dark:bg-white/5 border border-slate-200/50 dark:border-white/10">
+            <button type="button" id="modeVideoAudioBtn" onclick="setOutputMode('video+audio')"
+              class="py-2.5 rounded-xl text-xs font-bold transition-all bg-blue-600 text-white shadow-sm flex items-center justify-center gap-1.5">
+              <span>▶</span><span>Video + Audio</span>
+            </button>
+            <button type="button" id="modeVideoOnlyBtn" onclick="setOutputMode('video-only')"
+              class="py-2.5 rounded-xl text-xs font-bold transition-all text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white flex items-center justify-center gap-1.5">
+              <span>🎥</span><span>Video only</span>
+            </button>
+            <button type="button" id="modeAudioOnlyBtn" onclick="setOutputMode('audio')"
+              class="py-2.5 rounded-xl text-xs font-bold transition-all text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white flex items-center justify-center gap-1.5">
+              <span>♫</span><span>Audio only</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Video Resolution & Format Controls -->
+        <div id="videoControlsSection">
+          <label class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider block mb-2">Target
+            Quality</label>
+          <div class="flex flex-wrap gap-2">
+            <button type="button" onclick="selectQuality('best')"
+              class="quality-btn px-4 py-2 rounded-xl text-xs font-bold bg-blue-500/20 text-blue-600 dark:text-blue-400 border border-blue-500/30">Best
+              available</button>
+            <button type="button" onclick="selectQuality('1080p')"
+              class="quality-btn px-4 py-2 rounded-xl text-xs font-bold glass text-slate-600 dark:text-slate-300 hover:bg-white/30">1080p</button>
+            <button type="button" onclick="selectQuality('720p')"
+              class="quality-btn px-4 py-2 rounded-xl text-xs font-bold glass text-slate-600 dark:text-slate-300 hover:bg-white/30">720p</button>
+            <button type="button" onclick="selectQuality('480p')"
+              class="quality-btn px-4 py-2 rounded-xl text-xs font-bold glass text-slate-600 dark:text-slate-300 hover:bg-white/30">480p</button>
+            <button type="button" onclick="selectQuality('360p')"
+              class="quality-btn px-4 py-2 rounded-xl text-xs font-bold glass text-slate-600 dark:text-slate-300 hover:bg-white/30">360p</button>
+          </div>
+
+          <div class="mt-4 flex items-center gap-3">
+            <div class="flex-1">
+              <label
+                class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider block mb-1.5">Format</label>
+              <select id="containerFormat"
+                class="w-full glass h-10 px-3 rounded-xl text-xs font-semibold bg-transparent text-slate-900 dark:text-white border border-slate-200/50 dark:border-white/10 outline-none">
+                <option value="mp4" class="dark:bg-slate-900">MP4 (Universal compatible)</option>
+                <option value="webm" class="dark:bg-slate-900">WebM (Open media)</option>
+              </select>
+            </div>
+            <div class="flex-1">
+              <label
+                class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider block mb-1.5">Filename</label>
+              <input type="text" id="customFilename" placeholder="my-media-download"
+                class="w-full glass h-10 px-3 rounded-xl text-xs font-semibold bg-transparent text-slate-900 dark:text-white border border-slate-200/50 dark:border-white/10 outline-none" />
+            </div>
+          </div>
+        </div>
+
+        <!-- Audio Options Section -->
+        <div id="audioControlsSection" class="hidden">
+          <label class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider block mb-2">Audio Format &
+            Bitrate</label>
+          <div class="flex flex-wrap gap-2">
+            <button type="button" onclick="selectAudioFormat('mp3', 320)"
+              class="audio-btn px-4 py-2 rounded-xl text-xs font-bold bg-purple-500/20 text-purple-600 dark:text-purple-400 border border-purple-500/30">MP3
+              320k (Best)</button>
+            <button type="button" onclick="selectAudioFormat('flac', 0)"
+              class="audio-btn px-4 py-2 rounded-xl text-xs font-bold glass text-slate-600 dark:text-slate-300 hover:bg-white/30">FLAC
+              (Lossless)</button>
+            <button type="button" onclick="selectAudioFormat('m4a', 256)"
+              class="audio-btn px-4 py-2 rounded-xl text-xs font-bold glass text-slate-600 dark:text-slate-300 hover:bg-white/30">M4A
+              / AAC</button>
+            <button type="button" onclick="selectAudioFormat('wav', 0)"
+              class="audio-btn px-4 py-2 rounded-xl text-xs font-bold glass text-slate-600 dark:text-slate-300 hover:bg-white/30">WAV</button>
+          </div>
+        </div>
+
+        <!-- Optional Features Toggles -->
+        <div
+          class="flex flex-wrap items-center gap-6 pt-3 border-t border-slate-200/50 dark:border-white/10 text-xs font-medium text-slate-600 dark:text-slate-300">
+          <label class="flex items-center gap-2 cursor-pointer">
+            <input type="checkbox" id="embedThumbnailCheck" checked class="w-4 h-4 rounded text-blue-600" />
+            <span>Embed Cover Art</span>
+          </label>
+          <label class="flex items-center gap-2 cursor-pointer">
+            <input type="checkbox" id="embedMetadataCheck" checked class="w-4 h-4 rounded text-blue-600" />
+            <span>Smart Music Metadata</span>
+          </label>
+          <label class="flex items-center gap-2 cursor-pointer">
+            <input type="checkbox" id="normalizeAudioCheck" class="w-4 h-4 rounded text-blue-600" />
+            <span>Loudness Normalization (-14 LUFS)</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Estimated Size & Process Trigger -->
+      <div class="lg:col-span-4 flex flex-col gap-4">
+        <div class="glass glass-rim rounded-3xl p-5 shadow-lg flex flex-col justify-between">
+          <div>
+            <span class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Estimated Size</span>
+            <p id="estimatedSizeText" class="text-3xl font-black text-slate-900 dark:text-white mt-1">~248 MB</p>
+          </div>
+          <div class="mt-4 pt-3 border-t border-slate-200/50 dark:border-white/10">
+            <label class="flex items-start gap-2 text-xs font-medium text-slate-500 dark:text-slate-400 cursor-pointer">
+              <input type="checkbox" id="consentCheck" checked class="w-4 h-4 rounded text-blue-600 mt-0.5" />
+              <span>I own this content or have permission to reuse it.</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Primary Action Buttons -->
+        <div class="flex flex-col gap-2">
+          <button type="button" id="startVideoBtn" onclick="triggerDownload('video')"
+            class="w-full py-3.5 rounded-2xl btn-orange text-white font-bold text-xs shadow-lg flex items-center justify-center gap-2 hover:opacity-95 transition-all">
+            <span>↓</span>
+            <span>Download video (best MP4)</span>
+          </button>
+          <button type="button" id="startAudioBtn" onclick="triggerDownload('audio')"
+            class="w-full py-3.5 rounded-2xl btn-purple text-white font-bold text-xs shadow-lg flex items-center justify-center gap-2 hover:opacity-95 transition-all">
+            <span>♫</span>
+            <span>Extract audio (MP3 320 kbps)</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Active Job Progress State (Hidden by default) -->
+    <div id="jobProgressContainer"
+      class="hidden glass glass-rim rounded-3xl p-6 shadow-xl border border-blue-500/30 flex flex-col gap-3">
+      <div class="flex items-center justify-between text-xs font-bold text-slate-900 dark:text-white">
+        <div class="flex items-center gap-2 truncate">
+          <span class="text-blue-500 font-bold">↓</span>
+          <span id="jobStageText" class="truncate font-bold">Downloading stream...</span>
+          <span id="jobFormatBadge" class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-blue-500/20 text-blue-600 dark:text-blue-400 shrink-0">MP3 320K</span>
+        </div>
+        <button type="button" title="Pause / Resume" class="text-slate-400 hover:text-slate-600 dark:hover:text-white text-xs font-bold px-1.5 py-0.5 shrink-0 cursor-pointer">❚❚</button>
+      </div>
+      <div class="w-full h-2 rounded-full bg-slate-200 dark:bg-white/10 overflow-hidden">
+        <div id="jobProgressBar"
+          class="h-full bg-gradient-to-r from-blue-500 to-cyan-400 transition-all duration-300 w-0"></div>
+      </div>
+      <div class="flex items-center justify-between text-[11px] text-slate-400 font-medium">
+        <div class="flex items-center gap-1.5">
+          <span id="jobSpeedText">Speed: 8.4 MB/s</span>
+          <span>·</span>
+          <span id="jobEtaText">ETA: 00:42</span>
+        </div>
+        <span id="jobPercentText" class="font-bold text-slate-700 dark:text-slate-300">0%</span>
+      </div>
+
+      <!-- Completion Actions -->
+      <div id="downloadDoneActions"
+        class="hidden mt-3 pt-4 border-t border-slate-200/50 dark:border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div class="flex items-center gap-2 text-xs font-bold text-emerald-600 dark:text-emerald-400">
+          <span class="w-5 h-5 rounded-full bg-emerald-500/20 flex items-center justify-center font-bold">✓</span>
+          <span>Ready in ephemeral storage!</span>
+        </div>
+        <div class="flex items-center gap-2 flex-wrap">
+          <button type="button" onclick="showToast('Downloading file directly to PC...', 'success')"
+            class="px-3.5 py-1.5 rounded-xl btn-blue text-white text-xs font-bold shadow">
+            ↓ Save File
+          </button>
+          <button type="button" id="doneToAudioBtn" onclick="openActiveInStudio()"
+            class="px-3.5 py-1.5 rounded-xl btn-purple text-white text-xs font-bold shadow flex items-center gap-1.5 hover:opacity-90">
+            <span>♫</span><span>Open in Audio Studio →</span>
+          </button>
+          <button type="button" id="doneToTrimmerBtn" onclick="openActiveInTrimmer()"
+            class="px-3.5 py-1.5 rounded-xl text-white text-xs font-bold shadow flex items-center gap-1.5 hover:opacity-90"
+            style="background: linear-gradient(135deg, #10B981, #059669);">
+            <span>✂</span><span>Open in Video Trimmer →</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  let currentMode = 'video+audio';
+  let targetUrl = '';
+  let selectedVideoQuality = 'best';
+  let selectedAudioFormat = 'mp3';
+  let selectedAudioBitrate = 320;
+  let activeEventSource = null;
+  let activeJobId = null;
+
+  function openActiveInStudio() {
+    playGlassTick();
+    const title = document.getElementById('mediaTitle').textContent.trim();
+    const url = targetUrl || document.getElementById('downloaderUrlInput')?.value?.trim();
+    let dest = `/audio-studio?title=${encodeURIComponent(title)}&type=audio`;
+    if (activeJobId) dest += `&jobId=${activeJobId}`;
+    else if (url) dest += `&url=${encodeURIComponent(url)}`;
+    window.location.href = dest;
+  }
+
+  function openActiveInTrimmer() {
+    playGlassTick();
+    const title = document.getElementById('mediaTitle').textContent.trim();
+    const url = targetUrl || document.getElementById('downloaderUrlInput')?.value?.trim();
+    let dest = `/video-trimmer?title=${encodeURIComponent(title)}&type=video`;
+    if (activeJobId) dest += `&jobId=${activeJobId}`;
+    else if (url) dest += `&url=${encodeURIComponent(url)}`;
+    window.location.href = dest;
+  }
+
+  function downloadCompletedFile() {
+    playGlassPop();
+    if (activeJobId) {
+      window.location.href = `/api/v1/jobs/${activeJobId}/file`;
+    } else {
+      showToast('Downloading file...', 'success');
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const params = new URLSearchParams(window.location.search);
+    const qUrl = params.get('url');
+    const qType = params.get('type');
+
+    if (qUrl) {
+      targetUrl = qUrl;
+      const input = document.getElementById('downloaderUrlInput');
+      if (input) input.value = qUrl;
+      inspectMedia(qUrl);
+    }
+    if (qType === 'audio') {
+      setOutputMode('audio');
+    }
+  });
+
+  async function handleDownloaderPasteClick() {
+    playGlassTick();
+    const input = document.getElementById('downloaderUrlInput');
+    try {
+      const text = await navigator.clipboard.readText();
+      if (text && text.trim()) {
+        const cleaned = text.trim();
+        input.value = cleaned;
+        targetUrl = cleaned;
+        showToast('Link pasted! Inspecting...', 'info');
+        await inspectMedia(cleaned);
+      } else {
+        input.focus();
+        showToast('Clipboard is empty. Press Ctrl+V to paste link.', 'info');
+      }
+    } catch (e) {
+      input.focus();
+      showToast('Click in the input box and press Ctrl+V to paste.', 'info');
+    }
+  }
+
+  async function inspectDownloaderUrl() {
+    playGlassTick();
+    const input = document.getElementById('downloaderUrlInput');
+    const url = input.value.trim();
+    if (!url) {
+      showToast('Please paste a YouTube URL first', 'error');
+      input.focus();
+      return;
+    }
+    targetUrl = url;
+    const btnText = document.getElementById('inspectBtnText');
+    if (btnText) btnText.textContent = 'Fetching...';
+    await inspectMedia(url);
+    if (btnText) btnText.textContent = 'Inspect';
+  }
+
+  async function inspectMedia(url) {
+    try {
+      showToast('Inspecting YouTube media stream...', 'info');
+      const urlInput = document.getElementById('downloaderUrlInput');
+      if (urlInput && !urlInput.value) {
+        urlInput.value = url;
+      }
+      const res = await fetch(`/api/inspect?url=${encodeURIComponent(url)}`);
+      if (res.ok) {
+        const data = await res.json();
+        document.getElementById('mediaTitle').textContent = data.title || 'YouTube Media';
+        document.getElementById('mediaChannel').textContent = data.channel || 'Channel';
+        document.getElementById('mediaDuration').textContent = formatDuration(data.duration || 0);
+        document.getElementById('mediaDurationText').textContent = formatDuration(data.duration || 0);
+        if (data.thumbnail) {
+          const thumb = document.getElementById('mediaThumbnail');
+          thumb.src = data.thumbnail;
+          thumb.classList.remove('hidden');
+          const ph = document.getElementById('mediaThumbnailPlaceholder');
+          if (ph) ph.classList.add('hidden');
+        }
+        if (data.title) {
+          const fn = document.getElementById('customFilename');
+          if (fn && !fn.value) {
+            fn.value = data.title.replace(/[^\w\s-]/gi, '').trim().replace(/\s+/g, '-').toLowerCase();
+          }
+        }
+        showToast('Stream inspection ready!', 'success');
+      }
+    } catch (e) {
+      console.warn('Inspect fallback:', e);
+    }
+  }
+
+  function setOutputMode(mode) {
+    currentMode = mode;
+    playGlassTick();
+
+    const videoAudioBtn = document.getElementById('modeVideoAudioBtn');
+    const videoOnlyBtn = document.getElementById('modeVideoOnlyBtn');
+    const audioOnlyBtn = document.getElementById('modeAudioOnlyBtn');
+    const videoSec = document.getElementById('videoControlsSection');
+    const audioSec = document.getElementById('audioControlsSection');
+
+    // Reset styles
+    [videoAudioBtn, videoOnlyBtn, audioOnlyBtn].forEach(b => {
+      b.className = 'py-2.5 rounded-xl text-xs font-bold transition-all text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white flex items-center justify-center gap-1.5';
+    });
+
+    if (mode === 'audio') {
+      audioOnlyBtn.className = 'py-2.5 rounded-xl text-xs font-bold transition-all bg-purple-600 text-white shadow-sm flex items-center justify-center gap-1.5';
+      videoSec.classList.add('hidden');
+      audioSec.classList.remove('hidden');
+      document.getElementById('estimatedSizeText').textContent = '~7.2 MB';
+    } else if (mode === 'video-only') {
+      videoOnlyBtn.className = 'py-2.5 rounded-xl text-xs font-bold transition-all bg-blue-600 text-white shadow-sm flex items-center justify-center gap-1.5';
+      videoSec.classList.remove('hidden');
+      audioSec.classList.add('hidden');
+      document.getElementById('estimatedSizeText').textContent = '~180 MB';
+    } else {
+      videoAudioBtn.className = 'py-2.5 rounded-xl text-xs font-bold transition-all bg-blue-600 text-white shadow-sm flex items-center justify-center gap-1.5';
+      videoSec.classList.remove('hidden');
+      audioSec.classList.add('hidden');
+      document.getElementById('estimatedSizeText').textContent = '~248 MB';
+    }
+  }
+
+  function selectQuality(q) {
+    selectedVideoQuality = q;
+    playGlassTick();
+    document.querySelectorAll('.quality-btn').forEach(b => {
+      b.className = 'quality-btn px-4 py-2 rounded-xl text-xs font-bold glass text-slate-600 dark:text-slate-300 hover:bg-white/30';
+    });
+    event.target.className = 'quality-btn px-4 py-2 rounded-xl text-xs font-bold bg-blue-500/20 text-blue-600 dark:text-blue-400 border border-blue-500/30';
+  }
+
+  function selectAudioFormat(fmt, bitrate) {
+    selectedAudioFormat = fmt;
+    selectedAudioBitrate = bitrate;
+    playGlassTick();
+    document.querySelectorAll('.audio-btn').forEach(b => {
+      b.className = 'audio-btn px-4 py-2 rounded-xl text-xs font-bold glass text-slate-600 dark:text-slate-300 hover:bg-white/30';
+    });
+    event.target.className = 'audio-btn px-4 py-2 rounded-xl text-xs font-bold bg-purple-500/20 text-purple-600 dark:text-purple-400 border border-purple-500/30';
+  }
+
+  async function triggerDownload(type) {
+    if (!document.getElementById('consentCheck').checked) {
+      showToast('Please check the consent box to proceed', 'error');
+      return;
+    }
+    playGlassPop();
+
+    const reqFilename = document.getElementById('customFilename').value.trim() || document.getElementById('mediaTitle').textContent.trim();
+    const reqFormat = type === 'audio' ? selectedAudioFormat : document.getElementById('containerFormat').value;
+    const reqQuality = selectedVideoQuality || 'best';
+
+    const prog = document.getElementById('jobProgressContainer');
+    prog.classList.remove('hidden');
+    document.getElementById('downloadDoneActions').classList.add('hidden');
+    document.getElementById('jobStageText').textContent = reqFilename || 'Downloading media stream...';
+    document.getElementById('jobFormatBadge').textContent = type === 'audio' ? `${reqFormat.toUpperCase()} 320K` : `${reqFormat.toUpperCase()} ${reqQuality.toUpperCase()}`;
+    document.getElementById('jobPercentText').textContent = '0%';
+    document.getElementById('jobProgressBar').style.width = '0%';
+    document.getElementById('jobSpeedText').textContent = 'Speed: 8.4 MB/s';
+    document.getElementById('jobEtaText').textContent = 'ETA: 00:42';
+    prog.scrollIntoView({ behavior: 'smooth' });
+
+    const reqUrl = targetUrl || document.getElementById('downloaderUrlInput')?.value?.trim();
+    if (!reqUrl) {
+      showToast('Please paste a YouTube URL first before downloading', 'error');
+      document.getElementById('downloaderUrlInput')?.focus();
+      return;
+    }
+    const reqMode = type === 'audio' ? 'audio' : currentMode;
+    const reqFormat = type === 'audio' ? selectedAudioFormat : document.getElementById('containerFormat').value;
+    const reqQuality = selectedVideoQuality || 'best';
+    const reqFilename = document.getElementById('customFilename').value.trim() || document.getElementById('mediaTitle').textContent.trim();
+    const embedThumb = document.getElementById('embedThumbnailCheck').checked;
+    const embedMeta = document.getElementById('embedMetadataCheck').checked;
+
+    try {
+      const res = await fetch('/api/v1/jobs', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          url: reqUrl,
+          mode: reqMode,
+          format: reqFormat,
+          quality: reqQuality,
+          filename: reqFilename,
+          consent: true,
+          embedThumbnail: embedThumb,
+          embedMetadata: embedMeta
+        })
+      });
+
+      if (!res.ok) {
+        const errJson = await res.json().catch(() => ({}));
+        const msg = (errJson.detail && errJson.detail.explanation) || 'Download job initialization failed.';
+        showToast(msg, 'error');
+        document.getElementById('jobStageText').textContent = msg;
+        return;
+      }
+
+      const { jobId } = await res.json();
+      activeJobId = jobId;
+
+      if (activeEventSource) {
+        activeEventSource.close();
+      }
+
+      // Connect to real SSE stream
+      activeEventSource = new EventSource(`/api/v1/jobs/${jobId}/events`);
+
+      activeEventSource.addEventListener('update', (ev) => {
+        const data = JSON.parse(ev.data);
+        const percent = Math.round(data.percent || 0);
+
+        document.getElementById('jobPercentText').textContent = `${percent}%`;
+        document.getElementById('jobProgressBar').style.width = `${percent}%`;
+
+        let stage = 'Downloading media stream...';
+        if (data.state === 'merging') stage = 'Merging high-quality streams...';
+        else if (data.state === 'converting') stage = 'Converting audio format (FFmpeg)...';
+        else if (data.state === 'trimming') stage = 'Trimming video segment...';
+        else if (data.state === 'embedding') stage = 'Embedding metadata & cover art...';
+        else if (data.state === 'ready') stage = 'Assembly Complete!';
+        else if (data.state === 'failed') stage = 'Processing Failed';
+
+        document.getElementById('jobStageText').textContent = stage;
+
+        if (data.speed) {
+          document.getElementById('jobSpeedText').textContent = `Speed: ${data.speed}`;
+        }
+        if (data.eta !== null && data.eta !== undefined) {
+          document.getElementById('jobEtaText').textContent = `ETA: 00:${String(data.eta).padStart(2, '0')}`;
+        }
+
+        if (data.state === 'ready') {
+          activeEventSource.close();
+          const cleanTitle = data.filename || document.getElementById('mediaTitle').textContent.trim();
+          const fileUrl = `/api/v1/jobs/${jobId}/file`;
+
+          saveToSessionHistory({
+            jobId: jobId,
+            title: cleanTitle,
+            format: (data.format || reqFormat).toUpperCase(),
+            size: data.filesize ? `${(data.filesize / (1024 * 1024)).toFixed(1)} MB` : (type === 'audio' ? '7.2 MB' : '248 MB'),
+            type: type === 'audio' ? 'audio' : 'video',
+            fileUrl: fileUrl,
+            date: new Date().toLocaleTimeString()
+          });
+
+          document.getElementById('downloadDoneActions').classList.remove('hidden');
+          showToast('Real download complete! File ready to save.', 'success');
+        } else if (data.state === 'failed') {
+          activeEventSource.close();
+          const errDetail = (data.error && data.error.explanation) || 'Job failed during execution.';
+          showToast(errDetail, 'error');
+        }
+      });
+
+      activeEventSource.onerror = (err) => {
+        console.warn('SSE event notice:', err);
+      };
+
+    } catch (e) {
+      console.error(e);
+      showToast('Error sending job to server', 'error');
+    }
+  }
+</script>
+{% endblock %}

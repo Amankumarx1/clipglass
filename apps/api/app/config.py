@@ -1,7 +1,24 @@
 import os
+import shutil
 from pathlib import Path
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from typing import List
+
+# Ensure FFmpeg and local runtimes are in PATH on Windows
+if os.name == "nt":
+    extra_paths = [
+        Path(os.environ.get("LOCALAPPDATA", "")) / "Programs" / "nodejs",
+        Path(os.environ.get("LOCALAPPDATA", "")) / "Programs" / "Python" / "Python312",
+        Path(os.environ.get("LOCALAPPDATA", "")) / "Programs" / "Python" / "Python312" / "Scripts",
+    ]
+    winget_packages = Path(os.environ.get("LOCALAPPDATA", "")) / "Microsoft" / "WinGet" / "Packages"
+    if winget_packages.exists():
+        for ffp in winget_packages.glob("**/ffmpeg.exe"):
+            extra_paths.append(ffp.parent)
+            break
+    for p in extra_paths:
+        if p.exists() and str(p) not in os.environ.get("PATH", ""):
+            os.environ["PATH"] = f"{p}{os.pathsep}{os.environ.get('PATH', '')}"
 
 class Settings(BaseSettings):
     ENVIRONMENT: str = "development"

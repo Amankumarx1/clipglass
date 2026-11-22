@@ -71,6 +71,20 @@ async def inspect_endpoint(request: Request, body: InspectRequest):
     return data
 
 
+@router.get(
+    "/inspect",
+    response_model=InspectResponse,
+    responses={
+        400: {"model": FriendlyError, "description": "Invalid URL or parameters"},
+        429: {"model": FriendlyError, "description": "Rate limit exceeded"},
+        500: {"model": FriendlyError, "description": "Extraction error"}
+    }
+)
+async def inspect_get_endpoint(request: Request, url: str):
+    return await inspect_endpoint(request, InspectRequest(url=url))
+
+
+
 @router.get("/subtitles/download")
 async def download_subtitles_endpoint(request: Request, url: str, lang: str = "en", format: str = "srt"):
     client_ip = request.client.host if request.client else "127.0.0.1"

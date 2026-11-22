@@ -1,0 +1,214 @@
+{% extends "base.html" %}
+
+{% block title %}ClipGlass — Media Processing Workspace{% endblock %}
+
+{% block content %}
+<div class="flex flex-col items-center justify-center text-center pt-8 pb-12 w-full">
+  <!-- Hero Badge -->
+  <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-500/15 dark:bg-blue-500/20 border border-blue-500/30 text-blue-600 dark:text-blue-300 text-xs font-semibold mb-6">
+    <span>✨</span>
+    <span>Next-Gen Liquid Glass Processing Engine</span>
+  </div>
+
+  <!-- Hero Heading -->
+  <h1 class="font-extrabold text-4xl sm:text-6xl md:text-7xl tracking-tight text-slate-900 dark:text-white leading-[1.1] max-w-4xl">
+    paste a link. pick a quality. <span class="bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 bg-clip-text text-transparent">done.</span>
+  </h1>
+
+  <!-- Hero Subtitle -->
+  <p class="text-sm sm:text-base text-slate-600 dark:text-slate-300 mt-4 max-w-xl">
+    Your all-in-one workspace for downloading, editing, mastering audio, and creating viral shorts from any video.
+  </p>
+
+  <!-- URL Search & Inspection Form -->
+  <form id="fetchForm" class="w-full max-w-2xl mt-8" onsubmit="handleIndexSubmit(event)">
+    <div class="glass glass-rim rounded-full p-2 pl-5 flex items-center justify-between gap-3 shadow-2xl transition-all focus-within:ring-2 focus-within:ring-blue-500">
+      <div class="flex items-center gap-3 flex-1 min-w-0">
+        <span class="text-slate-400">🔗</span>
+        <input
+          type="url"
+          id="urlInput"
+          placeholder="Paste YouTube or Music URL..."
+          class="w-full bg-transparent text-sm sm:text-base text-slate-900 dark:text-white placeholder:text-slate-400 outline-none font-medium"
+        />
+      </div>
+
+      <div class="flex items-center gap-2 shrink-0">
+        <!-- Paste from clipboard -->
+        <button
+          type="button"
+          onclick="handlePasteClick()"
+          title="Paste from clipboard"
+          class="w-9 h-9 rounded-full flex items-center justify-center glass hover:bg-white/40 text-slate-600 dark:text-slate-300 transition-all"
+        >
+          📋
+        </button>
+
+        <!-- Fetch Button -->
+        <button
+          type="submit"
+          id="fetchBtn"
+          class="h-11 sm:h-12 px-6 rounded-full btn-blue btn-gloss btn-shine text-white font-bold text-xs sm:text-sm flex items-center gap-1.5 shadow-lg hover:opacity-95 transition-all select-none"
+        >
+          <span>Fetch video</span>
+        </button>
+      </div>
+    </div>
+  </form>
+
+  <!-- Media Workspaces Overview -->
+  <div class="w-full max-w-5xl mt-16 text-left">
+    <div class="text-center mb-8">
+      <h2 class="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white">Media Workspaces</h2>
+      <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Pick a specialized workstation to process your media.</p>
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <!-- Card 1: Downloader -->
+      <a href="/downloader" class="glass glass-rim glass-interactive rounded-3xl p-5 flex flex-col justify-between group shadow-xl">
+        <div>
+          <div class="w-10 h-10 rounded-2xl bg-blue-500/15 text-blue-600 dark:text-blue-400 flex items-center justify-center font-bold text-base mb-3 group-hover:scale-105 transition-transform">
+            ↓
+          </div>
+          <h3 class="font-bold text-slate-900 dark:text-white text-base">Downloader</h3>
+          <p class="text-xs text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">
+            Extract 4K to 360p MP4/WebM video and MP3 up to 320 kbps with embedded cover art.
+          </p>
+        </div>
+        <div class="mt-4 pt-3 border-t border-slate-200/50 dark:border-white/10 flex items-center justify-between text-xs font-semibold text-blue-600 dark:text-blue-400">
+          <span>Open Downloader</span>
+          <span>→</span>
+        </div>
+      </a>
+
+      <!-- Card 2: Audio Studio -->
+      <a href="/audio-studio" class="glass glass-rim glass-interactive rounded-3xl p-5 flex flex-col justify-between group shadow-xl">
+        <div>
+          <div class="w-10 h-10 rounded-2xl bg-purple-500/15 text-purple-600 dark:text-purple-400 flex items-center justify-center font-bold text-base mb-3 group-hover:scale-105 transition-transform">
+            ♫
+          </div>
+          <h3 class="font-bold text-slate-900 dark:text-white text-base">Audio Studio</h3>
+          <p class="text-xs text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">
+            60+ audio DSP effects, Auto & Custom modes, loudness normalization, and studio mastering.
+          </p>
+        </div>
+        <div class="mt-4 pt-3 border-t border-slate-200/50 dark:border-white/10 flex items-center justify-between text-xs font-semibold text-purple-600 dark:text-purple-400">
+          <span>Open Audio Studio</span>
+          <span>→</span>
+        </div>
+      </a>
+
+      <!-- Card 3: Video Trimmer -->
+      <a href="/video-trimmer" class="glass glass-rim glass-interactive rounded-3xl p-5 flex flex-col justify-between group shadow-xl">
+        <div>
+          <div class="w-10 h-10 rounded-2xl bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 flex items-center justify-center font-bold text-base mb-3 group-hover:scale-105 transition-transform">
+            ✂
+          </div>
+          <h3 class="font-bold text-slate-900 dark:text-white text-base">Video Trimmer</h3>
+          <p class="text-xs text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">
+            Visual timeline and timestamp cutting with lossless instant stream copying.
+          </p>
+        </div>
+        <div class="mt-4 pt-3 border-t border-slate-200/50 dark:border-white/10 flex items-center justify-between text-xs font-semibold text-emerald-600 dark:text-emerald-400">
+          <span>Open Trimmer</span>
+          <span>→</span>
+        </div>
+      </a>
+
+      <!-- Card 4: Auto Clip Studio -->
+      <a href="/auto-clip" class="glass glass-rim glass-interactive rounded-3xl p-5 flex flex-col justify-between group shadow-xl">
+        <div>
+          <div class="w-10 h-10 rounded-2xl bg-orange-500/15 text-orange-600 dark:text-orange-400 flex items-center justify-center font-bold text-base mb-3 group-hover:scale-105 transition-transform">
+            ✨
+          </div>
+          <h3 class="font-bold text-slate-900 dark:text-white text-base">Auto Clip Studio</h3>
+          <p class="text-xs text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">
+            AI viral highlight detection, auto 9:16 vertical crop, and animated karaoke captions.
+          </p>
+        </div>
+        <div class="mt-4 pt-3 border-t border-slate-200/50 dark:border-white/10 flex items-center justify-between text-xs font-semibold text-orange-600 dark:text-orange-400">
+          <span>Open Auto Clip</span>
+          <span>→</span>
+        </div>
+      </a>
+    </div>
+  </div>
+
+  <!-- How It Works Section -->
+  <div class="w-full max-w-4xl mt-20 text-left">
+    <div class="text-center mb-8">
+      <span class="text-xs font-semibold text-blue-500 uppercase tracking-widest">Effortless Workflow</span>
+      <h2 class="text-2xl font-bold text-slate-900 dark:text-white mt-1">how it works</h2>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+      <div class="glass glass-rim rounded-3xl p-6 shadow-lg">
+        <span class="text-2xl font-black text-blue-500/40">01</span>
+        <h3 class="font-bold text-slate-900 dark:text-white mt-2">paste link</h3>
+        <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Drop in any YouTube video, Shorts, or Music URL. Instant stream inspection under 2 seconds.</p>
+      </div>
+
+      <div class="glass glass-rim rounded-3xl p-6 shadow-lg">
+        <span class="text-2xl font-black text-purple-500/40">02</span>
+        <h3 class="font-bold text-slate-900 dark:text-white mt-2">pick quality</h3>
+        <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Select MP4 or WebM up to 4K, or extract tagged audio in MP3, M4A, Opus, FLAC, or WAV.</p>
+      </div>
+
+      <div class="glass glass-rim rounded-3xl p-6 shadow-lg">
+        <span class="text-2xl font-black text-emerald-500/40">03</span>
+        <h3 class="font-bold text-slate-900 dark:text-white mt-2">download</h3>
+        <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">High-speed FFmpeg assembly. Direct download with automatic 15-minute ephemeral deletion.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Privacy Banner -->
+  <div class="w-full max-w-4xl mt-12 glass glass-rim rounded-3xl p-6 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-xl">
+    <div class="flex items-center gap-4 text-left">
+      <div class="w-12 h-12 rounded-2xl bg-emerald-500/15 text-emerald-500 flex items-center justify-center text-xl shrink-0">
+        🛡️
+      </div>
+      <div>
+        <h3 class="font-bold text-sm text-slate-900 dark:text-white">Privacy-Conscious by Architecture</h3>
+        <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">No accounts required. 100% ad-free interface with zero trackers. All downloaded files live in temporary storage and are strictly deleted after 15 minutes.</p>
+      </div>
+    </div>
+    <div class="px-3.5 py-1.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-xs font-semibold shrink-0">
+      ⏱ 15-Min Auto Purge
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  function handleIndexSubmit(e) {
+    e.preventDefault();
+    const url = document.getElementById('urlInput').value.trim();
+    if (!url) {
+      window.location.href = '/downloader';
+      return;
+    }
+    window.location.href = `/downloader?url=${encodeURIComponent(url)}`;
+  }
+
+  function selectPreset(url) {
+    document.getElementById('urlInput').value = url;
+    playGlassPop();
+    handleIndexSubmit(new Event('submit'));
+  }
+
+  async function handlePasteClick() {
+    playGlassTick();
+    try {
+      const text = await navigator.clipboard.readText();
+      if (text) {
+        document.getElementById('urlInput').value = text;
+        showToast('Pasted from clipboard!', 'success');
+      }
+    } catch {
+      showToast('Please press Ctrl+V to paste', 'info');
+    }
+  }
+</script>
+{% endblock %}

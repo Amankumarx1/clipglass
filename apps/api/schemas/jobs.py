@@ -68,20 +68,30 @@ class CreativeFXConfig(BaseModel):
 
 class JobCreateRequest(BaseModel):
     url: str = Field(..., max_length=2048)
-    mode: Literal['video', 'video_only', 'audio'] = 'video'
+    mode: Literal['video', 'video_only', 'audio', 'video+audio'] = 'video'
     height: Optional[int] = Field(1080, ge=144, le=4320)
     container: Literal['mp4', 'webm'] = 'mp4'
     audioFormat: Literal['mp3', 'm4a', 'opus', 'wav', 'flac'] = 'mp3'
     audioBitrate: Optional[int] = Field(320, ge=32, le=320)
+    format: Optional[str] = None
+    quality: Optional[str] = None
     subtitles: Optional[SubtitleConfig] = None
     trim: Optional[TrimConfig] = None
     mastering: Optional[AudioMasteringConfig] = None
     fx: Optional[CreativeFXConfig] = None
     thumbnail: bool = False
+    embedThumbnail: bool = False
     embedMetadata: bool = True
     filename: Optional[str] = Field(None, max_length=120)
     consent: bool = Field(..., description="Must be true to acknowledge legal permission")
     turnstileToken: Optional[str] = Field(None, max_length=2048)
+
+    @field_validator('mode')
+    @classmethod
+    def normalize_mode(cls, v: str) -> str:
+        if v == 'video+audio':
+            return 'video'
+        return v
 
     @field_validator('filename')
     @classmethod

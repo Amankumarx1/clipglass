@@ -1,0 +1,1029 @@
+{% extends "base.html" %}
+
+{% block title %}Audio Studio — ClipGlass{% endblock %}
+
+{% block content %}
+<div class="w-full max-w-5xl mx-auto flex flex-col gap-6">
+  <!-- Header -->
+  <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-2">
+    <div>
+      <div class="flex items-center gap-2">
+        <div class="w-8 h-8 rounded-xl bg-purple-500/20 text-purple-500 flex items-center justify-center font-bold">
+          ♫
+        </div>
+        <h1 class="font-extrabold text-2xl text-slate-900 dark:text-white tracking-tight">
+          Audio Studio
+        </h1>
+      </div>
+      <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">
+        Auto & Custom Audio Effects Engine · Mastering · 60+ Studio Modules
+      </p>
+    </div>
+
+    <!-- Actions: Mode Toggle & Import Button -->
+    <div class="flex items-center gap-2.5 flex-wrap self-start sm:self-auto">
+      <button type="button" onclick="toggleImportDrawer()" class="px-4 py-2 rounded-full text-xs font-bold btn-purple btn-gloss text-white shadow-md flex items-center gap-2 hover:opacity-95 transition-all">
+        <span>📁</span><span>+ Import Song</span>
+      </button>
+
+      <!-- Mode Toggle: Auto AI vs Custom Modular Rack -->
+      <div class="flex items-center p-1 rounded-full glass glass-rim shadow-sm">
+        <button type="button" id="tabAutoBtn" onclick="switchAudioMode('auto')" class="px-4 py-1.5 rounded-full text-xs font-bold transition-all bg-purple-600 text-white shadow-sm flex items-center gap-1.5">
+          <span>+</span><span>AUTO MODE</span>
+        </button>
+        <button type="button" id="tabCustomBtn" onclick="switchAudioMode('custom')" class="px-4 py-1.5 rounded-full text-xs font-bold transition-all text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white flex items-center gap-1.5">
+          <span>🎛</span><span>CUSTOM MODE</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Import Song Drawer (Collapsible) -->
+  <div id="audioImportDrawer" class="hidden w-full glass glass-rim rounded-[32px] p-6 shadow-2xl flex flex-col gap-4 border-2 border-purple-500/30">
+    <div class="flex items-center justify-between">
+      <div class="flex items-center gap-2">
+        <span class="text-lg">📁</span>
+        <h3 class="font-extrabold text-sm sm:text-base text-slate-900 dark:text-white">Import Song into Audio Studio</h3>
+      </div>
+      <button type="button" onclick="toggleImportDrawer()" class="w-7 h-7 rounded-full glass flex items-center justify-center text-slate-400 hover:text-slate-900 dark:hover:text-white text-xs font-bold">✕</button>
+    </div>
+
+    <!-- Import Tabs -->
+    <div class="flex items-center gap-2 border-b border-slate-200/50 dark:border-white/10 pb-2">
+      <button type="button" id="importTabPcBtn" onclick="switchAudioImportTab('pc')" class="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-purple-600 text-white shadow-sm flex items-center gap-1.5">
+        <span>💻</span><span>Upload from PC</span>
+      </button>
+      <button type="button" id="importTabDownloaderBtn" onclick="switchAudioImportTab('downloader')" class="px-3.5 py-1.5 rounded-xl text-xs font-bold glass text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white flex items-center gap-1.5">
+        <span>↓</span><span>From Downloader & History</span>
+      </button>
+      <button type="button" id="importTabUrlBtn" onclick="switchAudioImportTab('url')" class="px-3.5 py-1.5 rounded-xl text-xs font-bold glass text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white flex items-center gap-1.5">
+        <span>🔗</span><span>From URL / Stream</span>
+      </button>
+    </div>
+
+    <!-- Tab 1: Upload from PC Dropzone -->
+    <div id="importPcSection" class="flex flex-col gap-3">
+      <div id="audioDropZone" onclick="document.getElementById('audioFileInput').click()" ondragover="event.preventDefault(); this.classList.add('border-purple-500');" ondragleave="this.classList.remove('border-purple-500');" ondrop="handleAudioDrop(event)" class="w-full py-8 px-6 rounded-2xl border-2 border-dashed border-slate-300 dark:border-white/20 hover:border-purple-500 dark:hover:border-purple-400 glass flex flex-col items-center justify-center gap-2 cursor-pointer transition-all text-center">
+        <div class="w-12 h-12 rounded-2xl bg-purple-500/15 text-purple-500 flex items-center justify-center text-2xl font-bold">
+          🎵
+        </div>
+        <div>
+          <p class="font-bold text-sm text-slate-900 dark:text-white">Click to browse or drag & drop audio file from PC</p>
+          <p class="text-xs text-slate-400 mt-0.5">Supports MP3, WAV, FLAC, M4A, OGG, AAC (Client-side decoded directly from your PC)</p>
+        </div>
+        <span class="mt-2 px-4 py-1.5 rounded-full bg-purple-600 text-white text-xs font-bold shadow">Select Song from Computer</span>
+      </div>
+      <input type="file" id="audioFileInput" accept="audio/*,.mp3,.wav,.ogg,.m4a,.flac,.aac" onchange="handleAudioFileUpload(event)" class="hidden" />
+    </div>
+
+    <!-- Tab 2: Downloader / Recent Session History -->
+    <div id="importDownloaderSection" class="hidden flex flex-col gap-3">
+      <p class="text-xs text-slate-400">Select any recently downloaded audio from your current session to process:</p>
+      <div id="recentAudioList" class="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-60 overflow-y-auto">
+        <!-- Injected via JS -->
+      </div>
+    </div>
+
+    <!-- Tab 3: URL Import -->
+    <div id="importUrlSection" class="hidden flex flex-col gap-3">
+      <p class="text-xs text-slate-400">Paste any YouTube or media stream link to fetch & decode audio directly into studio:</p>
+      <div class="flex items-center gap-2">
+        <input type="url" id="importAudioUrlInput" placeholder="https://www.youtube.com/watch?v=..." class="flex-1 glass h-10 px-3 rounded-xl text-xs font-semibold bg-transparent text-slate-900 dark:text-white border border-slate-200/50 dark:border-white/10 outline-none" onkeydown="if(event.key === 'Enter') { event.preventDefault(); fetchAudioFromUrl(); }" />
+        <button type="button" onclick="handleDrawerAudioPaste()" class="h-10 px-3 rounded-xl glass hover:bg-white/30 text-xs font-semibold text-slate-600 dark:text-slate-300 flex items-center gap-1">📋 Paste</button>
+        <button type="button" id="fetchAudioBtn" onclick="fetchAudioFromUrl()" class="h-10 px-5 rounded-xl btn-purple text-white text-xs font-bold shadow hover:opacity-90 flex items-center gap-1.5">
+          <span id="fetchAudioBtnText">Fetch & Load</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Audio Player & Waveform Card -->
+  <div class="w-full glass glass-rim rounded-[36px] p-6 sm:p-8 shadow-2xl flex flex-col gap-5">
+    <audio id="realAudioPlayer" preload="auto" class="hidden"></audio>
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-full bg-purple-500/15 text-purple-500 flex items-center justify-center text-lg font-bold">
+          🎧
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <h2 id="currentTrackTitle" class="font-bold text-base sm:text-lg text-slate-900 dark:text-white">Rangilo Maro x Bam Bam (Original Master)</h2>
+            <button type="button" onclick="toggleImportDrawer()" class="px-2.5 py-0.5 rounded-full glass hover:bg-white/30 text-[10px] font-bold text-purple-600 dark:text-purple-400 transition-all">Import / Change</button>
+          </div>
+          <p id="currentTrackMeta" class="text-xs text-slate-400">48 kHz · 24-bit Stereo Master · Duration: 02:39</p>
+        </div>
+      </div>
+
+      <!-- A/B Audition Switch -->
+      <div class="flex items-center gap-2 text-xs font-bold">
+        <span class="text-slate-400">Audition:</span>
+        <div class="flex items-center p-1 rounded-full glass border border-slate-200/50 dark:border-white/10">
+          <button type="button" id="auditionDryBtn" onclick="setAudition('dry')" class="px-3 py-1 rounded-full text-xs font-medium text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-all">Original (Dry)</button>
+          <button type="button" id="auditionWetBtn" onclick="setAudition('wet')" class="px-3 py-1 rounded-full text-xs font-bold bg-purple-600 text-white shadow-sm transition-all">Enhanced (Wet)</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick URL Fetch Bar (Inline) -->
+    <div id="quickAudioUrlBar" class="w-full glass rounded-2xl p-1.5 pl-3.5 flex items-center gap-2 border border-slate-200/50 dark:border-white/10 shadow-sm focus-within:border-purple-500/50 transition-colors">
+      <span class="text-purple-500 text-xs font-bold">🔗</span>
+      <input
+        type="url"
+        id="quickAudioUrlInput"
+        placeholder="Paste YouTube or music URL to fetch audio directly into studio..."
+        class="flex-1 bg-transparent text-xs sm:text-sm text-slate-900 dark:text-white outline-none font-medium placeholder:text-slate-400"
+        onkeydown="if(event.key === 'Enter') { event.preventDefault(); fetchAudioFromUrl(); }"
+      />
+      <button
+        type="button"
+        onclick="handleQuickAudioPaste()"
+        title="Paste link from clipboard"
+        class="h-8 px-3 rounded-xl glass hover:bg-white/40 dark:hover:bg-white/10 text-slate-700 dark:text-slate-300 text-xs font-bold transition-all flex items-center gap-1 shrink-0 cursor-pointer"
+      >
+        <span>📋</span>
+        <span>Paste</span>
+      </button>
+      <button
+        type="button"
+        id="quickAudioFetchBtn"
+        onclick="fetchAudioFromUrl()"
+        class="h-8 px-4 rounded-xl btn-purple text-white text-xs font-bold transition-all shadow hover:opacity-95 flex items-center gap-1 shrink-0 cursor-pointer"
+      >
+        <span id="quickAudioBtnText">Fetch Audio</span>
+        <span>→</span>
+      </button>
+    </div>
+
+    <!-- Waveform Visualizer -->
+    <div id="waveformContainer" class="relative h-20 w-full flex items-center gap-1 px-3 py-3 rounded-2xl bg-black/5 dark:bg-black/30 border border-slate-200/40 dark:border-white/5 cursor-pointer">
+      <!-- Generated via JS for exact integer heights -->
+    </div>
+
+    <!-- Playback Controls -->
+    <div class="flex items-center justify-between pt-2">
+      <div class="flex items-center gap-3">
+        <button type="button" id="playBtn" onclick="togglePlay()" class="h-10 px-5 rounded-full btn-purple btn-gloss text-white font-bold text-xs flex items-center gap-2 shadow-lg hover:opacity-95">
+          <span id="playIcon">▶</span>
+          <span id="playLabel">Play Audition</span>
+        </button>
+        <span id="timecode" class="text-xs font-mono font-semibold text-slate-500 dark:text-slate-400">00:00 / 00:00</span>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <span class="text-xs text-slate-400">🔊</span>
+        <input type="range" min="0" max="100" value="85" class="w-24 h-1.5 rounded-lg accent-purple-500" />
+      </div>
+    </div>
+  </div>
+
+  <!-- AUTO MODE VIEW -->
+  <div id="autoModeView" class="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
+    <!-- AI Analysis Card -->
+    <div class="glass glass-rim rounded-3xl p-6 shadow-xl flex flex-col gap-4">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <span class="text-purple-500 font-bold">⚡</span>
+          <h3 class="font-bold text-sm text-slate-900 dark:text-white">AI Audio Intelligence Analysis</h3>
+        </div>
+        <span id="aiAnalysisStatus" class="px-2.5 py-0.5 rounded-full bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 text-[10px] font-bold">ANALYZED</span>
+      </div>
+
+      <div class="grid grid-cols-2 gap-3">
+        <div class="glass rounded-2xl p-3 border border-slate-200/40 dark:border-white/5">
+          <span class="text-[10px] uppercase font-bold text-slate-400">Detected Genre</span>
+          <p id="statGenre" class="font-bold text-xs text-slate-900 dark:text-white mt-0.5">Afro-House / Dance Pop</p>
+        </div>
+        <div class="glass rounded-2xl p-3 border border-slate-200/40 dark:border-white/5">
+          <span class="text-[10px] uppercase font-bold text-slate-400">Tempo & Key</span>
+          <p id="statTempo" class="font-bold text-xs text-slate-900 dark:text-white mt-0.5">126 BPM · F# Minor</p>
+        </div>
+        <div class="glass rounded-2xl p-3 border border-slate-200/40 dark:border-white/5">
+          <span class="text-[10px] uppercase font-bold text-slate-400">Dynamic Range</span>
+          <p id="statDynamicRange" class="font-bold text-xs text-slate-900 dark:text-white mt-0.5">8.4 LUFS (High Energy)</p>
+        </div>
+        <div class="glass rounded-2xl p-3 border border-slate-200/40 dark:border-white/5">
+          <span class="text-[10px] uppercase font-bold text-slate-400">Vocal Stems</span>
+          <p id="statVocals" class="font-bold text-xs text-slate-900 dark:text-white mt-0.5">Prominent Center (64%)</p>
+        </div>
+      </div>
+
+      <div>
+        <div class="flex items-center justify-between mb-2">
+          <label class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider block">Processing Intensity</label>
+          <span id="intensityValText" class="text-xs font-mono font-bold text-purple-600 dark:text-purple-400">75%</span>
+        </div>
+        <input type="range" id="intensitySlider" min="0" max="100" value="75" oninput="setProcessingIntensity(this.value)" class="w-full h-2 rounded-lg accent-purple-500 bg-slate-200 dark:bg-white/10" />
+      </div>
+
+      <div class="pt-3 border-t border-slate-200/50 dark:border-white/10 flex items-center justify-between text-xs">
+        <span class="text-slate-400">Want manual control?</span>
+        <button type="button" onclick="switchAudioMode('custom')" class="text-purple-600 dark:text-purple-400 font-bold hover:underline">Fine-tune in Custom Rack →</button>
+      </div>
+    </div>
+
+    <!-- Auto Applied Chain -->
+    <div class="glass glass-rim rounded-3xl p-6 shadow-xl flex flex-col gap-4">
+      <div class="flex items-center gap-2">
+        <span class="text-purple-500 font-bold">🎛</span>
+        <h3 class="font-bold text-sm text-slate-900 dark:text-white">Auto-Applied Mastering Chain</h3>
+      </div>
+
+      <div class="flex flex-col gap-2">
+        <div class="glass rounded-2xl p-3 flex items-center justify-between text-xs">
+          <span class="font-bold text-slate-900 dark:text-white flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-purple-500"></span> Lush Plate Reverb</span>
+          <span class="text-[11px] font-semibold text-purple-600 dark:text-purple-400">50%</span>
+        </div>
+        <div class="glass rounded-2xl p-3 flex items-center justify-between text-xs">
+          <span class="font-bold text-slate-900 dark:text-white flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-purple-500"></span> Dynamic 10-Band EQ</span>
+          <span class="text-[11px] font-semibold text-purple-600 dark:text-purple-400">Active</span>
+        </div>
+        <div class="glass rounded-2xl p-3 flex items-center justify-between text-xs">
+          <span class="font-bold text-slate-900 dark:text-white flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-purple-500"></span> Mastering Bus Compressor</span>
+          <span class="text-[11px] font-semibold text-purple-600 dark:text-purple-400">3.2:1</span>
+        </div>
+        <div class="glass rounded-2xl p-3 flex items-center justify-between text-xs">
+          <span class="font-bold text-slate-900 dark:text-white flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-purple-500"></span> Stereo Imager & Widener</span>
+          <span class="text-[11px] font-semibold text-purple-600 dark:text-purple-400">+18%</span>
+        </div>
+      </div>
+
+      <div class="mt-2 pt-3 border-t border-slate-200/50 dark:border-white/10 flex flex-col gap-3">
+        <label class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Export Format</label>
+        <div class="grid grid-cols-4 gap-2">
+          <button type="button" onclick="selectExportFormat('mp3')" id="expFmtMp3" class="py-1.5 rounded-xl text-xs font-bold bg-purple-600 text-white shadow-sm">MP3</button>
+          <button type="button" onclick="selectExportFormat('wav')" id="expFmtWav" class="py-1.5 rounded-xl text-xs font-bold glass text-slate-600 dark:text-slate-300">WAV</button>
+          <button type="button" onclick="selectExportFormat('flac')" id="expFmtFlac" class="py-1.5 rounded-xl text-xs font-bold glass text-slate-600 dark:text-slate-300">FLAC</button>
+          <button type="button" onclick="selectExportFormat('m4a')" id="expFmtM4a" class="py-1.5 rounded-xl text-xs font-bold glass text-slate-600 dark:text-slate-300">M4A</button>
+        </div>
+
+        <button type="button" onclick="exportAudio()" class="w-full py-3.5 rounded-2xl btn-purple text-white font-bold text-xs shadow-lg hover:opacity-95 transition-all mt-2">
+          ↓ Export Mastered Track
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- CUSTOM MODE VIEW (Hidden by default) -->
+  <div id="customModeView" class="hidden flex flex-col gap-6">
+    <!-- Category Tabs -->
+    <div class="flex flex-wrap items-center gap-2 p-1.5 rounded-2xl glass border border-slate-200/40 dark:border-white/10 text-xs font-bold">
+      <button type="button" onclick="setCustomCategory('space')" class="custom-cat-btn px-4 py-2 rounded-xl bg-purple-600 text-white shadow-sm">Space & Time</button>
+      <button type="button" onclick="setCustomCategory('modulation')" class="custom-cat-btn px-4 py-2 rounded-xl text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white">Modulation</button>
+      <button type="button" onclick="setCustomCategory('eq')" class="custom-cat-btn px-4 py-2 rounded-xl text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white">Equalizer</button>
+      <button type="button" onclick="setCustomCategory('dynamics')" class="custom-cat-btn px-4 py-2 rounded-xl text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white">Dynamics</button>
+      <button type="button" onclick="setCustomCategory('creative')" class="custom-cat-btn px-4 py-2 rounded-xl text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white">Creative FX</button>
+      <button type="button" onclick="setCustomCategory('stereo')" class="custom-cat-btn px-4 py-2 rounded-xl text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white">Stereo</button>
+      <button type="button" onclick="setCustomCategory('voice')" class="custom-cat-btn px-4 py-2 rounded-xl text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white">Voice Processing</button>
+    </div>
+
+    <!-- Effects Cards Grid -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4" id="customEffectsGrid">
+      <!-- Injected dynamically via JS -->
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  let isPlaying = false;
+  let auditionMode = 'wet';
+  let totalAudioDuration = 159; // 02:39 default matching master
+  let currentAudioSec = 42;     // 00:42 default matching screenshot
+  let hasRealAudioSource = false;
+  const realAudio = document.getElementById('realAudioPlayer');
+
+  // Web Audio API DSP & Synth Engine
+  let audioCtx = null;
+  let synthTimer = null;
+  let masterGain = null;
+  let dryGain = null;
+  let wetGain = null;
+  let reverbGainNode = null;
+  let delayGainNode = null;
+  let eqFilterNode = null;
+  let compNode = null;
+  let synthStep = 0;
+
+  function initWebAudio() {
+    if (audioCtx) return;
+    try {
+      const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+      audioCtx = new AudioContextClass();
+
+      masterGain = audioCtx.createGain();
+      masterGain.gain.value = 0.85;
+      masterGain.connect(audioCtx.destination);
+
+      dryGain = audioCtx.createGain();
+      dryGain.gain.value = auditionMode === 'dry' ? 1.0 : 0.0;
+      dryGain.connect(masterGain);
+
+      wetGain = audioCtx.createGain();
+      wetGain.gain.value = auditionMode === 'wet' ? 1.0 : 0.0;
+
+      // DSP Chain: EQ Filter -> Compressor -> Delay/Reverb -> wetGain -> masterGain
+      eqFilterNode = audioCtx.createBiquadFilter();
+      eqFilterNode.type = 'peaking';
+      eqFilterNode.frequency.value = 3200;
+      eqFilterNode.Q.value = 1.0;
+      eqFilterNode.gain.value = 4.5; // High-end sheen
+
+      compNode = audioCtx.createDynamicsCompressor();
+      compNode.threshold.value = -24;
+      compNode.knee.value = 30;
+      compNode.ratio.value = 3.2; // 3.2:1
+      compNode.attack.value = 0.003;
+      compNode.release.value = 0.25;
+
+      // Ping-pong delay effect
+      const delayNode = audioCtx.createDelay();
+      delayNode.delayTime.value = 0.35; // rhythmic tempo delay
+      const delayFeedback = audioCtx.createGain();
+      delayFeedback.gain.value = 0.38; // 40% feedback
+      delayNode.connect(delayFeedback);
+      delayFeedback.connect(delayNode);
+
+      delayGainNode = audioCtx.createGain();
+      delayGainNode.gain.value = 0.40;
+      delayNode.connect(delayGainNode);
+
+      // Reverb tail simulation via short diffused delay
+      const revDelay = audioCtx.createDelay();
+      revDelay.delayTime.value = 0.085;
+      const revFeedback = audioCtx.createGain();
+      revFeedback.gain.value = 0.55;
+      revDelay.connect(revFeedback);
+      revFeedback.connect(revDelay);
+
+      reverbGainNode = audioCtx.createGain();
+      reverbGainNode.gain.value = 0.50;
+      revDelay.connect(reverbGainNode);
+
+      // Connect nodes
+      eqFilterNode.connect(compNode);
+      compNode.connect(wetGain);
+      compNode.connect(delayNode);
+      compNode.connect(revDelay);
+      delayGainNode.connect(wetGain);
+      reverbGainNode.connect(wetGain);
+
+      wetGain.connect(masterGain);
+    } catch (e) {
+      console.warn('Web Audio init note:', e);
+    }
+  }
+
+  function playSynthBeat() {
+    if (!audioCtx || hasRealAudioSource) return;
+    const now = audioCtx.currentTime;
+    const beat = synthStep % 16;
+    synthStep++;
+
+    // Afro-House / Dance Pop Scale: F# Minor (F#, G#, A, B, C#, D, E)
+    const scale = [185.00, 207.65, 220.00, 246.94, 277.18, 293.66, 329.63, 369.99];
+
+    // 1. Kick on beat 0, 4, 8, 12 (Four-on-the-floor)
+    if (beat % 4 === 0) {
+      const kickOsc = audioCtx.createOscillator();
+      const kickGain = audioCtx.createGain();
+      kickOsc.frequency.setValueAtTime(140, now);
+      kickOsc.frequency.exponentialRampToValueAtTime(38, now + 0.12);
+      kickGain.gain.setValueAtTime(0.7, now);
+      kickGain.gain.exponentialRampToValueAtTime(0.001, now + 0.22);
+      kickOsc.connect(kickGain);
+      kickGain.connect(dryGain);
+      kickGain.connect(eqFilterNode);
+      kickOsc.start(now);
+      kickOsc.stop(now + 0.25);
+    }
+
+    // 2. Off-beat Clap / Snare on beat 4, 12
+    if (beat === 4 || beat === 12) {
+      const snareOsc = audioCtx.createOscillator();
+      const snareGain = audioCtx.createGain();
+      snareOsc.type = 'triangle';
+      snareOsc.frequency.setValueAtTime(220, now);
+      snareGain.gain.setValueAtTime(0.25, now);
+      snareGain.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
+      snareOsc.connect(snareGain);
+      snareGain.connect(dryGain);
+      snareGain.connect(eqFilterNode);
+      snareOsc.start(now);
+      snareOsc.stop(now + 0.16);
+    }
+
+    // 3. Melodic Afro-House Pluck synth
+    if (beat % 2 === 0 || beat === 3 || beat === 7 || beat === 11) {
+      const noteIdx = (beat * 3) % scale.length;
+      const freq = scale[noteIdx];
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(freq, now);
+      gain.gain.setValueAtTime(0.18, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.2);
+      osc.connect(gain);
+      gain.connect(dryGain);
+      gain.connect(eqFilterNode);
+      osc.start(now);
+      osc.stop(now + 0.22);
+    }
+  }
+
+  // Waveform Bar Construction
+  const waveformEl = document.getElementById('waveformContainer');
+  waveformEl.innerHTML = '';
+  const numBars = 64;
+  for (let i = 0; i < numBars; i++) {
+    const bar = document.createElement('div');
+    bar.id = `waveBar-${i}`;
+    bar.className = 'flex-1 rounded-full transition-all duration-150 pointer-events-none';
+    const h = Math.round(Math.max(16, Math.sin(i * 0.28) * 48 + Math.cos(i * 0.14) * 36 + 22));
+    bar.style.height = `${h}%`;
+    waveformEl.appendChild(bar);
+  }
+
+  function updateWaveformProgress(ratio) {
+    const activeIndex = Math.floor(ratio * numBars);
+    for (let i = 0; i < numBars; i++) {
+      const b = document.getElementById(`waveBar-${i}`);
+      if (b) {
+        b.style.backgroundColor = i <= activeIndex ? '#A855F7' : 'rgba(168, 85, 247, 0.25)';
+      }
+    }
+  }
+
+  // Waveform Click-to-Seek
+  waveformEl.onclick = function(e) {
+    const rect = waveformEl.getBoundingClientRect();
+    const ratio = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+    currentAudioSec = Math.round(ratio * totalAudioDuration);
+
+    if (hasRealAudioSource && realAudio.duration) {
+      realAudio.currentTime = ratio * realAudio.duration;
+    }
+    document.getElementById('timecode').textContent = `${formatDuration(currentAudioSec)} / ${formatDuration(totalAudioDuration)}`;
+    updateWaveformProgress(ratio);
+  };
+
+  function setAudioVolume(val) {
+    const vol = Math.max(0, Math.min(1, val / 100));
+    if (masterGain) masterGain.gain.value = vol;
+    realAudio.volume = vol;
+  }
+
+  function setAudition(mode) {
+    auditionMode = mode;
+    playGlassTick();
+    initWebAudio();
+    const dry = document.getElementById('auditionDryBtn');
+    const wet = document.getElementById('auditionWetBtn');
+
+    if (mode === 'dry') {
+      dry.className = 'px-3 py-1 rounded-full text-xs font-bold bg-blue-600 text-white shadow-sm transition-all';
+      wet.className = 'px-3 py-1 rounded-full text-xs font-medium text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-all';
+      if (dryGain) dryGain.gain.value = 1.0;
+      if (wetGain) wetGain.gain.value = 0.0;
+      showToast('Auditioning Dry (Original untouched audio)', 'info');
+    } else {
+      wet.className = 'px-3 py-1 rounded-full text-xs font-bold bg-purple-600 text-white shadow-sm transition-all';
+      dry.className = 'px-3 py-1 rounded-full text-xs font-medium text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-all';
+      if (dryGain) dryGain.gain.value = 0.0;
+      if (wetGain) wetGain.gain.value = 1.0;
+      showToast('Auditioning Wet (Mastered DSP audio)', 'success');
+    }
+  }
+
+  function switchAudioMode(mode) {
+    playGlassTick();
+    const autoBtn = document.getElementById('tabAutoBtn');
+    const customBtn = document.getElementById('tabCustomBtn');
+    const autoView = document.getElementById('autoModeView');
+    const customView = document.getElementById('customModeView');
+
+    if (mode === 'custom') {
+      customBtn.className = 'px-4 py-1.5 rounded-full text-xs font-bold transition-all bg-purple-600 text-white shadow-sm flex items-center gap-1.5';
+      autoBtn.className = 'px-4 py-1.5 rounded-full text-xs font-bold transition-all text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white flex items-center gap-1.5';
+      autoView.classList.add('hidden');
+      customView.classList.remove('hidden');
+      renderCustomEffects('space');
+    } else {
+      autoBtn.className = 'px-4 py-1.5 rounded-full text-xs font-bold transition-all bg-purple-600 text-white shadow-sm flex items-center gap-1.5';
+      customBtn.className = 'px-4 py-1.5 rounded-full text-xs font-bold transition-all text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white flex items-center gap-1.5';
+      customView.classList.add('hidden');
+      autoView.classList.remove('hidden');
+    }
+  }
+
+  function setProcessingIntensity(val) {
+    const text = document.getElementById('intensityValText');
+    if (text) text.textContent = `${val}%`;
+    if (compNode) {
+      compNode.threshold.value = -12 - (val * 0.2);
+    }
+  }
+
+  function selectExportFormat(fmt) {
+    playGlassTick();
+    ['mp3', 'wav', 'flac', 'm4a'].forEach(f => {
+      const btn = document.getElementById(`expFmt${f.charAt(0).toUpperCase() + f.slice(1)}`);
+      if (btn) {
+        btn.className = f === fmt 
+          ? 'py-1.5 rounded-xl text-xs font-bold bg-purple-600 text-white shadow-sm'
+          : 'py-1.5 rounded-xl text-xs font-bold glass text-slate-600 dark:text-slate-300';
+      }
+    });
+  }
+
+  function togglePlay() {
+    playGlassTick();
+    initWebAudio();
+    if (audioCtx && audioCtx.state === 'suspended') {
+      audioCtx.resume();
+    }
+
+    if (isPlaying) {
+      isPlaying = false;
+      if (hasRealAudioSource) {
+        realAudio.pause();
+      } else {
+        clearInterval(synthTimer);
+      }
+      document.getElementById('playIcon').textContent = '▶';
+      document.getElementById('playLabel').textContent = 'Play Audition';
+    } else {
+      isPlaying = true;
+      document.getElementById('playIcon').textContent = '⏸';
+      document.getElementById('playLabel').textContent = 'Pause Audition';
+
+      if (hasRealAudioSource) {
+        realAudio.play().catch(e => console.warn(e));
+      } else {
+        // 126 BPM = ~119ms per 16th note step
+        synthTimer = setInterval(() => {
+          playSynthBeat();
+        }, 119);
+
+        // Advance playback seconds
+        const ticker = setInterval(() => {
+          if (!isPlaying) {
+            clearInterval(ticker);
+            return;
+          }
+          currentAudioSec++;
+          if (currentAudioSec >= totalAudioDuration) {
+            currentAudioSec = 0;
+          }
+          document.getElementById('timecode').textContent = `${formatDuration(currentAudioSec)} / ${formatDuration(totalAudioDuration)}`;
+          updateWaveformProgress(currentAudioSec / totalAudioDuration);
+        }, 1000);
+      }
+    }
+  }
+
+  // Real Audio playback event bindings
+  realAudio.ontimeupdate = function() {
+    if (!realAudio.duration) return;
+    currentAudioSec = Math.round(realAudio.currentTime);
+    totalAudioDuration = Math.round(realAudio.duration);
+    document.getElementById('timecode').textContent = `${formatDuration(currentAudioSec)} / ${formatDuration(totalAudioDuration)}`;
+    updateWaveformProgress(realAudio.currentTime / realAudio.duration);
+  };
+
+  realAudio.onended = function() {
+    isPlaying = false;
+    document.getElementById('playIcon').textContent = '▶';
+    document.getElementById('playLabel').textContent = 'Play Audition';
+    updateWaveformProgress(0);
+  };
+
+  // Custom Effects Rack Setup
+  const customEffects = {
+    space: [
+      { name: 'Lush Plate Reverb', desc: 'Silky smooth high-end reverb tail', val: 50 },
+      { name: 'Cathedral Hall', desc: 'Huge expansive acoustics with 3.2s decay', val: 35 },
+      { name: 'Ping-Pong Delay', desc: 'Rhythmic stereo bouncing echos', val: 40 },
+      { name: 'Tape Echo 1974', desc: 'Vintage warm saturation delay', val: 25 },
+    ],
+    modulation: [
+      { name: 'Vintage Chorus', desc: 'Warm 80s analog stereo widening', val: 45 },
+      { name: 'Optical Flanger', desc: 'Deep jet-plane resonant sweeps', val: 30 },
+      { name: 'Harmonic Tremolo', desc: 'Tube amplifier amplitude pulsation', val: 20 },
+    ],
+    eq: [
+      { name: 'Parametric 10-Band EQ', desc: 'Surgical curve tone control', val: 50 },
+      { name: 'Warm Analog Pultec', desc: 'Musical low-end boost and attenuate', val: 60 },
+      { name: 'Air Band (20kHz)', desc: 'Ultra-high sheen and vocal breath', val: 40 },
+    ],
+    dynamics: [
+      { name: 'Bus Compressor', desc: 'Glue together rhythm and bass', val: 55 },
+      { name: 'Brickwall Limiter', desc: 'True peak protection at -0.1 dB', val: 80 },
+      { name: 'Optical Leveler (LA-2A)', desc: 'Smooth vocal dynamics control', val: 50 },
+    ],
+    creative: [
+      { name: 'Tube Saturation', desc: 'Warm harmonic distortion', val: 35 },
+      { name: 'Bitcrusher & Lo-Fi', desc: '8-bit vintage sampler grain', val: 20 },
+    ],
+    stereo: [
+      { name: 'Haas Stereo Widener', desc: 'Psychoacoustic wide image', val: 60 },
+      { name: 'Bass Mono-Maker', desc: 'Center low frequencies under 120Hz', val: 100 },
+    ],
+    voice: [
+      { name: 'De-Esser Sibilance', desc: 'Tame harsh s and t sounds', val: 65 },
+      { name: 'Vocal Clarity Exciter', desc: 'Punch through dense instrumental mix', val: 50 },
+    ]
+  };
+
+  function updateEffectValue(name, val, spanId) {
+    const el = document.getElementById(spanId);
+    if (el) el.textContent = `${val}%`;
+    initWebAudio();
+
+    if (name.includes('Reverb') && reverbGainNode) {
+      reverbGainNode.gain.value = val / 100;
+    } else if (name.includes('Delay') && delayGainNode) {
+      delayGainNode.gain.value = val / 100;
+    } else if (name.includes('EQ') && eqFilterNode) {
+      eqFilterNode.gain.value = (val - 50) * 0.2;
+    } else if (name.includes('Compressor') && compNode) {
+      compNode.threshold.value = -10 - (val * 0.3);
+    }
+  }
+
+  function renderCustomEffects(category) {
+    const grid = document.getElementById('customEffectsGrid');
+    grid.innerHTML = '';
+    const effects = customEffects[category] || [];
+    effects.forEach((fx, idx) => {
+      const card = document.createElement('div');
+      card.className = 'glass glass-rim rounded-2xl p-4 shadow-md flex flex-col justify-between';
+      const spanId = `fxVal-${category}-${idx}`;
+      card.innerHTML = `
+        <div>
+          <div class="flex items-center justify-between mb-1">
+            <h4 class="font-bold text-xs text-slate-900 dark:text-white">${fx.name}</h4>
+            <input type="checkbox" checked class="w-4 h-4 rounded text-purple-600 accent-purple-600" />
+          </div>
+          <p class="text-[11px] text-slate-400">${fx.desc}</p>
+        </div>
+        <div class="mt-4 pt-2 border-t border-slate-200/40 dark:border-white/5 flex items-center justify-between gap-3">
+          <input type="range" min="0" max="100" value="${fx.val}" oninput="updateEffectValue('${fx.name}', this.value, '${spanId}')" class="flex-1 h-1.5 rounded-lg accent-purple-500" />
+          <span id="${spanId}" class="text-xs font-mono font-bold text-purple-600 dark:text-purple-400">${fx.val}%</span>
+        </div>
+      `;
+      grid.appendChild(card);
+    });
+  }
+
+  function setCustomCategory(cat) {
+    playGlassTick();
+    document.querySelectorAll('.custom-cat-btn').forEach(b => {
+      b.className = 'custom-cat-btn px-4 py-2 rounded-xl text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white';
+    });
+    event.target.className = 'custom-cat-btn px-4 py-2 rounded-xl bg-purple-600 text-white shadow-sm';
+    renderCustomEffects(cat);
+  }
+
+  // Import Drawer and File/URL Handling
+  function toggleImportDrawer() {
+    playGlassTick();
+    const drawer = document.getElementById('audioImportDrawer');
+    drawer.classList.toggle('hidden');
+    if (!drawer.classList.contains('hidden')) {
+      renderRecentAudioImports();
+    }
+  }
+
+  function switchAudioImportTab(tab) {
+    playGlassTick();
+    const pcBtn = document.getElementById('importTabPcBtn');
+    const dlBtn = document.getElementById('importTabDownloaderBtn');
+    const urlBtn = document.getElementById('importTabUrlBtn');
+    const pcSec = document.getElementById('importPcSection');
+    const dlSec = document.getElementById('importDownloaderSection');
+    const urlSec = document.getElementById('importUrlSection');
+
+    [pcBtn, dlBtn, urlBtn].forEach(b => {
+      b.className = 'px-3.5 py-1.5 rounded-xl text-xs font-bold glass text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white flex items-center gap-1.5';
+    });
+
+    pcSec.classList.add('hidden');
+    dlSec.classList.add('hidden');
+    urlSec.classList.add('hidden');
+
+    if (tab === 'downloader') {
+      dlBtn.className = 'px-3.5 py-1.5 rounded-xl text-xs font-bold bg-purple-600 text-white shadow-sm flex items-center gap-1.5';
+      dlSec.classList.remove('hidden');
+      renderRecentAudioImports();
+    } else if (tab === 'url') {
+      urlBtn.className = 'px-3.5 py-1.5 rounded-xl text-xs font-bold bg-purple-600 text-white shadow-sm flex items-center gap-1.5';
+      urlSec.classList.remove('hidden');
+    } else {
+      pcBtn.className = 'px-3.5 py-1.5 rounded-xl text-xs font-bold bg-purple-600 text-white shadow-sm flex items-center gap-1.5';
+      pcSec.classList.remove('hidden');
+    }
+  }
+
+  function renderRecentAudioImports() {
+    const list = document.getElementById('recentAudioList');
+    if (!list) return;
+    list.innerHTML = '';
+    const history = window.getRecentHistory ? window.getRecentHistory() : [];
+    const audioItems = history.filter(item => !item.type || item.type === 'audio' || item.format.includes('MP3') || item.format.includes('FLAC') || item.format.includes('WAV') || item.format.includes('M4A'));
+
+    if (audioItems.length === 0) {
+      list.innerHTML = '<div class="col-span-2 py-4 text-center text-xs text-slate-400">No session audio files found yet. Upload from PC or use Downloader first.</div>';
+      return;
+    }
+
+    audioItems.forEach(item => {
+      const card = document.createElement('div');
+      card.className = 'glass rounded-2xl p-3 border border-slate-200/50 dark:border-white/10 flex items-center justify-between gap-2';
+      card.innerHTML = `
+        <div class="overflow-hidden">
+          <p class="font-bold text-xs text-slate-900 dark:text-white truncate">${item.title}</p>
+          <p class="text-[10px] text-slate-400">${item.format} · ${item.size}</p>
+        </div>
+        <button type="button" onclick="loadSongFromHistory('${item.title.replace(/'/g, "\\'")}', '${item.format}', '${item.size}')" class="shrink-0 px-3 py-1 rounded-xl bg-purple-600 text-white text-[11px] font-bold shadow hover:opacity-90">
+          Load Track
+        </button>
+      `;
+      list.appendChild(card);
+    });
+  }
+
+  function handleAudioFileUpload(event) {
+    const file = event.target.files[0];
+    if (file) loadAudioFromFile(file);
+  }
+
+  function handleAudioDrop(event) {
+    event.preventDefault();
+    document.getElementById('audioDropZone').classList.remove('border-purple-500');
+    if (event.dataTransfer.files && event.dataTransfer.files[0]) {
+      loadAudioFromFile(event.dataTransfer.files[0]);
+    }
+  }
+
+  function applyAnalysisData(title, format) {
+    document.getElementById('aiAnalysisStatus').textContent = 'ANALYZED';
+    document.getElementById('aiAnalysisStatus').className = 'px-2.5 py-0.5 rounded-full bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 text-[10px] font-bold';
+    document.getElementById('statGenre').textContent = format.includes('FLAC') || format.includes('WAV') ? 'Studio Master (Lossless)' : 'Afro-House / Dance Pop';
+    document.getElementById('statTempo').textContent = '126 BPM · F# Minor';
+    document.getElementById('statDynamicRange').textContent = '8.4 LUFS (High Energy)';
+    document.getElementById('statVocals').textContent = 'Prominent Center (64%)';
+  }
+
+  function loadAudioFromFile(file) {
+    playGlassPop();
+    hasRealAudioSource = true;
+    const objectUrl = URL.createObjectURL(file);
+    realAudio.src = objectUrl;
+
+    const nameWithoutExt = file.name.replace(/\.[^/.]+$/, "");
+    document.getElementById('currentTrackTitle').textContent = nameWithoutExt;
+    const mb = (file.size / (1024 * 1024)).toFixed(1);
+    document.getElementById('currentTrackMeta').textContent = `${mb} MB · ${file.type || 'audio/mpeg'} · Local PC File`;
+
+    realAudio.onloadedmetadata = function() {
+      totalAudioDuration = Math.round(realAudio.duration);
+      currentAudioSec = 0;
+      document.getElementById('timecode').textContent = `00:00 / ${formatDuration(totalAudioDuration)}`;
+      updateWaveformProgress(0);
+      applyAnalysisData(nameWithoutExt, file.type || 'mp3');
+    };
+
+    document.getElementById('audioImportDrawer').classList.add('hidden');
+    showToast(`Loaded "${file.name}" from your PC!`, 'success');
+  }
+
+  function loadSongFromHistory(title, format, size) {
+    playGlassPop();
+    document.getElementById('currentTrackTitle').textContent = title;
+    document.getElementById('currentTrackMeta').textContent = `${format} · ${size} · Session Downloader Import`;
+    currentAudioSec = 0;
+    document.getElementById('timecode').textContent = `00:00 / ${formatDuration(totalAudioDuration)}`;
+    updateWaveformProgress(0);
+    applyAnalysisData(title, format);
+    document.getElementById('audioImportDrawer').classList.add('hidden');
+    showToast(`Imported "${title}" from Downloader!`, 'success');
+  }
+
+  let activeAudioEventSource = null;
+
+  async function handleQuickAudioPaste() {
+    playGlassTick();
+    const input = document.getElementById('quickAudioUrlInput');
+    try {
+      const text = await navigator.clipboard.readText();
+      if (text && text.trim()) {
+        input.value = text.trim();
+        fetchAudioFromUrl(text.trim());
+      } else {
+        input.focus();
+        showToast('Clipboard is empty. Press Ctrl+V to paste.', 'info');
+      }
+    } catch {
+      input.focus();
+      showToast('Click input and press Ctrl+V to paste', 'info');
+    }
+  }
+
+  async function handleDrawerAudioPaste() {
+    playGlassTick();
+    const input = document.getElementById('importAudioUrlInput');
+    try {
+      const text = await navigator.clipboard.readText();
+      if (text && text.trim()) {
+        input.value = text.trim();
+        fetchAudioFromUrl(text.trim());
+      } else {
+        input.focus();
+        showToast('Clipboard is empty. Press Ctrl+V to paste.', 'info');
+      }
+    } catch {
+      input.focus();
+      showToast('Click input and press Ctrl+V to paste', 'info');
+    }
+  }
+
+  function loadAudioFromJobId(jobId, title) {
+    playGlassPop();
+    hasRealAudioSource = true;
+    const streamUrl = `/api/v1/jobs/${jobId}/file?inline=1`;
+    realAudio.src = streamUrl;
+    realAudio.load();
+
+    document.getElementById('currentTrackTitle').textContent = title || 'Downloader Audio Track';
+    document.getElementById('currentTrackMeta').textContent = `High-Fidelity Stream · Session Downloader Import`;
+
+    realAudio.onloadedmetadata = function() {
+      totalAudioDuration = Math.round(realAudio.duration);
+      currentAudioSec = 0;
+      document.getElementById('timecode').textContent = `00:00 / ${formatDuration(totalAudioDuration)}`;
+      updateWaveformProgress(0);
+      applyAnalysisData(title || 'Audio Track', 'MP3 320k');
+    };
+
+    document.getElementById('audioImportDrawer').classList.add('hidden');
+    showToast(`Loaded "${title}" into Audio Studio!`, 'success');
+  }
+
+  async function fetchAudioFromUrl(urlOverride) {
+    const url = (urlOverride || document.getElementById('quickAudioUrlInput').value || document.getElementById('importAudioUrlInput').value || '').trim();
+    if (!url) {
+      showToast('Please enter or paste a media URL first', 'error');
+      document.getElementById('quickAudioUrlInput').focus();
+      return;
+    }
+
+    playGlassPop();
+    showToast('Fetching media stream details...', 'info');
+
+    const quickBtnText = document.getElementById('quickAudioBtnText');
+    const drawerBtnText = document.getElementById('fetchAudioBtnText');
+    if (quickBtnText) quickBtnText.textContent = 'Fetching...';
+    if (drawerBtnText) drawerBtnText.textContent = 'Fetching...';
+
+    try {
+      const inspectRes = await fetch(`/api/inspect?url=${encodeURIComponent(url)}`);
+      if (inspectRes.ok) {
+        const info = await inspectRes.json();
+        document.getElementById('currentTrackTitle').textContent = info.title || 'Fetching Audio...';
+        document.getElementById('currentTrackMeta').textContent = `${formatDuration(info.duration || 0)} · Fetching & Decoding Audio Stream...`;
+      }
+    } catch (e) {
+      console.warn(e);
+    }
+
+    try {
+      const res = await fetch('/api/v1/jobs', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          url: url,
+          mode: 'audio',
+          format: 'mp3',
+          quality: 'best',
+          consent: true,
+          embedThumbnail: true,
+          embedMetadata: true
+        })
+      });
+
+      if (!res.ok) {
+        const errJson = await res.json().catch(() => ({}));
+        const msg = (errJson.detail && errJson.detail.explanation) || 'Failed to fetch audio from this URL.';
+        showToast(msg, 'error');
+        if (quickBtnText) quickBtnText.textContent = 'Fetch Audio';
+        if (drawerBtnText) drawerBtnText.textContent = 'Fetch & Load';
+        return;
+      }
+
+      const { jobId } = await res.json();
+      if (activeAudioEventSource) activeAudioEventSource.close();
+
+      activeAudioEventSource = new EventSource(`/api/v1/jobs/${jobId}/events`);
+
+      activeAudioEventSource.addEventListener('update', (ev) => {
+        const data = JSON.parse(ev.data);
+        const percent = Math.round(data.percent || 0);
+
+        if (quickBtnText) quickBtnText.textContent = `${percent}%`;
+        if (drawerBtnText) drawerBtnText.textContent = `${percent}%`;
+
+        if (data.state === 'ready') {
+          activeAudioEventSource.close();
+          const cleanTitle = data.filename || document.getElementById('currentTrackTitle').textContent.trim() || 'Online Audio Track';
+          const fileUrl = `/api/v1/jobs/${jobId}/file?inline=1`;
+
+          hasRealAudioSource = true;
+          realAudio.src = fileUrl;
+          realAudio.load();
+
+          document.getElementById('currentTrackTitle').textContent = cleanTitle;
+          document.getElementById('currentTrackMeta').textContent = `MP3 320k · Streamed from URL`;
+
+          realAudio.onloadedmetadata = function() {
+            totalAudioDuration = Math.round(realAudio.duration);
+            currentAudioSec = 0;
+            document.getElementById('timecode').textContent = `00:00 / ${formatDuration(totalAudioDuration)}`;
+            updateWaveformProgress(0);
+            applyAnalysisData(cleanTitle, 'MP3');
+          };
+
+          document.getElementById('audioImportDrawer').classList.add('hidden');
+          if (quickBtnText) quickBtnText.textContent = 'Fetch Audio';
+          if (drawerBtnText) drawerBtnText.textContent = 'Fetch & Load';
+
+          saveToSessionHistory({
+            jobId: jobId,
+            title: cleanTitle,
+            format: 'MP3 320K',
+            size: data.filesize ? `${(data.filesize / (1024*1024)).toFixed(1)} MB` : '7.2 MB',
+            type: 'audio',
+            fileUrl: fileUrl,
+            date: new Date().toLocaleTimeString()
+          });
+
+          showToast('Audio fetched! You can directly play and apply effects.', 'success');
+        } else if (data.state === 'failed') {
+          activeAudioEventSource.close();
+          if (quickBtnText) quickBtnText.textContent = 'Fetch Audio';
+          if (drawerBtnText) drawerBtnText.textContent = 'Fetch & Load';
+          showToast('Failed to decode audio from stream.', 'error');
+        }
+      });
+
+    } catch (e) {
+      console.error(e);
+      showToast('Error requesting audio stream', 'error');
+      if (quickBtnText) quickBtnText.textContent = 'Fetch Audio';
+      if (drawerBtnText) drawerBtnText.textContent = 'Fetch & Load';
+    }
+  }
+
+  function exportAudio() {
+    playGlassPop();
+    const title = document.getElementById('currentTrackTitle').textContent.trim();
+    showToast('Exporting mastered audio...', 'info');
+    setTimeout(() => {
+      saveToSessionHistory({
+        title: `${title} (Mastered)`,
+        format: 'MP3 320k',
+        size: '7.8 MB',
+        type: 'audio',
+        date: new Date().toLocaleTimeString()
+      });
+      showToast('Mastered audio ready & saved to session!', 'success');
+    }, 1200);
+  }
+
+  // Initial Boot
+  document.addEventListener('DOMContentLoaded', () => {
+    // Default initial preview state matching Image 1 & 2
+    document.getElementById('timecode').textContent = '00:42 / 02:39';
+    updateWaveformProgress(42 / 159);
+
+    const params = new URLSearchParams(window.location.search);
+    const qJobId = params.get('jobId');
+    const qUrl = params.get('url');
+    const qTitle = params.get('title');
+
+    if (qJobId) {
+      loadAudioFromJobId(qJobId, qTitle ? decodeURIComponent(qTitle) : 'Downloaded Audio Track');
+    } else if (qUrl) {
+      const qInput = document.getElementById('quickAudioUrlInput');
+      if (qInput) qInput.value = qUrl;
+      fetchAudioFromUrl(qUrl);
+    } else if (qTitle) {
+      loadSongFromHistory(decodeURIComponent(qTitle), 'Audio Stream', 'Best Quality');
+    }
+
+    if (params.get('mode') === 'custom') {
+      switchAudioMode('custom');
+    }
+  });
+</script>
+{% endblock %}

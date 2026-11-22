@@ -1,0 +1,212 @@
+{% extends "base.html" %}
+
+{% block title %}Queue & Job Manager — ClipGlass{% endblock %}
+
+{% block content %}
+<div class="w-full max-w-5xl mx-auto flex flex-col gap-6">
+  <!-- Header -->
+  <div class="flex items-center gap-3 px-2">
+    <div class="w-8 h-8 rounded-xl bg-blue-500/20 text-blue-500 flex items-center justify-center font-bold">
+      ≡
+    </div>
+    <div>
+      <h1 class="font-extrabold text-2xl text-slate-900 dark:text-white tracking-tight">Queue & Job Manager</h1>
+      <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Real-time processing queue across Downloads, Audio Mastering, Video Trimming & Auto Clip.</p>
+    </div>
+  </div>
+
+  <!-- 4 Stats Cards -->
+  <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+    <div class="glass glass-rim rounded-2xl p-4 shadow-md">
+      <span class="text-[10px] font-bold uppercase text-blue-500">Active</span>
+      <p id="statActive" class="text-2xl font-black text-slate-900 dark:text-white mt-1">0</p>
+    </div>
+    <div class="glass glass-rim rounded-2xl p-4 shadow-md">
+      <span class="text-[10px] font-bold uppercase text-amber-500">Queued</span>
+      <p id="statQueued" class="text-2xl font-black text-slate-900 dark:text-white mt-1">0</p>
+    </div>
+    <div class="glass glass-rim rounded-2xl p-4 shadow-md">
+      <span class="text-[10px] font-bold uppercase text-emerald-500">Completed</span>
+      <p id="statCompleted" class="text-2xl font-black text-slate-900 dark:text-white mt-1">0</p>
+    </div>
+    <div class="glass glass-rim rounded-2xl p-4 shadow-md">
+      <span class="text-[10px] font-bold uppercase text-rose-500">Failed</span>
+      <p id="statFailed" class="text-2xl font-black text-slate-900 dark:text-white mt-1">0</p>
+    </div>
+  </div>
+
+  <!-- Filters -->
+  <div class="flex items-center gap-2 p-1 rounded-2xl glass text-xs font-bold self-start">
+    <button type="button" onclick="setJobFilter('all')" id="filterBtn-all" class="job-filter-btn px-3.5 py-1.5 rounded-xl bg-blue-600 text-white shadow-sm">All</button>
+    <button type="button" onclick="setJobFilter('download')" id="filterBtn-download" class="job-filter-btn px-3.5 py-1.5 rounded-xl text-slate-500 dark:text-slate-400">Download</button>
+    <button type="button" onclick="setJobFilter('audio')" id="filterBtn-audio" class="job-filter-btn px-3.5 py-1.5 rounded-xl text-slate-500 dark:text-slate-400">Audio</button>
+    <button type="button" onclick="setJobFilter('trim')" id="filterBtn-trim" class="job-filter-btn px-3.5 py-1.5 rounded-xl text-slate-500 dark:text-slate-400">Trim</button>
+    <button type="button" onclick="setJobFilter('autoclip')" id="filterBtn-autoclip" class="job-filter-btn px-3.5 py-1.5 rounded-xl text-slate-500 dark:text-slate-400">Auto Clip</button>
+  </div>
+
+  <!-- Jobs List -->
+  <div class="w-full glass glass-rim rounded-[36px] p-6 shadow-2xl flex flex-col gap-4">
+    <div id="jobsListContainer" class="flex flex-col gap-4">
+      <!-- Injected dynamically with REAL data via JS -->
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  let activeFilter = 'all';
+  let pollInterval = null;
+
+  function setJobFilter(filter) {
+    activeFilter = filter;
+    playGlassTick();
+    document.querySelectorAll('.job-filter-btn').forEach(b => {
+      b.className = 'job-filter-btn px-3.5 py-1.5 rounded-xl text-slate-500 dark:text-slate-400';
+    });
+    const activeBtn = document.getElementById(`filterBtn-${filter}`);
+    if (activeBtn) {
+      activeBtn.className = 'job-filter-btn px-3.5 py-1.5 rounded-xl bg-blue-600 text-white shadow-sm';
+    }
+    loadRealJobs();
+  }
+
+  async function cancelJob(jobId) {
+    playGlassTick();
+    try {
+      const res = await fetch(`/api/v1/jobs/${jobId}`, { method: 'DELETE' });
+      if (res.ok) {
+        showToast('Job cancelled.', 'info');
+        loadRealJobs();
+      }
+    } catch (e) {
+      console.warn(e);
+    }
+  }
+
+  async function loadRealJobs() {
+    try {
+      const res = await fetch('/api/v1/jobs');
+      let data = { jobs: [], counts: { active: 0, queued: 0, completed: 0, failed: 0 } };
+      if (res.ok) {
+        data = await res.json();
+      }
+
+      // Update counters
+      document.getElementById('statActive').textContent = data.counts.active || 0;
+      document.getElementById('statQueued').textContent = data.counts.queued || 0;
+      document.getElementById('statCompleted').textContent = data.counts.completed || 0;
+      document.getElementById('statFailed').textContent = data.counts.failed || 0;
+
+      const container = document.getElementById('jobsListContainer');
+      container.innerHTML = '';
+
+      let jobs = data.jobs || [];
+
+      // Filter by type if selected
+      if (activeFilter === 'audio') {
+        jobs = jobs.filter(j => j.mode === 'audio' || (j.format && (j.format.includes('MP3') || j.format.includes('FLAC') || j.format.includes('WAV'))));
+      } else if (activeFilter === 'trim') {
+        jobs = jobs.filter(j => j.mode === 'trim' || (j.title && j.title.toLowerCase().includes('trim')));
+      } else if (activeFilter === 'autoclip') {
+        jobs = jobs.filter(j => j.mode === 'autoclip' || (j.title && j.title.toLowerCase().includes('short')));
+      } else if (activeFilter === 'download') {
+        jobs = jobs.filter(j => j.mode !== 'trim' && j.mode !== 'autoclip');
+      }
+
+      if (jobs.length === 0) {
+        container.innerHTML = `
+          <div class="text-center py-12 glass rounded-2xl flex flex-col items-center justify-center gap-3">
+            <div class="w-12 h-12 rounded-2xl bg-blue-500/10 text-blue-500 flex items-center justify-center text-xl font-bold">
+              ≡
+            </div>
+            <h3 class="font-bold text-sm text-slate-900 dark:text-white">No active or pending jobs in queue</h3>
+            <p class="text-xs text-slate-400 max-w-sm">When you download a video, extract an audio track, or trim a clip, real-time speed, ETA, and progress will appear right here.</p>
+            <a href="/downloader" class="mt-2 px-4 py-2 rounded-xl btn-blue text-white text-xs font-bold shadow hover:opacity-90">Start a Download →</a>
+          </div>
+        `;
+        return;
+      }
+
+      jobs.forEach(job => {
+        const percent = Math.round(job.percent || 0);
+        const isCompleted = job.state === 'ready';
+        const isFailed = job.state === 'failed' || job.state === 'cancelled';
+        const isActive = !isCompleted && !isFailed;
+
+        const card = document.createElement('div');
+
+        if (isActive) {
+          // Real Active Job Card
+          card.className = 'glass rounded-2xl p-4 shadow flex flex-col gap-3 border border-blue-500/30';
+          card.innerHTML = `
+            <div class="flex items-center justify-between text-xs">
+              <div class="flex items-center gap-2.5">
+                <span class="text-blue-500 font-bold">↓</span>
+                <span class="font-bold text-slate-900 dark:text-white">${job.title || 'Processing Media...'}</span>
+                <span class="px-2 py-0.5 rounded-full bg-blue-500/15 text-blue-600 dark:text-blue-400 text-[10px] font-bold">${job.format || 'MP4'}</span>
+              </div>
+              <button type="button" onclick="cancelJob('${job.jobId}')" title="Cancel job" class="text-slate-400 hover:text-rose-500 text-sm">🗑</button>
+            </div>
+            <div class="w-full h-2 rounded-full bg-slate-200 dark:bg-white/10 overflow-hidden">
+              <div class="h-full bg-gradient-to-r from-blue-500 to-cyan-400 transition-all duration-300" style="width: ${percent}%"></div>
+            </div>
+            <div class="flex items-center justify-between text-[11px] text-slate-400 font-mono">
+              <span>Speed: ${job.speed || 'Downloading...'} ${job.eta !== null && job.eta !== undefined ? '· ETA: 00:' + String(job.eta).padStart(2, '0') : ''}</span>
+              <span>${percent}%</span>
+            </div>
+          `;
+        } else if (isCompleted) {
+          // Real Completed Job Card
+          card.className = 'glass rounded-2xl p-4 shadow flex items-center justify-between text-xs';
+          card.innerHTML = `
+            <div class="flex items-center gap-2.5">
+              <span class="text-emerald-500 font-bold">✓</span>
+              <span class="font-bold text-slate-900 dark:text-white">${job.title || 'Completed Media'}</span>
+              <span class="px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 text-[10px] font-bold">${job.format || 'READY'}</span>
+            </div>
+            <div class="flex items-center gap-3">
+              <span class="text-emerald-500 font-bold text-[11px]">✓ Ready</span>
+              <a href="/api/v1/jobs/${job.jobId}/file" download class="px-3 py-1 rounded-full btn-blue text-white font-bold text-xs shadow hover:opacity-90">↓ Download</a>
+            </div>
+          `;
+        } else {
+          // Failed Job Card
+          card.className = 'glass rounded-2xl p-4 shadow flex items-center justify-between text-xs border border-rose-500/20';
+          card.innerHTML = `
+            <div class="flex items-center gap-2.5">
+              <span class="text-rose-500 font-bold">✕</span>
+              <span class="font-bold text-slate-900 dark:text-white">${job.title || 'Failed Job'}</span>
+              <span class="px-2 py-0.5 rounded-full bg-rose-500/15 text-rose-600 dark:text-rose-400 text-[10px] font-bold">FAILED</span>
+            </div>
+            <span class="text-rose-400 text-xs">${(job.error && job.error.explanation) || 'Error during processing'}</span>
+          `;
+        }
+
+        container.appendChild(card);
+      });
+
+      // Maintain polling if active jobs exist
+      if (data.counts.active > 0 || data.counts.queued > 0) {
+        if (!pollInterval) {
+          pollInterval = setInterval(loadRealJobs, 1500);
+        }
+      } else {
+        if (pollInterval) {
+          clearInterval(pollInterval);
+          pollInterval = null;
+        }
+      }
+
+    } catch (e) {
+      console.warn('Load jobs notice:', e);
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    loadRealJobs();
+    // Poll every 3 seconds to keep stats synchronized
+    setInterval(loadRealJobs, 3000);
+  });
+</script>
+{% endblock %}

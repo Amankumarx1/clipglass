@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+
+{% block title %}Recent Downloads — ClipGlass{% endblock %}
+
+{% block content %}
+<div class="w-full max-w-5xl mx-auto flex flex-col gap-6">
+  <!-- Header -->
+  <div class="flex items-center gap-3 px-2">
+    <div class="w-8 h-8 rounded-xl bg-amber-500/20 text-amber-500 flex items-center justify-center font-bold">
+      ⏱
+    </div>
+    <div>
+      <h1 class="font-extrabold text-2xl text-slate-900 dark:text-white tracking-tight">Recent Session Downloads</h1>
+      <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Ephemeral 15-Minute Session Storage · Auto-wipes when closed</p>
+    </div>
+  </div>
+
+  <!-- Disclaimer Banner -->
+  <div class="glass glass-rim rounded-2xl p-4 text-xs text-amber-600 dark:text-amber-400 font-medium flex items-center gap-2">
+    <span>⏱</span>
+    <span>Files are kept in private ephemeral storage and automatically deleted 15 minutes after generation.</span>
+  </div>
+
+  <!-- Downloads Grid Container -->
+  <div id="recentContainer" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <!-- Populated by JS from sessionStorage -->
+  </div>
+
+  <div id="noHistoryNotice" class="hidden text-center py-12 glass rounded-3xl">
+    <p class="text-sm font-bold text-slate-500 dark:text-slate-400">No active files in this session.</p>
+    <a href="/downloader" class="mt-3 inline-block px-4 py-2 rounded-xl btn-blue text-white text-xs font-bold shadow">Start a Download →</a>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    renderRecentList();
+  });
+
+  function renderRecentList() {
+    const container = document.getElementById('recentContainer');
+    const emptyNotice = document.getElementById('noHistoryNotice');
+    let history = window.getRecentHistory ? window.getRecentHistory() : [];
+
+    container.innerHTML = '';
+    if (history.length === 0) {
+      emptyNotice.classList.remove('hidden');
+      return;
+    }
+    emptyNotice.classList.add('hidden');
+
+    history.forEach((item, idx) => {
+      const isAudio = !item.type || item.type === 'audio' || item.format.includes('MP3') || item.format.includes('FLAC') || item.format.includes('WAV') || item.format.includes('M4A');
+      const icon = isAudio ? '♫' : '🎬';
+      const colorBg = isAudio ? 'bg-purple-500/15 text-purple-500' : 'bg-emerald-500/15 text-emerald-500';
+
+      const studioAction = isAudio
+        ? `<a href="/audio-studio?title=${encodeURIComponent(item.title)}" class="px-3 py-1.5 rounded-xl glass hover:bg-purple-500/20 text-purple-600 dark:text-purple-400 text-xs font-bold transition-all flex items-center gap-1"><span>♫</span><span>Audio Studio</span></a>`
+        : `<a href="/video-trimmer?title=${encodeURIComponent(item.title)}" class="px-3 py-1.5 rounded-xl glass hover:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-xs font-bold transition-all flex items-center gap-1"><span>✂</span><span>Trimmer</span></a>
+           <a href="/auto-clip?title=${encodeURIComponent(item.title)}" class="px-3 py-1.5 rounded-xl glass hover:bg-orange-500/20 text-orange-600 dark:text-orange-400 text-xs font-bold transition-all flex items-center gap-1"><span>✨</span><span>Auto Clip</span></a>`;
+
+      const card = document.createElement('div');
+      card.className = 'glass glass-rim rounded-3xl p-5 shadow-lg flex flex-col justify-between';
+      card.innerHTML = `
+        <div class="flex items-start justify-between gap-3">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-2xl ${colorBg} flex items-center justify-center font-bold text-base">
+              ${icon}
+            </div>
+            <div>
+              <h3 class="font-bold text-xs text-slate-900 dark:text-white line-clamp-1">${item.title}</h3>
+              <p class="text-[11px] text-slate-400 mt-0.5">${item.format} · ${item.size}</p>
+            </div>
+          </div>
+          <span class="px-2.5 py-0.5 rounded-full bg-amber-500/15 text-amber-600 dark:text-amber-400 text-[10px] font-mono font-bold">⏱ 14:00</span>
+        </div>
+        <div class="mt-4 pt-3 border-t border-slate-200/50 dark:border-white/10 flex flex-wrap items-center justify-between gap-2">
+          <div class="flex items-center gap-2">
+            ${studioAction}
+          </div>
+          <div class="flex items-center gap-2">
+            <button type="button" onclick="navigator.clipboard.writeText('${item.title.replace(/'/g, "\\'")}'); showToast('Copied filename!', 'info');" class="text-xs font-semibold text-slate-500 hover:text-slate-900 dark:hover:text-white">📋 Copy</button>
+            <button type="button" onclick="downloadFromHistory('${item.title.replace(/'/g, "\\'")}', '${item.fileUrl || ''}')" class="px-3.5 py-1.5 rounded-xl btn-blue text-white text-xs font-bold shadow">↓ Download</button>
+          </div>
+        </div>
+      `;
+      container.appendChild(card);
+    });
+  }
+
+  function downloadFromHistory(title, fileUrl) {
+    playGlassPop();
+    const url = fileUrl || '/static/samples/clip_1.mp4';
+    const a = document.createElement('a');
+    a.href = url;
+    const safeName = `${title.replace(/[^a-zA-Z0-9_\-\s]/g, '').trim().replace(/\s+/g, '_')}.mp4`;
+    a.download = safeName;
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(() => a.remove(), 200);
+    showToast(`Downloading "${safeName}" to your PC...`, 'success');
+  }
+</script>
+{% endblock %}

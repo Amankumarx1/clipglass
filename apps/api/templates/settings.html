@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+
+{% block title %}Settings & Preferences — ClipGlass{% endblock %}
+
+{% block content %}
+<div class="w-full max-w-4xl mx-auto flex flex-col gap-6">
+  <!-- Header -->
+  <div class="flex items-center gap-3 px-2">
+    <div class="w-8 h-8 rounded-xl bg-slate-500/20 text-slate-500 flex items-center justify-center font-bold">
+      ⚙
+    </div>
+    <div>
+      <h1 class="font-extrabold text-2xl text-slate-900 dark:text-white tracking-tight">Settings & Preferences</h1>
+      <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Configure appearance, download defaults, audio normalization, and privacy options.</p>
+    </div>
+  </div>
+
+  <!-- Appearance Card -->
+  <div class="glass glass-rim rounded-[36px] p-6 shadow-xl flex flex-col gap-4">
+    <span class="text-xs font-bold uppercase text-slate-400 tracking-wider">Appearance & Audio Feedback</span>
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div class="glass rounded-2xl p-4 flex items-center justify-between">
+        <div>
+          <h4 class="font-bold text-xs text-slate-900 dark:text-white">Theme Mode</h4>
+          <p class="text-[11px] text-slate-400 mt-0.5">Switch between Liquid Light and Midnight Dark</p>
+        </div>
+        <button type="button" data-toggle-theme class="px-4 py-2 rounded-xl btn-blue text-white font-bold text-xs shadow">
+          Toggle Theme
+        </button>
+      </div>
+
+      <div class="glass rounded-2xl p-4 flex items-center justify-between">
+        <div>
+          <h4 class="font-bold text-xs text-slate-900 dark:text-white">Sensory Sound Effects</h4>
+          <p class="text-[11px] text-slate-400 mt-0.5">Glass pops, ticks, and crystal success chimes</p>
+        </div>
+        <button type="button" data-toggle-sound class="px-4 py-2 rounded-xl btn-blue text-white font-bold text-xs shadow">
+          Toggle Sound
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Media Defaults Card -->
+  <div class="glass glass-rim rounded-[36px] p-6 shadow-xl flex flex-col gap-4">
+    <span class="text-xs font-bold uppercase text-slate-400 tracking-wider">Media Defaults</span>
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div class="glass rounded-2xl p-4">
+        <label class="text-[10px] uppercase font-bold text-slate-400 block mb-2">Default Resolution</label>
+        <div class="flex flex-wrap gap-1.5">
+          <button type="button" class="px-3 py-1 rounded-lg text-xs font-bold bg-blue-600 text-white">1080p</button>
+          <button type="button" class="px-3 py-1 rounded-lg text-xs font-bold glass text-slate-400">1440p</button>
+          <button type="button" class="px-3 py-1 rounded-lg text-xs font-bold glass text-slate-400">2160p</button>
+        </div>
+      </div>
+
+      <div class="glass rounded-2xl p-4">
+        <label class="text-[10px] uppercase font-bold text-slate-400 block mb-2">Default Container</label>
+        <div class="flex gap-1.5">
+          <button type="button" class="px-4 py-1 rounded-lg text-xs font-bold bg-blue-600 text-white">MP4</button>
+          <button type="button" class="px-4 py-1 rounded-lg text-xs font-bold glass text-slate-400">WEBM</button>
+        </div>
+      </div>
+
+      <div class="glass rounded-2xl p-4">
+        <label class="text-[10px] uppercase font-bold text-slate-400 block mb-2">Audio Bitrate</label>
+        <div class="flex gap-1.5">
+          <button type="button" class="px-3 py-1 rounded-lg text-xs font-bold bg-purple-600 text-white">320k</button>
+          <button type="button" class="px-3 py-1 rounded-lg text-xs font-bold glass text-slate-400">256k</button>
+          <button type="button" class="px-3 py-1 rounded-lg text-xs font-bold glass text-slate-400">192k</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Privacy Card -->
+  <div class="glass glass-rim rounded-[36px] p-6 shadow-xl flex flex-col gap-4">
+    <span class="text-xs font-bold uppercase text-slate-400 tracking-wider">Privacy & Ephemeral Storage</span>
+    <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+      ClipGlass processes media strictly in ephemeral storage. All converted and downloaded files are unlinked and permanently deleted 15 minutes after completion. No account data, personal identifiers, or search histories are ever sent to third parties.
+    </p>
+    <div class="pt-3 border-t border-slate-200/50 dark:border-white/10 flex items-center justify-between">
+      <span class="text-xs font-bold text-slate-500">Clear all local session records:</span>
+      <button type="button" onclick="clearSessionHistory()" class="px-4 py-2 rounded-xl glass border border-rose-500/30 text-rose-500 hover:bg-rose-500/10 text-xs font-bold shadow-sm">
+        🗑 Clear Session History
+      </button>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  function clearSessionHistory() {
+    playGlassPop();
+    sessionStorage.removeItem('clipglass-history');
+    if (window.updateRecentBadge) window.updateRecentBadge();
+    showToast('Session history wiped successfully!', 'success');
+  }
+</script>
+{% endblock %}
