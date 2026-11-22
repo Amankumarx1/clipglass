@@ -1,8 +1,13 @@
 import os
 import subprocess
 import pytest
-from schemas.clip import ClipMoment, TranscriptWord
+from fastapi.testclient import TestClient
+from app.main import app
+from schemas.clip import ClipMoment, TranscriptWord, ClipJobCreateRequest
 from services.clip_render_service import render_clip_segment, package_clips_zip
+from services.clip_queue_service import clip_job_manager
+
+client = TestClient(app)
 
 def test_clip_pipeline_render_and_zip(tmp_path):
     job_dir = str(tmp_path)
@@ -31,16 +36,21 @@ def test_clip_pipeline_render_and_zip(tmp_path):
         end=3.8,
         duration=2.8,
         score=94,
+        hookScore=96,
+        engagementScore=92,
+        valueScore=90,
+        shareabilityScore=95,
         hook="WAIT FOR THIS",
         title="Epic Test Moment",
         hashtags=["#test", "#clip"],
         reason="Peak energy segment.",
+        evidence=["Heatmap peak 95%", "Audio burst +14dB"],
         reframeMode="follow-face",
         captionPreset="viral_pop",
         words=words
     )
 
-    # 3. Render 9:16 vertical segment with ASS burning
+    # 3. Render 9:16 vertical segment with ASS burning and opening hook
     ok, mp4_path, err = render_clip_segment(source_video, job_dir, clip, width=1920, height=1080)
     assert ok is True
     assert mp4_path is not None
@@ -68,3 +78,53 @@ def test_clip_pipeline_render_and_zip(tmp_path):
     assert os.path.exists(zip_path)
     assert os.path.getsize(zip_path) > 500
 
+def test_api_polish_styles_endpoint():
+    res = client.get("/api/clip/polish-styles")
+    assert res.status_code == 200
+    data = res.json()
+    assert "styles" in data
+    assert len(data["styles"]) >= 4
+
+def test_api_job_consent_validation():
+    # Attempt job creation without consent
+    res = client.post("/api/clip/jobs", json={
+        "url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+        "consent": False
+    })
+    assert res.status_code == 400
+    assert "Consent Required" in res.text
+
+def test_api_feedback_and_edit_box():
+    # Setup dummy job in manager
+    req = ClipJobCreateRequest(
+        url="https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+        consent=True
+    )
+    job_id = clip_job_manager.create_job(req, "127.0.0.1")
+    rec = clip_job_manager.get_job(job_id)
+
+    clip = ClipMoment(
+        clipId="cid99",
+        start=10.0,
+        end=35.0,
+        duration=25.0,
+        score=90,
+        hook="INITIAL HOOK",
+        title="Initial Title",
+        reason="test"
+    )
+    rec.clips.append(clip)
+
+    # Test feedback endpoint
+    fb_res = client.post(f"/api/clip/jobs/{job_id}/clips/cid99/feedback", json={"thumb": "up"})
+    assert fb_res.status_code == 200
+    assert fb_res.json()["thumb"] == "up"
+    assert clip.feedback == "up"
+
+    # Test edit box command endpoint
+    cmd_res = client.post(f"/api/clip/jobs/{job_id}/clips/cid99/command", json={"command": "make it 5s longer"})
+    assert cmd_res.status_code == 200
+    res_data = cmd_res.json()
+    assert res_data["result"]["success"] is True
+    assert clip.duration == 30.0
+    assert clip.end == 40.0

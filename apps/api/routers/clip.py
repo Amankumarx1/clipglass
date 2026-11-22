@@ -6,10 +6,12 @@ from fastapi.responses import FileResponse, StreamingResponse
 from sse_starlette.sse import EventSourceResponse
 from schemas.clip import (
     ClipJobCreateRequest, ClipJobEventData, ClipMoment,
-    ClipMomentUpdateRequest
+    ClipMomentUpdateRequest, ClipFeedbackRequest, EditBoxCommandRequest
 )
 from services.clip_queue_service import clip_job_manager
 from services.clip_render_service import render_clip_segment, package_clips_zip
+from services.edit_box_service import EditBoxParser
+from services.polish_pack_service import get_available_polish_styles
 
 router = APIRouter(prefix="/api/clip", tags=["Auto Clip"])
 
@@ -23,6 +25,12 @@ def validate_job_id(job_id: str) -> str:
         )
     return job_id
 
+@router.get("/polish-styles")
+async def list_polish_styles():
+    """Returns available pre-rendered design-time Polish Pack styles."""
+    styles = get_available_polish_styles()
+    return {"styles": styles}
+
 @router.post("/jobs")
 async def create_clip_job(request: Request, body: ClipJobCreateRequest):
     if not body.consent:
@@ -33,6 +41,20 @@ async def create_clip_job(request: Request, body: ClipJobCreateRequest):
                 "title": "Consent Required",
                 "explanation": "You must confirm you own this video or have legal permission to clip it.",
                 "suggestedAction": "Check the consent checkbox to proceed."
+            }
+        )
+
+    # Basic SSRF prevention: ensure URL domain is YouTube
+    domain = re.sub(r'^https?://', '', body.url.lower()).split('/')[0].split(':')[0]
+    valid_domains = {"youtube.com", "www.youtube.com", "m.youtube.com", "youtu.be"}
+    if domain not in valid_domains:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail={
+                "code": "invalid-media-url",
+                "title": "Invalid Media URL",
+                "explanation": "Auto Clip currently supports public YouTube videos (youtube.com or youtu.be).",
+                "suggestedAction": "Please paste a valid YouTube video link."
             }
         )
 
@@ -96,6 +118,10 @@ async def update_clip_moment(job_id: str, cid: str, body: ClipMomentUpdateReques
     if not matched_clip:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Clip moment not found.")
 
+    cmd_result = None
+    if body.command:
+        cmd_result = EditBoxParser.parse_and_apply(body.command, matched_clip)
+
     if body.start is not None: matched_clip.start = body.start
     if body.end is not None: matched_clip.end = body.end
     if body.start is not None or body.end is not None:
@@ -105,15 +131,58 @@ async def update_clip_moment(job_id: str, cid: str, body: ClipMomentUpdateReques
     if body.hashtags is not None: matched_clip.hashtags = body.hashtags
     if body.reframeMode is not None: matched_clip.reframeMode = body.reframeMode
     if body.captionPreset is not None: matched_clip.captionPreset = body.captionPreset
+    if body.platformPreset is not None: matched_clip.platformPreset = body.platformPreset
+    if body.polishStyle is not None: matched_clip.polishStyle = body.polishStyle
     if body.transcriptText is not None: matched_clip.transcriptText = body.transcriptText
     if body.words is not None: matched_clip.words = body.words
+    if body.feedback is not None: matched_clip.feedback = body.feedback
 
-    # Invalidate rendered status on edit
+    # Invalidate rendered status on boundary or style edits
     matched_clip.status = 'discovered'
     matched_clip.videoUrl = None
 
     record.emit_update()
-    return {"message": "Clip updated successfully", "clip": matched_clip}
+    return {
+        "message": "Clip updated successfully",
+        "clip": matched_clip,
+        "commandResult": cmd_result
+    }
+
+@router.post("/jobs/{job_id}/clips/{cid}/command")
+async def execute_edit_box_command(job_id: str, cid: str, body: EditBoxCommandRequest):
+    """Executes a plain-language edit box command on a clip candidate."""
+    valid_id = validate_job_id(job_id)
+    record = clip_job_manager.get_job(valid_id)
+    if not record:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Clip job not found.")
+
+    matched_clip = next((c for c in record.clips if c.clipId == cid), None)
+    if not matched_clip:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Clip moment not found.")
+
+    cmd_result = EditBoxParser.parse_and_apply(body.command, matched_clip)
+    if cmd_result.success:
+        matched_clip.status = 'discovered'
+        matched_clip.videoUrl = None
+        record.emit_update()
+
+    return {"result": cmd_result, "clip": matched_clip}
+
+@router.post("/jobs/{job_id}/clips/{cid}/feedback")
+async def record_clip_feedback(job_id: str, cid: str, body: ClipFeedbackRequest):
+    """Records local thumbs up / thumbs down feedback on a clip."""
+    valid_id = validate_job_id(job_id)
+    record = clip_job_manager.get_job(valid_id)
+    if not record:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Clip job not found.")
+
+    matched_clip = next((c for c in record.clips if c.clipId == cid), None)
+    if not matched_clip:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Clip moment not found.")
+
+    matched_clip.feedback = body.thumb
+    record.emit_update()
+    return {"message": "Feedback recorded", "clipId": cid, "thumb": body.thumb}
 
 @router.post("/jobs/{job_id}/clips/{cid}/render")
 async def render_clip(job_id: str, cid: str):
@@ -223,4 +292,3 @@ async def export_all_clips(job_id: str):
         media_type="application/zip",
         filename=f"clipglass_{job_id[:8]}_all_clips.zip"
     )
-

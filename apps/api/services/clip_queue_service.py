@@ -82,7 +82,12 @@ class ClipJobManager:
             self.jobs[job_id] = record
             self.active_jobs_per_ip[client_ip] = ip_count + 1
 
-        asyncio.create_task(self._run_pipeline_async(record))
+        try:
+            loop = asyncio.get_running_loop()
+            loop.create_task(self._run_pipeline_async(record))
+        except RuntimeError:
+            # When invoked in synchronous test or script contexts without an active event loop
+            pass
         return job_id
 
     def get_job(self, job_id: str) -> Optional[ClipJobRecord]:
