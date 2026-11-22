@@ -1,0 +1,31 @@
+{
+  "name": "Swiss Motion Graphics",
+  "style": "swiss_motion",
+  "version": "1.0.0",
+  "aspect_ratio": "9:16",
+  "width": 1080,
+  "height": 1920,
+  "intro_duration": 3.0,
+  "outro_duration": 3.0,
+  "keying": {
+    "mode": "bumper",
+    "description": "Minimalist geometric grid with international signal red accent"
+  },
+  "safe_zones": {
+    "top": 180,
+    "bottom": 320,
+    "left": 80,
+    "right": 80
+  },
+  "text_area": {
+    "x": 80,
+    "y": 400,
+    "width": 920,
+    "height": 260
+  },
+  "palette": {
+    "primary": "#FFFFFF",
+    "secondary": "#0A0A0A",
+    "accent": "#FF4400"
+  }
+}

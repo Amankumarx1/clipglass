@@ -6,18 +6,19 @@ from typing import Optional, List, Dict, Any, Tuple
 from schemas.clip import ClipMoment, TranscriptWord
 from services.ass_caption_service import generate_ass_subtitles
 from services.face_tracking_service import build_reframe_filter
+from services.polish_pack_service import apply_polish_bumpers
 
 _DETECTED_ENCODER = None
 
 def get_best_h264_encoder() -> str:
     """
-    Detects hardware video encoder (NVENC, QSV, VAAPI), falling back to CPU libx264.
+    Detects hardware video encoder (NVENC, QSV, AMF, VAAPI), falling back to CPU libx264.
     """
     global _DETECTED_ENCODER
     if _DETECTED_ENCODER is not None:
         return _DETECTED_ENCODER
 
-    candidates = ["h264_nvenc", "h264_qsv", "h264_vaapi"]
+    candidates = ["h264_nvenc", "h264_qsv", "h264_amf", "h264_vaapi"]
     try:
         proc = subprocess.run(["ffmpeg", "-encoders"], stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, text=True, timeout=5)
         for enc in candidates:
@@ -68,7 +69,8 @@ def render_clip_segment(
     height: int = 1080
 ) -> Tuple[bool, Optional[str], Optional[str]]:
     """
-    Renders trimmed, reframed 9:16 vertical video with burned ASS subtitles and metadata.
+    Renders trimmed, reframed 9:16 vertical video with burned ASS subtitles, opening hook title,
+    optional design-time Polish Pack bumpers, and metadata JSON.
     Returns (success, mp4_path, error_str).
     """
     out_filename = f"clip_{clip.clipId}.mp4"
@@ -80,23 +82,38 @@ def render_clip_segment(
 
     dur = max(1.0, clip.end - clip.start)
 
-    # 1. Generate Word-Synced Subtitles
+    # 1. Generate Word-Synced Subtitles with Opening Hook Title Banner
     words_to_burn = clip.words if clip.words else []
-    generate_ass_subtitles(words_to_burn, ass_path, preset=clip.captionPreset, clip_offset=clip.start)
+    generate_ass_subtitles(
+        words_to_burn,
+        ass_path,
+        preset=clip.captionPreset,
+        clip_offset=clip.start,
+        hook_title=clip.hook,
+        hook_duration=3.5
+    )
     generate_srt_subtitles(words_to_burn, srt_path, clip_offset=clip.start)
 
-    # 2. Write metadata.json
+    # 2. Write comprehensive metadata.json
     metadata_content = {
         "clipId": clip.clipId,
         "title": clip.title,
         "hook": clip.hook,
         "hashtags": clip.hashtags,
         "reason": clip.reason,
+        "evidence": clip.evidence,
+        "score": clip.score,
+        "hookScore": clip.hookScore,
+        "engagementScore": clip.engagementScore,
+        "valueScore": clip.valueScore,
+        "shareabilityScore": clip.shareabilityScore,
         "duration": round(dur, 2),
         "start": clip.start,
         "end": clip.end,
         "reframeMode": clip.reframeMode,
-        "captionPreset": clip.captionPreset
+        "captionPreset": clip.captionPreset,
+        "platformPreset": clip.platformPreset,
+        "polishStyle": clip.polishStyle
     }
     with open(meta_path, "w", encoding="utf-8") as f:
         json.dump(metadata_content, f, indent=2)
@@ -144,6 +161,10 @@ def render_clip_segment(
         # Run inside job_dir so relative file paths resolve cleanly
         proc = subprocess.run(cmd, cwd=job_dir, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, timeout=180)
         if proc.returncode == 0 and os.path.exists(out_path) and os.path.getsize(out_path) > 1000:
+            # 4. Apply Polish Pack Bumpers if requested
+            if clip.polishStyle and clip.polishStyle != 'none':
+                apply_polish_bumpers(out_path, clip.polishStyle, out_path)
+
             return True, out_path, None
         else:
             err_msg = proc.stderr[-400:] if proc.stderr else "FFmpeg failed without stderr."

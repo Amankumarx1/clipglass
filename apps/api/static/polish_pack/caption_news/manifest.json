@@ -1,0 +1,31 @@
+{
+  "name": "Caption News",
+  "style": "caption_news",
+  "version": "1.0.0",
+  "aspect_ratio": "9:16",
+  "width": 1080,
+  "height": 1920,
+  "intro_duration": 3.0,
+  "outro_duration": 3.0,
+  "keying": {
+    "mode": "bumper",
+    "description": "Full-frame broadcast news intro and outro stings"
+  },
+  "safe_zones": {
+    "top": 180,
+    "bottom": 320,
+    "left": 60,
+    "right": 60
+  },
+  "text_area": {
+    "x": 80,
+    "y": 280,
+    "width": 920,
+    "height": 300
+  },
+  "palette": {
+    "primary": "#FFE600",
+    "secondary": "#111111",
+    "accent": "#FF3333"
+  }
+}

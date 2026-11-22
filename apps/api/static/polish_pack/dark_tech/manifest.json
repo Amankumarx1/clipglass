@@ -1,0 +1,31 @@
+{
+  "name": "Dark Tech Keynote",
+  "style": "dark_tech",
+  "version": "1.0.0",
+  "aspect_ratio": "9:16",
+  "width": 1080,
+  "height": 1920,
+  "intro_duration": 3.0,
+  "outro_duration": 3.0,
+  "keying": {
+    "mode": "bumper",
+    "description": "Sleek dark matte keynote presentation with violet refraction line"
+  },
+  "safe_zones": {
+    "top": 180,
+    "bottom": 320,
+    "left": 60,
+    "right": 60
+  },
+  "text_area": {
+    "x": 80,
+    "y": 320,
+    "width": 920,
+    "height": 260
+  },
+  "palette": {
+    "primary": "#8B5CF6",
+    "secondary": "#0F172A",
+    "accent": "#38BDF8"
+  }
+}

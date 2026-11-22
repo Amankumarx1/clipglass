@@ -1,0 +1,31 @@
+{
+  "name": "Neon Tubes",
+  "style": "neon_tubes",
+  "version": "1.0.0",
+  "aspect_ratio": "9:16",
+  "width": 1080,
+  "height": 1920,
+  "intro_duration": 3.0,
+  "outro_duration": 3.0,
+  "keying": {
+    "mode": "bumper",
+    "description": "Cyberpunk high-glow neon cyan and magenta outlines"
+  },
+  "safe_zones": {
+    "top": 180,
+    "bottom": 320,
+    "left": 60,
+    "right": 60
+  },
+  "text_area": {
+    "x": 80,
+    "y": 300,
+    "width": 920,
+    "height": 280
+  },
+  "palette": {
+    "primary": "#00F0FF",
+    "secondary": "#050510",
+    "accent": "#FF0077"
+  }
+}
