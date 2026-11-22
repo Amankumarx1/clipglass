@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+
+{% block title %}Terms of Service — ClipGlass{% endblock %}
+
+{% block content %}
+<div class="w-full flex flex-col gap-8 bg-geom-terms">
+  <!-- Header Banner -->
+  <div class="border-b border-white/10 pb-4">
+    <h1 class="text-3xl font-extrabold tracking-tight text-white mb-2">Terms of Service</h1>
+    <p class="text-xs text-slate-400">Effective Date: November 2026 • Please read these terms carefully before using ClipGlass.</p>
+  </div>
+
+  <!-- Main Editorial Layout (Screen 14) -->
+  <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+    <!-- Left Navigation / Table of Contents -->
+    <div class="lg:col-span-4 glass rounded-3xl p-6 border border-white/10 sticky top-24">
+      <h2 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">Contents</h2>
+      <nav class="flex flex-col gap-2 text-xs font-semibold">
+        <a href="#acceptance" class="p-2.5 rounded-xl bg-white/10 text-cyan-300 flex items-center justify-between">
+          <span>1. Acceptance of Terms</span>
+          <span>→</span>
+        </a>
+        <a href="#license" class="p-2.5 rounded-xl hover:bg-white/5 text-slate-400 hover:text-white transition-colors flex items-center justify-between">
+          <span>2. Use License</span>
+          <span>→</span>
+        </a>
+        <a href="#responsibilities" class="p-2.5 rounded-xl hover:bg-white/5 text-slate-400 hover:text-white transition-colors flex items-center justify-between">
+          <span>3. User Responsibilities</span>
+          <span>→</span>
+        </a>
+        <a href="#prohibited" class="p-2.5 rounded-xl hover:bg-white/5 text-slate-400 hover:text-white transition-colors flex items-center justify-between">
+          <span>4. Prohibited Activities</span>
+          <span>→</span>
+        </a>
+        <a href="#liability" class="p-2.5 rounded-xl hover:bg-white/5 text-slate-400 hover:text-white transition-colors flex items-center justify-between">
+          <span>5. Limitation of Liability</span>
+          <span>→</span>
+        </a>
+      </nav>
+
+      <!-- Decorative Document Emblem -->
+      <div class="mt-8 p-4 rounded-2xl bg-cyan-500/10 border border-cyan-500/20 text-center flex flex-col items-center">
+        <div class="w-12 h-12 rounded-xl bg-cyan-500/20 text-cyan-300 flex items-center justify-center text-xl mb-2 shadow">📄</div>
+        <div class="text-xs font-bold text-white">Ephemeral Utility</div>
+        <div class="text-[10px] text-slate-400 mt-0.5">Zero permanent storage • 15m file purge</div>
+      </div>
+    </div>
+
+    <!-- Right: Editorial Clauses Pane -->
+    <div class="lg:col-span-8 glass rounded-3xl p-8 border border-white/10 flex flex-col gap-8 text-xs text-slate-300 leading-relaxed">
+      <!-- Section 1 -->
+      <section id="acceptance" class="flex flex-col gap-2">
+        <h3 class="text-base font-bold text-white text-cyan-300">1. Acceptance of Terms</h3>
+        <p>
+          By accessing and using ClipGlass ("the Service"), you agree to be bound by these Terms of Service and all applicable laws and regulations. If you do not agree with any of these terms, you are prohibited from using or accessing this site.
+        </p>
+      </section>
+
+      <!-- Section 2 -->
+      <section id="license" class="flex flex-col gap-2">
+        <h3 class="text-base font-bold text-white text-cyan-300">2. Use License</h3>
+        <p>
+          Permission is granted to use ClipGlass for personal, non-commercial, and legitimate transformative editing purposes. You may process media files for trimming, audio enhancement, formatting, and short-form creation provided that you hold the necessary intellectual property rights or fair-use authorizations.
+        </p>
+      </section>
+
+      <!-- Section 3 -->
+      <section id="responsibilities" class="flex flex-col gap-2">
+        <h3 class="text-base font-bold text-white text-cyan-300">3. User Responsibilities &amp; Copyright Compliance</h3>
+        <p>
+          You represent and warrant that you own or have obtained all legal licenses, permissions, and consents required to process and extract content using ClipGlass. ClipGlass operates as a neutral technological tool and does not maintain a permanent directory or index of user content.
+        </p>
+      </section>
+
+      <!-- Section 4 -->
+      <section id="prohibited" class="flex flex-col gap-2">
+        <h3 class="text-base font-bold text-white text-cyan-300">4. Prohibited Activities</h3>
+        <p>When using ClipGlass, you expressly agree not to:</p>
+        <ul class="list-disc pl-5 space-y-1 text-slate-400">
+          <li>Infringe upon copyrights, trademarks, or proprietary rights of third parties.</li>
+          <li>Circumvent technological DRM or anti-piracy protection mechanisms beyond lawful exemptions.</li>
+          <li>Perform automated scraping, high-volume denial of service, or SSRF attacks against host infrastructure.</li>
+          <li>Distribute malicious payloads, spyware, or offensive illegal media through the platform.</li>
+        </ul>
+      </section>
+
+      <!-- Section 5 -->
+      <section id="liability" class="flex flex-col gap-2">
+        <h3 class="text-base font-bold text-white text-cyan-300">5. Limitation of Liability</h3>
+        <p>
+          In no event shall ClipGlass, its developers, or affiliates be liable for any damages (including, without limitation, damages for loss of data, copyright disputes, or business interruption) arising out of the use or inability to use the platform. Media files are stored ephemerally and automatically purged after 15 minutes.
+        </p>
+      </section>
+    </div>
+  </div>
+</div>
+{% endblock %}

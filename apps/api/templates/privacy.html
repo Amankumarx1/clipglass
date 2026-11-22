@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+
+{% block title %}Privacy Policy — ClipGlass{% endblock %}
+
+{% block content %}
+<div class="w-full flex flex-col gap-8 bg-geom-privacy">
+  <!-- Header Banner -->
+  <div class="border-b border-white/10 pb-4">
+    <h1 class="text-3xl font-extrabold tracking-tight text-white mb-2">Privacy Policy</h1>
+    <p class="text-xs text-slate-400">Last updated: November 2026 • ClipGlass is designed ground-up for user privacy and ephemeral processing.</p>
+  </div>
+
+  <!-- Main Split Layout (Screen 15) -->
+  <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+    <!-- Left Navigation / Outline -->
+    <div class="lg:col-span-4 glass rounded-3xl p-6 border border-white/10 sticky top-24">
+      <h2 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">Privacy Outline</h2>
+      <nav class="flex flex-col gap-2 text-xs font-semibold">
+        <a href="#collect" class="p-2.5 rounded-xl bg-white/10 text-cyan-300 flex items-center justify-between">
+          <span>1. Information We Collect</span>
+          <span>→</span>
+        </a>
+        <a href="#usage" class="p-2.5 rounded-xl hover:bg-white/5 text-slate-400 hover:text-white transition-colors flex items-center justify-between">
+          <span>2. How We Use It</span>
+          <span>→</span>
+        </a>
+        <a href="#storage" class="p-2.5 rounded-xl hover:bg-white/5 text-slate-400 hover:text-white transition-colors flex items-center justify-between">
+          <span>3. 15-Minute Data Storage</span>
+          <span>→</span>
+        </a>
+        <a href="#rights" class="p-2.5 rounded-xl hover:bg-white/5 text-slate-400 hover:text-white transition-colors flex items-center justify-between">
+          <span>4. Your Rights &amp; Control</span>
+          <span>→</span>
+        </a>
+        <a href="#contact" class="p-2.5 rounded-xl hover:bg-white/5 text-slate-400 hover:text-white transition-colors flex items-center justify-between">
+          <span>5. Contact &amp; Security</span>
+          <span>→</span>
+        </a>
+      </nav>
+
+      <!-- Glowing Luminous Shield Graphic (Screen 15) -->
+      <div class="mt-8 p-6 rounded-2xl bg-cyan-500/10 border border-cyan-500/20 text-center flex flex-col items-center">
+        <div class="w-16 h-16 rounded-2xl bg-gradient-to-tr from-cyan-500 to-blue-600 flex items-center justify-center text-3xl mb-3 shadow-[0_0_35px_rgba(57,213,255,0.5)]">
+          🛡️
+        </div>
+        <div class="text-xs font-bold text-white">Zero Tracking Guarantee</div>
+        <div class="text-[10px] text-slate-400 mt-1">No cookies, no profiles, no telemetry tracking.</div>
+      </div>
+    </div>
+
+    <!-- Right: Editorial Content -->
+    <div class="lg:col-span-8 glass rounded-3xl p-8 border border-white/10 flex flex-col gap-8 text-xs text-slate-300 leading-relaxed">
+      <!-- Section 1 -->
+      <section id="collect" class="flex flex-col gap-2">
+        <h3 class="text-base font-bold text-white text-cyan-300">1. Information We Collect</h3>
+        <p>
+          ClipGlass operates without user registration or accounts. We only temporarily process the media URL or file that you directly submit for transcoding, audio filtering, or trimming. We do not inspect personal profiles or store behavioral histories.
+        </p>
+      </section>
+
+      <!-- Section 2 -->
+      <section id="usage" class="flex flex-col gap-2">
+        <h3 class="text-base font-bold text-white text-cyan-300">2. How We Use It</h3>
+        <p>
+          Submitted media streams are utilized exclusively to execute the requested operational tasks (e.g. ffmpeg encoding, modular audio filter chains, or sentence-aligned auto-trimming). We never train machine learning models on your files, nor do we sell, share, or monetize any user data.
+        </p>
+      </section>
+
+      <!-- Section 3 -->
+      <section id="storage" class="flex flex-col gap-2">
+        <h3 class="text-base font-bold text-white text-cyan-300">3. 15-Minute Ephemeral Storage Purge</h3>
+        <p>
+          All temporary download files, converted audio waveforms, rendered vertical short clips, and logs are housed in an isolated ephemeral directory. A continuous background worker permanently unlinks and overwrites these assets after 15 minutes of inactivity.
+        </p>
+      </section>
+
+      <!-- Section 4 -->
+      <section id="rights" class="flex flex-col gap-2">
+        <h3 class="text-base font-bold text-white text-cyan-300">4. Your Rights &amp; Browser-Local Session</h3>
+        <p>
+          Your session history is stored locally in your browser's <code class="text-cyan-300">localStorage</code> and never sent to external telemetry servers. You can immediately wipe all local download tokens and session memories at any time by clicking "Clear Session" in the Recent Session Drawer.
+        </p>
+      </section>
+
+      <!-- Section 5 -->
+      <section id="contact" class="flex flex-col gap-2">
+        <h3 class="text-base font-bold text-white text-cyan-300">5. Contact &amp; Security Inquiries</h3>
+        <p>
+          For questions regarding privacy, security hardening, or ephemeral data policies, review our open documentation or submit inquiries via our documentation and FAQ center.
+        </p>
+      </section>
+    </div>
+  </div>
+</div>
+{% endblock %}
