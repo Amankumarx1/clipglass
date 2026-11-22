@@ -2,13 +2,19 @@
 (function() {
   // Theme Manager
   function initTheme() {
-    const saved = localStorage.getItem('clipglass-theme');
+    const saved = localStorage.getItem('clipglass-theme') || localStorage.getItem('cg_theme');
     const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    if (saved === 'dark' || (!saved && prefersDark) || !saved) {
+    const isDark = saved === 'dark' || (!saved && prefersDark) || !saved;
+    if (isDark) {
       document.documentElement.classList.add('dark');
+      document.documentElement.dataset.theme = 'dark';
       localStorage.setItem('clipglass-theme', 'dark');
+      localStorage.setItem('cg_theme', 'dark');
     } else {
       document.documentElement.classList.remove('dark');
+      document.documentElement.dataset.theme = 'light';
+      localStorage.setItem('clipglass-theme', 'light');
+      localStorage.setItem('cg_theme', 'light');
     }
   }
   initTheme();
@@ -72,7 +78,9 @@
       btn.addEventListener('click', () => {
         playGlassTick();
         const isDark = document.documentElement.classList.toggle('dark');
+        document.documentElement.dataset.theme = isDark ? 'dark' : 'light';
         localStorage.setItem('clipglass-theme', isDark ? 'dark' : 'light');
+        localStorage.setItem('cg_theme', isDark ? 'dark' : 'light');
       });
     });
 

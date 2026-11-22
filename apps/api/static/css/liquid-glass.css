@@ -1,15 +1,24 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+
 :root {
-  --canvas: #E9ECF3;
-  --ink: #0B1020;
-  --ink-2: #4A5270;
-  --ink-3: #7A829E;
-  --glass-fill: linear-gradient(135deg, rgba(255, 255, 255, 0.72) 0%, rgba(255, 255, 255, 0.32) 100%);
-  --glass-border: rgba(255, 255, 255, 0.85);
-  --glass-shadow:
-    inset 0 1px 1.5px rgba(255, 255, 255, 0.98),
-    inset 0 -10px 18px rgba(120, 130, 170, 0.12),
-    0 24px 48px -14px rgba(60, 70, 110, 0.22),
-    0 3px 8px rgba(60, 70, 110, 0.08);
+  --bg: #eceef6;
+  --text: #12142a;
+  --muted: #5b607a;
+  --glass: rgba(255, 255, 255, 0.55);
+  --edge: rgba(255, 255, 255, 0.85);
+  --blue: #2f5bff;
+  --pink: #e0489a;
+  --purple: #6a4dff;
+  --hi: rgba(255, 255, 255, 0.75);
+  --shadow: 0 24px 60px rgba(60, 70, 140, 0.16);
+  --ease: cubic-bezier(0.16, 1, 0.3, 1);
+  --canvas: var(--bg);
+  --ink: var(--text);
+  --ink-2: #5b607a;
+  --ink-3: #8a90ac;
+  --glass-fill: var(--glass);
+  --glass-border: var(--edge);
+  --glass-shadow: var(--shadow);
   --rim: conic-gradient(
     from 210deg,
     rgba(255, 120, 150, 0.6),
@@ -20,18 +29,22 @@
   );
 }
 
+:root[data-theme="dark"],
 html.dark {
-  --canvas: #060814;
-  --ink: #FFFFFF;
-  --ink-2: #94A3B8;
-  --ink-3: #64748B;
-  --glass-fill: linear-gradient(135deg, rgba(22, 30, 62, 0.62) 0%, rgba(9, 13, 30, 0.52) 100%);
-  --glass-border: rgba(255, 255, 255, 0.16);
-  --glass-shadow:
-    inset 0 1px 1.5px rgba(255, 255, 255, 0.38),
-    inset 0 -1px 2px rgba(168, 85, 247, 0.3),
-    0 28px 65px -14px rgba(0, 0, 0, 0.85),
-    0 0 45px -5px rgba(47, 107, 255, 0.25);
+  --bg: #0b0d1c;
+  --text: #f1f2ff;
+  --muted: #a3a8c6;
+  --glass: rgba(34, 38, 76, 0.5);
+  --edge: rgba(255, 255, 255, 0.16);
+  --hi: rgba(255, 255, 255, 0.14);
+  --shadow: 0 24px 60px rgba(0, 0, 0, 0.5);
+  --canvas: var(--bg);
+  --ink: var(--text);
+  --ink-2: #a3a8c6;
+  --ink-3: #6b7294;
+  --glass-fill: var(--glass);
+  --glass-border: var(--edge);
+  --glass-shadow: var(--shadow);
   --rim: conic-gradient(
     from 220deg,
     rgba(56, 189, 248, 0.85) 0%,
@@ -42,22 +55,35 @@ html.dark {
 }
 
 body {
-  background-color: var(--canvas);
-  color: var(--ink);
+  font-family: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background-color: var(--bg);
+  color: var(--text);
   min-height: 100dvh;
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   overflow-x: hidden;
+  background-image: radial-gradient(60vw 50vh at 0% 0%, rgba(90, 130, 255, 0.28), transparent), radial-gradient(50vw 50vh at 100% 45%, rgba(200, 120, 255, 0.22), transparent);
   -webkit-font-smoothing: antialiased;
+  transition: background-color 0.5s ease, color 0.5s ease;
+}
+
+/* Brand Triangle Icon */
+.logo-triangle {
+  width: 0;
+  height: 0;
+  border-left: 16px solid #6a4dff;
+  border-top: 10px solid transparent;
+  border-bottom: 10px solid transparent;
+  display: inline-block;
+  vertical-align: middle;
 }
 
 /* Glass Surface with Iridescent Specular Rims */
 .glass {
-  background: var(--glass-fill);
-  backdrop-filter: blur(24px) saturate(165%);
-  -webkit-backdrop-filter: blur(24px) saturate(165%);
-  border: 1px solid var(--glass-border);
-  box-shadow: var(--glass-shadow);
-  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+  background: var(--glass);
+  backdrop-filter: blur(20px) saturate(170%);
+  -webkit-backdrop-filter: blur(20px) saturate(170%);
+  border: 1px solid var(--edge);
+  box-shadow: var(--shadow), inset 0 1px 0 var(--hi);
+  transition: border-color 0.25s ease, box-shadow 0.25s ease, transform 0.25s ease;
 }
 
 .glass:not(.absolute):not(.fixed):not([style*="position: absolute"]):not([style*="position: fixed"]) {
@@ -256,4 +282,94 @@ html.dark ::-webkit-scrollbar-thumb {
 }
 html.dark ::-webkit-scrollbar-thumb:hover {
   background: rgba(255, 255, 255, 0.3);
+}
+
+/* Card Reflective Radial Cursor Spotlight & Tilt */
+.card, .glass-card, .glass-interactive {
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.4s var(--ease), box-shadow 0.4s var(--ease);
+}
+
+.card::before, .glass-card::before, .glass-interactive::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(260px circle at var(--mx, 50%) var(--my, 0%), var(--hi), transparent 70%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: 1;
+}
+
+.card:hover::before, .glass-card:hover::before, .glass-interactive:hover::before {
+  opacity: 1;
+}
+
+/* Landing Page Buttons & Form Elements */
+.bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px;
+  border-radius: 999px;
+  transition: box-shadow 0.4s ease;
+}
+.bar:focus-within {
+  box-shadow: var(--shadow), 0 0 0 3px rgba(47, 91, 255, 0.35);
+}
+
+.pst {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 0;
+  background: rgba(127, 127, 170, 0.14);
+  cursor: pointer;
+  font-size: 15px;
+  transition: transform 0.3s var(--ease);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.pst:hover {
+  transform: scale(1.1);
+}
+
+.tag {
+  display: inline-block;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--blue);
+  padding: 7px 16px;
+  border-radius: 999px;
+}
+
+.pill {
+  white-space: nowrap;
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: rgba(40, 190, 140, 0.16);
+  color: #13946a;
+  font-weight: 700;
+  font-size: 13px;
+}
+
+.cta {
+  display: block;
+  width: max-content;
+  margin: 26px auto 0;
+  padding: 18px 38px;
+  border-radius: 999px;
+  font-weight: 800;
+  font-size: 17px;
+  color: #fff;
+  background: linear-gradient(120deg, #2f5bff, #8a4dff, #e0489a);
+  background-size: 200% 100%;
+  box-shadow: 0 14px 40px rgba(110, 80, 255, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  transition: background-position 0.8s var(--ease), transform 0.5s var(--ease);
+}
+.cta:hover {
+  background-position: 100% 0;
+  transform: translateY(-3px) scale(1.03);
 }

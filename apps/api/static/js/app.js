@@ -180,7 +180,28 @@
   }
   window.updateRecentBadge = updateRecentBadge;
 
+  // 3D Tilt & Cursor Spotlight for Cards across all workstations (matching landing page)
+  function initCardTilt() {
+    const cards = document.querySelectorAll('.card, .glass-card, .glass-interactive');
+    cards.forEach(c => {
+      c.addEventListener('pointermove', e => {
+        const r = c.getBoundingClientRect();
+        const x = e.clientX - r.left, y = e.clientY - r.top;
+        c.style.setProperty('--mx', x + 'px');
+        c.style.setProperty('--my', y + 'px');
+        const rx = ((y / r.height) - 0.5) * -6;
+        const ry = ((x / r.width) - 0.5) * 6;
+        c.style.transform = `perspective(800px) rotateX(${rx}deg) rotateY(${ry}deg) translateZ(2px)`;
+      });
+      c.addEventListener('pointerleave', () => {
+        c.style.transform = '';
+      });
+    });
+  }
+  window.initCardTilt = initCardTilt;
+
   document.addEventListener('DOMContentLoaded', () => {
     updateRecentBadge();
+    initCardTilt();
   });
 })();
