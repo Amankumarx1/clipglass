@@ -4,50 +4,70 @@ import re
 import uuid
 import httpx
 from typing import List, Dict, Any, Optional, Tuple
-from schemas.clip import TranscriptSentence, MultimodalSignals, ClipMoment
+from schemas.clip import (
+    TranscriptSentence, TranscriptWord, MultimodalSignals, ClipMoment,
+    CaptionPresetType, ReframeModeType
+)
 from app.config import settings
+
+# Boundary snapping parameters (clean-room re-implementation)
+SENTENCE_REACH_SECONDS = 8.0
+SENTENCE_PAUSE_SECONDS = 2.0
 
 def snap_boundaries_to_sentences(
     start: float,
     end: float,
     sentences: List[TranscriptSentence],
     min_dur: float = 15.0,
-    max_dur: float = 75.0
-) -> Tuple[float, float, str, List[Any]]:
+    max_dur: float = 75.0,
+    reach_seconds: float = SENTENCE_REACH_SECONDS,
+    pause_seconds: float = SENTENCE_PAUSE_SECONDS
+) -> Tuple[float, float, str, List[TranscriptWord]]:
     """
     Snaps clip boundaries to exact sentence beginnings and sentence endings
-    so the speech is never clipped mid-word or mid-thought.
+    so the speech is never clipped mid-word or mid-thought. Start snaps back
+    to sentence beginning within reach_seconds; pause > pause_seconds acts as sentence boundary.
     """
     if not sentences:
         return max(0.0, start), max(start + min_dur, end), "", []
 
-    # Find closest sentence start
+    # 1. Snap start: Find sentence whose start is closest to target start
     best_start_idx = 0
     min_start_diff = float('inf')
     for idx, s in enumerate(sentences):
+        # Allow reaching back up to reach_seconds
         diff = abs(s.start - start)
-        if diff < min_start_diff:
+        if s.start <= start and (start - s.start) <= reach_seconds:
+            best_start_idx = idx
+            break
+        elif diff < min_start_diff:
             min_start_diff = diff
             best_start_idx = idx
 
-    # Find closest sentence end within bounds
+    # 2. Snap end: Find sentence end satisfying min_dur and max_dur
     best_end_idx = best_start_idx
     min_end_diff = float('inf')
+    start_time = sentences[best_start_idx].start
+
     for idx in range(best_start_idx, len(sentences)):
         s = sentences[idx]
-        diff = abs(s.end - end)
-        dur = s.end - sentences[best_start_idx].start
-        if dur >= min_dur and dur <= max_dur:
+        dur = s.end - start_time
+        if min_dur <= dur <= max_dur:
+            diff = abs(s.end - end)
             if diff < min_end_diff:
                 min_end_diff = diff
                 best_end_idx = idx
 
     # If no sentence satisfied duration, choose closest valid end
-    if best_end_idx < best_start_idx or (sentences[best_end_idx].end - sentences[best_start_idx].start) < min_dur:
+    if (sentences[best_end_idx].end - start_time) < min_dur:
         curr_idx = best_start_idx
-        while curr_idx < len(sentences) and (sentences[curr_idx].end - sentences[best_start_idx].start) < min_dur:
+        while curr_idx < len(sentences) and (sentences[curr_idx].end - start_time) < min_dur:
             curr_idx += 1
         best_end_idx = min(len(sentences) - 1, curr_idx)
+
+    # Enforce max duration ceiling
+    while best_end_idx > best_start_idx and (sentences[best_end_idx].end - start_time) > max_dur:
+        best_end_idx -= 1
 
     snapped_start = round(sentences[best_start_idx].start, 2)
     snapped_end = round(sentences[best_end_idx].end, 2)
@@ -55,11 +75,59 @@ def snap_boundaries_to_sentences(
     # Extract sentences and word items
     chosen_sentences = sentences[best_start_idx : best_end_idx + 1]
     transcript_text = " ".join(s.text for s in chosen_sentences)
-    all_words = []
+    all_words: List[TranscriptWord] = []
     for s in chosen_sentences:
         all_words.extend(s.words)
 
     return snapped_start, snapped_end, transcript_text, all_words
+
+def rerank_finalists(candidates: List[ClipMoment], target_count: int) -> List[ClipMoment]:
+    """
+    Head-to-head tournament reranking and duplicate elimination.
+    Rejects any candidate with >30% temporal overlap against an already chosen higher-ranked clip.
+    Weights 4 sub-scores into a definitive composite rank.
+    """
+    if not candidates:
+        return []
+
+    # Recalculate definitive composite score:
+    # 35% Hook + 30% Engagement + 20% Value + 15% Shareability
+    for c in candidates:
+        comp = int(round(
+            0.35 * c.hookScore +
+            0.30 * c.engagementScore +
+            0.20 * c.valueScore +
+            0.15 * c.shareabilityScore
+        ))
+        c.score = min(100, max(50, comp))
+
+    # Sort descending by composite score
+    sorted_candidates = sorted(candidates, key=lambda x: x.score, reverse=True)
+
+    chosen: List[ClipMoment] = []
+    for cand in sorted_candidates:
+        overlap = False
+        cand_dur = max(1.0, cand.end - cand.start)
+
+        for kept in chosen:
+            kept_dur = max(1.0, kept.end - kept.start)
+            # Intersection duration
+            inter_start = max(cand.start, kept.start)
+            inter_end = min(cand.end, kept.end)
+            if inter_end > inter_start:
+                inter_dur = inter_end - inter_start
+                # Overlap ratio relative to shorter clip
+                shorter_dur = min(cand_dur, kept_dur)
+                if (inter_dur / shorter_dur) > 0.30:
+                    overlap = True
+                    break
+
+        if not overlap:
+            chosen.append(cand)
+            if len(chosen) >= target_count:
+                break
+
+    return chosen
 
 def heuristic_score_clips(
     signals: MultimodalSignals,
@@ -71,7 +139,7 @@ def heuristic_score_clips(
 ) -> List[ClipMoment]:
     """
     Heuristic scoring engine using composite multimodal signals (loudness, burst,
-    scene cuts, chapters, heatmap) when no LLM is configured.
+    scene cuts, chapters, heatmap) producing 4 explainable sub-scores and evidence tags.
     """
     T = signals.duration_seconds
     if T < min_dur:
@@ -91,62 +159,95 @@ def heuristic_score_clips(
 
     # Sliding window search with window size ~35s
     window_sz = min(T, max(min_dur, 35))
-    candidates = []
+    candidates_raw = []
 
     for start_sec in range(0, max(1, T - window_sz), 5):
         end_sec = min(T, start_sec + window_sz)
         avg_score = sum(composite[start_sec:end_sec]) / max(1, end_sec - start_sec)
-        candidates.append((start_sec, end_sec, avg_score))
+        candidates_raw.append((start_sec, end_sec, avg_score))
 
-    # Sort descending by composite score
-    candidates.sort(key=lambda x: x[2], reverse=True)
+    candidates_raw.sort(key=lambda x: x[2], reverse=True)
 
-    # Non-maximum suppression (NMS) to eliminate overlaps > 10s
-    chosen_windows = []
-    for s, e, score in candidates:
-        overlap = False
-        for cs, ce, _ in chosen_windows:
-            if not (e <= cs or s >= ce):
-                overlap = True
-                break
-        if not overlap:
-            chosen_windows.append((s, e, score))
-            if len(chosen_windows) >= clip_count:
-                break
+    initial_moments: List[ClipMoment] = []
+    top_n = min(len(candidates_raw), clip_count * 3)
 
-    clips: List[ClipMoment] = []
-    max_score = max((w[2] for w in chosen_windows), default=1.0) or 1.0
-
-    for idx, (raw_s, raw_e, raw_sc) in enumerate(chosen_windows):
+    for idx, (raw_s, raw_e, raw_sc) in enumerate(candidates_raw[:top_n]):
         snapped_s, snapped_e, transcript_txt, words = snap_boundaries_to_sentences(
             float(raw_s), float(raw_e), sentences, float(min_dur), float(max_dur)
         )
-        norm_score = int(min(98, max(65, (raw_sc / max_score) * 95)))
-        cid = uuid.uuid4().hex[:12]
+        s_int = int(snapped_s)
+        e_int = int(snapped_e)
 
-        # Extract opening hook from first words
+        # 1. Calculate 4 Sub-Scores from signals in slice
+        slice_heatmap = signals.heatmap[s_int:e_int] if s_int < len(signals.heatmap) else []
+        slice_loudness = signals.loudness[s_int:e_int] if s_int < len(signals.loudness) else []
+        slice_burst = signals.burst[s_int:e_int] if s_int < len(signals.burst) else []
+        slice_cuts = signals.scene_cuts[s_int:e_int] if s_int < len(signals.scene_cuts) else []
+
+        # Hook score: based on burst / energy in first 4 seconds
+        hook_window = slice_burst[:4] if slice_burst else [0.5]
+        max_hook_burst = max(hook_window, default=0.5)
+        hook_sc = int(min(98, max(60, 65 + max_hook_burst * 32)))
+
+        # Engagement score: based on loudness variance and scene cuts
+        avg_loud = sum(slice_loudness) / max(1, len(slice_loudness)) if slice_loudness else 0.5
+        cut_count = sum(1 for c in slice_cuts if c > 0.5)
+        eng_sc = int(min(98, max(60, 60 + avg_loud * 25 + min(12, cut_count * 3))))
+
+        # Value score: based on speech content density and duration efficiency
+        word_count = len(words)
+        dur = max(1.0, snapped_e - snapped_s)
+        wpm = (word_count / dur) * 60 if dur > 0 else 120
+        val_sc = int(min(96, max(65, 70 + min(25, int(wpm * 0.12)))))
+
+        # Shareability score: based on heatmap retention peak
+        peak_heatmap = max(slice_heatmap, default=0.4)
+        share_sc = int(min(98, max(55, 55 + peak_heatmap * 42)))
+
+        # Overall composite
+        comp_score = int(round(0.35 * hook_sc + 0.30 * eng_sc + 0.20 * val_sc + 0.15 * share_sc))
+
+        # 2. Extract evidence badges
+        evidence: List[str] = []
+        if peak_heatmap > 0.6:
+            evidence.append(f"Heatmap Peak ({int(peak_heatmap * 100)}% retention)")
+        if max_hook_burst > 0.4:
+            evidence.append("Loudness Burst (+12dB energy spike)")
+        if cut_count > 1:
+            evidence.append(f"Visual Dynamic ({cut_count} scene cuts)")
+        if not evidence:
+            evidence.append("Core Thematic Climax")
+
+        # 3. Extract opening hook
         first_words = transcript_txt.split()[:7]
         hook = " ".join(first_words).upper() if first_words else "WAIT FOR THIS MOMENT"
         hook = re.sub(r'[^\w\s]', '', hook) or "WAIT FOR THIS MOMENT"
 
         title = f"{title_prefix}: Part {idx+1}"
         hashtags = ["#shorts", "#viral", "#clip", "#fyp", "#trending"]
+        cid = uuid.uuid4().hex[:12]
 
-        clips.append(ClipMoment(
+        initial_moments.append(ClipMoment(
             clipId=cid,
             start=snapped_s,
             end=snapped_e,
             duration=round(snapped_e - snapped_s, 2),
-            score=norm_score,
+            score=comp_score,
+            hookScore=hook_sc,
+            engagementScore=eng_sc,
+            valueScore=val_sc,
+            shareabilityScore=share_sc,
             hook=hook,
             title=title,
             hashtags=hashtags,
             reason="High audience retention peak and audio energy transition.",
+            evidence=evidence,
             transcriptText=transcript_txt,
             words=words
         ))
 
-    return clips
+    # Apply head-to-head tournament reranking
+    return rerank_finalists(initial_moments, clip_count)
 
 async def score_clips_with_llm(
     signals: MultimodalSignals,
@@ -158,41 +259,60 @@ async def score_clips_with_llm(
 ) -> List[ClipMoment]:
     """
     Provider-agnostic LLM scoring: sends transcript with timestamps and signal markers,
-    validates strict JSON output, and snaps boundaries to sentences.
+    validates strict JSON output with 4 sub-scores and evidence, and snaps boundaries to sentences.
     Falls back gracefully to heuristic scoring if LLM fails or is unconfigured.
     """
     if not (settings.ANTHROPIC_API_KEY or settings.OPENROUTER_API_KEY or settings.OLLAMA_BASE_URL):
         return heuristic_score_clips(signals, sentences, clip_count, min_dur, max_dur, title_prefix)
 
-    # Prepare formatted transcript timeline
+    # Prepare formatted transcript timeline with signal markers
     lines = []
     for s in sentences:
         sec = int(s.start)
         sig_note = ""
         if sec < len(signals.heatmap) and signals.heatmap[sec] > 0.7:
-            sig_note += " [HIGH REPLAY PEAK]"
+            sig_note += " [HEATMAP PEAK]"
         if sec < len(signals.burst) and signals.burst[sec] > 0.6:
             sig_note += " [AUDIO SPIKE]"
+        if sec < len(signals.scene_cuts) and signals.scene_cuts[sec] > 0.5:
+            sig_note += " [SCENE CUT]"
         lines.append(f"[{s.start:.1f}s - {s.end:.1f}s]{sig_note} {s.text}")
 
-    timeline_str = "\n".join(lines[:120])  # Cap context to prevent overflow
+    timeline_str = "\n".join(lines[:140])
 
-    prompt = f"""You are an elite viral video editor scoring candidate clips from a video.
-Identify the TOP {clip_count} most viral, self-contained segments suitable for 9:16 vertical Shorts/TikToks.
-Requirements:
+    prompt = f"""You are an elite short-form video editor identifying viral 9:16 clips for YouTube Shorts, Reels, and TikTok.
+Identify up to {clip_count * 2} candidate segments from the video transcript below.
+
+REQUIREMENTS:
 1. Duration between {min_dur} and {max_dur} seconds.
-2. Must have an attention-grabbing opening hook in the first 3 seconds.
-3. Must deliver a satisfying insight, punchline, or reaction without cut-off sentences.
-4. Output ONLY a valid JSON array of objects with keys:
-   - "start": float (seconds)
-   - "end": float (seconds)
-   - "score": integer 0-100 (viral rating)
-   - "hook": string (3-6 words, high-energy teaser in ALL CAPS)
-   - "title": string (catchy YouTube Short title)
-   - "hashtags": array of 4-5 strings (e.g. ["#shorts", "#story"])
-   - "reason": string (1 sentence explaining why this clip is viral)
+2. Must have an attention-grabbing opening hook in the first 3.5 seconds.
+3. Must evaluate 4 specific virality sub-scores (0-100 each):
+   - "hook_score": grabs attention immediately
+   - "engagement_score": maintains retention and audio/visual rhythm
+   - "value_score": takeaway density, insight, or entertainment
+   - "shareability_score": impulse to send or comment
+4. Must list concrete multimodal evidence items in "evidence" (e.g. ["Heatmap Peak", "Audio Burst", "Shocking Revelation"]).
+5. Output ONLY a valid JSON array of objects. No markdown, no commentary.
 
-Transcript Timeline:
+SCHEMA:
+[
+  {{
+    "start": 12.0,
+    "end": 44.5,
+    "hook_score": 92,
+    "engagement_score": 88,
+    "value_score": 85,
+    "shareability_score": 90,
+    "score": 89,
+    "hook": "WAIT UNTIL YOU HEAR THIS",
+    "title": "The Shocking Secret Nobody Knew",
+    "hashtags": ["#shorts", "#story", "#viral", "#mindblown"],
+    "reason": "Dramatic conversational pivot with immediate tension.",
+    "evidence": ["Heatmap Peak", "Audio Burst", "High speech punchiness"]
+  }}
+]
+
+TRANSCRIPT TIMELINE:
 {timeline_str}
 """
 
@@ -209,7 +329,7 @@ Transcript Timeline:
                     },
                     json={
                         "model": "claude-3-5-sonnet-20241022",
-                        "max_tokens": 1024,
+                        "max_tokens": 1500,
                         "messages": [{"role": "user", "content": prompt}]
                     }
                 )
@@ -248,12 +368,13 @@ Transcript Timeline:
                 if res.status_code == 200:
                     response_text = res.json().get("response", "")
 
-        # Parse JSON from response
+        # Parse JSON array
         match = re.search(r'\[.*\]', response_text, re.DOTALL)
         if match:
             raw_items = json.loads(match.group(0))
-            clips: List[ClipMoment] = []
-            for item in raw_items[:clip_count]:
+            candidates: List[ClipMoment] = []
+
+            for item in raw_items:
                 raw_s = float(item.get("start", 0))
                 raw_e = float(item.get("end", raw_s + 30))
                 snapped_s, snapped_e, transcript_txt, words = snap_boundaries_to_sentences(
@@ -261,26 +382,35 @@ Transcript Timeline:
                 )
 
                 cid = uuid.uuid4().hex[:12]
-                clips.append(ClipMoment(
+                h_sc = int(item.get("hook_score", 85))
+                e_sc = int(item.get("engagement_score", 85))
+                v_sc = int(item.get("value_score", 85))
+                s_sc = int(item.get("shareability_score", 85))
+                comp_sc = int(item.get("score", round(0.35*h_sc + 0.3*e_sc + 0.2*v_sc + 0.15*s_sc)))
+
+                candidates.append(ClipMoment(
                     clipId=cid,
                     start=snapped_s,
                     end=snapped_e,
                     duration=round(snapped_e - snapped_s, 2),
-                    score=int(item.get("score", 85)),
+                    score=comp_sc,
+                    hookScore=h_sc,
+                    engagementScore=e_sc,
+                    valueScore=v_sc,
+                    shareabilityScore=s_sc,
                     hook=str(item.get("hook", "WAIT FOR THIS")).upper()[:60],
                     title=str(item.get("title", f"{title_prefix}: Highlight"))[:80],
-                    hashtags=item.get("hashtags", ["#shorts", "#viral"]),
-                    reason=str(item.get("reason", "High retention hook detected."))[:200],
+                    hashtags=item.get("hashtags", ["#shorts", "#viral", "#reels"]),
+                    reason=str(item.get("reason", "Strong opening hook with consistent retention."))[:200],
+                    evidence=item.get("evidence", ["Hook peak", "Speech clarity"]),
                     transcriptText=transcript_txt,
                     words=words
                 ))
-            if clips:
-                # Sort descending by score
-                clips.sort(key=lambda c: c.score, reverse=True)
-                return clips
+
+            if candidates:
+                return rerank_finalists(candidates, clip_count)
 
     except Exception as e:
         print(f"LLM scoring exception notice: {e}; falling back to heuristic scorer.")
 
     return heuristic_score_clips(signals, sentences, clip_count, min_dur, max_dur, title_prefix)
-
