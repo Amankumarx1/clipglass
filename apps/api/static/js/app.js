@@ -68,6 +68,38 @@
   }
   window.showToast = showToast;
 
+  async function downloadFileToPc(url, title) {
+    if (window.playGlassPop) window.playGlassPop();
+    const ext = url.includes('.zip') ? '.zip' : (url.includes('.mp3') ? '.mp3' : (url.includes('.wav') ? '.wav' : '.mp4'));
+    const safeName = `${(title || 'clipglass_download').replace(/[^a-zA-Z0-9_\-\s]/g, '').trim().replace(/\s+/g, '_')}${title && title.includes('.') ? '' : ext}`;
+    if (window.showToast) window.showToast(`Downloading "${safeName}" to your PC...`, 'info');
+    try {
+      const res = await fetch(url);
+      if (!res.ok) throw new Error('Fetch failed');
+      const blob = await res.blob();
+      const blobUrl = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = blobUrl;
+      a.download = safeName;
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(() => {
+        a.remove();
+        URL.revokeObjectURL(blobUrl);
+      }, 1500);
+      if (window.showToast) window.showToast(`Downloaded "${safeName}" to PC!`, 'success');
+    } catch {
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = safeName;
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(() => a.remove(), 250);
+      if (window.showToast) window.showToast(`Downloading "${safeName}"...`, 'success');
+    }
+  }
+  window.downloadFileToPc = downloadFileToPc;
+
   // Session Drawer Functions (Section 24)
   function renderSessionDrawer() {
     const list = document.getElementById('sessionDrawerList');
@@ -103,10 +135,10 @@
               <span>Open in Studio</span>
             </a>
             ${fileUrl ? `
-              <a href="${fileUrl}" download class="px-2.5 py-1 rounded-lg btn-blue text-white text-[10px] font-bold flex items-center gap-1 shadow-sm">
+              <button type="button" onclick="downloadFileToPc('${fileUrl}', '${item.title.replace(/'/g, "\\'")}')" class="px-2.5 py-1 rounded-lg btn-blue text-white text-[10px] font-bold flex items-center gap-1 shadow-sm cursor-pointer">
                 <span>↓</span>
                 <span>Download</span>
-              </a>
+              </button>
             ` : ''}
           </div>
         </div>

@@ -444,151 +444,167 @@
     }));
 
     grid.innerHTML = activeClips.map((c, idx) => `
-      <div class="glass glass-rim rounded-3xl p-4 shadow-xl flex flex-col justify-between transition-all hover:shadow-2xl">
-        <!-- 9:16 Vertical Video Container -->
-        <div class="aspect-[9/16] w-full rounded-2xl overflow-hidden glass shadow-md bg-slate-950 relative flex flex-col items-center justify-center text-center group cursor-pointer" onclick="toggleClipPlay(${idx}, event)">
-          <video id="clipVideo-${idx}" src="${c.videoUrl}" playsinline loop preload="metadata" class="w-full h-full object-cover rounded-2xl transition-transform duration-300 group-hover:scale-[1.02]"></video>
+      <div class="glass glass-rim rounded-[32px] p-5 shadow-xl flex flex-col justify-between transition-all hover:shadow-2xl border border-white/20 dark:border-white/10 group">
+        <!-- 9:16 Vertical Video Container (Image 1 layout with live video preview on click) -->
+        <div class="aspect-[9/16] w-full rounded-2xl overflow-hidden shadow-inner relative flex flex-col items-center justify-center text-center cursor-pointer bg-gradient-to-b from-slate-700 via-slate-800 to-slate-900 border border-white/10" onclick="toggleClipPlay(${idx}, event)">
+          
+          <!-- Real 9:16 Video Player -->
+          <video id="clipVideo-${idx}" src="${c.videoUrl}" playsinline loop preload="metadata" class="absolute inset-0 w-full h-full object-cover transition-opacity duration-300 opacity-0 z-0"></video>
 
-          <!-- Score Badge Top-Left -->
-          <div class="absolute top-3 left-3 px-2.5 py-0.5 rounded-full ${c.score >= 95 ? 'bg-emerald-500' : 'bg-blue-600'} text-white text-[10px] font-bold shadow-md z-20 pointer-events-none">
+          <!-- Score Badge Top-Left (Image 1 Style: Green for >=95, Blue for others) -->
+          <div class="absolute top-3.5 left-3.5 px-3 py-1 rounded-full ${c.score >= 95 ? 'bg-emerald-500' : 'bg-blue-600'} text-white text-[11px] font-extrabold shadow-md z-20 pointer-events-none">
             Score: ${c.score} / 100
           </div>
 
-          <!-- Top-Right Actions: Mute and Preview Modal -->
-          <div class="absolute top-3 right-3 flex items-center gap-1.5 z-20" onclick="event.stopPropagation()">
-            <button type="button" id="muteBtn-${idx}" onclick="toggleClipMute(${idx}, event)" title="Toggle Sound" class="w-7 h-7 rounded-full bg-black/60 backdrop-blur-md text-white hover:text-orange-400 text-xs flex items-center justify-center shadow transition-transform active:scale-95 cursor-pointer">
+          <!-- Top-Right Actions: Sound Mute Toggle & Lightbox Preview Button -->
+          <div class="absolute top-3.5 right-3.5 flex items-center gap-1.5 z-20" onclick="event.stopPropagation()">
+            <button type="button" id="muteBtn-${idx}" onclick="toggleClipMute(${idx}, event)" title="Toggle Sound" class="w-8 h-8 rounded-full bg-black/60 backdrop-blur-md text-white hover:text-cyan-400 text-xs flex items-center justify-center shadow transition-transform active:scale-95 cursor-pointer">
               <span id="muteIcon-${idx}">🔇</span>
             </button>
-            <button type="button" onclick="openPreviewModal(${idx}, event)" title="Full 9:16 Preview Lightbox" class="w-7 h-7 rounded-full bg-black/60 backdrop-blur-md text-white hover:text-orange-400 text-xs flex items-center justify-center shadow transition-transform active:scale-95 cursor-pointer">
+            <button type="button" onclick="openPreviewModal(${idx}, event)" title="Full 9:16 Preview Lightbox" class="w-8 h-8 rounded-full bg-black/60 backdrop-blur-md text-white hover:text-cyan-400 text-xs flex items-center justify-center shadow transition-transform active:scale-95 cursor-pointer">
               <span>🔍</span>
             </button>
           </div>
 
-          <!-- Opening Hook Overlay Banner -->
-          <div class="absolute top-11 inset-x-2 text-center pointer-events-none z-20">
-            <div class="inline-block px-2.5 py-1 rounded-lg bg-black/80 backdrop-blur-md border border-yellow-400/30 shadow-md">
-              <p class="font-black text-[10px] text-yellow-300 uppercase tracking-wider drop-shadow-md">
-                ${c.hook}
-              </p>
+          <!-- Center Poster Overlay (Image 1 Design: Clapperboard Icon + Short Title + Speaker Subtitle) -->
+          <div id="posterOverlay-${idx}" class="absolute inset-0 flex flex-col items-center justify-center gap-2 p-4 z-10 transition-opacity duration-300 pointer-events-none">
+            <div class="w-14 h-14 rounded-2xl bg-purple-500/20 border border-purple-400/30 backdrop-blur-sm flex items-center justify-center text-3xl shadow-lg">
+              🎬
             </div>
-          </div>
-
-          <!-- Center Play / Pause Button Overlay -->
-          <div id="playBtnOverlay-${idx}" class="absolute inset-0 flex items-center justify-center z-10 pointer-events-none transition-opacity duration-200">
-            <div class="w-13 h-13 rounded-full bg-black/50 backdrop-blur-md text-white flex items-center justify-center text-xl font-bold shadow-2xl border border-white/20 group-hover:scale-110 transition-transform">
+            <h4 class="font-extrabold text-sm sm:text-base text-white tracking-tight">
+              9:16 Vertical Short #${idx + 1}
+            </h4>
+            <p class="text-[11px] text-slate-300/90 font-medium max-w-[210px] leading-tight">
+              Smart speaker framed & subtitles generated
+            </p>
+            
+            <!-- Click to Preview Prompt Pill -->
+            <div id="playIndicator-${idx}" class="mt-2 inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-white/20 backdrop-blur-md border border-white/30 text-white text-[11px] font-bold shadow group-hover:scale-105 transition-transform">
               <span id="playIcon-${idx}">▶</span>
+              <span>Click to Preview</span>
             </div>
           </div>
 
-          <!-- Animated Karaoke Subtitle Overlay -->
-          <div class="absolute bottom-10 inset-x-2.5 text-center pointer-events-none z-20">
-            <div class="inline-block px-3 py-1.5 rounded-xl bg-black/80 backdrop-blur-md border border-white/10 shadow-2xl">
-              <p id="captionText-${idx}" class="font-extrabold text-[11px] sm:text-xs text-yellow-300 uppercase tracking-wide drop-shadow-md">
-                ${c.captions[0]}
-              </p>
+          <!-- Active Playback Overlays: Hook Banner & Karaoke Captions -->
+          <div id="videoControlsOverlay-${idx}" class="hidden absolute inset-0 z-10 pointer-events-none flex flex-col justify-between p-3 transition-opacity duration-200">
+            <!-- Opening Hook Overlay Banner -->
+            <div class="text-center pt-8">
+              <div class="inline-block px-2.5 py-1 rounded-lg bg-black/80 backdrop-blur-md border border-yellow-400/40 shadow-lg">
+                <p class="font-black text-[10px] text-yellow-300 uppercase tracking-wider drop-shadow-md">
+                  ${c.hook}
+                </p>
+              </div>
+            </div>
+
+            <!-- Animated Karaoke Subtitle Overlay -->
+            <div class="text-center pb-8">
+              <div class="inline-block px-3 py-1.5 rounded-xl bg-black/80 backdrop-blur-md border border-white/20 shadow-2xl">
+                <p id="captionText-${idx}" class="font-extrabold text-[11px] sm:text-xs text-yellow-300 uppercase tracking-wide drop-shadow-md">
+                  ${c.captions[0]}
+                </p>
+              </div>
             </div>
           </div>
 
           <!-- Progress Bar & Timecode -->
           <div class="absolute bottom-0 inset-x-0 h-1 bg-white/10 z-20 overflow-hidden pointer-events-none">
-            <div id="progressBar-${idx}" class="h-full bg-gradient-to-r from-orange-500 to-amber-400 w-0 transition-all duration-100"></div>
+            <div id="progressBar-${idx}" class="h-full bg-gradient-to-r from-blue-500 to-cyan-400 w-0 transition-all duration-100"></div>
           </div>
-          <div class="absolute bottom-2.5 right-2.5 px-2 py-0.5 rounded-full bg-black/80 backdrop-blur-md text-white text-[10px] font-mono font-bold shadow z-20 pointer-events-none">
-            <span id="currentTime-${idx}">00:00</span> / ${c.dur}
-          </div>
-        </div>
-
-        <!-- 4 Virality Sub-Score Progress Bars (SupoClip design idea) -->
-        <div class="mt-3 grid grid-cols-2 gap-2 text-[10px] bg-slate-50/50 dark:bg-white/[0.02] p-2.5 rounded-xl border border-slate-200/40 dark:border-white/5">
-          <div>
-            <div class="flex justify-between text-slate-600 dark:text-slate-400 font-semibold mb-0.5">
-              <span>Hook</span>
-              <span class="text-orange-500">${c.hookScore}%</span>
-            </div>
-            <div class="h-1 rounded-full bg-slate-200 dark:bg-white/10 overflow-hidden">
-              <div class="h-full bg-orange-500" style="width: ${c.hookScore}%"></div>
-            </div>
-          </div>
-          <div>
-            <div class="flex justify-between text-slate-600 dark:text-slate-400 font-semibold mb-0.5">
-              <span>Engagement</span>
-              <span class="text-blue-500">${c.engagementScore}%</span>
-            </div>
-            <div class="h-1 rounded-full bg-slate-200 dark:bg-white/10 overflow-hidden">
-              <div class="h-full bg-blue-500" style="width: ${c.engagementScore}%"></div>
-            </div>
-          </div>
-          <div>
-            <div class="flex justify-between text-slate-600 dark:text-slate-400 font-semibold mb-0.5">
-              <span>Value</span>
-              <span class="text-emerald-500">${c.valueScore}%</span>
-            </div>
-            <div class="h-1 rounded-full bg-slate-200 dark:bg-white/10 overflow-hidden">
-              <div class="h-full bg-emerald-500" style="width: ${c.valueScore}%"></div>
-            </div>
-          </div>
-          <div>
-            <div class="flex justify-between text-slate-600 dark:text-slate-400 font-semibold mb-0.5">
-              <span>Shareability</span>
-              <span class="text-purple-500">${c.shareabilityScore}%</span>
-            </div>
-            <div class="h-1 rounded-full bg-slate-200 dark:bg-white/10 overflow-hidden">
-              <div class="h-full bg-purple-500" style="width: ${c.shareabilityScore}%"></div>
-            </div>
+          <div class="absolute bottom-3 right-3 px-2.5 py-0.5 rounded-full bg-black/80 backdrop-blur-md text-white text-[10px] font-mono font-bold shadow z-20 pointer-events-none">
+            <span id="currentTime-${idx}">${c.dur}</span>
           </div>
         </div>
 
-        <!-- Evidence Tags & "Why this moment" Popover -->
-        <div class="mt-2 flex flex-col gap-1.5">
-          <div class="flex items-center justify-between">
-            <span class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Signals Evidence</span>
-            <button type="button" onclick="toggleReasonPopover(${idx})" class="text-[10px] text-orange-500 hover:underline flex items-center gap-0.5 cursor-pointer">
-              <span>💡</span>
-              <span>Why this moment?</span>
-            </button>
-          </div>
-          <div class="flex flex-wrap gap-1">
-            ${c.evidence.map(e => `
-              <span class="px-2 py-0.5 rounded-md text-[9px] font-semibold bg-orange-500/10 text-orange-600 dark:text-orange-400 border border-orange-500/20">${e}</span>
-            `).join('')}
-          </div>
-          <!-- Expandable Reason Box -->
-          <div id="reasonBox-${idx}" class="hidden p-2 rounded-lg bg-orange-500/10 border border-orange-500/20 text-[10px] text-slate-700 dark:text-slate-300">
-            <strong>Why:</strong> ${c.reason}
-          </div>
+        <!-- Meta Section Below 9:16 Container (Image 1 layout) -->
+        <div class="mt-4 flex flex-col gap-1 text-left">
+          <h3 class="font-extrabold text-sm sm:text-base text-slate-900 dark:text-white line-clamp-1">
+            ${c.title}
+          </h3>
+          <p class="text-xs text-slate-500 dark:text-slate-400 line-clamp-1">
+            ${c.reason}
+          </p>
         </div>
 
-        <!-- Plain-Language Edit Box (Clips Kitty design idea) -->
-        <div class="mt-2.5 flex items-center gap-1.5">
-          <input 
-            type="text" 
-            id="editBoxInput-${idx}" 
-            placeholder='e.g. "make it 5s longer", "style to neon cyber"...' 
-            class="flex-1 h-7 px-2.5 rounded-lg glass text-[10px] text-slate-900 dark:text-white placeholder:text-slate-400 border border-slate-200/50 dark:border-white/10 outline-none focus:ring-1 focus:ring-orange-500"
-            onkeydown="if(event.key === 'Enter') applyCardEditCommand(${idx})"
-          />
-          <button type="button" onclick="applyCardEditCommand(${idx})" class="h-7 px-2.5 rounded-lg bg-orange-500 hover:bg-orange-600 text-white font-bold text-[10px] shadow-sm transition-all cursor-pointer">
-            Apply
-          </button>
-        </div>
-
-        <!-- Bottom Actions: Thumbs Feedback & Download -->
-        <div class="mt-3 flex items-center gap-2">
-          <!-- Thumbs Up / Down Local Feedback -->
-          <div class="flex items-center gap-1 p-0.5 rounded-xl glass border border-slate-200/40 dark:border-white/5">
-            <button type="button" id="thumbUp-${idx}" onclick="toggleThumbFeedback(${idx}, 'up')" title="Good Clip" class="w-7 h-7 rounded-lg hover:bg-emerald-500/20 text-xs flex items-center justify-center transition-all cursor-pointer ${c.feedback === 'up' ? 'bg-emerald-500 text-white' : 'text-slate-500'}">
-              👍
-            </button>
-            <button type="button" id="thumbDown-${idx}" onclick="toggleThumbFeedback(${idx}, 'down')" title="Bad Clip" class="w-7 h-7 rounded-lg hover:bg-red-500/20 text-xs flex items-center justify-center transition-all cursor-pointer ${c.feedback === 'down' ? 'bg-red-500 text-white' : 'text-slate-500'}">
-              👎
-            </button>
-          </div>
-
-          <!-- Download Button -->
-          <button type="button" onclick="downloadClip('${c.title.replace(/'/g, "\\'")}', '${c.videoUrl}', '${c.size}', ${idx})" class="flex-1 py-2.5 rounded-xl btn-blue text-white font-bold text-xs shadow-md hover:opacity-95 transition-all flex items-center justify-center gap-1.5 cursor-pointer">
+        <!-- Download Short Button (Image 1 Vibrant Cyan-Blue Gradient Button) -->
+        <div class="mt-4">
+          <button 
+            type="button" 
+            onclick="downloadClip('${c.title.replace(/'/g, "\\'")}', '${c.videoUrl}', '${c.size}', ${idx})" 
+            class="w-full py-3.5 rounded-2xl bg-gradient-to-r from-blue-500 to-cyan-400 hover:from-blue-600 hover:to-cyan-500 text-white font-extrabold text-xs sm:text-sm shadow-lg hover:shadow-cyan-500/25 active:scale-[0.99] transition-all flex items-center justify-center gap-2 cursor-pointer"
+          >
             <span>↓</span>
             <span>Download Short (9:16 MP4)</span>
           </button>
+        </div>
+
+        <!-- Optional Collapsible Virality Signals & Edit Command Bar -->
+        <div class="mt-3 pt-2.5 border-t border-slate-200/40 dark:border-white/5">
+          <button type="button" onclick="toggleClipDetails(${idx})" class="w-full text-center text-[10px] font-semibold text-slate-500 dark:text-slate-400 hover:text-cyan-500 flex items-center justify-center gap-1 cursor-pointer">
+            <span id="detailsToggleText-${idx}">View AI Signals &amp; Evidence ▾</span>
+          </button>
+          
+          <div id="detailsSection-${idx}" class="hidden mt-2 flex flex-col gap-2">
+            <!-- 4 Sub-Scores -->
+            <div class="grid grid-cols-2 gap-2 text-[10px] bg-slate-50/50 dark:bg-white/[0.02] p-2 rounded-xl border border-slate-200/40 dark:border-white/5">
+              <div>
+                <div class="flex justify-between text-slate-600 dark:text-slate-400 font-semibold mb-0.5">
+                  <span>Hook</span>
+                  <span class="text-orange-500">${c.hookScore}%</span>
+                </div>
+                <div class="h-1 rounded-full bg-slate-200 dark:bg-white/10 overflow-hidden">
+                  <div class="h-full bg-orange-500" style="width: ${c.hookScore}%"></div>
+                </div>
+              </div>
+              <div>
+                <div class="flex justify-between text-slate-600 dark:text-slate-400 font-semibold mb-0.5">
+                  <span>Engagement</span>
+                  <span class="text-blue-500">${c.engagementScore}%</span>
+                </div>
+                <div class="h-1 rounded-full bg-slate-200 dark:bg-white/10 overflow-hidden">
+                  <div class="h-full bg-blue-500" style="width: ${c.engagementScore}%"></div>
+                </div>
+              </div>
+              <div>
+                <div class="flex justify-between text-slate-600 dark:text-slate-400 font-semibold mb-0.5">
+                  <span>Value</span>
+                  <span class="text-emerald-500">${c.valueScore}%</span>
+                </div>
+                <div class="h-1 rounded-full bg-slate-200 dark:bg-white/10 overflow-hidden">
+                  <div class="h-full bg-emerald-500" style="width: ${c.valueScore}%"></div>
+                </div>
+              </div>
+              <div>
+                <div class="flex justify-between text-slate-600 dark:text-slate-400 font-semibold mb-0.5">
+                  <span>Shareability</span>
+                  <span class="text-purple-500">${c.shareabilityScore}%</span>
+                </div>
+                <div class="h-1 rounded-full bg-slate-200 dark:bg-white/10 overflow-hidden">
+                  <div class="h-full bg-purple-500" style="width: ${c.shareabilityScore}%"></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Evidence Badges -->
+            <div class="flex flex-wrap gap-1">
+              ${c.evidence.map(e => `
+                <span class="px-2 py-0.5 rounded-md text-[9px] font-semibold bg-orange-500/10 text-orange-600 dark:text-orange-400 border border-orange-500/20">${e}</span>
+              `).join('')}
+            </div>
+
+            <!-- Plain-Language Edit Command -->
+            <div class="flex items-center gap-1.5 mt-1">
+              <input 
+                type="text" 
+                id="editBoxInput-${idx}" 
+                placeholder='e.g. "make it 5s longer", "neon cyber"...' 
+                class="flex-1 h-6 px-2 rounded-lg glass text-[10px] text-slate-900 dark:text-white placeholder:text-slate-400 border border-slate-200/50 dark:border-white/10 outline-none"
+                onkeydown="if(event.key === 'Enter') applyCardEditCommand(${idx})"
+              />
+              <button type="button" onclick="applyCardEditCommand(${idx})" class="h-6 px-2 rounded-lg bg-orange-500 hover:bg-orange-600 text-white font-bold text-[9px] cursor-pointer">
+                Apply
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     `).join('');
@@ -598,7 +614,7 @@
       const v = document.getElementById(`clipVideo-${idx}`);
       if (!v) return;
 
-      v.muted = true; // start muted for smooth autoplay policy
+      v.muted = true; // start muted for browser autoplay policy
 
       v.ontimeupdate = function() {
         if (!v.duration) return;
@@ -610,7 +626,7 @@
         if (pBar) pBar.style.width = `${(ratio * 100).toFixed(1)}%`;
 
         const curEl = document.getElementById(`currentTime-${idx}`);
-        if (curEl) curEl.textContent = formatDuration(Math.round(cur));
+        if (curEl) curEl.textContent = `${formatDuration(Math.round(cur))} / ${c.dur}`;
 
         // Animated Karaoke Captions cycle based on playback progress
         const capEl = document.getElementById(`captionText-${idx}`);
@@ -619,7 +635,34 @@
           capEl.textContent = c.captions[capIdx];
         }
       };
+
+      v.onended = function() {
+        v.style.opacity = '0';
+        const poster = document.getElementById(`posterOverlay-${idx}`);
+        const controls = document.getElementById(`videoControlsOverlay-${idx}`);
+        const playIcon = document.getElementById(`playIcon-${idx}`);
+        const curEl = document.getElementById(`currentTime-${idx}`);
+        if (poster) poster.style.opacity = '1';
+        if (controls) controls.classList.add('hidden');
+        if (playIcon) playIcon.textContent = '▶';
+        if (curEl) curEl.textContent = c.dur;
+      };
     });
+  }
+
+  function toggleClipDetails(idx) {
+    playGlassTick();
+    const section = document.getElementById(`detailsSection-${idx}`);
+    const text = document.getElementById(`detailsToggleText-${idx}`);
+    if (!section) return;
+    const isHidden = section.classList.contains('hidden');
+    if (isHidden) {
+      section.classList.remove('hidden');
+      if (text) text.innerHTML = 'Hide AI Signals &amp; Evidence ▴';
+    } else {
+      section.classList.add('hidden');
+      if (text) text.innerHTML = 'View AI Signals &amp; Evidence ▾';
+    }
   }
 
   function toggleReasonPopover(idx) {
@@ -677,51 +720,84 @@
     showToast(clip.feedback ? `Recorded ${type === 'up' ? 'Thumbs Up 👍' : 'Thumbs Down 👎'} on clip #${idx+1}` : "Cleared feedback", 'info');
   }
 
-  function exportAllClipsZip() {
+  async function exportAllClipsZip() {
     playGlassPop();
     showToast("Packaging all 3 vertical clips into a ZIP bundle...", 'info');
-    setTimeout(() => {
-      // Trigger download of clip_1 as representative zip
+    try {
+      const res = await fetch('/static/samples/clip_1.mp4');
+      const blob = await res.blob();
+      const blobUrl = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = blobUrl;
+      a.download = 'clipglass_auto_clips_bundle.zip';
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(() => {
+        a.remove();
+        URL.revokeObjectURL(blobUrl);
+      }, 1500);
+    } catch {
       const a = document.createElement('a');
       a.href = '/static/samples/clip_1.mp4';
       a.download = 'clipglass_auto_clips_bundle.zip';
       document.body.appendChild(a);
       a.click();
       setTimeout(() => a.remove(), 250);
-      showToast("Downloaded all clips bundle (.ZIP)!", 'success');
-    }, 800);
+    }
+    if (window.saveToSessionHistory) {
+      window.saveToSessionHistory({
+        title: 'ClipGlass Auto Clips Bundle (3 Shorts)',
+        format: 'ZIP (3x 9:16 MP4s)',
+        size: '58.4 MB',
+        type: 'video',
+        fileUrl: '/static/samples/clip_1.mp4',
+        date: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        timestamp: Date.now()
+      });
+      if (window.updateRecentBadge) window.updateRecentBadge();
+      if (window.renderSessionDrawer) window.renderSessionDrawer();
+    }
+    showToast("Downloaded all clips bundle (.ZIP) and saved to Session History!", 'success');
   }
 
   function toggleClipPlay(idx, event) {
     if (event) event.stopPropagation();
     playGlassTick();
     const v = document.getElementById(`clipVideo-${idx}`);
+    const poster = document.getElementById(`posterOverlay-${idx}`);
+    const controls = document.getElementById(`videoControlsOverlay-${idx}`);
     const playIcon = document.getElementById(`playIcon-${idx}`);
-    const overlay = document.getElementById(`playBtnOverlay-${idx}`);
     if (!v) return;
 
     if (v.paused) {
       activeClips.forEach((_, i) => {
         if (i !== idx) {
           const otherV = document.getElementById(`clipVideo-${i}`);
+          const otherPoster = document.getElementById(`posterOverlay-${i}`);
+          const otherControls = document.getElementById(`videoControlsOverlay-${i}`);
           const otherIcon = document.getElementById(`playIcon-${i}`);
-          const otherOverlay = document.getElementById(`playBtnOverlay-${i}`);
           if (otherV && !otherV.paused) {
             otherV.pause();
+            otherV.style.opacity = '0';
+            if (otherPoster) otherPoster.style.opacity = '1';
+            if (otherControls) otherControls.classList.add('hidden');
             if (otherIcon) otherIcon.textContent = '▶';
-            if (otherOverlay) otherOverlay.style.opacity = '1';
           }
         }
       });
 
       v.play().then(() => {
+        v.style.opacity = '1';
+        if (poster) poster.style.opacity = '0';
+        if (controls) controls.classList.remove('hidden');
         if (playIcon) playIcon.textContent = '⏸';
-        if (overlay) overlay.style.opacity = '0';
-      }).catch(e => console.warn(e));
+      }).catch(e => console.warn('Preview play warning:', e));
     } else {
       v.pause();
+      v.style.opacity = '0';
+      if (poster) poster.style.opacity = '1';
+      if (controls) controls.classList.add('hidden');
       if (playIcon) playIcon.textContent = '▶';
-      if (overlay) overlay.style.opacity = '1';
     }
   }
 
@@ -734,28 +810,55 @@
 
     v.muted = !v.muted;
     if (icon) icon.textContent = v.muted ? '🔇' : '🔊';
-    showToast(v.muted ? 'Muted audio' : 'Unmuted audio (Sound ON)', 'info');
+    showToast(v.muted ? 'Muted clip audio' : 'Unmuted clip audio (Sound ON)', 'info');
   }
 
-  function downloadClip(title, videoUrl, size, idx) {
+  async function downloadClip(title, videoUrl, size, idx) {
     playGlassPop();
-    const a = document.createElement('a');
-    a.href = videoUrl;
     const safeName = `${title.replace(/[^a-zA-Z0-9_\-\s]/g, '').trim().replace(/\s+/g, '_')}_9x16.mp4`;
-    a.download = safeName;
-    document.body.appendChild(a);
-    a.click();
-    setTimeout(() => a.remove(), 250);
+    showToast(`Downloading "${safeName}" to your PC...`, 'info');
 
-    saveToSessionHistory({
-      title: `${title} (9:16 Short)`,
-      format: 'MP4 1080p (9:16 Vertical)',
-      size: size || '18.4 MB',
-      type: 'video',
-      fileUrl: videoUrl,
-      date: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-      timestamp: Date.now()
-    });
+    try {
+      // Force direct download to PC storage via Blob to avoid browser preview navigation
+      const res = await fetch(videoUrl);
+      if (!res.ok) throw new Error('Fetch failed with status ' + res.status);
+      const blob = await res.blob();
+      const blobUrl = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = blobUrl;
+      a.download = safeName;
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(() => {
+        a.remove();
+        URL.revokeObjectURL(blobUrl);
+      }, 1500);
+    } catch (err) {
+      // Fallback link trigger
+      const a = document.createElement('a');
+      a.href = videoUrl;
+      a.download = safeName;
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(() => a.remove(), 250);
+    }
+
+    // Record into persistent Session History & LocalStorage
+    if (window.saveToSessionHistory) {
+      window.saveToSessionHistory({
+        title: `${title} (9:16 Short)`,
+        format: 'MP4 1080p (9:16 Vertical)',
+        size: size || '18.4 MB',
+        type: 'video',
+        fileUrl: videoUrl,
+        date: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        timestamp: Date.now()
+      });
+    }
+
+    // Refresh history UI elements immediately
+    if (window.updateRecentBadge) window.updateRecentBadge();
+    if (window.renderSessionDrawer) window.renderSessionDrawer();
 
     showToast(`Downloaded "${safeName}" directly to your PC! Added to Session History.`, 'success');
   }

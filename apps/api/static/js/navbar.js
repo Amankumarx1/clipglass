@@ -98,7 +98,7 @@
     // Session History Count Badge
     function updateRecentBadge() {
       try {
-        const history = JSON.parse(sessionStorage.getItem('clipglass-history') || '[]');
+        const history = window.getRecentHistory ? window.getRecentHistory() : JSON.parse(localStorage.getItem('clipglass-history') || sessionStorage.getItem('clipglass-history') || '[]');
         const badges = document.querySelectorAll('[data-history-count]');
         badges.forEach(b => {
           b.textContent = history.length;

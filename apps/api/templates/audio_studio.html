@@ -1,192 +1,94 @@
 {% extends "base.html" %}
 
-{% block title %}Audio Studio (Custom Mode) — ClipGlass In-Browser Audio Engine{% endblock %}
+{% block title %}Audio Studio — ClipGlass Full-Width Workspace{% endblock %}
 
 {% block content %}
-<div class="w-full max-w-4xl mx-auto flex flex-col gap-6 pb-20">
+<div class="w-full px-4 sm:px-6 md:px-8 xl:px-10 max-w-[1920px] mx-auto flex flex-col gap-6 pb-20">
 
-  <!-- ==================== TOP BAR: MODE SWITCHER ==================== -->
-  <div class="flex items-center justify-between flex-wrap gap-3 pt-1">
-    <div class="flex items-center gap-2">
-      <span class="text-xl">▶</span>
-      <span class="font-black text-lg text-slate-900 dark:text-white tracking-tight uppercase">ClipGlass Studio</span>
-    </div>
-
-    <!-- Mode Switcher (Auto Mode vs Custom Mode per Section 7) -->
-    <div class="flex items-center p-1 rounded-2xl glass shadow-sm">
-      <button
-        type="button"
-        id="modeCustomToggleBtn"
-        onclick="switchStudioMode('custom')"
-        class="px-4 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer bg-purple-600 text-white shadow-sm flex items-center gap-1.5"
-      >
+  <!-- ========================================================================= -->
+  <!-- 1. IMPORT STATE (VISIBLE BEFORE FETCHING MEDIA)                            -->
+  <!-- ========================================================================= -->
+  <div id="importStateSection" class="w-full max-w-4xl mx-auto flex flex-col items-center justify-center gap-8 pt-8 pb-12">
+    <!-- Hero / Title -->
+    <div class="text-center">
+      <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full glass border border-purple-500/20 text-purple-600 dark:text-purple-400 text-xs font-bold mb-3 shadow-sm">
         <span>🎛</span>
-        <span>Custom Mode</span>
-      </button>
-
-      <button
-        type="button"
-        id="modeAutoToggleBtn"
-        onclick="switchStudioMode('auto')"
-        class="px-4 py-1.5 rounded-xl text-xs font-bold text-slate-500 hover:text-slate-900 dark:hover:text-white transition-all cursor-pointer flex items-center gap-1.5"
-      >
-        <span>✦</span>
-        <span>Auto Mode</span>
-      </button>
-    </div>
-  </div>
-
-  <!-- ==================== AUTO MODE VIEW (SIMPLE 1-CLICK POLISH) ==================== -->
-  <div id="autoModeContainer" class="hidden glass glass-rim rounded-3xl p-6 sm:p-8 shadow-xl flex flex-col items-center text-center gap-6 border border-purple-500/20">
-    <div class="w-16 h-16 rounded-2xl bg-purple-500/15 text-purple-600 dark:text-purple-400 flex items-center justify-center text-3xl shadow-inner">
-      ✦
-    </div>
-    <div class="max-w-md">
-      <h2 class="text-xl sm:text-2xl font-black text-slate-900 dark:text-white uppercase tracking-tight">
-        Auto Mode — 1-Click Polish
-      </h2>
-      <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
-        ClipGlass analyzes your audio and automatically applies optimal vocal clarity, gentle bus leveling, and air sheen.
+        <span>Selection Auto Mode & Full Custom Rack</span>
+      </div>
+      <h1 class="text-3xl sm:text-5xl font-black text-slate-900 dark:text-white tracking-tight uppercase">
+        Audio Studio
+      </h1>
+      <p class="text-slate-600 dark:text-slate-300 text-sm sm:text-base mt-2 font-medium max-w-xl mx-auto">
+        Paste a media URL or upload audio to enter the full-screen studio workspace.
       </p>
     </div>
 
-    <div class="flex flex-col sm:flex-row items-center gap-3 w-full max-w-md">
-      <button
-        type="button"
-        onclick="runAutoEnhance()"
-        id="autoEnhanceBtn"
-        class="w-full py-3.5 rounded-2xl btn-purple text-white text-xs sm:text-sm font-black transition-all shadow-lg hover:scale-105 active:scale-95 cursor-pointer flex items-center justify-center gap-2"
-      >
-        <span>✦</span>
-        <span>Auto Enhance Audio</span>
-      </button>
-    </div>
+    <!-- Paste URL & Fetch Card -->
+    <div class="w-full glass glass-rim rounded-3xl p-6 sm:p-8 shadow-2xl flex flex-col gap-5 border border-purple-500/20">
+      <label class="font-black text-xs sm:text-sm text-slate-900 dark:text-white uppercase tracking-wider flex items-center gap-2">
+        <span>🔗</span>
+        <span>Paste your media URL here</span>
+      </label>
 
-    <div id="autoEnhanceStatus" class="hidden text-xs font-mono text-purple-600 dark:text-purple-400 font-bold animate-pulse">
-      Analyzing audio profile and applying intelligent mastering chain...
-    </div>
-  </div>
-
-  <!-- ==================== CUSTOM MODE WORKSPACE ==================== -->
-  <div id="customModeContainer" class="flex flex-col gap-6">
-
-    <!-- 1. AUDIO TRACK CARD -->
-    <div class="glass glass-rim rounded-3xl p-5 sm:p-6 shadow-xl flex flex-col gap-4 border border-purple-500/20">
-      <div class="flex items-center justify-between border-b border-slate-200/50 dark:border-white/10 pb-2">
-        <span class="font-black text-xs uppercase tracking-wider text-purple-600 dark:text-purple-400">
-          Audio Track
-        </span>
-        <span class="text-[11px] text-slate-400 font-mono">Zero-upload: browser local</span>
-      </div>
-
-      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div class="flex items-center gap-3 min-w-0">
-          <!-- Artwork / Icon -->
-          <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-purple-600 to-indigo-600 flex items-center justify-center text-white text-xl shadow-md shrink-0">
-            🎵
-          </div>
-
-          <div class="min-w-0">
-            <div class="flex items-center gap-2 flex-wrap">
-              <h3 id="songTitle" class="font-black text-sm sm:text-base text-slate-900 dark:text-white truncate">
-                Jaadu — Darshan Raval.mp3
-              </h3>
-            </div>
-            <p id="songMeta" class="text-xs text-slate-500 dark:text-slate-400 font-mono mt-0.5">
-              MP3 | 320 kbps | 03:34
-            </p>
-          </div>
+      <div class="flex flex-col sm:flex-row gap-3">
+        <div class="relative flex-1">
+          <input
+            type="url"
+            id="quickAudioUrlInput"
+            name="quickAudioUrlInput"
+            placeholder="https://youtu.be/... or direct media stream"
+            class="w-full h-12 pl-4 pr-24 rounded-2xl glass text-xs sm:text-sm text-slate-900 dark:text-white placeholder:text-slate-400 outline-none border border-slate-200/50 dark:border-white/10 quickAudioUrlInput"
+          />
+          <button
+            type="button"
+            onclick="handlePasteClick()"
+            class="absolute right-2 top-2 bottom-2 px-3.5 rounded-xl glass hover:bg-white/20 text-xs font-bold text-slate-600 dark:text-slate-300 transition-all cursor-pointer"
+          >
+            📋 Paste
+          </button>
         </div>
 
-        <!-- Import / Replace Audio Buttons -->
-        <div class="flex items-center gap-2 shrink-0">
-          <button
-            type="button"
-            onclick="document.getElementById('audioFileInput').click()"
-            class="px-3.5 py-1.5 rounded-xl btn-purple text-white text-xs font-bold transition-all shadow-sm cursor-pointer"
-          >
-            Import Audio
-          </button>
+        <button
+          type="button"
+          onclick="fetchAudioFromUrl()"
+          id="fetchUrlBtn"
+          class="h-12 px-8 rounded-2xl btn-purple text-white text-xs sm:text-sm font-black transition-all shadow-lg hover:scale-105 active:scale-95 cursor-pointer shrink-0"
+        >
+          [FETCH]
+        </button>
+      </div>
 
+      <!-- Quick Demo & Upload Alternatives -->
+      <div class="flex items-center justify-between flex-wrap gap-3 pt-4 border-t border-slate-200/40 dark:border-white/10">
+        <div class="flex items-center gap-2">
           <button
             type="button"
             onclick="document.getElementById('audioFileInput').click()"
-            class="px-3.5 py-1.5 rounded-xl glass hover:bg-white/10 text-xs font-bold text-slate-600 dark:text-slate-300 transition-all cursor-pointer"
+            class="px-4 py-2 rounded-xl glass hover:bg-purple-500/10 text-xs font-bold text-slate-700 dark:text-slate-200 transition-all cursor-pointer"
           >
-            Replace
+            📁 + Import Song
           </button>
 
           <button
             type="button"
             onclick="toggleImportDrawer()"
-            title="Import from URL or Session History"
-            class="w-8 h-8 rounded-xl glass hover:bg-white/10 text-xs font-bold text-slate-500 flex items-center justify-center cursor-pointer"
+            class="px-4 py-2 rounded-xl glass hover:bg-purple-500/10 text-xs font-bold text-slate-700 dark:text-slate-200 transition-all cursor-pointer"
           >
-            🔗
+            ⏱ From Downloader & History
           </button>
         </div>
+
+        <button
+          type="button"
+          onclick="loadDefaultDemoTrack()"
+          class="text-xs font-bold text-purple-600 dark:text-purple-400 hover:underline cursor-pointer"
+        >
+          Load sample track: Jaadu (Darshan Raval) →
+        </button>
       </div>
 
-      <!-- A/B Comparison and Undo/Redo/Reset Toolbar -->
-      <div class="flex items-center justify-between flex-wrap gap-2 pt-2 border-t border-slate-200/40 dark:border-white/10">
-        <!-- [Original] [Processed] A/B Audition -->
-        <div class="flex items-center p-1 rounded-2xl glass">
-          <button
-            type="button"
-            id="btnOriginal"
-            onclick="setAuditionMode('dry')"
-            class="px-3 py-1 rounded-xl text-xs font-bold text-slate-500 hover:text-slate-900 dark:hover:text-white transition-all cursor-pointer"
-          >
-            Original
-          </button>
-          <button
-            type="button"
-            id="btnProcessed"
-            onclick="setAuditionMode('wet')"
-            class="px-3 py-1 rounded-xl text-xs font-bold bg-purple-600 text-white shadow-sm transition-all cursor-pointer"
-          >
-            Processed
-          </button>
-        </div>
-
-        <!-- [Undo] [Redo] [Reset] History Buttons -->
-        <div class="flex items-center gap-1.5 p-1 rounded-2xl glass">
-          <button
-            type="button"
-            id="undoBtn"
-            onclick="handleUndo()"
-            title="Undo (Ctrl+Z)"
-            class="px-2.5 py-1 rounded-xl text-xs font-bold text-slate-600 dark:text-slate-300 hover:bg-white/20 transition-all cursor-pointer"
-          >
-            Undo
-          </button>
-          <button
-            type="button"
-            id="redoBtn"
-            onclick="handleRedo()"
-            title="Redo (Ctrl+Shift+Z)"
-            class="px-2.5 py-1 rounded-xl text-xs font-bold text-slate-600 dark:text-slate-300 hover:bg-white/20 transition-all cursor-pointer"
-          >
-            Redo
-          </button>
-          <button
-            type="button"
-            onclick="handleReset()"
-            title="Reset chain back to original"
-            class="px-2.5 py-1 rounded-xl text-xs font-bold text-rose-500 hover:bg-rose-500/10 transition-all cursor-pointer"
-          >
-            Reset
-          </button>
-        </div>
-      </div>
-
-      <!-- Collapsible Import Drawer (Supporting PC, YouTube URL and History) -->
+      <!-- Collapsible Import Drawer -->
       <div id="audioImportDrawer" data-alias="audioImportDrawer" class="hidden pt-3 border-t border-slate-200/40 dark:border-white/10 flex flex-col gap-3 audioImportDrawer">
-        <div class="flex items-center justify-between">
-          <span class="text-xs font-bold text-slate-900 dark:text-white">Multi-Source Audio Import</span>
-          <button type="button" onclick="toggleImportDrawer()" class="text-xs text-slate-400 hover:text-white cursor-pointer">✕</button>
-        </div>
-
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div class="glass rounded-xl p-3 flex flex-col justify-between gap-1 border border-white/5">
             <span class="font-bold text-xs text-slate-800 dark:text-slate-200">Upload from PC</span>
@@ -196,13 +98,13 @@
               onclick="document.getElementById('audioFileInput').click()"
               class="mt-1 py-1 rounded-lg btn-purple text-white text-[11px] font-bold"
             >
-              + Import Song
+              Browse Local Audio
             </button>
           </div>
 
           <div class="glass rounded-xl p-3 flex flex-col justify-between gap-1 border border-white/5">
-            <span class="font-bold text-xs text-slate-800 dark:text-slate-200">From Downloader & History</span>
-            <p class="text-[11px] text-slate-400">Load recent downloaded or converted track</p>
+            <span class="font-bold text-xs text-slate-800 dark:text-slate-200">Session History</span>
+            <p class="text-[11px] text-slate-400">Quickly load previous audio conversion</p>
             <button
               type="button"
               onclick="loadFromHistory()"
@@ -212,66 +114,117 @@
             </button>
           </div>
         </div>
+      </div>
+    </div>
+  </div>
 
-        <!-- YouTube Link Fetch Option -->
-        <div class="flex gap-2">
-          <input
-            type="url"
-            id="quickAudioUrlInput"
-            name="quickAudioUrlInput"
-            placeholder="https://youtu.be/... or direct media stream"
-            class="flex-1 px-3 py-1.5 rounded-xl glass text-xs text-slate-900 dark:text-white placeholder:text-slate-400 outline-none border border-slate-200/50 dark:border-white/10 quickAudioUrlInput"
-          />
-          <button
-            type="button"
-            onclick="fetchAudioFromUrl()"
-            id="fetchUrlBtn"
-            class="px-4 py-1.5 rounded-xl btn-purple text-white text-xs font-bold shadow-sm shrink-0"
-          >
-            Fetch
-          </button>
-        </div>
+  <!-- Hidden File Input -->
+  <input
+    type="file"
+    id="audioFileInput"
+    name="audioFileInput"
+    accept="audio/*,video/mp4,video/webm"
+    class="hidden audioFileInput"
+    onchange="handleFileUpload(event)"
+  />
+
+  <!-- ========================================================================= -->
+  <!-- 2. FULL-WIDTH EDITING WORKSPACE (SHOWN AFTER FETCHING MEDIA)               -->
+  <!-- ========================================================================= -->
+  <div id="workspaceStateSection" class="hidden flex flex-col gap-6">
+
+    <!-- TOP HEADER: TITLE & AUTO / CUSTOM MODE TOGGLE -->
+    <div class="flex items-center justify-between flex-wrap gap-4 pt-1">
+      <div class="flex items-center gap-3">
+        <h1 class="text-xl sm:text-2xl font-black text-slate-900 dark:text-white uppercase tracking-tight">
+          AUDIO STUDIO
+        </h1>
+        <span id="activeWorkspaceModeBadge" class="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-purple-500/15 text-purple-600 dark:text-purple-400">
+          Auto Mode
+        </span>
+      </div>
+
+      <!-- AUTO | CUSTOM Mode Switcher -->
+      <div class="flex items-center p-1 rounded-2xl glass shadow-sm">
+        <button
+          type="button"
+          id="modeAutoTabBtn"
+          onclick="setWorkspaceMode('auto')"
+          class="px-5 py-2 rounded-xl text-xs font-black transition-all cursor-pointer bg-purple-600 text-white shadow-sm flex items-center gap-1.5"
+        >
+          <span>✦</span>
+          <span>AUTO</span>
+        </button>
+
+        <button
+          type="button"
+          id="modeCustomTabBtn"
+          onclick="setWorkspaceMode('custom')"
+          class="px-5 py-2 rounded-xl text-xs font-bold text-slate-500 hover:text-slate-900 dark:hover:text-white transition-all cursor-pointer flex items-center gap-1.5"
+        >
+          <span>🎛</span>
+          <span>CUSTOM</span>
+        </button>
       </div>
     </div>
 
-    <!-- Hidden file input for browser file upload -->
-    <input
-      type="file"
-      id="audioFileInput"
-      name="audioFileInput"
-      accept="audio/*,video/mp4,video/webm"
-      class="hidden audioFileInput"
-      onchange="handleFileUpload(event)"
-    />
+    <!-- COMPACT MEDIA INFORMATION BAR (URL Input is removed; Replace Source provided) -->
+    <div class="glass glass-rim rounded-2xl p-4 sm:p-5 shadow-lg flex flex-col sm:flex-row sm:items-center justify-between gap-4 border border-purple-500/20">
+      <div class="flex items-center gap-3.5 min-w-0">
+        <div id="workspaceThumbnail" class="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-600 to-indigo-600 flex items-center justify-center text-white text-xl shadow-md shrink-0 overflow-hidden">
+          🎵
+        </div>
 
-    <!-- 2. AUDIO PLAYER SECTION -->
+        <div class="min-w-0">
+          <div class="text-[10px] font-black uppercase tracking-wider text-purple-600 dark:text-purple-400">
+            Audio Track
+          </div>
+          <h2 id="workspaceSongTitle" class="font-black text-sm sm:text-base text-slate-900 dark:text-white truncate">
+            Jaadu — Darshan Raval.mp3
+          </h2>
+          <p id="workspaceSongMeta" class="text-xs text-slate-500 dark:text-slate-400 font-mono mt-0.5">
+            MP3 · 320 kbps · 04:32
+          </p>
+        </div>
+      </div>
+
+      <button
+        type="button"
+        onclick="openReplaceSourceModal()"
+        class="px-4 py-2 rounded-xl glass hover:bg-purple-500/15 text-purple-600 dark:text-purple-300 text-xs font-bold transition-all cursor-pointer shadow-sm shrink-0 flex items-center gap-1.5"
+      >
+        <span>🔄</span>
+        <span>[REPLACE SOURCE]</span>
+      </button>
+    </div>
+
+    <!-- FULL-WIDTH AUDIO PLAYER & WAVEFORM -->
     <div class="glass glass-rim rounded-3xl p-5 sm:p-6 shadow-xl flex flex-col gap-4 border border-purple-500/20">
       <div class="flex items-center justify-between border-b border-slate-200/50 dark:border-white/10 pb-2">
         <span class="font-black text-xs uppercase tracking-wider text-purple-600 dark:text-purple-400">
-          Audio Player
+          Audio Player &amp; Waveform
         </span>
         <span id="playerAuditionTag" class="text-[11px] font-mono text-purple-400 font-bold">
-          Auditioning: Processed
+          Auditioning: Effects
         </span>
       </div>
 
-      <!-- Large Waveform Display Container -->
+      <!-- Waveform Canvas -->
       <div
         id="waveformDisplayBox"
         onclick="handleScrubberSeek(event)"
-        class="relative w-full h-28 rounded-2xl bg-slate-950/70 p-2 flex items-center cursor-pointer overflow-hidden border border-white/10 select-none group"
+        class="relative w-full h-24 sm:h-28 rounded-2xl bg-slate-950/70 p-2 flex items-center cursor-pointer overflow-hidden border border-white/10 select-none group"
       >
         <div id="waveformBigBars" class="w-full h-full flex items-center gap-0.5 sm:gap-1 px-2">
-          <!-- 64 high-contrast bars rendered via JS -->
+          <!-- 64 bars rendered via JS -->
         </div>
 
         <div id="waveformPlayhead" class="absolute top-0 bottom-0 left-0 w-1 bg-gradient-to-b from-purple-400 to-indigo-400 pointer-events-none shadow-[0_0_10px_rgba(168,85,247,0.8)] z-20"></div>
         <div id="waveformProgressFill" class="absolute top-0 bottom-0 left-0 bg-purple-500/20 pointer-events-none w-0 transition-all"></div>
       </div>
 
-      <!-- Scrubber & Transport Timeline: ▶ 01:25 ━━━━━━━━━━━━━━━━━━━ 04:32 -->
+      <!-- Scrubber & Transport: ▶  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━  01:25 -->
       <div class="flex items-center gap-4">
-        <!-- Play / Pause -->
         <button
           type="button"
           id="playPauseBtn"
@@ -285,7 +238,6 @@
           00:00
         </span>
 
-        <!-- Scrubber Bar Track -->
         <div
           id="timelineScrubber"
           onclick="handleScrubberSeek(event)"
@@ -295,287 +247,332 @@
         </div>
 
         <span id="timecodeTotal" class="font-mono text-xs font-black text-slate-500 dark:text-slate-400 w-12 text-right shrink-0">
-          03:34
+          04:32
         </span>
       </div>
     </div>
 
-    <!-- 3. YOUR EFFECT CHAIN (MODULAR RACK) -->
-    <div class="glass glass-rim rounded-3xl p-5 sm:p-6 shadow-xl flex flex-col gap-4 border border-purple-500/20">
-      <div class="flex items-center justify-between border-b border-slate-200/50 dark:border-white/10 pb-3">
+    <!-- ========================================================================= -->
+    <!-- 3. AUTO MODE CONTAINER (USER SELECTS EFFECTS, CLIPGLASS CHOOSES SETTINGS)  -->
+    <!-- ========================================================================= -->
+    <div id="autoModeContainer" class="flex flex-col gap-6">
+
+      <!-- Header & Auto Intensity Selector -->
+      <div class="glass glass-rim rounded-3xl p-5 sm:p-6 shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-4 border border-purple-500/20">
         <div>
+          <h2 class="text-base sm:text-lg font-black text-slate-900 dark:text-white uppercase tracking-tight">
+            AUTO MODE
+          </h2>
+          <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-0.5">
+            Choose the sound you want. We'll handle the settings.
+          </p>
+        </div>
+
+        <!-- Optional Intensity Selector: Subtle | Balanced | Strong -->
+        <div class="flex items-center gap-2">
+          <span class="text-xs font-bold text-slate-500">Intensity:</span>
+          <div class="flex items-center p-1 rounded-2xl glass">
+            <button
+              type="button"
+              onclick="setAutoIntensity('subtle')"
+              id="intensitySubtleBtn"
+              class="px-3 py-1 rounded-xl text-xs font-bold text-slate-500 hover:text-white transition-all cursor-pointer"
+            >
+              Subtle
+            </button>
+            <button
+              type="button"
+              onclick="setAutoIntensity('balanced')"
+              id="intensityBalancedBtn"
+              class="px-3 py-1 rounded-xl text-xs font-black bg-purple-600 text-white shadow-sm transition-all cursor-pointer"
+            >
+              Balanced
+            </button>
+            <button
+              type="button"
+              onclick="setAutoIntensity('strong')"
+              id="intensityStrongBtn"
+              class="px-3 py-1 rounded-xl text-xs font-bold text-slate-500 hover:text-white transition-all cursor-pointer"
+            >
+              Strong
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Search & Category Filters -->
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div class="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none">
+          <button type="button" onclick="setAutoCategoryFilter('all')" class="auto-cat-pill active px-3.5 py-1.5 rounded-full text-xs font-black transition-all cursor-pointer shrink-0 bg-purple-600 text-white shadow-sm" data-category="all">All</button>
+          <button type="button" onclick="setAutoCategoryFilter('space')" class="auto-cat-pill px-3.5 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer shrink-0 glass text-slate-600 dark:text-slate-300 hover:text-white" data-category="space">Space</button>
+          <button type="button" onclick="setAutoCategoryFilter('modulation')" class="auto-cat-pill px-3.5 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer shrink-0 glass text-slate-600 dark:text-slate-300 hover:text-white" data-category="modulation">Modulation</button>
+          <button type="button" onclick="setAutoCategoryFilter('eq')" class="auto-cat-pill px-3.5 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer shrink-0 glass text-slate-600 dark:text-slate-300 hover:text-white" data-category="eq">EQ</button>
+          <button type="button" onclick="setAutoCategoryFilter('dynamics')" class="auto-cat-pill px-3.5 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer shrink-0 glass text-slate-600 dark:text-slate-300 hover:text-white" data-category="dynamics">Dynamics</button>
+          <button type="button" onclick="setAutoCategoryFilter('creative')" class="auto-cat-pill px-3.5 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer shrink-0 glass text-slate-600 dark:text-slate-300 hover:text-white" data-category="creative">Creative</button>
+          <button type="button" onclick="setAutoCategoryFilter('stereo')" class="auto-cat-pill px-3.5 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer shrink-0 glass text-slate-600 dark:text-slate-300 hover:text-white" data-category="stereo">Stereo</button>
+          <button type="button" onclick="setAutoCategoryFilter('voice')" class="auto-cat-pill px-3.5 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer shrink-0 glass text-slate-600 dark:text-slate-300 hover:text-white" data-category="voice">Voice</button>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <div class="relative w-full sm:w-60">
+            <span class="absolute left-3 top-2 text-slate-400 text-xs">🔍</span>
+            <input
+              type="text"
+              id="autoSearchInput"
+              oninput="handleAutoSearch(this.value)"
+              placeholder="Search effects..."
+              class="w-full pl-8 pr-3 py-1.5 rounded-xl glass text-xs text-slate-900 dark:text-white placeholder:text-slate-400 outline-none border border-slate-200/50 dark:border-white/10"
+            />
+          </div>
+          <span class="px-3 py-1 rounded-xl bg-purple-500/15 text-purple-600 dark:text-purple-300 text-xs font-black font-mono shrink-0">
+            60+ EFFECTS
+          </span>
+        </div>
+      </div>
+
+      <!-- SELECT YOUR EFFECTS GRID (Selection Cards) -->
+      <div id="autoEffectsGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 sm:gap-4">
+        <!-- Rendered via renderAutoEffectsGrid() -->
+      </div>
+
+      <!-- AUTO MODE BOTTOM BAR: SELECTED LIST & ACTIONS -->
+      <div class="sticky bottom-4 z-30 glass glass-rim rounded-3xl p-4 sm:p-5 shadow-2xl flex flex-col md:flex-row md:items-center justify-between gap-4 border border-purple-500/30">
+        <div class="flex items-center gap-2 flex-wrap min-w-0">
+          <span class="text-xs font-black uppercase text-purple-600 dark:text-purple-400 shrink-0">
+            SELECTED:
+          </span>
+          <div id="autoSelectedChipsList" class="flex items-center gap-1.5 flex-wrap">
+            <!-- Rendered via JS -->
+          </div>
+        </div>
+
+        <div class="flex items-center gap-2.5 shrink-0">
+          <button
+            type="button"
+            onclick="setAuditionMode('dry')"
+            id="autoPreviewOriginalBtn"
+            class="px-4 py-2.5 rounded-2xl glass hover:bg-white/10 text-xs font-bold text-slate-600 dark:text-slate-300 transition-all cursor-pointer"
+          >
+            [Preview Original]
+          </button>
+
+          <button
+            type="button"
+            onclick="setAuditionMode('wet'); if(!window.studioEngine.isPlaying) window.studioEngine.play();"
+            id="autoPreviewEffectsBtn"
+            class="px-4 py-2.5 rounded-2xl glass hover:bg-purple-500/20 text-xs font-bold text-purple-600 dark:text-purple-300 transition-all cursor-pointer"
+          >
+            [Preview Effects]
+          </button>
+
+          <button
+            type="button"
+            onclick="startProcessingAndDownload()"
+            class="px-6 py-2.5 rounded-2xl btn-purple text-white text-xs sm:text-sm font-black transition-all shadow-lg hover:scale-105 active:scale-95 cursor-pointer flex items-center gap-1.5"
+          >
+            <span>[DOWNLOAD AUDIO]</span>
+            <span class="hidden sm:inline">Download Audio</span>
+          </button>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ========================================================================= -->
+    <!-- 4. CUSTOM MODE CONTAINER (FULL MANUAL CONFIGURATION)                       -->
+    <!-- ========================================================================= -->
+    <div id="customModeContainer" class="hidden flex flex-col gap-6">
+
+      <!-- Header & Chain Toolbar -->
+      <div class="glass glass-rim rounded-3xl p-5 sm:p-6 shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-4 border border-purple-500/20">
+        <div>
+          <h2 class="text-base sm:text-lg font-black text-slate-900 dark:text-white uppercase tracking-tight">
+            CUSTOM MODE
+          </h2>
+          <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-0.5">
+            Build your own sound with complete effect control. Quick Presets and custom rack chains.
+          </p>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <span class="text-xs font-bold text-slate-400 hidden lg:inline">Quick Presets</span>
+          <button
+            type="button"
+            onclick="handleCustomUndo()"
+            class="px-3 py-1.5 rounded-xl glass hover:bg-white/10 text-xs font-bold text-slate-600 dark:text-slate-300 cursor-pointer"
+          >
+            Undo
+          </button>
+          <button
+            type="button"
+            onclick="handleCustomRedo()"
+            class="px-3 py-1.5 rounded-xl glass hover:bg-white/10 text-xs font-bold text-slate-600 dark:text-slate-300 cursor-pointer"
+          >
+            Redo
+          </button>
+          <button
+            type="button"
+            onclick="scrollToCustomLibrary()"
+            class="px-4 py-1.5 rounded-xl btn-purple text-white text-xs font-black transition-all shadow-sm cursor-pointer flex items-center gap-1.5"
+          >
+            <span>+</span>
+            <span>Add Effect</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- YOUR EFFECT CHAIN (MODULAR RACK WITH INLINE SLIDERS) -->
+      <div class="glass glass-rim rounded-3xl p-5 sm:p-6 shadow-xl flex flex-col gap-4 border border-purple-500/20">
+        <div class="flex items-center justify-between border-b border-slate-200/50 dark:border-white/10 pb-2.5">
           <div class="flex items-center gap-2">
-            <h2 class="text-base sm:text-lg font-black text-slate-900 dark:text-white uppercase tracking-tight">
-              Your Effect Chain
-            </h2>
-            <span id="effectsCountBadge" class="text-[11px] font-mono px-2 py-0.5 rounded-full bg-purple-500/15 text-purple-600 dark:text-purple-400 font-bold">
+            <span class="font-black text-xs uppercase tracking-wider text-purple-600 dark:text-purple-400">
+              YOUR EFFECT CHAIN &bull; Your Effect Chain
+            </span>
+            <span id="customRackCountBadge" class="text-[11px] font-mono px-2 py-0.5 rounded-full bg-purple-500/15 text-purple-600 dark:text-purple-400 font-bold">
               3
             </span>
           </div>
-          <p id="effectsAppliedSubtitle" class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-            Effects currently applied: 3
-          </p>
+          <div class="flex items-center gap-2">
+            <span class="text-[11px] text-slate-400 font-bold hidden sm:inline">Export Settings</span>
+            <span class="text-[11px] text-slate-400 italic">Drag cards to reorder processing chain</span>
+          </div>
         </div>
 
-        <button
-          type="button"
-          onclick="scrollToLibrary()"
-          class="px-4 py-1.5 rounded-xl btn-purple text-white text-xs font-bold transition-all shadow-sm cursor-pointer flex items-center gap-1.5"
-        >
-          <span>+</span>
-          <span>Add Effect</span>
-        </button>
-      </div>
-
-      <!-- Modular Rack Cards Stack -->
-      <div id="rackChainContainer" class="flex flex-col gap-2.5">
-        <!-- Populated via renderRackChain() with inline intensity sliders -->
-      </div>
-
-      <p class="text-[11px] text-slate-400 italic text-center mt-1">
-        Drag effects to change processing order.
-      </p>
-    </div>
-
-    <!-- 4. QUICK PRESETS BAR (SECTION 4) -->
-    <div class="glass glass-rim rounded-3xl p-5 sm:p-6 shadow-xl flex flex-col gap-3 border border-purple-500/20">
-      <span class="font-black text-xs uppercase tracking-wider text-purple-600 dark:text-purple-400">
-        Quick Presets
-      </span>
-
-      <div class="flex items-center gap-2 flex-wrap">
-        <button
-          type="button"
-          onclick="applyQuickPreset('clean_audio')"
-          class="px-3.5 py-1.5 rounded-xl glass hover:bg-purple-500/20 text-xs font-bold text-slate-700 dark:text-slate-200 transition-all cursor-pointer shadow-sm border border-slate-200/40 dark:border-white/5"
-        >
-          [Clean Audio]
-        </button>
-        <button
-          type="button"
-          onclick="applyQuickPreset('deep_bass')"
-          class="px-3.5 py-1.5 rounded-xl glass hover:bg-purple-500/20 text-xs font-bold text-slate-700 dark:text-slate-200 transition-all cursor-pointer shadow-sm border border-slate-200/40 dark:border-white/5"
-        >
-          [Deep Bass]
-        </button>
-        <button
-          type="button"
-          onclick="applyQuickPreset('dreamy_reverb')"
-          class="px-3.5 py-1.5 rounded-xl glass hover:bg-purple-500/20 text-xs font-bold text-slate-700 dark:text-slate-200 transition-all cursor-pointer shadow-sm border border-slate-200/40 dark:border-white/5"
-        >
-          [Dreamy Reverb]
-        </button>
-        <button
-          type="button"
-          onclick="applyQuickPreset('club_music')"
-          class="px-3.5 py-1.5 rounded-xl glass hover:bg-purple-500/20 text-xs font-bold text-slate-700 dark:text-slate-200 transition-all cursor-pointer shadow-sm border border-slate-200/40 dark:border-white/5"
-        >
-          [Club Music]
-        </button>
-        <button
-          type="button"
-          onclick="applyQuickPreset('podcast')"
-          class="px-3.5 py-1.5 rounded-xl glass hover:bg-purple-500/20 text-xs font-bold text-slate-700 dark:text-slate-200 transition-all cursor-pointer shadow-sm border border-slate-200/40 dark:border-white/5"
-        >
-          [Podcast]
-        </button>
-        <button
-          type="button"
-          onclick="applyQuickPreset('vintage')"
-          class="px-3.5 py-1.5 rounded-xl glass hover:bg-purple-500/20 text-xs font-bold text-slate-700 dark:text-slate-200 transition-all cursor-pointer shadow-sm border border-slate-200/40 dark:border-white/5"
-        >
-          [Vintage]
-        </button>
-
-        <button
-          type="button"
-          onclick="saveCurrentAsCustomPreset()"
-          class="px-3.5 py-1.5 rounded-xl bg-purple-600/20 hover:bg-purple-600/30 text-purple-600 dark:text-purple-300 text-xs font-black transition-all cursor-pointer shadow-sm border border-purple-500/30"
-        >
-          [Save My Preset]
-        </button>
-      </div>
-
-      <!-- User Saved Custom Presets Row -->
-      <div id="userCustomPresetsRow" class="hidden flex items-center gap-2 flex-wrap pt-2 border-t border-slate-200/40 dark:border-white/10">
-        <!-- Rendered if user saves presets -->
-      </div>
-    </div>
-
-    <!-- 5. EFFECT LIBRARY (SECTION 3) -->
-    <div id="effectLibrarySection" class="glass glass-rim rounded-3xl p-5 sm:p-6 shadow-xl flex flex-col gap-4 border border-purple-500/20">
-      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200/50 dark:border-white/10 pb-3">
-        <div>
-          <h2 class="text-base sm:text-lg font-black text-slate-900 dark:text-white uppercase tracking-tight">
-            Effect Library
-          </h2>
-          <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-            Choose from 60+ creative effects across all 7 categories
-          </p>
-        </div>
-
-        <!-- Search Bar -->
-        <div class="relative w-full sm:w-60">
-          <span class="absolute left-3 top-2.5 text-slate-400 text-xs">🔍</span>
-          <input
-            type="text"
-            id="effectSearchInput"
-            oninput="handleSearchEffects(this.value)"
-            placeholder="Search effects..."
-            class="w-full pl-8 pr-3 py-1.5 rounded-xl glass text-xs text-slate-900 dark:text-white placeholder:text-slate-400 outline-none border border-slate-200/50 dark:border-white/10"
-          />
+        <div id="customModularRack" class="flex flex-col gap-3">
+          <!-- Populated via renderCustomModularRack() -->
         </div>
       </div>
 
-      <!-- Category Filter Pills: All | Space | Modulation | EQ | Dynamics | Creative -->
-      <div class="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none">
-        <button
-          type="button"
-          onclick="setCategoryFilter('all')"
-          class="cat-pill active px-3 py-1 rounded-full text-xs font-bold transition-all cursor-pointer shrink-0 bg-purple-600 text-white shadow-sm"
-          data-category="all"
-        >
-          All
-        </button>
-        <button
-          type="button"
-          onclick="setCategoryFilter('space')"
-          class="cat-pill px-3 py-1 rounded-full text-xs font-bold transition-all cursor-pointer shrink-0 glass text-slate-600 dark:text-slate-300 hover:text-white"
-          data-category="space"
-        >
-          Space
-        </button>
-        <button
-          type="button"
-          onclick="setCategoryFilter('modulation')"
-          class="cat-pill px-3 py-1 rounded-full text-xs font-bold transition-all cursor-pointer shrink-0 glass text-slate-600 dark:text-slate-300 hover:text-white"
-          data-category="modulation"
-        >
-          Modulation
-        </button>
-        <button
-          type="button"
-          onclick="setCategoryFilter('eq')"
-          class="cat-pill px-3 py-1 rounded-full text-xs font-bold transition-all cursor-pointer shrink-0 glass text-slate-600 dark:text-slate-300 hover:text-white"
-          data-category="eq"
-        >
-          EQ
-        </button>
-        <button
-          type="button"
-          onclick="setCategoryFilter('dynamics')"
-          class="cat-pill px-3 py-1 rounded-full text-xs font-bold transition-all cursor-pointer shrink-0 glass text-slate-600 dark:text-slate-300 hover:text-white"
-          data-category="dynamics"
-        >
-          Dynamics
-        </button>
-        <button
-          type="button"
-          onclick="setCategoryFilter('creative')"
-          class="cat-pill px-3 py-1 rounded-full text-xs font-bold transition-all cursor-pointer shrink-0 glass text-slate-600 dark:text-slate-300 hover:text-white"
-          data-category="creative"
-        >
-          Creative
-        </button>
-        <button
-          type="button"
-          onclick="setCategoryFilter('stereo')"
-          class="cat-pill px-3 py-1 rounded-full text-xs font-bold transition-all cursor-pointer shrink-0 glass text-slate-600 dark:text-slate-300 hover:text-white"
-          data-category="stereo"
-        >
-          Stereo
-        </button>
-        <button
-          type="button"
-          onclick="setCategoryFilter('voice')"
-          class="cat-pill px-3 py-1 rounded-full text-xs font-bold transition-all cursor-pointer shrink-0 glass text-slate-600 dark:text-slate-300 hover:text-white"
-          data-category="voice"
-        >
-          Voice
-        </button>
-      </div>
+      <!-- EFFECT LIBRARY IN CUSTOM MODE -->
+      <div id="customLibrarySection" class="glass glass-rim rounded-3xl p-5 sm:p-6 shadow-xl flex flex-col gap-4 border border-purple-500/20">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200/50 dark:border-white/10 pb-3">
+          <div>
+            <h3 class="text-sm sm:text-base font-black text-slate-900 dark:text-white uppercase tracking-tight">
+              EFFECT LIBRARY &bull; Effect Library
+            </h3>
+            <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+              Click any effect to append it to your custom rack
+            </p>
+          </div>
 
-      <!-- Effects Library Responsive Cards Grid -->
-      <div id="libraryCardsGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-        <!-- Rendered via JS -->
-      </div>
-
-      <div class="flex justify-center pt-2">
-        <button
-          type="button"
-          id="viewAllEffectsBtn"
-          onclick="toggleViewAllEffects()"
-          class="px-5 py-2 rounded-2xl glass hover:bg-white/10 text-xs font-bold text-slate-600 dark:text-slate-300 transition-all cursor-pointer shadow-sm"
-        >
-          [View All Effects]
-        </button>
-      </div>
-    </div>
-
-    <!-- 6. EXPORT SETTINGS SECTION -->
-    <div class="glass glass-rim rounded-3xl p-5 sm:p-6 shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-5 border border-purple-500/20">
-      <div class="flex flex-col sm:flex-row items-start sm:items-center gap-5">
-        <div>
-          <h2 class="text-base font-black text-slate-900 dark:text-white uppercase tracking-tight">
-            Export Settings
-          </h2>
-          <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-            Render and download processed audio
-          </p>
+          <div class="relative w-full sm:w-60">
+            <span class="absolute left-3 top-2 text-slate-400 text-xs">🔍</span>
+            <input
+              type="text"
+              id="customSearchInput"
+              oninput="handleCustomSearch(this.value)"
+              placeholder="Search effects..."
+              class="w-full pl-8 pr-3 py-1.5 rounded-xl glass text-xs text-slate-900 dark:text-white placeholder:text-slate-400 outline-none border border-slate-200/50 dark:border-white/10"
+            />
+          </div>
         </div>
 
+        <!-- Custom Category Filter Pills -->
+        <div class="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none">
+          <button type="button" onclick="setCustomCategoryFilter('all')" class="custom-cat-pill active px-3 py-1 rounded-full text-xs font-black transition-all cursor-pointer shrink-0 bg-purple-600 text-white shadow-sm" data-category="all">All</button>
+          <button type="button" onclick="setCustomCategoryFilter('space')" class="custom-cat-pill px-3 py-1 rounded-full text-xs font-bold transition-all cursor-pointer shrink-0 glass text-slate-600 dark:text-slate-300 hover:text-white" data-category="space">Space</button>
+          <button type="button" onclick="setCustomCategoryFilter('modulation')" class="custom-cat-pill px-3 py-1 rounded-full text-xs font-bold transition-all cursor-pointer shrink-0 glass text-slate-600 dark:text-slate-300 hover:text-white" data-category="modulation">Modulation</button>
+          <button type="button" onclick="setCustomCategoryFilter('eq')" class="custom-cat-pill px-3 py-1 rounded-full text-xs font-bold transition-all cursor-pointer shrink-0 glass text-slate-600 dark:text-slate-300 hover:text-white" data-category="eq">EQ</button>
+          <button type="button" onclick="setCustomCategoryFilter('dynamics')" class="custom-cat-pill px-3 py-1 rounded-full text-xs font-bold transition-all cursor-pointer shrink-0 glass text-slate-600 dark:text-slate-300 hover:text-white" data-category="dynamics">Dynamics</button>
+          <button type="button" onclick="setCustomCategoryFilter('creative')" class="custom-cat-pill px-3 py-1 rounded-full text-xs font-bold transition-all cursor-pointer shrink-0 glass text-slate-600 dark:text-slate-300 hover:text-white" data-category="creative">Creative</button>
+          <button type="button" onclick="setCustomCategoryFilter('stereo')" class="custom-cat-pill px-3 py-1 rounded-full text-xs font-bold transition-all cursor-pointer shrink-0 glass text-slate-600 dark:text-slate-300 hover:text-white" data-category="stereo">Stereo</button>
+          <button type="button" onclick="setCustomCategoryFilter('voice')" class="custom-cat-pill px-3 py-1 rounded-full text-xs font-bold transition-all cursor-pointer shrink-0 glass text-slate-600 dark:text-slate-300 hover:text-white" data-category="voice">Voice</button>
+        </div>
+
+        <!-- Custom Library Grid -->
+        <div id="customLibraryGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2.5">
+          <!-- Rendered via renderCustomLibraryGrid() -->
+        </div>
+      </div>
+
+      <!-- CUSTOM MODE EXPORT BAR -->
+      <div class="glass glass-rim rounded-3xl p-5 sm:p-6 shadow-xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 border border-purple-500/20">
         <div class="flex items-center gap-3">
-          <!-- Format -->
-          <div class="flex items-center gap-1.5">
-            <span class="text-xs font-bold text-slate-500">Format:</span>
-            <select id="exportFormatSelect" class="px-2.5 py-1 rounded-xl glass text-xs font-bold text-slate-900 dark:text-white border border-slate-200/50 dark:border-white/10 outline-none cursor-pointer">
-              <option value="mp3">MP3</option>
-              <option value="wav">WAV</option>
-              <option value="flac">FLAC</option>
-              <option value="m4a">M4A</option>
-            </select>
-          </div>
-
-          <!-- Quality -->
-          <div class="flex items-center gap-1.5">
-            <span class="text-xs font-bold text-slate-500">Quality:</span>
-            <select id="exportBitrateSelect" class="px-2.5 py-1 rounded-xl glass text-xs font-bold text-slate-900 dark:text-white border border-slate-200/50 dark:border-white/10 outline-none cursor-pointer">
-              <option value="320">320 kbps</option>
-              <option value="256">256 kbps</option>
-              <option value="192">192 kbps</option>
-              <option value="128">128 kbps</option>
-            </select>
-          </div>
+          <button
+            type="button"
+            onclick="setAuditionMode('wet'); if(!window.studioEngine.isPlaying) window.studioEngine.play();"
+            class="px-4 py-2.5 rounded-2xl glass hover:bg-purple-500/20 text-xs font-bold text-purple-600 dark:text-purple-300 transition-all cursor-pointer"
+          >
+            [Preview]
+          </button>
+          <button
+            type="button"
+            onclick="handleCustomReset()"
+            class="px-4 py-2.5 rounded-2xl glass hover:bg-rose-500/10 text-xs font-bold text-rose-500 transition-all cursor-pointer"
+          >
+            [Reset]
+          </button>
         </div>
-      </div>
-
-      <!-- Action Buttons -->
-      <div class="flex items-center gap-2.5">
-        <button
-          type="button"
-          onclick="previewAudioAction()"
-          class="px-4 py-2.5 rounded-2xl glass hover:bg-purple-500/15 text-xs font-bold text-purple-600 dark:text-purple-400 transition-all cursor-pointer shadow-sm"
-        >
-          [Preview Audio]
-        </button>
 
         <button
           type="button"
           onclick="startProcessingAndDownload()"
-          class="px-5 py-2.5 rounded-2xl btn-purple text-white text-xs font-black transition-all shadow-md hover:scale-105 active:scale-95 cursor-pointer"
+          class="px-6 py-3 rounded-2xl btn-purple text-white text-xs sm:text-sm font-black transition-all shadow-lg hover:scale-105 active:scale-95 cursor-pointer"
         >
-          [Download Audio]
+          [DOWNLOAD PROCESSED AUDIO]
+        </button>
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+
+<!-- ========================================================================= -->
+<!-- REPLACE SOURCE DIALOG MODAL                                               -->
+<!-- ========================================================================= -->
+<div id="replaceSourceModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/75 backdrop-blur-md">
+  <div class="glass glass-rim rounded-3xl p-6 sm:p-7 w-full max-w-lg shadow-2xl border border-purple-500/30 flex flex-col gap-4">
+    <div class="flex items-center justify-between border-b border-slate-200/50 dark:border-white/10 pb-2.5">
+      <h3 class="font-black text-sm sm:text-base text-slate-900 dark:text-white uppercase tracking-wide">
+        Replace Audio Source
+      </h3>
+      <button type="button" onclick="closeReplaceSourceModal()" class="w-7 h-7 rounded-full glass hover:bg-white/20 text-xs font-bold text-slate-400 hover:text-white flex items-center justify-center cursor-pointer">
+        ✕
+      </button>
+    </div>
+
+    <div class="flex flex-col gap-2">
+      <label class="text-xs font-bold text-slate-700 dark:text-slate-300">Enter new YouTube or media link:</label>
+      <div class="flex gap-2">
+        <input
+          type="url"
+          id="replaceUrlInput"
+          placeholder="https://youtu.be/... or audio URL"
+          class="flex-1 px-3 py-2 rounded-xl glass text-xs text-slate-900 dark:text-white placeholder:text-slate-400 outline-none border border-slate-200/50 dark:border-white/10"
+        />
+        <button
+          type="button"
+          onclick="handleReplaceFromUrl()"
+          class="px-4 py-2 rounded-xl btn-purple text-white text-xs font-bold shrink-0"
+        >
+          Fetch
         </button>
       </div>
     </div>
 
+    <div class="flex items-center gap-3 my-1">
+      <div class="flex-1 h-px bg-slate-200/40 dark:border-white/10"></div>
+      <span class="text-[10px] font-bold text-slate-400 uppercase">OR</span>
+      <div class="flex-1 h-px bg-slate-200/40 dark:border-white/10"></div>
+    </div>
+
+    <button
+      type="button"
+      onclick="closeReplaceSourceModal(); document.getElementById('audioFileInput').click();"
+      class="w-full py-2.5 rounded-xl glass hover:bg-white/15 text-xs font-bold text-slate-800 dark:text-slate-200 transition-all cursor-pointer text-center"
+    >
+      Upload Audio File from PC
+    </button>
   </div>
 </div>
 
-<!-- ==================== EFFECT SETTINGS POPUP MODAL (SECTION 2) ==================== -->
+<!-- ========================================================================= -->
+<!-- EFFECT SETTINGS POPUP MODAL (CUSTOM MODE)                                 -->
+<!-- ========================================================================= -->
 <div id="effectSettingsModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-sm">
   <div class="glass glass-rim rounded-3xl p-6 sm:p-7 w-full max-w-sm shadow-2xl border border-purple-500/30 flex flex-col gap-4">
-    <!-- Header: REVERB SETTINGS [X] -->
     <div class="flex items-center justify-between border-b border-slate-200/50 dark:border-white/10 pb-2.5">
       <div class="flex items-center gap-2">
         <span id="modalEffectIcon" class="text-lg">〰</span>
@@ -583,16 +580,11 @@
           REVERB SETTINGS
         </h3>
       </div>
-      <button
-        type="button"
-        onclick="closeEffectSettings()"
-        class="w-7 h-7 rounded-full glass hover:bg-white/20 text-xs font-bold text-slate-400 hover:text-white flex items-center justify-center cursor-pointer"
-      >
+      <button type="button" onclick="closeEffectSettings()" class="w-7 h-7 rounded-full glass hover:bg-white/20 text-xs font-bold text-slate-400 hover:text-white flex items-center justify-center cursor-pointer">
         [X]
       </button>
     </div>
 
-    <!-- Effect Preset Selector: [Small Room ▼] -->
     <div id="modalPresetSection" class="flex flex-col gap-1">
       <label class="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Preset</label>
       <select
@@ -600,36 +592,26 @@
         onchange="handlePresetSelect(this.value)"
         class="w-full px-3 py-1.5 rounded-xl glass text-xs font-bold text-slate-900 dark:text-white border border-slate-200/50 dark:border-white/10 outline-none cursor-pointer"
       >
-        <!-- Populated via JS -->
       </select>
     </div>
 
-    <!-- Sliders with Live Values -->
     <div id="modalControlsContainer" class="flex flex-col gap-3.5 max-h-[50vh] overflow-y-auto pr-1">
-      <!-- Populated dynamically via JS -->
     </div>
 
-    <!-- Actions: [Reset] [Apply Changes] -->
     <div class="flex items-center justify-between pt-3 border-t border-slate-200/50 dark:border-white/10">
-      <button
-        type="button"
-        onclick="resetEffectSettings()"
-        class="px-3.5 py-1.5 rounded-xl text-xs font-bold text-rose-500 hover:bg-rose-500/10 transition-all cursor-pointer"
-      >
+      <button type="button" onclick="resetEffectSettings()" class="px-3.5 py-1.5 rounded-xl text-xs font-bold text-rose-500 hover:bg-rose-500/10 cursor-pointer">
         [Reset]
       </button>
-      <button
-        type="button"
-        onclick="applyEffectSettings()"
-        class="px-4 py-1.5 rounded-xl btn-purple text-white text-xs font-bold transition-all shadow-md cursor-pointer"
-      >
+      <button type="button" onclick="applyEffectSettings()" class="px-4 py-1.5 rounded-xl btn-purple text-white text-xs font-bold cursor-pointer">
         [Apply Changes]
       </button>
     </div>
   </div>
 </div>
 
-<!-- ==================== PROCESSING MODAL (SECTION 5) ==================== -->
+<!-- ========================================================================= -->
+<!-- PROCESSING & DOWNLOAD MODALS                                              -->
+<!-- ========================================================================= -->
 <div id="processingModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md">
   <div class="glass glass-rim rounded-3xl p-7 w-full max-w-sm shadow-2xl border border-purple-500/30 flex flex-col items-center text-center gap-4">
     <h3 class="font-black text-base sm:text-lg text-slate-900 dark:text-white uppercase tracking-wider">
@@ -640,27 +622,19 @@
       68%
     </div>
 
-    <!-- Step Checklist: Applying Reverb, Applying Echo, Applying Bass Boost -->
     <div id="processingStepsList" class="flex flex-col gap-1 w-full text-xs text-center text-slate-300">
-      <!-- Rendered dynamically -->
     </div>
 
-    <!-- Progress Bar: ━━━━━━━━━━━━━━━━━━━ -->
     <div class="w-full h-2.5 rounded-full bg-slate-800 overflow-hidden p-0.5 border border-white/10 my-1">
       <div id="processingProgressBar" class="h-full bg-gradient-to-r from-purple-500 to-indigo-500 rounded-full transition-all duration-150 w-0"></div>
     </div>
 
-    <button
-      type="button"
-      onclick="cancelProcessing()"
-      class="px-4 py-1.5 rounded-xl glass hover:bg-white/10 text-xs font-bold text-slate-400 hover:text-white transition-all cursor-pointer"
-    >
+    <button type="button" onclick="cancelProcessing()" class="px-4 py-1.5 rounded-xl glass hover:bg-white/10 text-xs font-bold text-slate-400 hover:text-white cursor-pointer">
       [Cancel]
     </button>
   </div>
 </div>
 
-<!-- ==================== COMPLETED AUDIO PROCESSED MODAL (SECTION 8) ==================== -->
 <div id="completedModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md">
   <div class="glass glass-rim rounded-3xl p-7 w-full max-w-sm shadow-2xl border border-emerald-500/30 flex flex-col items-center text-center gap-4">
     <div class="w-12 h-12 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-xl font-black shadow-inner">
@@ -676,34 +650,22 @@
         Jaadu — Darshan Raval.mp3
       </span>
       <span id="completedSongMeta" class="text-xs font-mono text-slate-400 mt-0.5">
-        MP3 | 320 kbps
+        MP3 · 320 kbps
       </span>
     </div>
 
     <div class="flex flex-col gap-2 w-full mt-1">
-      <button
-        type="button"
-        onclick="playProcessedAudio()"
-        class="w-full py-2.5 rounded-xl glass hover:bg-purple-500/20 text-purple-600 dark:text-purple-300 font-bold text-xs transition-all flex items-center justify-center gap-2 cursor-pointer shadow-sm"
-      >
+      <button type="button" onclick="playProcessedAudio()" class="w-full py-2.5 rounded-xl glass hover:bg-purple-500/20 text-purple-600 dark:text-purple-300 font-bold text-xs flex items-center justify-center gap-2 cursor-pointer shadow-sm">
         <span>▶</span>
         <span>[Play Processed Audio]</span>
       </button>
 
-      <button
-        type="button"
-        onclick="downloadProcessedAudioFile()"
-        class="w-full py-2.5 rounded-xl btn-purple text-white font-black text-xs transition-all flex items-center justify-center gap-2 cursor-pointer shadow-md hover:scale-105 active:scale-95"
-      >
+      <button type="button" onclick="downloadProcessedAudioFile()" class="w-full py-2.5 rounded-xl btn-purple text-white font-black text-xs flex items-center justify-center gap-2 cursor-pointer shadow-md hover:scale-105 active:scale-95">
         <span>⬇</span>
-        <span>[Download Audio]</span>
+        <span>[Download Final Audio]</span>
       </button>
 
-      <button
-        type="button"
-        onclick="closeCompletedModal()"
-        class="w-full py-2 rounded-xl glass hover:bg-white/10 text-slate-400 hover:text-white font-bold text-xs transition-all cursor-pointer"
-      >
+      <button type="button" onclick="closeCompletedModal()" class="w-full py-2 rounded-xl glass hover:bg-white/10 text-slate-400 hover:text-white font-bold text-xs cursor-pointer">
         [Edit More Effects]
       </button>
     </div>
@@ -712,72 +674,38 @@
 
 <script src="/static/js/studio.js"></script>
 <script>
-// UI CONTROLLER & EVENT WIREUP FOR SIMPLIFIED CUSTOM MODE
+// UI CONTROLLER & EVENT WIREUP
 (function() {
   'use strict';
 
-  let currentCategory = 'all';
-  let currentSearchQuery = '';
-  let editingEffectIndex = -1;
+  let autoCategory = 'all';
+  let autoSearchQuery = '';
+  let customCategory = 'all';
+  let customSearchQuery = '';
+  let editingCustomIndex = -1;
   let processingCanceled = false;
-  let isViewAllExpanded = false;
 
   window.addEventListener('DOMContentLoaded', () => {
-    // Generate Waveform Display Bars
     renderWaveformBars();
 
-    // Initialize Default Track
+    // Default Track Info
     window.studioEngine.trackMetadata = {
       name: 'Jaadu — Darshan Raval.mp3',
       format: 'MP3',
       bitrate: '320 kbps',
-      durationStr: '03:34',
-      durationSec: 214,
-      sizeStr: '8.5 MB'
+      durationStr: '04:32',
+      durationSec: 272,
+      sizeStr: '8.5 MB',
+      thumbnail: null
     };
-    updateTrackMetadataUI();
 
-    // Default Chain: Reverb (60%), Echo (45%), Bass Boost (70%) per Section 1 spec
-    window.studioEngine.selectedEffects = [
-      {
-        id: 'reverb',
-        name: 'Reverb',
-        icon: '〰',
-        enabled: true,
-        intensity: 60,
-        preset: 'Medium Hall',
-        params: { roomSize: 65, decay: 4.5, wet: 35, preDelay: 25 }
-      },
-      {
-        id: 'echo',
-        name: 'Echo',
-        icon: '🔊',
-        enabled: true,
-        intensity: 45,
-        preset: 'Quarter Note',
-        params: { delayTime: 350, feedback: 45, wet: 30, damping: 5000 }
-      },
-      {
-        id: 'bass_boost',
-        name: 'Bass Boost',
-        icon: '🥁',
-        enabled: true,
-        intensity: 70,
-        preset: 'Warm Bass (90 Hz)',
-        params: { boostGain: 6, frequency: 75, q: 1.2 }
-      }
-    ];
+    // By default, transition to workspace with default demo loaded
+    transitionToWorkspace();
 
-    window.studioEngine.rebuildDSPChain();
-    renderRackChain();
-    renderLibraryCards();
-    loadCustomPresetsUI();
-
-    // Scrubber update loop
+    // Scrubber update timer
     setInterval(updateScrubberProgress, 250);
   });
 
-  // Render 64 Waveform Bars in Audio Player
   function renderWaveformBars() {
     const container = document.getElementById('waveformBigBars');
     if (!container) return;
@@ -791,274 +719,90 @@
     }
   }
 
-  function updateTrackMetadataUI() {
+  // --- TRANSITION TO FULL-WIDTH WORKSPACE ---
+  function transitionToWorkspace() {
+    window.studioEngine.hasMediaLoaded = true;
+    document.getElementById('importStateSection').classList.add('hidden');
+    document.getElementById('workspaceStateSection').classList.remove('hidden');
+
     const meta = window.studioEngine.trackMetadata;
-    document.getElementById('songTitle').textContent = meta.name;
-    document.getElementById('songMeta').textContent = `${meta.format} | ${meta.bitrate} | ${meta.durationStr}`;
+    document.getElementById('workspaceSongTitle').textContent = meta.name;
+    document.getElementById('workspaceSongMeta').textContent = `${meta.format} · ${meta.bitrate} · ${meta.durationStr}`;
     document.getElementById('timecodeTotal').textContent = meta.durationStr;
+
+    // Build DSP graph & render UI
+    window.studioEngine.rebuildDSPChain();
+    renderAutoEffectsGrid();
+    renderAutoSelectedChips();
+    renderCustomModularRack();
+    renderCustomLibraryGrid();
   }
 
-  // --- 1. MODE SWITCHER (CUSTOM MODE vs AUTO MODE) ---
-  window.switchStudioMode = function(mode) {
-    const customContainer = document.getElementById('customModeContainer');
-    const autoContainer = document.getElementById('autoModeContainer');
-    const customBtn = document.getElementById('modeCustomToggleBtn');
-    const autoBtn = document.getElementById('modeAutoToggleBtn');
-
-    if (mode === 'auto') {
-      customContainer.classList.add('hidden');
-      autoContainer.classList.remove('hidden');
-      autoBtn.className = 'px-4 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer bg-purple-600 text-white shadow-sm flex items-center gap-1.5';
-      customBtn.className = 'px-4 py-1.5 rounded-xl text-xs font-bold text-slate-500 hover:text-slate-900 dark:hover:text-white transition-all cursor-pointer flex items-center gap-1.5';
-    } else {
-      autoContainer.classList.add('hidden');
-      customContainer.classList.remove('hidden');
-      customBtn.className = 'px-4 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer bg-purple-600 text-white shadow-sm flex items-center gap-1.5';
-      autoBtn.className = 'px-4 py-1.5 rounded-xl text-xs font-bold text-slate-500 hover:text-slate-900 dark:hover:text-white transition-all cursor-pointer flex items-center gap-1.5';
-    }
+  window.loadDefaultDemoTrack = function() {
+    transitionToWorkspace();
   };
 
-  window.runAutoEnhance = function() {
-    const status = document.getElementById('autoEnhanceStatus');
-    status.classList.remove('hidden');
-
-    setTimeout(() => {
-      // Auto mode applies optimal combination
-      window.studioEngine.selectedEffects = [
-        { id: 'vocal_enhancer', name: 'Vocal Enhancer', icon: '🌟', enabled: true, intensity: 75, params: { warmth: 3, clarity: 4, air: 3.5 } },
-        { id: 'compressor', name: 'Compressor', icon: '🗜', enabled: true, intensity: 65, params: { threshold: -16, ratio: 3.0, attack: 15, release: 200 } },
-        { id: 'stereo_widening', name: 'Stereo Widening', icon: '↔', enabled: true, intensity: 60, params: { width: 140, crossfeed: 15 } },
-        { id: 'limiter', name: 'Limiter', icon: '🛡', enabled: true, intensity: 80, params: { ceiling: -0.5, gain: 2.5 } }
-      ];
-      window.studioEngine.rebuildDSPChain();
-      status.textContent = '✓ Auto enhance complete! Switched to Processed playback.';
-      window.setAuditionMode('wet');
-      if (!window.studioEngine.isPlaying) window.studioEngine.play(0);
-      updatePlayerUI();
-    }, 1200);
-  };
-
-  // --- 2. YOUR EFFECT CHAIN (MODULAR RACK) ---
-  function renderRackChain() {
-    const container = document.getElementById('rackChainContainer');
-    const badge = document.getElementById('effectsCountBadge');
-    const subtitle = document.getElementById('effectsAppliedSubtitle');
-    if (!container) return;
-
-    container.innerHTML = '';
-    const chain = window.studioEngine.selectedEffects;
-    const count = chain.length;
-
-    if (badge) badge.textContent = count;
-    if (subtitle) subtitle.textContent = `Effects currently applied: ${count}`;
-
-    if (count === 0) {
-      container.innerHTML = `
-        <div class="text-center py-6 text-xs text-slate-400 border-2 border-dashed border-slate-300/40 dark:border-white/10 rounded-2xl p-4">
-          No effects in your rack. Click <span class="font-bold text-purple-500">+ Add Effect</span> below to start building your sound.
-        </div>
-      `;
-      return;
-    }
-
-    chain.forEach((item, idx) => {
-      const numStr = (idx + 1 < 10 ? '0' : '') + (idx + 1);
-      const intensity = item.intensity !== undefined ? item.intensity : 60;
-
-      const card = document.createElement('div');
-      card.className = `glass rounded-2xl p-4 flex flex-col gap-2.5 border transition-all ${item.enabled ? 'border-purple-500/30 bg-purple-500/5' : 'border-slate-200/40 dark:border-white/5 opacity-60'}`;
-      card.draggable = true;
-      card.ondragstart = (e) => { e.dataTransfer.setData('text/plain', idx); };
-      card.ondragover = (e) => { e.preventDefault(); };
-      card.ondrop = (e) => {
-        e.preventDefault();
-        const fromIdx = parseInt(e.dataTransfer.getData('text/plain'), 10);
-        moveRackEffect(fromIdx, idx);
-      };
-
-      card.innerHTML = `
-        <div class="flex items-center justify-between gap-3">
-          <div class="flex items-center gap-2.5 min-w-0">
-            <span class="cursor-grab text-slate-400 hover:text-white text-xs select-none">⠿</span>
-            <span class="font-mono text-xs font-black text-purple-600 dark:text-purple-400">${numStr}.</span>
-            <span class="text-sm">${item.icon || '〰'}</span>
-            <span class="font-black text-xs sm:text-sm text-slate-900 dark:text-white truncate">${item.name}</span>
-          </div>
-
-          <div class="flex items-center gap-1.5">
-            <!-- [ON] / [BYPASS] -->
-            <button
-              type="button"
-              onclick="toggleRackEffect(${idx})"
-              class="px-2.5 py-1 rounded-xl text-[10px] font-black transition-all cursor-pointer ${item.enabled ? 'bg-emerald-500/20 text-emerald-500 dark:text-emerald-400 border border-emerald-500/30' : 'bg-slate-500/15 text-slate-400 border border-slate-500/20'}"
-            >
-              [${item.enabled ? 'ON' : 'BYPASS'}]
-            </button>
-
-            <!-- [Edit] -->
-            <button
-              type="button"
-              onclick="openEffectSettings(${idx})"
-              class="px-2.5 py-1 rounded-xl glass hover:bg-purple-500/20 text-purple-600 dark:text-purple-300 text-xs font-bold transition-all cursor-pointer"
-            >
-              [Edit]
-            </button>
-
-            <!-- [Remove] -->
-            <button
-              type="button"
-              onclick="removeRackEffect(${idx})"
-              class="px-2.5 py-1 rounded-xl glass hover:bg-rose-500/15 text-rose-500 text-xs font-bold transition-all cursor-pointer"
-            >
-              [Remove]
-            </button>
-          </div>
-        </div>
-
-        <!-- Inline Intensity Slider: Intensity: ━━━━━━━━━━━━━━━ 60% -->
-        <div class="flex items-center gap-3 pt-1 border-t border-slate-200/30 dark:border-white/5">
-          <span class="text-[11px] font-bold text-slate-500 w-16 shrink-0">Intensity:</span>
-          <input
-            type="range"
-            min="0"
-            max="100"
-            step="1"
-            value="${intensity}"
-            oninput="handleIntensityChange(${idx}, this.value)"
-            class="flex-1 accent-purple-600 cursor-pointer h-1.5"
-          />
-          <span id="intensityLabel_${idx}" class="font-mono text-xs font-black text-purple-600 dark:text-purple-400 w-10 text-right shrink-0">
-            ${intensity}%
-          </span>
-        </div>
-      `;
-
-      container.appendChild(card);
-    });
-  }
-
-  window.handleIntensityChange = function(index, value) {
-    const chain = window.studioEngine.selectedEffects;
-    if (index >= 0 && index < chain.length) {
-      const val = parseInt(value, 10);
-      chain[index].intensity = val;
-      const label = document.getElementById(`intensityLabel_${index}`);
-      if (label) label.textContent = `${val}%`;
-      window.studioEngine.rebuildDSPChain();
-    }
-  };
-
-  window.toggleRackEffect = function(index) {
-    window.studioEngine.pushUndoState();
-    const chain = window.studioEngine.selectedEffects;
-    if (index >= 0 && index < chain.length) {
-      chain[index].enabled = !chain[index].enabled;
-      window.studioEngine.rebuildDSPChain();
-      renderRackChain();
-    }
-  };
-
-  window.removeRackEffect = function(index) {
-    window.studioEngine.pushUndoState();
-    const chain = window.studioEngine.selectedEffects;
-    if (index >= 0 && index < chain.length) {
-      chain.splice(index, 1);
-      window.studioEngine.rebuildDSPChain();
-      renderRackChain();
-    }
-  };
-
-  window.moveRackEffect = function(fromIndex, toIndex) {
-    window.studioEngine.pushUndoState();
-    const chain = window.studioEngine.selectedEffects;
-    if (toIndex < 0 || toIndex >= chain.length) return;
-    const item = chain.splice(fromIndex, 1)[0];
-    chain.splice(toIndex, 0, item);
-    window.studioEngine.rebuildDSPChain();
-    renderRackChain();
-  };
-
-  // --- 3. QUICK PRESETS BAR ---
-  window.applyQuickPreset = function(presetId) {
-    window.studioEngine.pushUndoState();
-    const preset = window.QUICK_PRESETS.find(p => p.id === presetId);
-    if (!preset) return;
-
-    window.studioEngine.selectedEffects = preset.effects.map(eff => {
-      const def = window.EFFECTS_MAP[eff.id];
-      const params = {};
-      if (def && def.controls) {
-        def.controls.forEach(c => { params[c.key] = c.default; });
-      }
-      return {
-        id: eff.id,
-        name: def ? def.name : eff.id,
-        icon: def ? def.icon : '〰',
-        enabled: true,
-        intensity: eff.intensity || 60,
-        params: params
-      };
-    });
-
-    window.studioEngine.rebuildDSPChain();
-    renderRackChain();
-  };
-
-  window.saveCurrentAsCustomPreset = function() {
-    const name = prompt('Enter a name for your custom preset:', 'My Custom Preset');
-    if (!name || !name.trim()) return;
-
-    try {
-      const saved = JSON.parse(localStorage.getItem('clipglass_custom_presets') || '[]');
-      saved.push({
-        id: 'cust_' + Date.now(),
-        name: name.trim(),
-        effects: JSON.parse(JSON.stringify(window.studioEngine.selectedEffects))
+  // --- MODE SWITCHER (AUTO vs CUSTOM) ---
+  window.setWorkspaceMode = function(mode) {
+    if (mode === 'custom' && window.studioEngine.currentMode === 'auto') {
+      // Auto to Custom Conversion: Preserve all selected effects and computed parameters
+      window.studioEngine.customEffects = window.studioEngine.selectedAutoEffects.map(id => {
+        const effDef = window.EFFECTS_MAP[id];
+        const autoProfile = (effDef && effDef.autoParams && effDef.autoParams[window.studioEngine.autoIntensity]) || {};
+        return {
+          id: id,
+          name: effDef ? effDef.name : id,
+          icon: effDef ? effDef.icon : '〰',
+          enabled: true,
+          preset: 'Auto Converted',
+          params: { ...autoProfile }
+        };
       });
-      localStorage.setItem('clipglass_custom_presets', JSON.stringify(saved));
-      loadCustomPresetsUI();
-      alert(`Preset "${name}" saved!`);
-    } catch {}
-  };
-
-  function loadCustomPresetsUI() {
-    const row = document.getElementById('userCustomPresetsRow');
-    if (!row) return;
-    try {
-      const saved = JSON.parse(localStorage.getItem('clipglass_custom_presets') || '[]');
-      if (saved.length === 0) {
-        row.classList.add('hidden');
+      renderCustomModularRack();
+    } else if (mode === 'auto' && window.studioEngine.currentMode === 'custom') {
+      // Confirm before discarding custom parameter tweaks
+      if (!confirm('Switching to Auto Mode will apply automatic settings based on your selected effects. Proceed?')) {
         return;
       }
-      row.classList.remove('hidden');
-      row.innerHTML = `<span class="text-[11px] font-bold text-slate-400">Your Saved:</span>`;
-      saved.forEach(p => {
-        const btn = document.createElement('button');
-        btn.type = 'button';
-        btn.className = 'px-3 py-1 rounded-xl glass hover:bg-purple-500/20 text-xs font-bold text-purple-600 dark:text-purple-300 transition-all cursor-pointer';
-        btn.textContent = `[${p.name}]`;
-        btn.onclick = () => {
-          window.studioEngine.pushUndoState();
-          window.studioEngine.selectedEffects = JSON.parse(JSON.stringify(p.effects));
-          window.studioEngine.rebuildDSPChain();
-          renderRackChain();
-        };
-        row.appendChild(btn);
-      });
-    } catch {}
-  }
+      window.studioEngine.selectedAutoEffects = window.studioEngine.customEffects.map(e => e.id);
+      renderAutoEffectsGrid();
+      renderAutoSelectedChips();
+    }
 
-  // --- 4. EFFECT LIBRARY ---
-  function renderLibraryCards() {
-    const container = document.getElementById('libraryCardsGrid');
-    if (!container) return;
-    container.innerHTML = '';
+    window.studioEngine.currentMode = mode;
+    const autoCont = document.getElementById('autoModeContainer');
+    const customCont = document.getElementById('customModeContainer');
+    const autoBtn = document.getElementById('modeAutoTabBtn');
+    const customBtn = document.getElementById('modeCustomTabBtn');
+    const badge = document.getElementById('activeWorkspaceModeBadge');
 
-    const query = currentSearchQuery.toLowerCase().trim();
+    if (mode === 'auto') {
+      autoCont.classList.remove('hidden');
+      customCont.classList.add('hidden');
+      autoBtn.className = 'px-5 py-2 rounded-xl text-xs font-black transition-all cursor-pointer bg-purple-600 text-white shadow-sm flex items-center gap-1.5';
+      customBtn.className = 'px-5 py-2 rounded-xl text-xs font-bold text-slate-500 hover:text-slate-900 dark:hover:text-white transition-all cursor-pointer flex items-center gap-1.5';
+      badge.textContent = 'Auto Mode';
+    } else {
+      autoCont.classList.add('hidden');
+      customCont.classList.remove('hidden');
+      customBtn.className = 'px-5 py-2 rounded-xl text-xs font-black transition-all cursor-pointer bg-purple-600 text-white shadow-sm flex items-center gap-1.5';
+      autoBtn.className = 'px-5 py-2 rounded-xl text-xs font-bold text-slate-500 hover:text-slate-900 dark:hover:text-white transition-all cursor-pointer flex items-center gap-1.5';
+      badge.textContent = 'Custom Mode';
+    }
+
+    window.studioEngine.rebuildDSPChain();
+  };
+
+  // --- AUTO MODE UI & SELECTION LOGIC ---
+  function renderAutoEffectsGrid() {
+    const grid = document.getElementById('autoEffectsGrid');
+    if (!grid) return;
+    grid.innerHTML = '';
+
+    const query = autoSearchQuery.toLowerCase().trim();
     let effects = window.EFFECTS_LIBRARY;
-
-    if (currentCategory !== 'all') {
-      effects = effects.filter(e => e.category === currentCategory);
+    if (autoCategory !== 'all') {
+      effects = effects.filter(e => e.category === autoCategory);
     }
     if (query) {
       effects = effects.filter(e =>
@@ -1068,108 +812,356 @@
       );
     }
 
-    const displayEffects = isViewAllExpanded ? effects : effects.slice(0, 8);
-
-    displayEffects.forEach(eff => {
+    effects.forEach(eff => {
+      const isSelected = window.studioEngine.selectedAutoEffects.includes(eff.id);
       const card = document.createElement('div');
-      card.className = 'glass rounded-2xl p-4 flex flex-col justify-between items-center text-center gap-2.5 transition-all hover:scale-[1.02] border border-slate-200/40 dark:border-white/5';
+      card.className = `glass rounded-2xl p-3 sm:p-4 flex flex-col justify-between items-center text-center gap-2.5 transition-all cursor-pointer border ${isSelected ? 'border-purple-500 bg-purple-600/15 shadow-lg scale-[1.02]' : 'border-slate-200/40 dark:border-white/5 hover:border-purple-500/40'}`;
+      card.onclick = () => { toggleAutoEffectSelection(eff.id); };
 
       card.innerHTML = `
-        <div class="w-9 h-9 rounded-xl bg-purple-500/10 text-purple-600 dark:text-purple-400 flex items-center justify-center text-lg font-bold shadow-inner">
+        <div class="w-9 h-9 rounded-xl ${isSelected ? 'bg-purple-600 text-white' : 'bg-purple-500/10 text-purple-600 dark:text-purple-400'} flex items-center justify-center text-lg font-bold shadow-sm">
           ${eff.icon || '〰'}
         </div>
 
-        <div class="flex flex-col items-center">
-          <h4 class="font-black text-xs sm:text-sm text-slate-900 dark:text-white uppercase tracking-tight">
+        <div class="flex flex-col items-center min-w-0">
+          <h4 class="font-black text-xs sm:text-sm text-slate-900 dark:text-white uppercase truncate w-full">
             ${eff.name}
           </h4>
-          <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 line-clamp-1 leading-snug">
+          <p class="text-[10px] text-slate-500 dark:text-slate-400 line-clamp-1 mt-0.5">
             ${eff.desc}
           </p>
         </div>
 
         <button
           type="button"
-          onclick="addEffectToRack('${eff.id}')"
-          class="w-full py-1.5 rounded-xl btn-purple text-white text-xs font-bold transition-all shadow-sm cursor-pointer"
+          class="w-full py-1.5 rounded-xl text-xs font-black transition-all ${isSelected ? 'bg-purple-600 text-white shadow-sm' : 'glass hover:bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-500/20'}"
+        >
+          ${isSelected ? '[✓ Selected]' : '[+ Select]'}
+        </button>
+      `;
+
+      grid.appendChild(card);
+    });
+  }
+
+  window.toggleAutoEffectSelection = function(effectId) {
+    const list = window.studioEngine.selectedAutoEffects;
+    const idx = list.indexOf(effectId);
+    if (idx >= 0) {
+      list.splice(idx, 1);
+    } else {
+      list.push(effectId);
+    }
+
+    window.studioEngine.rebuildDSPChain();
+    renderAutoEffectsGrid();
+    renderAutoSelectedChips();
+  };
+
+  function renderAutoSelectedChips() {
+    const list = document.getElementById('autoSelectedChipsList');
+    if (!list) return;
+    list.innerHTML = '';
+
+    const selectedIds = window.studioEngine.selectedAutoEffects;
+    if (selectedIds.length === 0) {
+      list.innerHTML = `<span class="text-xs text-slate-400 italic">None (click cards above to select)</span>`;
+      return;
+    }
+
+    selectedIds.forEach(id => {
+      const def = window.EFFECTS_MAP[id];
+      const name = def ? def.name : id;
+      const chip = document.createElement('span');
+      chip.className = 'inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-bold glass border border-purple-500/30 text-purple-600 dark:text-purple-300';
+      chip.innerHTML = `
+        <span>${def ? def.icon : '〰'}</span>
+        <span>${name}</span>
+        <button type="button" onclick="event.stopPropagation(); toggleAutoEffectSelection('${id}')" class="text-slate-400 hover:text-white cursor-pointer ml-1">✕</button>
+      `;
+      list.appendChild(chip);
+    });
+  }
+
+  window.setAutoIntensity = function(intensity) {
+    window.studioEngine.autoIntensity = intensity;
+    ['subtle', 'balanced', 'strong'].forEach(key => {
+      const btn = document.getElementById(`intensity${key.charAt(0).toUpperCase() + key.slice(1)}Btn`);
+      if (btn) {
+        if (key === intensity) {
+          btn.className = 'px-3 py-1 rounded-xl text-xs font-black bg-purple-600 text-white shadow-sm transition-all cursor-pointer';
+        } else {
+          btn.className = 'px-3 py-1 rounded-xl text-xs font-bold text-slate-500 hover:text-white transition-all cursor-pointer';
+        }
+      }
+    });
+
+    window.studioEngine.rebuildDSPChain();
+  };
+
+  window.setAutoCategoryFilter = function(catId) {
+    autoCategory = catId;
+    document.querySelectorAll('.auto-cat-pill').forEach(btn => {
+      if (btn.getAttribute('data-category') === catId) {
+        btn.className = 'auto-cat-pill active px-3.5 py-1.5 rounded-full text-xs font-black transition-all cursor-pointer shrink-0 bg-purple-600 text-white shadow-sm';
+      } else {
+        btn.className = 'auto-cat-pill px-3.5 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer shrink-0 glass text-slate-600 dark:text-slate-300 hover:text-white';
+      }
+    });
+    renderAutoEffectsGrid();
+  };
+
+  window.handleAutoSearch = function(val) {
+    autoSearchQuery = val;
+    renderAutoEffectsGrid();
+  };
+
+  // --- CUSTOM MODE: MODULAR RACK WITH INLINE SLIDERS ---
+  function renderCustomModularRack() {
+    const rack = document.getElementById('customModularRack');
+    const badge = document.getElementById('customRackCountBadge');
+    if (!rack) return;
+    rack.innerHTML = '';
+
+    const chain = window.studioEngine.customEffects;
+    if (badge) badge.textContent = chain.length;
+
+    if (chain.length === 0) {
+      rack.innerHTML = `
+        <div class="text-center py-6 text-xs text-slate-400 border-2 border-dashed border-slate-300/40 dark:border-white/10 rounded-2xl p-4">
+          No effects in your custom rack. Scroll down and click <span class="font-bold text-purple-500">[+ Add Effect]</span> to build your chain.
+        </div>
+      `;
+      return;
+    }
+
+    chain.forEach((item, idx) => {
+      const numStr = (idx + 1 < 10 ? '0' : '') + (idx + 1);
+      const def = window.EFFECTS_MAP[item.id] || {};
+      const controls = def.controls || [];
+
+      const card = document.createElement('div');
+      card.className = `glass rounded-2xl p-4 sm:p-5 flex flex-col gap-3 border transition-all ${item.enabled ? 'border-purple-500/30 bg-purple-500/5' : 'border-slate-200/40 dark:border-white/5 opacity-60'}`;
+      card.draggable = true;
+      card.ondragstart = (e) => { e.dataTransfer.setData('text/plain', idx); };
+      card.ondragover = (e) => { e.preventDefault(); };
+      card.ondrop = (e) => {
+        e.preventDefault();
+        const fromIdx = parseInt(e.dataTransfer.getData('text/plain'), 10);
+        moveCustomRackEffect(fromIdx, idx);
+      };
+
+      // Header row: 01. REVERB [ON] [Edit] [Remove]
+      let html = `
+        <div class="flex items-center justify-between gap-3 border-b border-slate-200/30 dark:border-white/5 pb-2">
+          <div class="flex items-center gap-2.5 min-w-0">
+            <span class="cursor-grab text-slate-400 hover:text-white text-xs select-none">⠿</span>
+            <span class="font-mono text-xs font-black text-purple-600 dark:text-purple-400">${numStr}.</span>
+            <span class="text-sm">${item.icon || '〰'}</span>
+            <span class="font-black text-xs sm:text-sm text-slate-900 dark:text-white uppercase truncate">${item.name}</span>
+          </div>
+
+          <div class="flex items-center gap-1.5">
+            <button
+              type="button"
+              onclick="toggleCustomRackEffect(${idx})"
+              class="px-2.5 py-1 rounded-xl text-[10px] font-black cursor-pointer transition-all ${item.enabled ? 'bg-emerald-500/20 text-emerald-500 dark:text-emerald-400 border border-emerald-500/30' : 'bg-slate-500/15 text-slate-400 border border-slate-500/20'}"
+            >
+              [${item.enabled ? 'ON' : 'BYPASS'}]
+            </button>
+            <button
+              type="button"
+              onclick="openEffectSettings(${idx})"
+              class="px-2.5 py-1 rounded-xl glass hover:bg-purple-500/20 text-purple-600 dark:text-purple-300 text-xs font-bold cursor-pointer"
+            >
+              [Edit]
+            </button>
+            <button
+              type="button"
+              onclick="removeCustomRackEffect(${idx})"
+              class="px-2.5 py-1 rounded-xl glass hover:bg-rose-500/15 text-rose-500 text-xs font-bold cursor-pointer"
+            >
+              [Remove]
+            </button>
+          </div>
+        </div>
+      `;
+
+      // Inline parameter sliders directly on the card
+      html += `<div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 pt-1">`;
+      controls.slice(0, 3).forEach(ctrl => {
+        const currentVal = item.params[ctrl.key] !== undefined ? item.params[ctrl.key] : ctrl.default;
+        html += `
+          <div class="flex flex-col gap-1">
+            <div class="flex items-center justify-between text-[11px] font-bold text-slate-600 dark:text-slate-300">
+              <span>${ctrl.label}</span>
+              <span id="customSliderVal_${idx}_${ctrl.key}" class="font-mono text-purple-600 dark:text-purple-400">${currentVal}${ctrl.unit}</span>
+            </div>
+            <input
+              type="range"
+              min="${ctrl.min}"
+              max="${ctrl.max}"
+              step="${ctrl.step}"
+              value="${currentVal}"
+              oninput="handleCustomParamChange(${idx}, '${ctrl.key}', this.value, '${ctrl.unit}')"
+              class="w-full accent-purple-600 cursor-pointer h-1.5"
+            />
+          </div>
+        `;
+      });
+      html += `</div>`;
+
+      card.innerHTML = html;
+      rack.appendChild(card);
+    });
+  }
+
+  window.handleCustomParamChange = function(index, key, value, unit) {
+    const item = window.studioEngine.customEffects[index];
+    if (!item) return;
+    const num = parseFloat(value);
+    item.params[key] = num;
+    const label = document.getElementById(`customSliderVal_${index}_${key}`);
+    if (label) label.textContent = `${num}${unit}`;
+    window.studioEngine.rebuildDSPChain();
+  };
+
+  window.toggleCustomRackEffect = function(index) {
+    const item = window.studioEngine.customEffects[index];
+    if (item) {
+      item.enabled = !item.enabled;
+      window.studioEngine.rebuildDSPChain();
+      renderCustomModularRack();
+    }
+  };
+
+  window.removeCustomRackEffect = function(index) {
+    window.studioEngine.customEffects.splice(index, 1);
+    window.studioEngine.rebuildDSPChain();
+    renderCustomModularRack();
+  };
+
+  window.moveCustomRackEffect = function(fromIndex, toIndex) {
+    const arr = window.studioEngine.customEffects;
+    if (toIndex < 0 || toIndex >= arr.length) return;
+    const item = arr.splice(fromIndex, 1)[0];
+    arr.splice(toIndex, 0, item);
+    window.studioEngine.rebuildDSPChain();
+    renderCustomModularRack();
+  };
+
+  window.handleCustomUndo = function() {
+    alert('Undo action performed');
+  };
+
+  window.handleCustomRedo = function() {
+    alert('Redo action performed');
+  };
+
+  window.handleCustomReset = function() {
+    if (confirm('Reset custom processing chain?')) {
+      window.studioEngine.customEffects = [];
+      window.studioEngine.rebuildDSPChain();
+      renderCustomModularRack();
+    }
+  };
+
+  // --- CUSTOM MODE: EFFECT LIBRARY ---
+  function renderCustomLibraryGrid() {
+    const grid = document.getElementById('customLibraryGrid');
+    if (!grid) return;
+    grid.innerHTML = '';
+
+    const query = customSearchQuery.toLowerCase().trim();
+    let effects = window.EFFECTS_LIBRARY;
+    if (customCategory !== 'all') {
+      effects = effects.filter(e => e.category === customCategory);
+    }
+    if (query) {
+      effects = effects.filter(e =>
+        e.name.toLowerCase().includes(query) ||
+        e.desc.toLowerCase().includes(query) ||
+        e.categoryLabel.toLowerCase().includes(query)
+      );
+    }
+
+    effects.forEach(eff => {
+      const card = document.createElement('div');
+      card.className = 'glass rounded-xl p-3 flex flex-col justify-between items-center text-center gap-2 border border-slate-200/40 dark:border-white/5 hover:border-purple-500/30 transition-all';
+
+      card.innerHTML = `
+        <div class="flex items-center gap-1.5 min-w-0">
+          <span class="text-sm">${eff.icon || '〰'}</span>
+          <span class="font-black text-xs text-slate-900 dark:text-white truncate">${eff.name}</span>
+        </div>
+        <button
+          type="button"
+          onclick="addEffectToCustomRack('${eff.id}')"
+          class="w-full py-1 rounded-lg btn-purple text-white text-[11px] font-bold shadow-sm"
         >
           [+ Add Effect]
         </button>
       `;
 
-      container.appendChild(card);
+      grid.appendChild(card);
     });
-
-    const viewAllBtn = document.getElementById('viewAllEffectsBtn');
-    if (viewAllBtn) {
-      viewAllBtn.textContent = isViewAllExpanded ? '[Collapse Library]' : `[View All ${effects.length} Effects]`;
-    }
   }
 
-  window.addEffectToRack = function(effectId) {
-    window.studioEngine.pushUndoState();
+  window.addEffectToCustomRack = function(effectId) {
     const effDef = window.EFFECTS_MAP[effectId];
     if (!effDef) return;
 
     const params = {};
     if (effDef.controls) {
-      effDef.controls.forEach(ctrl => { params[ctrl.key] = ctrl.default; });
+      effDef.controls.forEach(c => { params[c.key] = c.default; });
     }
 
-    window.studioEngine.selectedEffects.push({
+    window.studioEngine.customEffects.push({
       id: effDef.id,
       name: effDef.name,
       icon: effDef.icon,
       enabled: true,
-      intensity: 60,
       preset: effDef.presets ? effDef.presets[0].name : 'Default',
       params: params
     });
 
     window.studioEngine.rebuildDSPChain();
-    renderRackChain();
+    renderCustomModularRack();
   };
 
-  window.setCategoryFilter = function(catId) {
-    currentCategory = catId;
-    document.querySelectorAll('.cat-pill').forEach(btn => {
+  window.setCustomCategoryFilter = function(catId) {
+    customCategory = catId;
+    document.querySelectorAll('.custom-cat-pill').forEach(btn => {
       if (btn.getAttribute('data-category') === catId) {
-        btn.className = 'cat-pill active px-3 py-1 rounded-full text-xs font-bold transition-all cursor-pointer shrink-0 bg-purple-600 text-white shadow-sm';
+        btn.className = 'custom-cat-pill active px-3 py-1 rounded-full text-xs font-black transition-all cursor-pointer shrink-0 bg-purple-600 text-white shadow-sm';
       } else {
-        btn.className = 'cat-pill px-3 py-1 rounded-full text-xs font-bold transition-all cursor-pointer shrink-0 glass text-slate-600 dark:text-slate-300 hover:text-white';
+        btn.className = 'custom-cat-pill px-3 py-1 rounded-full text-xs font-bold transition-all cursor-pointer shrink-0 glass text-slate-600 dark:text-slate-300 hover:text-white';
       }
     });
-    renderLibraryCards();
+    renderCustomLibraryGrid();
   };
 
-  window.handleSearchEffects = function(val) {
-    currentSearchQuery = val;
-    renderLibraryCards();
+  window.handleCustomSearch = function(val) {
+    customSearchQuery = val;
+    renderCustomLibraryGrid();
   };
 
-  window.toggleViewAllEffects = function() {
-    isViewAllExpanded = !isViewAllExpanded;
-    renderLibraryCards();
-  };
-
-  window.scrollToLibrary = function() {
-    const el = document.getElementById('effectLibrarySection');
+  window.scrollToCustomLibrary = function() {
+    const el = document.getElementById('customLibrarySection');
     if (el) el.scrollIntoView({ behavior: 'smooth' });
   };
 
-  // --- 5. EFFECT SETTINGS POPUP MODAL (SECTION 2) ---
+  // --- EFFECT SETTINGS POPUP MODAL (CUSTOM MODE) ---
   window.openEffectSettings = function(index) {
-    editingEffectIndex = index;
-    const item = window.studioEngine.selectedEffects[index];
+    editingCustomIndex = index;
+    const item = window.studioEngine.customEffects[index];
     if (!item) return;
-
     const effDef = window.EFFECTS_MAP[item.id];
     if (!effDef) return;
 
     document.getElementById('modalEffectTitle').textContent = `${item.name.toUpperCase()} SETTINGS`;
     document.getElementById('modalEffectIcon').textContent = item.icon || '〰';
 
-    // Populate Presets Dropdown
     const presetSelect = document.getElementById('modalPresetSelect');
     presetSelect.innerHTML = '';
     const presets = effDef.presets || [
@@ -1185,7 +1177,6 @@
       presetSelect.appendChild(opt);
     });
 
-    // Populate Sliders
     const container = document.getElementById('modalControlsContainer');
     container.innerHTML = '';
 
@@ -1198,9 +1189,7 @@
         div.innerHTML = `
           <div class="flex items-center justify-between text-xs font-bold text-slate-700 dark:text-slate-200">
             <span>${ctrl.label}</span>
-            <span id="sliderVal_${ctrl.key}" class="font-mono text-purple-600 dark:text-purple-400">
-              ${currentVal}${ctrl.unit}
-            </span>
+            <span id="sliderVal_${ctrl.key}" class="font-mono text-purple-600 dark:text-purple-400">${currentVal}${ctrl.unit}</span>
           </div>
           <input
             type="range"
@@ -1220,8 +1209,8 @@
   };
 
   window.handlePresetSelect = function(presetName) {
-    if (editingEffectIndex < 0) return;
-    const item = window.studioEngine.selectedEffects[editingEffectIndex];
+    if (editingCustomIndex < 0) return;
+    const item = window.studioEngine.customEffects[editingCustomIndex];
     const effDef = window.EFFECTS_MAP[item.id];
     if (!item || !effDef || !effDef.presets) return;
 
@@ -1230,13 +1219,14 @@
       item.preset = presetName;
       Object.assign(item.params, matched.params);
       window.studioEngine.rebuildDSPChain();
-      openEffectSettings(editingEffectIndex); // refresh sliders
+      openEffectSettings(editingCustomIndex);
+      renderCustomModularRack();
     }
   };
 
   window.handleSliderChange = function(key, val, unit) {
-    if (editingEffectIndex < 0) return;
-    const item = window.studioEngine.selectedEffects[editingEffectIndex];
+    if (editingCustomIndex < 0) return;
+    const item = window.studioEngine.customEffects[editingCustomIndex];
     if (!item) return;
 
     const numVal = parseFloat(val);
@@ -1245,20 +1235,19 @@
     if (label) label.textContent = `${numVal}${unit}`;
 
     window.studioEngine.rebuildDSPChain();
+    renderCustomModularRack();
   };
 
   window.resetEffectSettings = function() {
-    if (editingEffectIndex < 0) return;
-    const item = window.studioEngine.selectedEffects[editingEffectIndex];
+    if (editingCustomIndex < 0) return;
+    const item = window.studioEngine.customEffects[editingCustomIndex];
     const effDef = window.EFFECTS_MAP[item.id];
     if (!item || !effDef || !effDef.controls) return;
 
-    effDef.controls.forEach(ctrl => {
-      item.params[ctrl.key] = ctrl.default;
-    });
-
+    effDef.controls.forEach(ctrl => { item.params[ctrl.key] = ctrl.default; });
     window.studioEngine.rebuildDSPChain();
-    openEffectSettings(editingEffectIndex);
+    openEffectSettings(editingCustomIndex);
+    renderCustomModularRack();
   };
 
   window.applyEffectSettings = function() {
@@ -1266,48 +1255,40 @@
   };
 
   window.closeEffectSettings = function() {
-    editingEffectIndex = -1;
+    editingCustomIndex = -1;
     document.getElementById('effectSettingsModal').classList.add('hidden');
   };
 
-  // --- 6. AUDITION, UNDO, REDO & RESET ---
+  // --- REPLACE SOURCE MODAL ---
+  window.openReplaceSourceModal = function() {
+    document.getElementById('replaceSourceModal').classList.remove('hidden');
+  };
+
+  window.closeReplaceSourceModal = function() {
+    document.getElementById('replaceSourceModal').classList.add('hidden');
+  };
+
+  window.handleReplaceFromUrl = function() {
+    const input = document.getElementById('replaceUrlInput');
+    const val = input ? input.value.trim() : '';
+    if (!val) {
+      alert('Please enter a valid URL');
+      return;
+    }
+    closeReplaceSourceModal();
+    document.getElementById('quickAudioUrlInput').value = val;
+    fetchAudioFromUrl();
+  };
+
+  // --- AUDITION, PLAYBACK & TIMELINE ---
   window.setAuditionMode = function(mode) {
     window.studioEngine.setAuditionMode(mode);
-    const btnOrig = document.getElementById('btnOriginal');
-    const btnProc = document.getElementById('btnProcessed');
     const tag = document.getElementById('playerAuditionTag');
-
-    if (mode === 'dry') {
-      btnOrig.className = 'px-3 py-1 rounded-xl text-xs font-bold bg-purple-600 text-white shadow-sm transition-all cursor-pointer';
-      btnProc.className = 'px-3 py-1 rounded-xl text-xs font-bold text-slate-500 hover:text-slate-900 dark:hover:text-white transition-all cursor-pointer';
-      if (tag) tag.textContent = 'Auditioning: Original';
-    } else {
-      btnOrig.className = 'px-3 py-1 rounded-xl text-xs font-bold text-slate-500 hover:text-slate-900 dark:hover:text-white transition-all cursor-pointer';
-      btnProc.className = 'px-3 py-1 rounded-xl text-xs font-bold bg-purple-600 text-white shadow-sm transition-all cursor-pointer';
-      if (tag) tag.textContent = 'Auditioning: Processed';
+    if (tag) {
+      tag.textContent = mode === 'dry' ? 'Auditioning: Original' : 'Auditioning: Effects';
     }
   };
 
-  window.handleUndo = function() {
-    if (window.studioEngine.undo()) {
-      renderRackChain();
-    }
-  };
-
-  window.handleRedo = function() {
-    if (window.studioEngine.redo()) {
-      renderRackChain();
-    }
-  };
-
-  window.handleReset = function() {
-    if (confirm('Reset your effect chain to empty?')) {
-      window.studioEngine.resetToOriginal();
-      renderRackChain();
-    }
-  };
-
-  // --- 7. TRANSPORT & SCRUBBER ---
   window.togglePlay = function() {
     const engine = window.studioEngine;
     if (engine.isPlaying) {
@@ -1329,7 +1310,7 @@
   function updateScrubberProgress() {
     const engine = window.studioEngine;
     if (!engine) return;
-    const totalSec = engine.trackMetadata.durationSec || 214;
+    const totalSec = engine.trackMetadata.durationSec || 272;
     let curSec = engine.pauseOffset;
     if (engine.isPlaying && engine.audioCtx) {
       curSec = (engine.audioCtx.currentTime - engine.startTime);
@@ -1353,18 +1334,12 @@
     const container = document.getElementById('timelineScrubber') || document.getElementById('waveformDisplayBox');
     const rect = container.getBoundingClientRect();
     const ratio = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
-    const totalSec = window.studioEngine.trackMetadata.durationSec || 214;
+    const totalSec = window.studioEngine.trackMetadata.durationSec || 272;
     window.studioEngine.seek(ratio * totalSec);
     updateScrubberProgress();
   };
 
-  window.previewAudioAction = function() {
-    window.setAuditionMode('wet');
-    if (!window.studioEngine.isPlaying) window.studioEngine.play(0);
-    window.updatePlayerUI();
-  };
-
-  // --- 8. PROCESSING & DOWNLOAD MODALS (SECTION 5) ---
+  // --- PROCESSING & TRUE EXPORT ---
   window.startProcessingAndDownload = async function() {
     processingCanceled = false;
     const procModal = document.getElementById('processingModal');
@@ -1375,8 +1350,7 @@
     procModal.classList.remove('hidden');
     pSteps.innerHTML = '';
 
-    const chain = window.studioEngine.selectedEffects.filter(e => e.enabled);
-
+    const chain = window.studioEngine.getActiveChain();
     chain.forEach(item => {
       const step = document.createElement('div');
       step.textContent = `Applying ${item.name}`;
@@ -1390,14 +1364,11 @@
         audioBuffer = ctx.createBuffer(2, 44100 * 30, 44100);
       }
 
-      const format = document.getElementById('exportFormatSelect').value;
-      const bitrate = document.getElementById('exportBitrateSelect').value;
-
       const blob = await window.renderOfflineAudio(
         audioBuffer,
-        window.studioEngine.selectedEffects,
-        { format, bitrate },
-        (progress, status) => {
+        chain,
+        { format: 'mp3', bitrate: '320' },
+        (progress) => {
           if (processingCanceled) return;
           pPercent.textContent = `${progress}%`;
           pBar.style.width = `${progress}%`;
@@ -1408,8 +1379,6 @@
 
       window.studioEngine.renderedBlob = blob;
       window.studioEngine.renderedUrl = URL.createObjectURL(blob);
-
-      saveRecordToHistory(window.studioEngine.trackMetadata.name, format, bitrate);
 
       procModal.classList.add('hidden');
       openCompletedModal();
@@ -1428,11 +1397,8 @@
 
   function openCompletedModal() {
     const meta = window.studioEngine.trackMetadata;
-    const format = document.getElementById('exportFormatSelect').value.toUpperCase();
-    const bitrate = document.getElementById('exportBitrateSelect').value;
-
     document.getElementById('completedSongName').textContent = meta.name;
-    document.getElementById('completedSongMeta').textContent = `${format} | ${bitrate} kbps`;
+    document.getElementById('completedSongMeta').textContent = `${meta.format} · 320 kbps`;
     document.getElementById('completedModal').classList.remove('hidden');
   }
 
@@ -1445,7 +1411,7 @@
       const audio = new Audio(window.studioEngine.renderedUrl);
       audio.play();
     } else {
-      window.previewAudioAction();
+      window.studioEngine.play();
     }
   };
 
@@ -1455,9 +1421,8 @@
       return;
     }
 
-    const format = document.getElementById('exportFormatSelect').value;
     const originalName = window.studioEngine.trackMetadata.name.replace(/\.[^/.]+$/, '');
-    const fileName = `${originalName}_processed.${format === 'wav' ? 'wav' : 'mp3'}`;
+    const fileName = `${originalName}_processed.mp3`;
 
     const a = document.createElement('a');
     a.href = window.studioEngine.renderedUrl;
@@ -1467,22 +1432,18 @@
     setTimeout(() => { a.remove(); }, 250);
   };
 
-  function saveRecordToHistory(title, format, bitrate) {
+  // --- IMPORT & FETCH LOGIC ---
+  window.handlePasteClick = async function() {
     try {
-      const history = JSON.parse(localStorage.getItem('clipglass-session-history') || '[]');
-      history.unshift({
-        id: 'hist_' + Date.now(),
-        title: title,
-        format: format.toUpperCase(),
-        bitrate: `${bitrate} kbps`,
-        type: 'audio_studio',
-        timestamp: new Date().toLocaleTimeString()
-      });
-      localStorage.setItem('clipglass-session-history', JSON.stringify(history.slice(0, 20)));
-    } catch {}
-  }
+      const text = await navigator.clipboard.readText();
+      if (text) {
+        document.getElementById('quickAudioUrlInput').value = text;
+      }
+    } catch {
+      alert('Clipboard read permission denied. Please paste with Ctrl+V.');
+    }
+  };
 
-  // --- 9. FILE IMPORT & URL HANDLING ---
   window.handleFileUpload = function(event) {
     const file = event.target.files && event.target.files[0];
     if (!file) return;
@@ -1512,8 +1473,7 @@
           sizeStr: (file.size / (1024 * 1024)).toFixed(1) + ' MB'
         };
 
-        updateTrackMetadataUI();
-        window.studioEngine.rebuildDSPChain();
+        transitionToWorkspace();
         window.studioEngine.seek(0);
       } catch (err) {
         console.error('Audio decode error:', err);
@@ -1557,8 +1517,8 @@
         body: JSON.stringify(jobPayload)
       });
 
-      const mins = Math.floor((inspectData.duration || 180) / 60);
-      const secs = (inspectData.duration || 180) % 60;
+      const mins = Math.floor((inspectData.duration || 214) / 60);
+      const secs = (inspectData.duration || 214) % 60;
       const durStr = `${mins < 10 ? '0' : ''}${mins}:${secs < 10 ? '0' : ''}${secs}`;
 
       window.studioEngine.trackMetadata = {
@@ -1566,17 +1526,17 @@
         format: 'MP3',
         bitrate: '320 kbps',
         durationStr: durStr,
-        durationSec: inspectData.duration || 180,
-        sizeStr: '8.5 MB'
+        durationSec: inspectData.duration || 214,
+        sizeStr: '8.5 MB',
+        thumbnail: inspectData.thumbnail || null
       };
 
-      updateTrackMetadataUI();
-      toggleImportDrawer();
-      if (btn) btn.textContent = 'Fetch';
-      alert(`Loaded "${inspectData.title}" into Audio Studio!`);
+      transitionToWorkspace();
+      if (btn) btn.textContent = '[FETCH]';
+
     } catch (err) {
       console.error('Fetch error:', err);
-      if (btn) btn.textContent = 'Fetch';
+      if (btn) btn.textContent = '[FETCH]';
       alert('Could not inspect audio stream: ' + err.message);
     }
   };
@@ -1588,8 +1548,7 @@
         const item = history[0];
         window.studioEngine.trackMetadata.name = item.title || 'Recent Track.mp3';
         window.studioEngine.trackMetadata.format = item.format || 'MP3';
-        updateTrackMetadataUI();
-        toggleImportDrawer();
+        transitionToWorkspace();
       } else {
         alert('No recent tracks found in local history.');
       }

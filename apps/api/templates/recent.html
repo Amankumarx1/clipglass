@@ -91,17 +91,36 @@
     });
   }
 
-  function downloadFromHistory(title, fileUrl) {
+  async function downloadFromHistory(title, fileUrl) {
     playGlassPop();
     const url = fileUrl || '/static/samples/clip_1.mp4';
-    const a = document.createElement('a');
-    a.href = url;
     const safeName = `${title.replace(/[^a-zA-Z0-9_\-\s]/g, '').trim().replace(/\s+/g, '_')}.mp4`;
-    a.download = safeName;
-    document.body.appendChild(a);
-    a.click();
-    setTimeout(() => a.remove(), 200);
-    showToast(`Downloading "${safeName}" to your PC...`, 'success');
+    showToast(`Downloading "${safeName}" to your PC...`, 'info');
+
+    try {
+      const res = await fetch(url);
+      if (!res.ok) throw new Error('Fetch failed');
+      const blob = await res.blob();
+      const blobUrl = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = blobUrl;
+      a.download = safeName;
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(() => {
+        a.remove();
+        URL.revokeObjectURL(blobUrl);
+      }, 1500);
+      showToast(`Downloaded "${safeName}" to your PC!`, 'success');
+    } catch {
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = safeName;
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(() => a.remove(), 200);
+      showToast(`Downloading "${safeName}" to your PC...`, 'success');
+    }
   }
 </script>
 {% endblock %}
