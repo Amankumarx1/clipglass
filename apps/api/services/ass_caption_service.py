@@ -105,6 +105,58 @@ def generate_ass_subtitles(
             'shadow': 0,
             'margin_v': 260,
             'alignment': 2,
+        },
+        'glitch_cyber': {
+            'font': 'Courier New',
+            'fontsize': 46,
+            'primary_color': '&H0000FFCC&',    # Neon Mint Cyan
+            'secondary_color': '&H00CC00FF&',  # Magenta glitch
+            'outline_color': '&H00110022&',
+            'back_color': '&H00000000&',
+            'bold': 1,
+            'outline': 3.5,
+            'shadow': 2,
+            'margin_v': 255,
+            'alignment': 2,
+        },
+        'gold_luxury': {
+            'font': 'Georgia',
+            'fontsize': 48,
+            'primary_color': '&H0045D4FF&',    # Warm Golden amber
+            'secondary_color': '&H00FFFFFF&',
+            'outline_color': '&H00101525&',
+            'back_color': '&H80000000&',
+            'bold': 1,
+            'outline': 3,
+            'shadow': 3,
+            'margin_v': 260,
+            'alignment': 2,
+        },
+        'comic_pop': {
+            'font': 'Arial Black',
+            'fontsize': 52,
+            'primary_color': '&H0000E5FF&',    # Vibrant Yellow-Orange
+            'secondary_color': '&H00FFFFFF&',
+            'outline_color': '&H00000000&',
+            'back_color': '&H99000000&',
+            'bold': 1,
+            'outline': 5,
+            'shadow': 4,
+            'margin_v': 280,
+            'alignment': 2,
+        },
+        'cinematic_sub': {
+            'font': 'Helvetica',
+            'fontsize': 42,
+            'primary_color': '&H00FFFFFF&',
+            'secondary_color': '&H0020D8FF&',  # Warm subtitle yellow
+            'outline_color': '&H00000000&',
+            'back_color': '&HA0000000&',
+            'bold': 0,
+            'outline': 2,
+            'shadow': 1,
+            'margin_v': 230,
+            'alignment': 2,
         }
     }
 

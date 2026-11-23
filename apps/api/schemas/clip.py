@@ -4,9 +4,10 @@ import re
 from .inspect import FriendlyError
 
 CaptionPresetType = Literal[
-    'viral_pop', 'minimalist', 'neon_cyber', 'karaoke', 'headline', 'dynamic_box'
+    'viral_pop', 'minimalist', 'neon_cyber', 'karaoke', 'headline', 'dynamic_box',
+    'glitch_cyber', 'gold_luxury', 'comic_pop', 'cinematic_sub'
 ]
-ReframeModeType = Literal['center', 'follow-face', 'split']
+ReframeModeType = Literal['center', 'follow-face', 'split', 'dual-speaker', 'blurred-fill', 'letterbox', 'pip']
 PlatformPresetType = Literal['shorts', 'reels', 'tiktok', 'custom']
 PolishStyleType = Literal['none', 'caption_news', 'swiss_motion', 'neon_tubes', 'dark_tech']
 

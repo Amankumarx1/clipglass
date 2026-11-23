@@ -24,21 +24,34 @@
 
   <!-- Main Split Editor Workspace -->
   <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-    <!-- Left: Video Canvas with 9:16 Safe Zone Overlay -->
-    <div class="lg:col-span-8 flex flex-col items-center justify-center bg-[#24252B] rounded-3xl p-6 relative overflow-hidden min-h-[460px] border border-white/10 shadow-2xl">
-      <div class="relative w-full max-w-[340px] aspect-[9/16] bg-[#101113] rounded-2xl overflow-hidden shadow-2xl border border-white/10 flex items-center justify-center group">
+    <!-- Left: Video Canvas with 9:16 Safe Zone Overlay & Framing Guide -->
+    <div class="lg:col-span-8 flex flex-col items-center justify-center bg-[#24252B] rounded-3xl p-6 relative overflow-hidden min-h-[480px] border border-white/10 shadow-2xl">
+      <div class="relative w-full max-w-[320px] aspect-[9/16] bg-[#101113] rounded-2xl overflow-hidden shadow-2xl border border-white/10 flex items-center justify-center group">
         <!-- Mock Video Stream -->
         <img id="editorVideoImg" src="/static/samples/nature_sample.jpg" onerror="this.src='https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=720&auto=format&fit=crop&q=80'" alt="Video Frame" class="w-full h-full object-cover">
         
+        <!-- Frame Model Visual Overlay (Dynamic Guide) -->
+        <div id="editorFrameGuideOverlay" class="absolute inset-0 pointer-events-none transition-all duration-300">
+          <div class="absolute inset-x-8 top-12 bottom-32 border-2 border-blue-400 border-dashed rounded-xl pointer-events-none flex flex-col justify-between p-2">
+            <div class="flex justify-between items-center text-[9px] font-mono text-blue-400 bg-black/60 px-2 py-0.5 rounded self-start">
+              <span>[AI YuNet: FACE]</span>
+            </div>
+          </div>
+        </div>
+
         <!-- 9:16 Safe Area Bounding Lines -->
         <div class="absolute inset-4 border border-[#8655FF]/40 border-dashed rounded-lg pointer-events-none flex flex-col justify-between p-2">
           <div class="flex items-center justify-between text-[9px] font-mono font-bold text-[#8655FF] bg-black/70 px-2 py-0.5 rounded backdrop-blur-sm self-start">
-            <span>9:16 SAFE ZONE</span>
+            <span id="editorFrameBadge">9:16 SAFE ZONE • FACE TRACK</span>
           </div>
+
           <!-- Live Caption Overlay Preview -->
-          <div id="liveCaptionPreview" class="text-center font-extrabold text-base text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.9)] px-2 py-1 bg-black/60 backdrop-blur-sm rounded-lg border border-white/10 uppercase tracking-wide">
-            "THIS MOMENT CHANGED EVERYTHING"
+          <div class="w-full text-center my-auto px-2 pointer-events-none">
+            <div id="liveCaptionPreview" class="caption-preview-box caption-style-viral_pop text-center text-sm drop-shadow-[0_2px_8px_rgba(0,0,0,0.9)]">
+              THIS <span class="highlight">MOMENT</span> CHANGED EVERYTHING
+            </div>
           </div>
+
           <div class="text-[9px] font-mono text-[#8B8D98] bg-black/70 px-2 py-0.5 rounded backdrop-blur-sm self-end">
             1080 × 1920
           </div>
@@ -62,11 +75,27 @@
         <button type="button" onclick="switchEditorTab('effects')" id="tabBtnEffects" class="flex-1 py-1.5 rounded-full text-[#8B8D98] hover:text-white text-center transition-all">Effects</button>
       </div>
 
-      <!-- Tab Content: Caption -->
+      <!-- Tab Content: Caption (10 Presets) -->
       <div id="tabContentCaption" class="flex flex-col gap-4">
         <div>
+          <label class="block text-[10px] uppercase font-semibold text-[#8B8D98] tracking-wider mb-1.5">Caption Preset Style</label>
+          <select id="editorCaptionPresetSelect" onchange="setEditorCaptionPreset(this.value)" class="w-full bg-[#17181D] rounded-full px-4 py-2 text-xs text-white border border-white/10 outline-none">
+            <option value="viral_pop">Viral Pop (Highlight Bounce)</option>
+            <option value="minimalist">Clean Minimalist (Editorial)</option>
+            <option value="neon_cyber">Neon Cyber (Glow Aura)</option>
+            <option value="karaoke">Karaoke Word Bounce</option>
+            <option value="headline">Bold Headline (Impact)</option>
+            <option value="dynamic_box">Dynamic Pill Box (White Solid)</option>
+            <option value="glitch_cyber">Glitch Cyberpunk (RGB Split)</option>
+            <option value="gold_luxury">Gold Metallic Luxury</option>
+            <option value="comic_pop">Retro Comic Pop</option>
+            <option value="cinematic_sub">Cinematic Subtitle</option>
+          </select>
+        </div>
+
+        <div>
           <label class="block text-[10px] uppercase font-semibold text-[#8B8D98] tracking-wider mb-1.5">Subtitle Script</label>
-          <textarea id="captionTextInput" rows="3" class="w-full bg-[#17181D] rounded-xl p-3 text-xs text-white placeholder-[#8B8D98] focus:outline-none border border-white/10 focus:border-white/30 resize-none">THIS MOMENT CHANGED EVERYTHING</textarea>
+          <textarea id="captionTextInput" rows="2" class="w-full bg-[#17181D] rounded-xl p-3 text-xs text-white placeholder-[#8B8D98] focus:outline-none border border-white/10 focus:border-white/30 resize-none">THIS MOMENT CHANGED EVERYTHING</textarea>
         </div>
 
         <div>
@@ -75,6 +104,8 @@
             <option value="Rubik">Rubik (Modern Punchy)</option>
             <option value="Inter">Inter (Clean Editorial)</option>
             <option value="Impact">Impact (Classic Viral)</option>
+            <option value="Courier New">Courier New (Monospaced)</option>
+            <option value="Georgia">Georgia (Luxury Serif)</option>
           </select>
         </div>
 
@@ -82,7 +113,9 @@
           <label class="block text-[10px] uppercase font-semibold text-[#8B8D98] tracking-wider mb-1.5">Animation Style</label>
           <select id="captionAnimSelect" class="w-full bg-[#17181D] rounded-full px-4 py-2 text-xs text-white border border-white/10 outline-none">
             <option value="bounce">Word Bounce Pop (Viral)</option>
-            <option value="karaoke">Karaoke Highlight</option>
+            <option value="karaoke">Karaoke Highlight Wave</option>
+            <option value="glow">Neon Pulse Bloom</option>
+            <option value="glitch">Glitch Jitter</option>
             <option value="typewriter">Typewriter Reveal</option>
           </select>
         </div>
@@ -93,26 +126,42 @@
             <button type="button" onclick="setCaptionColor('#FACC15')" class="w-6 h-6 rounded-full bg-yellow-400 hover:scale-110 transition-transform" title="Vivid Yellow"></button>
             <button type="button" onclick="setCaptionColor('#2165F7')" class="w-6 h-6 rounded-full bg-[#2165F7] hover:scale-110 transition-transform" title="Blue"></button>
             <button type="button" onclick="setCaptionColor('#8655FF')" class="w-6 h-6 rounded-full bg-[#8655FF] hover:scale-110 transition-transform" title="Purple"></button>
+            <button type="button" onclick="setCaptionColor('#22C55E')" class="w-6 h-6 rounded-full bg-green-500 hover:scale-110 transition-transform" title="Emerald"></button>
+            <button type="button" onclick="setCaptionColor('#EC4899')" class="w-6 h-6 rounded-full bg-pink-500 hover:scale-110 transition-transform" title="Neon Pink"></button>
             <button type="button" onclick="setCaptionColor('#FFFFFF')" class="w-6 h-6 rounded-full bg-white hover:scale-110 transition-transform" title="Pure White"></button>
           </div>
         </div>
       </div>
 
-      <!-- Tab Content: Style -->
+      <!-- Tab Content: Style (Framing Models + Sizing) -->
       <div id="tabContentStyle" class="hidden flex flex-col gap-4">
+        <div>
+          <label class="block text-[10px] uppercase font-semibold text-[#8B8D98] tracking-wider mb-1.5">Frame Model / Reframe Engine</label>
+          <select id="editorFrameModelSelect" onchange="setEditorFrameModel(this.value)" class="w-full bg-[#17181D] rounded-full px-4 py-2 text-xs text-white border border-white/10 outline-none">
+            <option value="follow-face">Follow Speaker Face (AI YuNet)</option>
+            <option value="center">Center Crop 9:16 (Fixed)</option>
+            <option value="split">Split Screen Stack (Dual Layer)</option>
+            <option value="dual-speaker">Dual-Speaker Switcher</option>
+            <option value="blurred-fill">Blurred Mirror Pillarbox Fill</option>
+            <option value="letterbox">Cinematic 2.35:1 Letterbox</option>
+            <option value="pip">Picture-in-Picture (PiP Reaction)</option>
+          </select>
+        </div>
+
         <div>
           <div class="flex justify-between text-xs text-[#8B8D98] mb-1">
             <span>Font Size</span>
             <span id="fontSizeDisplay" class="text-white">28px</span>
           </div>
-          <input type="range" min="16" max="48" value="28" class="w-full accent-[#2165F7]" oninput="document.getElementById('fontSizeDisplay').textContent=this.value+'px'">
+          <input type="range" min="16" max="48" value="28" class="w-full accent-[#2165F7]" oninput="handleFontSize(this.value)">
         </div>
+
         <div>
           <div class="flex justify-between text-xs text-[#8B8D98] mb-1">
             <span>Vertical Placement</span>
             <span id="posDisplay" class="text-white">75% (Lower Third)</span>
           </div>
-          <input type="range" min="20" max="85" value="75" class="w-full accent-[#2165F7]" oninput="document.getElementById('posDisplay').textContent=this.value+'%'">
+          <input type="range" min="20" max="85" value="75" class="w-full accent-[#2165F7]" oninput="handleVerticalPos(this.value)">
         </div>
       </div>
 
@@ -129,6 +178,13 @@
           <div>
             <div class="text-xs font-medium text-white">Voice Audio Polish</div>
             <div class="text-[10px] text-[#8B8D98]">Normalize loudness &amp; remove hum</div>
+          </div>
+          <input type="checkbox" checked class="w-4 h-4 rounded accent-[#2165F7]">
+        </div>
+        <div class="p-3 rounded-2xl bg-[#17181D] border border-white/10 flex items-center justify-between">
+          <div>
+            <div class="text-xs font-medium text-white">Kinetic Punch-In Cuts</div>
+            <div class="text-[10px] text-[#8B8D98]">Subtle 5% zoom on impactful phrases</div>
           </div>
           <input type="checkbox" checked class="w-4 h-4 rounded accent-[#2165F7]">
         </div>
@@ -174,7 +230,7 @@
       <!-- Caption Track -->
       <div class="flex items-center gap-3">
         <span class="w-16 text-[10px] font-semibold text-[#8B8D98] uppercase tracking-wider shrink-0">Caption</span>
-        <div class="flex-1 h-8 bg-[#24252B] rounded-lg border border-white/10 flex items-center px-3 text-[10px] text-yellow-300">
+        <div id="timelineCaptionTrack" class="flex-1 h-8 bg-[#24252B] rounded-lg border border-white/10 flex items-center px-3 text-[10px] text-yellow-300">
           "THIS MOMENT CHANGED EVERYTHING"
         </div>
       </div>
@@ -185,50 +241,148 @@
 
 {% block scripts %}
 <script>
+  const editorCaptionMap = {
+    viral_pop: 'caption-style-viral_pop',
+    minimalist: 'caption-style-minimalist',
+    neon_cyber: 'caption-style-neon_cyber',
+    karaoke: 'caption-style-karaoke',
+    headline: 'caption-style-headline',
+    dynamic_box: 'caption-style-dynamic_box',
+    glitch_cyber: 'caption-style-glitch_cyber',
+    gold_luxury: 'caption-style-gold_luxury',
+    comic_pop: 'caption-style-comic_pop',
+    cinematic_sub: 'caption-style-cinematic_sub'
+  };
+
   function switchEditorTab(tabName) {
-    playGlassTick();
+    if (window.playGlassTick) window.playGlassTick();
     ['caption', 'style', 'effects'].forEach(t => {
       const btn = document.getElementById('tabBtn' + t.charAt(0).toUpperCase() + t.slice(1));
       const content = document.getElementById('tabContent' + t.charAt(0).toUpperCase() + t.slice(1));
       if (t === tabName) {
-        btn.className = "flex-1 py-1.5 rounded-xl bg-cyan-500/20 text-cyan-400 font-bold text-center transition-all";
-        content.classList.remove('hidden');
+        if (btn) btn.className = "flex-1 py-1.5 rounded-full bg-[#2165F7] text-white font-semibold text-center transition-all";
+        if (content) content.classList.remove('hidden');
       } else {
-        btn.className = "flex-1 py-1.5 rounded-xl text-slate-400 hover:text-white text-center transition-all";
-        content.classList.add('hidden');
+        if (btn) btn.className = "flex-1 py-1.5 rounded-full text-[#8B8D98] hover:text-white text-center transition-all";
+        if (content) content.classList.add('hidden');
       }
     });
   }
 
-  function setCaptionColor(hex) {
-    playGlassTick();
+  function setEditorCaptionPreset(presetKey) {
+    if (window.playGlassTick) window.playGlassTick();
     const preview = document.getElementById('liveCaptionPreview');
-    if (preview) preview.style.color = hex;
+    if (!preview) return;
+    preview.className = `caption-preview-box text-center text-sm drop-shadow-[0_2px_8px_rgba(0,0,0,0.9)] ${editorCaptionMap[presetKey] || 'caption-style-viral_pop'}`;
+    updateCaptionPreview();
+  }
+
+  function setEditorFrameModel(modelKey) {
+    if (window.playGlassTick) window.playGlassTick();
+    const badge = document.getElementById('editorFrameBadge');
+    const overlay = document.getElementById('editorFrameGuideOverlay');
+    if (badge) badge.textContent = `9:16 SAFE ZONE • ${modelKey.toUpperCase()}`;
+
+    if (!overlay) return;
+    if (modelKey === 'split') {
+      overlay.innerHTML = `
+        <div class="absolute inset-x-0 top-1/2 -translate-y-1/2 h-0.5 bg-[#8655FF] shadow-[0_0_8px_#8655FF] flex items-center justify-between px-2">
+          <span class="text-[7px] font-mono bg-black/80 text-purple-300 px-1 rounded -translate-y-2">TOP: CLOSE-UP</span>
+          <span class="text-[7px] font-mono bg-black/80 text-purple-300 px-1 rounded translate-y-2">BOT: CONTEXT</span>
+        </div>
+      `;
+    } else if (modelKey === 'blurred-fill') {
+      overlay.innerHTML = `
+        <div class="absolute inset-x-0 top-0 h-16 bg-blue-900/30 backdrop-blur-md border-b border-white/10 flex items-center justify-center text-[8px] text-[#8B8D98]">Blurred Fill</div>
+        <div class="absolute inset-x-0 bottom-0 h-16 bg-blue-900/30 backdrop-blur-md border-t border-white/10 flex items-center justify-center text-[8px] text-[#8B8D98]">Blurred Fill</div>
+      `;
+    } else if (modelKey === 'letterbox') {
+      overlay.innerHTML = `
+        <div class="absolute inset-x-0 top-0 h-20 bg-black flex items-center justify-center text-[8px] text-white/50 font-mono">2.35:1 SCOPE</div>
+        <div class="absolute inset-x-0 bottom-0 h-20 bg-black flex items-center justify-center text-[8px] text-white/50 font-mono">LETTERBOX</div>
+      `;
+    } else if (modelKey === 'pip') {
+      overlay.innerHTML = `
+        <div class="absolute top-8 right-2 w-14 h-14 rounded-full border-2 border-[#8655FF] bg-black/70 flex items-center justify-center text-[8px] text-purple-300 font-bold">
+          <span>👤 PiP</span>
+        </div>
+      `;
+    } else if (modelKey === 'dual-speaker') {
+      overlay.innerHTML = `
+        <div class="absolute top-12 left-2 w-14 h-16 border border-blue-400 rounded-lg flex items-center justify-center text-[7px] text-blue-300 bg-blue-950/40">Speaker A</div>
+        <div class="absolute top-12 right-2 w-14 h-16 border border-dashed border-white/30 rounded-lg flex items-center justify-center text-[7px] text-slate-400">Speaker B</div>
+      `;
+    } else {
+      overlay.innerHTML = `
+        <div class="absolute inset-x-8 top-12 bottom-32 border-2 border-blue-400 border-dashed rounded-xl pointer-events-none flex flex-col justify-between p-2">
+          <div class="flex justify-between items-center text-[8px] font-mono text-blue-400 bg-black/60 px-2 py-0.5 rounded self-start">
+            <span>[AI YuNet]</span>
+          </div>
+        </div>
+      `;
+    }
+  }
+
+  function setCaptionColor(hex) {
+    if (window.playGlassTick) window.playGlassTick();
+    const preview = document.getElementById('liveCaptionPreview');
+    if (preview) {
+      const high = preview.querySelector('.highlight');
+      if (high) high.style.color = hex;
+      else preview.style.color = hex;
+    }
   }
 
   function updateCaptionPreview() {
     const input = document.getElementById('captionTextInput');
     const select = document.getElementById('captionFontSelect');
     const preview = document.getElementById('liveCaptionPreview');
-    if (preview && input) preview.textContent = `"${input.value || 'UNTITLED'}"`;
-    if (preview && select) preview.style.fontFamily = select.value;
+    const track = document.getElementById('timelineCaptionTrack');
+    const text = input ? input.value : 'THIS MOMENT CHANGED EVERYTHING';
+    if (track) track.textContent = `"${text}"`;
+    if (!preview) return;
+
+    const words = text.trim().split(/\s+/);
+    if (words.length <= 1) {
+      preview.innerHTML = `<span class="highlight">${words[0] || 'CLIPGLASS'}</span>`;
+    } else {
+      const mid = Math.floor(words.length / 2);
+      const pre = words.slice(0, mid).join(' ');
+      const high = words[mid];
+      const post = words.slice(mid + 1).join(' ');
+      preview.innerHTML = `${pre} <span class="highlight">${high}</span> ${post}`;
+    }
+
+    if (select) preview.style.fontFamily = select.value;
+  }
+
+  function handleFontSize(val) {
+    const disp = document.getElementById('fontSizeDisplay');
+    const preview = document.getElementById('liveCaptionPreview');
+    if (disp) disp.textContent = val + 'px';
+    if (preview) preview.style.fontSize = val + 'px';
+  }
+
+  function handleVerticalPos(val) {
+    const disp = document.getElementById('posDisplay');
+    if (disp) disp.textContent = val + '% (Vertical)';
   }
 
   let isPlaying = false;
   function toggleEditorPlayback() {
-    playGlassTick();
+    if (window.playGlassTick) window.playGlassTick();
     isPlaying = !isPlaying;
     const btn = document.getElementById('editorPlayBtn');
     if (btn) btn.textContent = isPlaying ? '❚❚' : '▶';
   }
 
   function cycleAspectRatio() {
-    playGlassTick();
-    alert('Aspect ratio switched to 9:16 Vertical Shorts safe layout.');
+    if (window.playGlassTick) window.playGlassTick();
+    if (window.showToast) window.showToast('Aspect ratio locked to 9:16 Vertical Shorts safe layout.', 'info');
   }
 
   function exportEditedClip() {
-    playGlassTick();
+    if (window.playGlassTick) window.playGlassTick();
     const btn = document.getElementById('exportClipBtn');
     btn.disabled = true;
     btn.innerHTML = `<svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white inline" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path></svg> Rendering Clip...`;
@@ -238,5 +392,11 @@
   }
 
   document.getElementById('captionTextInput')?.addEventListener('input', updateCaptionPreview);
+
+  document.addEventListener('DOMContentLoaded', () => {
+    updateCaptionPreview();
+    setEditorCaptionPreset('viral_pop');
+    setEditorFrameModel('follow-face');
+  });
 </script>
 {% endblock %}

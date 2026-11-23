@@ -102,7 +102,29 @@ def build_reframe_filter(
     if reframe_mode == 'split':
         return compute_split_screen_filter(width, height), True
 
-    elif reframe_mode == 'follow-face':
+    elif reframe_mode == 'blurred-fill':
+        filter_str = (
+            "[0:v]split=2[bg][fg];"
+            "[bg]scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920,boxblur=20:5[bg_blur];"
+            "[fg]scale=1080:-2[fg_scaled];"
+            "[bg_blur][fg_scaled]overlay=(W-w)/2:(H-h)/2[v]"
+        )
+        return filter_str, True
+
+    elif reframe_mode == 'letterbox':
+        filter_str = "scale=1080:1920:force_original_aspect_ratio=decrease,pad=1080:1920:(ow-iw)/2:(oh-ih)/2:black"
+        return filter_str, False
+
+    elif reframe_mode == 'pip':
+        filter_str = (
+            "[0:v]split=2[main][pip];"
+            "[main]crop=ih*9/16:ih:(iw-ow)/2:0,scale=1080:1920[v_bg];"
+            "[pip]scale=400:400:force_original_aspect_ratio=increase,crop=400:400[v_pip];"
+            "[v_bg][v_pip]overlay=W-w-40:80[v]"
+        )
+        return filter_str, True
+
+    elif reframe_mode in ('follow-face', 'dual-speaker'):
         points = track_faces_opencv_or_mediapipe(video_path, start_time, duration, width, height)
         target_w = int(height * 9 / 16)
         target_w = target_w - (target_w % 2)
