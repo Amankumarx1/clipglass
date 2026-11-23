@@ -512,7 +512,7 @@ if(btnRe)btnRe.onclick=()=>{T=0;isExploded=false;if(btnExp)btnExp.classList.remo
 if(btnAud)btnAud.onclick=()=>{initAudio();soundEnabled=!soundEnabled;btnAud.classList.toggle('active',soundEnabled);$('#soundLabel').textContent=soundEnabled?'Sound ON':'Sound FX';if(soundEnabled)playHaptic('chime')};
 
 // Animation
-let slide=0,spin=0,sw=0,mx=0,my=0,T=0,last=0,drag=0,dragging=false,px=0,sp=0;
+let slide=0,spin=0,sw=0,mx=0,my=0,smx=0,smy=0,T=0,last=0,drag=0,dragging=false,px=0,sp=0;
 const cr={yaw:SL[0].yaw+2.6,x:0,y:0,s:.75};
 const ease=t=>1-Math.pow(1-t,4),cl=(v,a,b)=>Math.min(b,Math.max(a,v)),L=(a,b,t)=>a+(b-a)*t;
 function size(){const w=innerWidth,h=innerHeight;R.setSize(w,h,false);C.aspect=w/h;C.updateProjectionMatrix()}
@@ -523,7 +523,7 @@ addEventListener('pointerup',()=>{dragging=false;$('.stage').classList.remove('d
 window.GL={change(i,dir){slide=i;spin+=dir;bars.forEach(b=>{b.userData.dir=-1;b.userData.wait=.5+b.userData.delay})},color(k){sw=k}};
 
 function tick(t){
-  const dt=Math.min(.05,(t-(last||t))*.001);last=t;const sec=t*.001,ds=dt*(CG.skip?5:1);
+  const dt=Math.min(.033,(t-(last||t))*.001);last=t;const sec=t*.001,ds=dt*(CG.skip?5:1);
   if(CG.started){
     if(CG.skip){T=99}else T+=ds;
     if(T>4.4&&!tick.rv){tick.rv=1;document.body.classList.add('ready');try{sessionStorage.setItem('cg_intro','1')}catch(e){}}
@@ -535,35 +535,48 @@ function tick(t){
   if(!dragging)drag*=Math.exp(-dt*1.3);
   sp+=(cl(scrollY/innerHeight,0,1)-sp)*(1-Math.exp(-dt*8));const scr=sp*4.6;
 
-  explodeAmt+=((isExploded?1:0)-explodeAmt)*(1-Math.exp(-dt*6));
+  smx+=(mx-smx)*(1-Math.exp(-dt*6));
+  smy+=(my-smy)*(1-Math.exp(-dt*6));
+
+  explodeAmt+=((isExploded?1:0)-explodeAmt)*(1-Math.exp(-dt*5.5));
 
   if(soundEnabled){
-    if(T>1.7&&!tick.s1){tick.s1=1;playHaptic('dock')}
-    if(T>2.9&&!tick.s2){tick.s2=1;playHaptic('click')}
-    if(T>3.9&&!tick.s3){tick.s3=1;playHaptic('squish')}
-    if(T>4.1&&!tick.s4){tick.s4=1;playHaptic('lock')}
+    if(T>1.8&&!tick.s1){tick.s1=1;playHaptic('dock')}
+    if(T>2.8&&!tick.s2){tick.s2=1;playHaptic('click')}
+    if(T>3.8&&!tick.s3){tick.s3=1;playHaptic('click')}
+    if(T>4.0&&!tick.s4){tick.s4=1;playHaptic('squish')}
+    if(T>4.18&&!tick.s5){tick.s5=1;playHaptic('lock')}
   }
-  if(T<0.2){tick.s1=tick.s2=tick.s3=tick.s4=0}
+  if(T<0.2){tick.s1=tick.s2=tick.s3=tick.s4=tick.s5=0}
 
+  // Smooth C2 quintic interpolation suite
   const bk=(d,n)=>cl((T-d)/n,0,1);
-  const eb=(x,s=1.65)=>{if(x>=1)return 1;const t=x-1;return 1+t*t*((s+1)*t+s)};
-  const e=ease(bk(0,4.2));
+  const sm=x=>{if(x<=0)return 0;if(x>=1)return 1;return x*x*x*(x*(x*6-15)+10)};
+  const smDock=(x,snap=0.03)=>{
+    if(x<=0)return 0;if(x>=1)return 1;
+    const s=x*x*x*(x*(x*6-15)+10);
+    if(x>0.6&&snap>0){const p=(x-0.6)/0.4;return s+Math.sin(p*Math.PI)*(1-p)*snap}
+    return s;
+  };
+  const smRot=x=>{if(x<=0)return 0;if(x>=1)return 1;return x*x*(3-2*x)};
 
   // 1. Headband outer structural arch drops with aerodynamic tilt
-  const uBand=eb(bk(.4,1.4),1.5);
-  bandG.position.y=(1-uBand)*4.5+explodeAmt*1.6;
-  bandG.position.z=(1-uBand)*.5;
-  bandG.rotation.z=(1-uBand)*.35;
-  bandG.rotation.x=-(1-uBand)*.35;
+  const uBandPos=smDock(bk(.25,1.5),.025);
+  const uBandRot=smRot(bk(.25,1.5));
+  bandG.position.y=(1-uBandPos)*4.2+explodeAmt*1.6;
+  bandG.position.z=(1-uBandPos)*.45;
+  bandG.rotation.z=(1-uBandRot)*.32;
+  bandG.rotation.x=-(1-uBandRot)*.32;
 
   // 2. Headband inner leather comfort pad floats up from below and snaps inside arch
-  const uPad=eb(bk(.8,1.35),1.8);
-  padG.position.y=-(1-uPad)*2.8-explodeAmt*1.1;
-  padG.position.z=-(1-uPad)*1.8-explodeAmt*.4;
-  padG.rotation.x=(1-uPad)*.45;
+  const uPadPos=smDock(bk(.65,1.4),.02);
+  const uPadRot=smRot(bk(.65,1.4));
+  padG.position.y=-(1-uPadPos)*2.6-explodeAmt*1.1;
+  padG.position.z=-(1-uPadPos)*1.6-explodeAmt*.4;
+  padG.rotation.x=(1-uPadRot)*.4;
 
   // 3. Telescoping extension slider arms extend downward from headband tips
-  const uArms=eb(bk(1.2,1.3),1.5);
+  const uArms=smDock(bk(1.05,1.3),.03);
   armParts.forEach(arm=>{arm.position.y=-(1-uArms)*.85-explodeAmt*.35});
 
   // 4. Earcups Granular Exploded Hierarchy
@@ -571,61 +584,69 @@ function tick(t){
     const s=cp.side;
     
     // Yoke arcs in smoothly from wide perimeter
-    const uYoke=eb(bk(1.6+i*.1,1.35),1.75);
-    cp.yokeG.position.x=s*(1-uYoke)*4.5+s*explodeAmt*1.8;
-    cp.yokeG.position.y=-(1-uYoke)*1.4;
-    cp.yokeG.position.z=(1-uYoke)*2.2;
-    cp.yokeG.rotation.y=s*(1-uYoke)*2.4;
-    cp.yokeG.rotation.z=s*(1-uYoke)*.6;
+    const uYokePos=smDock(bk(1.45+i*.1,1.4),.025);
+    const uYokeRot=smRot(bk(1.45+i*.1,1.4));
+    cp.yokeG.position.x=s*(1-uYokePos)*4.2+s*explodeAmt*1.8;
+    cp.yokeG.position.y=-(1-uYokePos)*1.3;
+    cp.yokeG.position.z=(1-uYokePos)*2.0;
+    cp.yokeG.rotation.y=s*(1-uYokeRot)*2.2;
+    cp.yokeG.rotation.z=s*(1-uYokeRot)*.5;
 
     // Pivot Pins shoot inward along Z axis
-    const uPins=eb(bk(2.0+i*.08,1.1),1.4);
-    cp.pinMeshes[0].position.z=-.82-(1-uPins)*2.5-explodeAmt*1.2;
-    cp.pinMeshes[1].position.z=.82+(1-uPins)*2.5+explodeAmt*1.2;
+    const uPins=smDock(bk(1.95+i*.08,1.15),.04);
+    cp.pinMeshes[0].position.z=-.82-(1-uPins)*2.4-explodeAmt*1.2;
+    cp.pinMeshes[1].position.z=.82+(1-uPins)*2.4+explodeAmt*1.2;
 
     // Driver bezel rim aligns inside
-    const uRim=eb(bk(2.3+i*.08,1.15),1.5);
-    cp.rimG.position.y=-(1-uRim)*1.5-explodeAmt*.6;
+    const uRim=smDock(bk(2.25+i*.08,1.15),.02);
+    cp.rimG.position.y=-(1-uRim)*1.4-explodeAmt*.6;
 
     // Outer acoustic shell flies into yoke center
-    const uShell=eb(bk(2.4+i*.1,1.2),1.65);
-    cp.shellG.position.y=(1-uShell)*3.2+explodeAmt*1.5;
-    cp.shellG.position.x=s*(1-uShell)*1.5;
-    cp.shellG.rotation.y=s*(1-uShell)*2.0;
+    const uShellPos=smDock(bk(2.45+i*.1,1.25),.03);
+    const uShellRot=smRot(bk(2.45+i*.1,1.25));
+    cp.shellG.position.y=(1-uShellPos)*3.0+explodeAmt*1.5;
+    cp.shellG.position.x=s*(1-uShellPos)*1.4;
+    cp.shellG.rotation.y=s*(1-uShellRot)*1.8;
 
     // Machined center badges press down into the shell
-    const uBadge=eb(bk(2.7+i*.08,1.0),2.0);
-    cp.badgeG.position.y=(1-uBadge)*2.2+explodeAmt*1.2;
+    const uBadge=smDock(bk(2.75+i*.08,1.1),.04);
+    cp.badgeG.position.y=(1-uBadge)*2.0+explodeAmt*1.2;
 
-    // Memory foam cushions fly outward from inner listener space and dock with soft bounce
-    const uCush=eb(bk(3.0+i*.1,1.15),2.2);
-    cp.cushionG.position.y=-(1-uCush)*3.2-explodeAmt*1.6;
-    cp.cushionG.position.x=-s*(1-uCush)*1.8;
-    const squish=uCush>0.7&&uCush<1.2?(1+Math.sin((uCush-0.7)*2.5*Math.PI)*0.16*Math.exp(-(uCush-0.7)*4)):1;
-    cp.cushionG.scale.set(squish,1/squish,squish);
+    // Memory foam cushions fly outward and dock with organic viscoelastic compression
+    const tCush=bk(2.95+i*.1,1.2);
+    const uCushPos=sm(tCush);
+    cp.cushionG.position.y=-(1-uCushPos)*3.0-explodeAmt*1.6;
+    cp.cushionG.position.x=-s*(1-uCushPos)*1.7;
+    const compP=cl((tCush-.75)/.25,0,1);
+    const comp=compP>0&&compP<1?Math.sin(compP*Math.PI)*.11:0;
+    cp.cushionG.scale.set(1-comp,1+comp*.5,1+comp*.5);
 
     // Holographic caliper & reticle rings during assembly and in exploded mode
     const guideProgress=cl((T-(.8+i*.1))/3.2,0,1);
     const guideAlpha=Math.sin(guideProgress*Math.PI);
     if(cp.caliperRing){
-      cp.caliperRing.material.opacity=Math.max(T<4.0?guideAlpha*.75:0,explodeAmt*.85);
-      cp.caliperRing.scale.setScalar(1+(1-uShell)*1.9+explodeAmt*.6);
-      cp.caliperRing.position.y=(1-uShell)*1.4+explodeAmt*.8;
-      cp.caliperRing.rotation.z+=dt*(1.5+explodeAmt*2);
+      const alpha=Math.max(T<4.2?guideAlpha*.65:0,explodeAmt*.85);
+      cp.caliperRing.material.opacity=alpha;
+      cp.caliperRing.scale.setScalar(1+(1-uShellPos)*1.6+explodeAmt*.6);
+      cp.caliperRing.position.y=(1-uShellPos)*1.2+explodeAmt*.8;
+      cp.caliperRing.rotation.z+=dt*(1.2+explodeAmt*1.8);
     }
     if(cp.reticleRing){
-      cp.reticleRing.material.opacity=Math.max(T<3.6?guideAlpha*.65:0,explodeAmt*.75);
-      cp.reticleRing.scale.setScalar(1+(1-uYoke)*1.6+explodeAmt*.5);
-      cp.reticleRing.rotation.x+=dt*(1.2+explodeAmt*1.8);
+      const alpha=Math.max(T<3.8?guideAlpha*.55:0,explodeAmt*.75);
+      cp.reticleRing.material.opacity=alpha;
+      cp.reticleRing.scale.setScalar(1+(1-uYokePos)*1.4+explodeAmt*.5);
+      cp.reticleRing.rotation.x+=dt*(1.0+explodeAmt*1.5);
     }
   });
 
-  inner.scale.setScalar(.6+.4*e);
-  if(real){real.scale.setScalar(realS*(.6+.4*e));real.rotation.y=MODEL_ROT_Y}
+  inner.scale.setScalar(1);
+  if(real){real.scale.setScalar(realS);real.rotation.y=MODEL_ROT_Y}
 
-  H.position.set(cr.x,cr.y-.35*cr.s+(still?0:Math.sin(sec*1.1)*.1)+scr,0);
+  const hoverFade=sm(cl((T-4.1)/1.0,0,1));
+  const hoverBob=(still?0:Math.sin(sec*1.1)*.08*hoverFade);
+  H.position.set(cr.x,cr.y-.35*cr.s+hoverBob+scr,0);
   H.scale.setScalar(cr.s);
-  H.rotation.y=cr.yaw+drag+mx*.45+sp*1.2;H.rotation.x=my*.25;H.rotation.z=-mx*.05;
+  H.rotation.y=cr.yaw+drag+smx*.45+sp*1.2;H.rotation.x=smy*.25;H.rotation.z=-smx*.05;
 
   const kc=1-Math.exp(-dt*6);
   bodyMats.forEach(mt=>mt.color.lerp(lin(SW[sw][0]),kc));trim.color.lerp(lin(SW[sw][1]),kc);
@@ -635,25 +656,26 @@ function tick(t){
     if(u.dir<0){u.p-=ds*3;if(u.p<=0){u.p=0;u.dir=1;b.material.color.copy(u.ci===3?new THREE.Color(1,1,1):lin(SL[slide].acc[u.ci]))}}
     else if(u.wait>0)u.wait-=ds;else u.p=Math.min(1,u.p+ds*1.2);
     const q=ease(cl(u.p,0,1)),off=-3*(1-q);
-    b.position.set(cr.x+u.x*(cr.s/.75)+Math.cos(ANG)*off+mx*u.par*1.2,cr.y+u.y*(cr.s/.75)+Math.sin(ANG)*off-my*u.par*.6+scr,u.z);
+    b.position.set(cr.x+u.x*(cr.s/.75)+Math.cos(ANG)*off+smx*u.par*1.2,cr.y+u.y*(cr.s/.75)+Math.sin(ANG)*off-smy*u.par*.6+scr,u.z);
     b.material.opacity=q;b.visible=!m||u.ci!==3});
 
   // Cinematic opening camera: frames the entire headphone assembly in wide isometric 3D view,
-  // orbits smoothly as parts converge, then glides into hero placement.
+  // orbits smoothly as parts converge, then glides into hero placement with zero jerk.
   const uCam=cl(T/4.4,0,1);
-  const qCam=uCam<.5?4*uCam*uCam*uCam:1-Math.pow(-2*uCam+2,3)/2;
+  const qCam=sm(uCam);
   C.fov=L(34,30,qCam);C.updateProjectionMatrix();
-  C.position.set(L(-.8,mx*.35,qCam)+Math.sin((1-qCam)*Math.PI*.7)*1.8,L(1.4,-my*.2,qCam),L(9.4,10.5,qCam));
-  C.lookAt(L(0,0,qCam),L(.35,0,qCam),0);
-  C.rotation.z=(1-qCam)*.08*Math.cos(qCam*Math.PI);
+  const camOrbX=Math.sin((1-qCam)*Math.PI*.65)*1.6;
+  C.position.set(L(-.6,smx*.35,qCam)+camOrbX,L(1.3,-smy*.2,qCam),L(9.6,10.5,qCam));
+  C.lookAt(0,L(.35,0,qCam),0);
+  C.rotation.z=(1-qCam)*.05*Math.sin(qCam*Math.PI);
 
   // Dynamic Cursor Follow Specular Lighting & Ground Contact Shadow
-  followLight.position.set(mx*5,my*4+1,4.8);
-  groundShadow.material.opacity=(1-uBand)*0+uBand*.55*(1-cl(Math.abs(H.position.y-.5)*.4,0,.5));
+  followLight.position.set(smx*5,smy*4+1,4.8);
+  groundShadow.material.opacity=(1-uBandPos)*0+uBandPos*.55*(1-cl(Math.abs(H.position.y-.5)*.4,0,.5));
   groundShadow.position.x=H.position.x;
   groundShadow.scale.setScalar(1+(H.position.y-.5)*.2);
 
-  const sT=T-4.0;   // energetic shockwave and flash when all parts lock together
+  const sT=T-4.08;   // energetic shockwave and flash when all parts lock together
   if(sT>0&&sT<1.4){const w=sT/1.4;shock.visible=true;shock.position.set(H.position.x,H.position.y+.35,-.2);shock.scale.setScalar(1.2+w*8.5);shock.material.opacity=(1-w)*.95;glow.material.opacity=.5+(1-w)*.8}else{shock.visible=false;glow.material.opacity=.5}
   sweep.position.x=L(-8,8,cl((T-2.8)/2.2,0,1));sweep.intensity=T>2.8&&T<5.0?3.8*Math.sin(cl((T-2.8)/2.2,0,1)*Math.PI):0;
   const dpz=dust.geometry.attributes.position.array,dz=(.4+(1-qCam)*4)*dt;for(let i=2;i<dpz.length;i+=3){dpz[i]+=dz;if(dpz[i]>6)dpz[i]-=12}
