@@ -7,14 +7,17 @@
   <!-- Header Banner -->
   <div class="border-b border-white/10 pb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
     <div>
-      <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-[10px] font-semibold text-slate-400 mb-2 tracking-widest uppercase">
+      <div
+        class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-[10px] font-semibold text-slate-400 mb-2 tracking-widest uppercase">
         Design System
       </div>
       <h1 class="text-3xl font-extrabold tracking-tight text-white mb-1">Design Showcase</h1>
-      <p class="text-xs text-slate-400">ClipGlass Liquid Glass 2.0 — High-fidelity token system, capsule surfaces, and sensory controls.</p>
+      <p class="text-xs text-slate-400">ClipGlass Liquid Glass 2.0 — High-fidelity token system, capsule surfaces, and
+        sensory controls.</p>
     </div>
     <div class="flex items-center gap-2">
-      <span class="px-4 py-1.5 rounded-full capsule-surface text-xs font-semibold text-blue-400 border border-blue-500/20 shadow-sm flex items-center gap-1.5">
+      <span
+        class="px-4 py-1.5 rounded-full capsule-surface text-xs font-semibold text-blue-400 border border-blue-500/20 shadow-sm flex items-center gap-1.5">
         <span>🌙</span>
         <span>Cinematic Dark</span>
       </span>
@@ -27,26 +30,32 @@
     <div class="lg:col-span-3 capsule-surface rounded-3xl p-5 border border-white/10 sticky top-24">
       <h2 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">Components</h2>
       <nav class="flex flex-col gap-1.5 text-xs font-semibold">
-        <button type="button" onclick="showDesignSection('buttons')" id="btnTab-buttons" class="w-full p-2.5 rounded-xl bg-blue-600/20 text-blue-400 font-bold text-left transition-all">
+        <button type="button" onclick="showDesignSection('buttons')" id="btnTab-buttons"
+          class="w-full p-2.5 rounded-xl bg-blue-600/20 text-blue-400 font-bold text-left transition-all">
           Buttons &amp; Actions
         </button>
-        <button type="button" onclick="showDesignSection('inputs')" id="btnTab-inputs" class="w-full p-2.5 rounded-xl text-slate-400 hover:text-white text-left transition-all">
+        <button type="button" onclick="showDesignSection('inputs')" id="btnTab-inputs"
+          class="w-full p-2.5 rounded-xl text-slate-400 hover:text-white text-left transition-all">
           Inputs &amp; Sliders
         </button>
-        <button type="button" onclick="showDesignSection('cards')" id="btnTab-cards" class="w-full p-2.5 rounded-xl text-slate-400 hover:text-white text-left transition-all">
+        <button type="button" onclick="showDesignSection('cards')" id="btnTab-cards"
+          class="w-full p-2.5 rounded-xl text-slate-400 hover:text-white text-left transition-all">
           Capsule Surfaces
         </button>
-        <button type="button" onclick="showDesignSection('colors')" id="btnTab-colors" class="w-full p-2.5 rounded-xl text-slate-400 hover:text-white text-left transition-all">
+        <button type="button" onclick="showDesignSection('colors')" id="btnTab-colors"
+          class="w-full p-2.5 rounded-xl text-slate-400 hover:text-white text-left transition-all">
           Palette Tokens
         </button>
-        <button type="button" onclick="showDesignSection('modals')" id="btnTab-modals" class="w-full p-2.5 rounded-xl text-slate-400 hover:text-white text-left transition-all">
+        <button type="button" onclick="showDesignSection('modals')" id="btnTab-modals"
+          class="w-full p-2.5 rounded-xl text-slate-400 hover:text-white text-left transition-all">
           Telemetry &amp; Gauges
         </button>
       </nav>
 
       <!-- Decorative Accent Graphic -->
       <div class="mt-8 p-5 rounded-2xl bg-[#101113]/70 border border-white/5 text-center flex flex-col items-center">
-        <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-blue-600 to-purple-600 flex items-center justify-center text-2xl shadow-lg">
+        <div
+          class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-blue-600 to-purple-600 flex items-center justify-center text-2xl shadow-lg">
           💎
         </div>
         <div class="text-xs font-bold text-white mt-2">Liquid Glass 2.0</div>
@@ -57,30 +66,37 @@
     <!-- Right Component Preview Canvas -->
     <div class="lg:col-span-9 flex flex-col gap-8">
       <!-- Section: Buttons -->
-      <div id="section-buttons" class="capsule-surface rounded-3xl p-7 sm:p-8 border border-white/10 flex flex-col gap-6">
+      <div id="section-buttons"
+        class="capsule-surface rounded-3xl p-7 sm:p-8 border border-white/10 flex flex-col gap-6">
         <div>
           <h3 class="text-base font-bold text-white mb-1">Buttons &amp; Action Triggers</h3>
-          <p class="text-xs text-slate-400">Capsule pill buttons, haptic tick sounds, hover states, and glowing accents.</p>
+          <p class="text-xs text-slate-400">Capsule pill buttons, haptic tick sounds, hover states, and glowing accents.
+          </p>
         </div>
 
         <div class="flex flex-wrap items-center gap-3 pt-2">
-          <button type="button" onclick="playGlassPop()" class="px-6 py-2.5 rounded-full btn-pill-red text-xs uppercase tracking-wider font-bold">
+          <button type="button" onclick="playGlassPop()"
+            class="px-6 py-2.5 rounded-full btn-pill-red text-xs uppercase tracking-wider font-bold">
             Get Started
           </button>
 
-          <button type="button" onclick="playGlassTick()" class="px-6 py-2.5 rounded-full btn-pill-blue text-xs uppercase tracking-wider font-bold">
+          <button type="button" onclick="playGlassTick()"
+            class="px-6 py-2.5 rounded-full btn-pill-blue text-xs uppercase tracking-wider font-bold">
             Open App
           </button>
 
-          <button type="button" onclick="playGlassTick()" class="px-6 py-2.5 rounded-full btn-pill-dark text-xs font-bold">
+          <button type="button" onclick="playGlassTick()"
+            class="px-6 py-2.5 rounded-full btn-pill-dark text-xs font-bold">
             Audio Studio
           </button>
 
-          <button type="button" onclick="playGlassTick()" class="px-5 py-2.5 rounded-full bg-white/5 hover:bg-white/10 text-xs font-semibold text-slate-300 border border-white/10">
+          <button type="button" onclick="playGlassTick()"
+            class="px-5 py-2.5 rounded-full bg-white/5 hover:bg-white/10 text-xs font-semibold text-slate-300 border border-white/10">
             Secondary Action
           </button>
 
-          <button type="button" disabled class="px-5 py-2.5 rounded-full bg-white/5 opacity-40 text-xs font-semibold text-slate-500 cursor-not-allowed border border-white/5">
+          <button type="button" disabled
+            class="px-5 py-2.5 rounded-full bg-white/5 opacity-40 text-xs font-semibold text-slate-500 cursor-not-allowed border border-white/5">
             Disabled Action
           </button>
         </div>
@@ -88,14 +104,17 @@
         <div class="flex items-center gap-3 pt-2">
           <div class="p-1 rounded-full bg-[#101113]/70 border border-white/5 flex items-center gap-1 text-xs">
             <span class="px-4 py-1.5 rounded-full bg-blue-600 text-white font-bold">Video + Audio</span>
-            <span class="px-4 py-1.5 rounded-full text-slate-400 hover:text-white font-medium cursor-pointer">Video Only</span>
-            <span class="px-4 py-1.5 rounded-full text-slate-400 hover:text-white font-medium cursor-pointer">Audio Only</span>
+            <span class="px-4 py-1.5 rounded-full text-slate-400 hover:text-white font-medium cursor-pointer">Video
+              Only</span>
+            <span class="px-4 py-1.5 rounded-full text-slate-400 hover:text-white font-medium cursor-pointer">Audio
+              Only</span>
           </div>
         </div>
       </div>
 
       <!-- Section: Inputs & Controls -->
-      <div id="section-inputs" class="hidden capsule-surface rounded-3xl p-7 sm:p-8 border border-white/10 flex flex-col gap-6">
+      <div id="section-inputs"
+        class="hidden capsule-surface rounded-3xl p-7 sm:p-8 border border-white/10 flex flex-col gap-6">
         <div>
           <h3 class="text-base font-bold text-white mb-1">Form Controls &amp; Precision Sliders</h3>
           <p class="text-xs text-slate-400">Pill inputs, subtle dark borders, and precision sliders.</p>
@@ -105,8 +124,10 @@
           <!-- Search / URL Input -->
           <div class="relative flex items-center">
             <span class="absolute left-4 text-slate-500 text-xs pointer-events-none">🔍</span>
-            <input type="text" placeholder="Paste YouTube link or media URL..." class="w-full rounded-full bg-[#101113]/80 pl-11 pr-24 py-3 text-xs text-white placeholder-slate-500 focus:outline-none border border-white/10">
-            <button type="button" class="absolute right-2 px-4 py-1.5 rounded-full btn-pill-blue text-xs font-bold">Fetch</button>
+            <input type="text" placeholder="Paste YouTube link or media URL..."
+              class="w-full rounded-full bg-[#101113]/80 pl-11 pr-24 py-3 text-xs text-white placeholder-slate-500 focus:outline-none border border-white/10">
+            <button type="button"
+              class="absolute right-2 px-4 py-1.5 rounded-full btn-pill-blue text-xs font-bold">Fetch</button>
           </div>
 
           <!-- Slider Knob -->
@@ -115,7 +136,8 @@
               <span>Reverb Room Size</span>
               <span class="text-blue-400 font-mono" id="demoSliderVal">70%</span>
             </div>
-            <input type="range" min="0" max="100" value="70" class="w-full" oninput="document.getElementById('demoSliderVal').textContent=this.value+'%'">
+            <input type="range" min="0" max="100" value="70" class="w-full"
+              oninput="document.getElementById('demoSliderVal').textContent=this.value+'%'">
           </div>
 
           <!-- Toggle Switches -->
@@ -133,7 +155,8 @@
       </div>
 
       <!-- Section: Cards & Surfaces -->
-      <div id="section-cards" class="hidden capsule-surface rounded-3xl p-7 sm:p-8 border border-white/10 flex flex-col gap-6">
+      <div id="section-cards"
+        class="hidden capsule-surface rounded-3xl p-7 sm:p-8 border border-white/10 flex flex-col gap-6">
         <div>
           <h3 class="text-base font-bold text-white mb-1">Capsule Surfaces &amp; Interactive Cards</h3>
           <p class="text-xs text-slate-400">Restrained charcoal surfaces with subtle dark borders.</p>
@@ -141,12 +164,14 @@
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
           <div class="p-6 rounded-2xl bg-[#101113]/70 border border-white/5 flex flex-col gap-2">
-            <span class="w-9 h-9 rounded-xl bg-blue-500/10 text-blue-400 flex items-center justify-center font-bold text-sm">⚡</span>
+            <span
+              class="w-9 h-9 rounded-xl bg-blue-500/10 text-blue-400 flex items-center justify-center font-bold text-sm">⚡</span>
             <h4 class="text-sm font-bold text-white">Lossless Extraction</h4>
             <p class="text-xs text-slate-400">Direct bitstream copies without CPU re-encoding overhead.</p>
           </div>
           <div class="p-6 rounded-2xl bg-[#101113]/70 border border-white/5 flex flex-col gap-2">
-            <span class="w-9 h-9 rounded-xl bg-purple-500/10 text-purple-400 flex items-center justify-center font-bold text-sm">🎛</span>
+            <span
+              class="w-9 h-9 rounded-xl bg-purple-500/10 text-purple-400 flex items-center justify-center font-bold text-sm">🎛</span>
             <h4 class="text-sm font-bold text-white">Modular Audio Chain</h4>
             <p class="text-xs text-slate-400">Parametric EQ, multiband compressor, and spatial wideners.</p>
           </div>
@@ -154,7 +179,8 @@
       </div>
 
       <!-- Section: Colors & Tokens -->
-      <div id="section-colors" class="hidden capsule-surface rounded-3xl p-7 sm:p-8 border border-white/10 flex flex-col gap-6">
+      <div id="section-colors"
+        class="hidden capsule-surface rounded-3xl p-7 sm:p-8 border border-white/10 flex flex-col gap-6">
         <div>
           <h3 class="text-base font-bold text-white mb-1">Editorial Dark Color Tokens</h3>
           <p class="text-xs text-slate-400">Near-black charcoal canvas with purple, red, and blue accents.</p>
@@ -188,7 +214,8 @@
       </div>
 
       <!-- Section: Modals & Telemetry -->
-      <div id="section-modals" class="hidden capsule-surface rounded-3xl p-7 sm:p-8 border border-white/10 flex flex-col gap-6">
+      <div id="section-modals"
+        class="hidden capsule-surface rounded-3xl p-7 sm:p-8 border border-white/10 flex flex-col gap-6">
         <div>
           <h3 class="text-base font-bold text-white mb-1">Telemetry Indicators &amp; Badges</h3>
           <p class="text-xs text-slate-400">Progress rings, status pills, and ephemeral countdown indicators.</p>
@@ -199,13 +226,16 @@
             <span class="text-white font-bold">85%</span>
           </div>
           <div class="flex flex-col gap-3">
-            <span class="px-3.5 py-1 rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/20 text-xs font-semibold self-start">
+            <span
+              class="px-3.5 py-1 rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/20 text-xs font-semibold self-start">
               ✓ Completed
             </span>
-            <span class="px-3.5 py-1 rounded-full bg-blue-500/15 text-blue-400 border border-blue-500/20 text-xs font-semibold self-start">
+            <span
+              class="px-3.5 py-1 rounded-full bg-blue-500/15 text-blue-400 border border-blue-500/20 text-xs font-semibold self-start">
               ● Active Processing
             </span>
-            <span class="px-3.5 py-1 rounded-full bg-amber-500/15 text-amber-400 border border-amber-500/20 text-xs font-semibold self-start">
+            <span
+              class="px-3.5 py-1 rounded-full bg-amber-500/15 text-amber-400 border border-amber-500/20 text-xs font-semibold self-start">
               ⏱ 14m 32s Expiration
             </span>
           </div>
