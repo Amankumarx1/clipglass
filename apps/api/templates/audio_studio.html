@@ -275,6 +275,220 @@
           </button>
         </div>
       </div>
+
+      <!-- ===================================================================== -->
+      <!-- 1-CLICK DIMENSIONAL & SPATIAL SONG EDITS                              -->
+      <!-- ===================================================================== -->
+      <div class="bg-[#24252B] rounded-3xl p-6 sm:p-7 shadow-2xl flex flex-col gap-5 border border-white/10">
+        <!-- Section Header -->
+        <div class="flex items-center justify-between border-b border-white/10 pb-3">
+          <div class="flex items-center gap-2.5">
+            <span class="w-2.5 h-2.5 rounded-full bg-[#8655FF] animate-pulse"></span>
+            <h3 class="text-xs sm:text-sm font-bold text-white uppercase tracking-[0.14em] flex items-center gap-2">
+              <span>1-Click Dimensional Song Edits</span>
+              <span class="px-2 py-0.5 rounded-full text-[9px] font-bold bg-[#8655FF]/20 text-[#8655FF] border border-[#8655FF]/30 lowercase">spatial</span>
+            </h3>
+          </div>
+          <div class="flex items-center gap-2">
+            <span id="spatialStatusBadge" class="text-[10px] font-mono text-[#8B8D98]">10 Spatial Models</span>
+            <button 
+              type="button" 
+              onclick="resetSpatialEdits()" 
+              class="text-[10px] font-semibold text-[#8B8D98] hover:text-white px-2.5 py-0.5 rounded-full bg-[#17181D] border border-white/10 transition-colors cursor-pointer"
+              title="Clear active spatial presets"
+            >
+              Reset
+            </button>
+          </div>
+        </div>
+
+        <p class="text-xs text-[#8B8D98] -mt-1 leading-relaxed">
+          Instantly transform any song into multi-directional spatial audio. Click any edit below to reconfigure the real-time filtergraph and preview with headphones.
+        </p>
+
+        <!-- 10 Spatial Edit Cards (2-Column Grid) -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3" id="spatialEditsGrid">
+          <!-- 1. 3D Audio -->
+          <div id="spatialCard-3d_audio" onclick="applySpatialSongEdit('3d_audio')" class="spatial-card p-3.5 rounded-2xl bg-[#17181D] hover:bg-[#202128] border border-white/10 transition-all cursor-pointer flex flex-col justify-between gap-2.5 group">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <span class="w-7 h-7 rounded-lg bg-blue-500/15 text-blue-400 border border-blue-500/25 flex items-center justify-center text-xs font-bold">🌐</span>
+                <span class="text-xs font-bold text-white">3D Audio</span>
+              </div>
+              <span class="px-2 py-0.5 rounded-full bg-blue-500/15 text-blue-400 text-[9px] font-bold border border-blue-500/20">3D SPATIAL</span>
+            </div>
+            <p class="text-[11px] text-[#8B8D98] leading-tight group-hover:text-slate-300 transition-colors">
+              Simulates depth and spatial placement around the listener.
+            </p>
+            <div class="flex items-center justify-between pt-1 border-t border-white/5">
+              <span class="text-[10px] font-mono text-slate-500">Binaural • Stereo Widener</span>
+              <span class="spatial-btn-tag text-[10px] font-bold text-slate-400 group-hover:text-white">+ Apply Edit</span>
+            </div>
+          </div>
+
+          <!-- 2. 4D Audio -->
+          <div id="spatialCard-4d_audio" onclick="applySpatialSongEdit('4d_audio')" class="spatial-card p-3.5 rounded-2xl bg-[#17181D] hover:bg-[#202128] border border-white/10 transition-all cursor-pointer flex flex-col justify-between gap-2.5 group">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <span class="w-7 h-7 rounded-lg bg-purple-500/15 text-purple-400 border border-purple-500/25 flex items-center justify-center text-xs font-bold">💫</span>
+                <span class="text-xs font-bold text-white">4D Audio</span>
+              </div>
+              <span class="px-2 py-0.5 rounded-full bg-purple-500/15 text-purple-400 text-[9px] font-bold border border-purple-500/20">4D MOTION</span>
+            </div>
+            <p class="text-[11px] text-[#8B8D98] leading-tight group-hover:text-slate-300 transition-colors">
+              Enhanced 3D with movement and environmental acoustic space.
+            </p>
+            <div class="flex items-center justify-between pt-1 border-t border-white/5">
+              <span class="text-[10px] font-mono text-slate-500">Haas Effect • Room Air</span>
+              <span class="spatial-btn-tag text-[10px] font-bold text-slate-400 group-hover:text-white">+ Apply Edit</span>
+            </div>
+          </div>
+
+          <!-- 3. 8D Audio -->
+          <div id="spatialCard-8d_audio" onclick="applySpatialSongEdit('8d_audio')" class="spatial-card p-3.5 rounded-2xl bg-[#17181D] hover:bg-[#202128] border border-white/10 transition-all cursor-pointer flex flex-col justify-between gap-2.5 group">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <span class="w-7 h-7 rounded-lg bg-[#8655FF]/15 text-[#8655FF] border border-[#8655FF]/25 flex items-center justify-center text-xs font-bold">🎧</span>
+                <span class="text-xs font-bold text-white">8D Audio</span>
+              </div>
+              <span class="px-2 py-0.5 rounded-full bg-[#8655FF]/15 text-[#8655FF] text-[9px] font-bold border border-[#8655FF]/20">8D PANNING</span>
+            </div>
+            <p class="text-[11px] text-[#8B8D98] leading-tight group-hover:text-slate-300 transition-colors">
+              Rotating left–right panning with reverb for immersive headphone listening.
+            </p>
+            <div class="flex items-center justify-between pt-1 border-t border-white/5">
+              <span class="text-[10px] font-mono text-slate-500">Auto Pan • Reverb • HRTF</span>
+              <span class="spatial-btn-tag text-[10px] font-bold text-slate-400 group-hover:text-white">+ Apply Edit</span>
+            </div>
+          </div>
+
+          <!-- 4. 12D Audio -->
+          <div id="spatialCard-12d_audio" onclick="applySpatialSongEdit('12d_audio')" class="spatial-card p-3.5 rounded-2xl bg-[#17181D] hover:bg-[#202128] border border-white/10 transition-all cursor-pointer flex flex-col justify-between gap-2.5 group">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <span class="w-7 h-7 rounded-lg bg-pink-500/15 text-pink-400 border border-pink-500/25 flex items-center justify-center text-xs font-bold">🪐</span>
+                <span class="text-xs font-bold text-white">12D Audio</span>
+              </div>
+              <span class="px-2 py-0.5 rounded-full bg-pink-500/15 text-pink-400 text-[9px] font-bold border border-pink-500/20">12D REMIX</span>
+            </div>
+            <p class="text-[11px] text-[#8B8D98] leading-tight group-hover:text-slate-300 transition-colors">
+              Multi‑directional remix style often found in 8K/12D playlists.
+            </p>
+            <div class="flex items-center justify-between pt-1 border-t border-white/5">
+              <span class="text-[10px] font-mono text-slate-500">Multi-Pan • Flanger • Space</span>
+              <span class="spatial-btn-tag text-[10px] font-bold text-slate-400 group-hover:text-white">+ Apply Edit</span>
+            </div>
+          </div>
+
+          <!-- 5. 360° Audio -->
+          <div id="spatialCard-three_sixty_audio" onclick="applySpatialSongEdit('three_sixty_audio')" class="spatial-card p-3.5 rounded-2xl bg-[#17181D] hover:bg-[#202128] border border-white/10 transition-all cursor-pointer flex flex-col justify-between gap-2.5 group">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <span class="w-7 h-7 rounded-lg bg-cyan-500/15 text-cyan-400 border border-cyan-500/25 flex items-center justify-center text-xs font-bold">🔄</span>
+                <span class="text-xs font-bold text-white">360° Audio</span>
+              </div>
+              <span class="px-2 py-0.5 rounded-full bg-cyan-500/15 text-cyan-400 text-[9px] font-bold border border-cyan-500/20">360° CIRCLE</span>
+            </div>
+            <p class="text-[11px] text-[#8B8D98] leading-tight group-hover:text-slate-300 transition-colors">
+              Full circular spatial audio used in immersive surround playlists.
+            </p>
+            <div class="flex items-center justify-between pt-1 border-t border-white/5">
+              <span class="text-[10px] font-mono text-slate-500">Circular Panner • Panorama</span>
+              <span class="spatial-btn-tag text-[10px] font-bold text-slate-400 group-hover:text-white">+ Apply Edit</span>
+            </div>
+          </div>
+
+          <!-- 6. Binaural Audio -->
+          <div id="spatialCard-binaural_audio" onclick="applySpatialSongEdit('binaural_audio')" class="spatial-card p-3.5 rounded-2xl bg-[#17181D] hover:bg-[#202128] border border-white/10 transition-all cursor-pointer flex flex-col justify-between gap-2.5 group">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <span class="w-7 h-7 rounded-lg bg-emerald-500/15 text-emerald-400 border border-emerald-500/25 flex items-center justify-center text-xs font-bold">👂</span>
+                <span class="text-xs font-bold text-white">Binaural Audio</span>
+              </div>
+              <span class="px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400 text-[9px] font-bold border border-emerald-500/20">HRTF DUMMY-HEAD</span>
+            </div>
+            <p class="text-[11px] text-[#8B8D98] leading-tight group-hover:text-slate-300 transition-colors">
+              Recorded with two microphones to mimic human ears; creates realistic spatial sound.
+            </p>
+            <div class="flex items-center justify-between pt-1 border-t border-white/5">
+              <span class="text-[10px] font-mono text-slate-500">Ear Modeling • Interaural Delay</span>
+              <span class="spatial-btn-tag text-[10px] font-bold text-slate-400 group-hover:text-white">+ Apply Edit</span>
+            </div>
+          </div>
+
+          <!-- 7. Holophonic Sound -->
+          <div id="spatialCard-holophonic_sound" onclick="applySpatialSongEdit('holophonic_sound')" class="spatial-card p-3.5 rounded-2xl bg-[#17181D] hover:bg-[#202128] border border-white/10 transition-all cursor-pointer flex flex-col justify-between gap-2.5 group">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <span class="w-7 h-7 rounded-lg bg-amber-500/15 text-amber-400 border border-amber-500/25 flex items-center justify-center text-xs font-bold">🔮</span>
+                <span class="text-xs font-bold text-white">Holophonic Sound</span>
+              </div>
+              <span class="px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-400 text-[9px] font-bold border border-amber-500/20">HOLOPHONIC</span>
+            </div>
+            <p class="text-[11px] text-[#8B8D98] leading-tight group-hover:text-slate-300 transition-colors">
+              Psychoacoustic technique that simulates 3D movement around and over the head.
+            </p>
+            <div class="flex items-center justify-between pt-1 border-t border-white/5">
+              <span class="text-[10px] font-mono text-slate-500">Phase Matrix • Elevation Shift</span>
+              <span class="spatial-btn-tag text-[10px] font-bold text-slate-400 group-hover:text-white">+ Apply Edit</span>
+            </div>
+          </div>
+
+          <!-- 8. 8K Audio -->
+          <div id="spatialCard-eight_k_audio" onclick="applySpatialSongEdit('eight_k_audio')" class="spatial-card p-3.5 rounded-2xl bg-[#17181D] hover:bg-[#202128] border border-white/10 transition-all cursor-pointer flex flex-col justify-between gap-2.5 group">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <span class="w-7 h-7 rounded-lg bg-teal-500/15 text-teal-400 border border-teal-500/25 flex items-center justify-center text-xs font-bold">💎</span>
+                <span class="text-xs font-bold text-white">8K Audio</span>
+              </div>
+              <span class="px-2 py-0.5 rounded-full bg-teal-500/15 text-teal-400 text-[9px] font-bold border border-teal-500/20">8K REMIX</span>
+            </div>
+            <p class="text-[11px] text-[#8B8D98] leading-tight group-hover:text-slate-300 transition-colors">
+              A label used in remix communities for ultra‑clean, spatially enhanced versions of songs.
+            </p>
+            <div class="flex items-center justify-between pt-1 border-t border-white/5">
+              <span class="text-[10px] font-mono text-slate-500">Air Shelf • Exciter • Ultra Clarity</span>
+              <span class="spatial-btn-tag text-[10px] font-bold text-slate-400 group-hover:text-white">+ Apply Edit</span>
+            </div>
+          </div>
+
+          <!-- 9. Spatial Audio (Dolby Atmos) -->
+          <div id="spatialCard-spatial_audio_atmos" onclick="applySpatialSongEdit('spatial_audio_atmos')" class="spatial-card p-3.5 rounded-2xl bg-[#17181D] hover:bg-[#202128] border border-white/10 transition-all cursor-pointer flex flex-col justify-between gap-2.5 group">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <span class="w-7 h-7 rounded-lg bg-indigo-500/15 text-indigo-400 border border-indigo-500/25 flex items-center justify-center text-xs font-bold">🎬</span>
+                <span class="text-xs font-bold text-white">Spatial Audio (Dolby Atmos)</span>
+              </div>
+              <span class="px-2 py-0.5 rounded-full bg-indigo-500/15 text-indigo-400 text-[9px] font-bold border border-indigo-500/20">DOLBY ATMOS</span>
+            </div>
+            <p class="text-[11px] text-[#8B8D98] leading-tight group-hover:text-slate-300 transition-colors">
+              Multi‑channel immersive audio simulation used in modern streaming platforms.
+            </p>
+            <div class="flex items-center justify-between pt-1 border-t border-white/5">
+              <span class="text-[10px] font-mono text-slate-500">Object Bed • Height Virtualizer</span>
+              <span class="spatial-btn-tag text-[10px] font-bold text-slate-400 group-hover:text-white">+ Apply Edit</span>
+            </div>
+          </div>
+
+          <!-- 10. Ambisonic Audio -->
+          <div id="spatialCard-ambisonic_audio" onclick="applySpatialSongEdit('ambisonic_audio')" class="spatial-card p-3.5 rounded-2xl bg-[#17181D] hover:bg-[#202128] border border-white/10 transition-all cursor-pointer flex flex-col justify-between gap-2.5 group">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <span class="w-7 h-7 rounded-lg bg-rose-500/15 text-rose-400 border border-rose-500/25 flex items-center justify-center text-xs font-bold">🌌</span>
+                <span class="text-xs font-bold text-white">Ambisonic Audio</span>
+              </div>
+              <span class="px-2 py-0.5 rounded-full bg-rose-500/15 text-rose-400 text-[9px] font-bold border border-rose-500/20">FULL SPHERE</span>
+            </div>
+            <p class="text-[11px] text-[#8B8D98] leading-tight group-hover:text-slate-300 transition-colors">
+              Full-sphere surround sound used in VR and 360° video.
+            </p>
+            <div class="flex items-center justify-between pt-1 border-t border-white/5">
+              <span class="text-[10px] font-mono text-slate-500">B-Format • 3D Spherical Field</span>
+              <span class="spatial-btn-tag text-[10px] font-bold text-slate-400 group-hover:text-white">+ Apply Edit</span>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- RIGHT COLUMN (lg:col-span-5): CATEGORIES & EFFECTS -->
@@ -817,6 +1031,148 @@
     autoSearchQuery = val;
     renderAutoEffectsGrid();
   };
+
+  // --- 1-CLICK DIMENSIONAL & SPATIAL SONG EDITS ---
+  const SPATIAL_SONG_EDITS = {
+    '3d_audio': {
+      name: '3D Audio',
+      badge: '3D SPATIAL',
+      effects: ['binaural', 'stereo_widening'],
+      intensity: 'balanced',
+      toast: 'Applied 3D Audio: Simulates depth and spatial placement around the listener.'
+    },
+    '4d_audio': {
+      name: '4D Audio',
+      badge: '4D MOTION',
+      effects: ['binaural', 'haas_effect', 'reverb'],
+      intensity: 'strong',
+      toast: 'Applied 4D Audio: Enhanced 3D with movement and environmental dynamics.'
+    },
+    '8d_audio': {
+      name: '8D Audio',
+      badge: '8D PANNING',
+      effects: ['auto_pan', 'reverb', 'binaural'],
+      intensity: 'strong',
+      toast: 'Applied 8D Audio: Rotating left–right panning with reverb for immersive headphone listening.'
+    },
+    '12d_audio': {
+      name: '12D Audio',
+      badge: '12D REMIX',
+      effects: ['auto_pan', 'stereo_widening', 'reverb', 'flanger'],
+      intensity: 'strong',
+      toast: 'Applied 12D Audio: Multi-directional remix style with multi-axis trajectory.'
+    },
+    'three_sixty_audio': {
+      name: '360° Audio',
+      badge: '360° CIRCLE',
+      effects: ['binaural', 'auto_pan', 'stereo_widening'],
+      intensity: 'balanced',
+      toast: 'Applied 360° Audio: Full circular spatial audio for immersive playlists.'
+    },
+    'binaural_audio': {
+      name: 'Binaural Audio',
+      badge: 'HRTF DUMMY-HEAD',
+      effects: ['binaural', 'haas_effect'],
+      intensity: 'balanced',
+      toast: 'Applied Binaural Audio: Replicates human ear acoustics for hyper-realistic spatial sound.'
+    },
+    'holophonic_sound': {
+      name: 'Holophonic Sound',
+      badge: 'HOLOPHONIC',
+      effects: ['binaural', 'phaser', 'stereo_widening'],
+      intensity: 'strong',
+      toast: 'Applied Holophonic Sound: Psychoacoustic technique simulating 3D motion around the head.'
+    },
+    'eight_k_audio': {
+      name: '8K Audio',
+      badge: '8K REMIX',
+      effects: ['stereo_widening', 'eq', 'compressor', 'saturation'],
+      intensity: 'balanced',
+      toast: 'Applied 8K Audio: Ultra-clean, spatially enhanced, harmonic-widened version.'
+    },
+    'spatial_audio_atmos': {
+      name: 'Spatial Audio (Dolby Atmos)',
+      badge: 'DOLBY ATMOS',
+      effects: ['binaural', 'stereo_widening', 'reverb', 'limiter'],
+      intensity: 'balanced',
+      toast: 'Applied Spatial Audio (Dolby Atmos): Multi-channel immersive audio simulation.'
+    },
+    'ambisonic_audio': {
+      name: 'Ambisonic Audio',
+      badge: 'FULL SPHERE',
+      effects: ['binaural', 'stereo_widening', 'reverb', 'haas_effect'],
+      intensity: 'strong',
+      toast: 'Applied Ambisonic Audio: Full-sphere surround sound used in VR and 360° media.'
+    }
+  };
+
+  let activeSpatialSongEditId = null;
+
+  window.applySpatialSongEdit = function(editId) {
+    if (window.playGlassTick) window.playGlassTick();
+    const cfg = SPATIAL_SONG_EDITS[editId];
+    if (!cfg) return;
+
+    if (activeSpatialSongEditId === editId) {
+      activeSpatialSongEditId = null;
+      window.studioEngine.selectedAutoEffects = [];
+      highlightActiveSpatialCard(null);
+      if (window.showToast) window.showToast(`Cleared ${cfg.name}`, 'info');
+    } else {
+      activeSpatialSongEditId = editId;
+      window.studioEngine.selectedAutoEffects = [...cfg.effects];
+      if (cfg.intensity && window.setAutoIntensity) {
+        window.setAutoIntensity(cfg.intensity);
+      }
+      highlightActiveSpatialCard(editId);
+      if (window.showToast) window.showToast(cfg.toast, 'success');
+    }
+
+    window.studioEngine.rebuildDSPChain();
+    renderAutoEffectsGrid();
+    renderAutoSelectedChips();
+  };
+
+  window.resetSpatialEdits = function() {
+    if (window.playGlassTick) window.playGlassTick();
+    activeSpatialSongEditId = null;
+    highlightActiveSpatialCard(null);
+    window.studioEngine.selectedAutoEffects = [];
+    window.studioEngine.rebuildDSPChain();
+    renderAutoEffectsGrid();
+    renderAutoSelectedChips();
+    if (window.showToast) window.showToast('Reset all spatial song edits', 'info');
+  };
+
+  function highlightActiveSpatialCard(activeId) {
+    const badge = document.getElementById('spatialStatusBadge');
+    if (badge) {
+      badge.textContent = activeId ? (SPATIAL_SONG_EDITS[activeId]?.badge || '1 Active Model') : '10 Spatial Models';
+    }
+
+    document.querySelectorAll('.spatial-card').forEach(card => {
+      card.classList.remove('border-[#8655FF]', 'bg-[#8655FF]/15');
+      card.classList.add('border-white/10', 'bg-[#17181D]');
+      const tag = card.querySelector('.spatial-btn-tag');
+      if (tag) {
+        tag.textContent = '+ Apply Edit';
+        tag.className = 'spatial-btn-tag text-[10px] font-bold text-slate-400 group-hover:text-white';
+      }
+    });
+
+    if (activeId) {
+      const activeCard = document.getElementById(`spatialCard-${activeId}`);
+      if (activeCard) {
+        activeCard.classList.remove('border-white/10', 'bg-[#17181D]');
+        activeCard.classList.add('border-[#8655FF]', 'bg-[#8655FF]/15');
+        const tag = activeCard.querySelector('.spatial-btn-tag');
+        if (tag) {
+          tag.textContent = '✓ Active';
+          tag.className = 'spatial-btn-tag text-[10px] font-bold text-[#8655FF]';
+        }
+      }
+    }
+  }
 
   // --- CUSTOM MODE: MODULAR RACK WITH INLINE SLIDERS ---
   function renderCustomModularRack() {
