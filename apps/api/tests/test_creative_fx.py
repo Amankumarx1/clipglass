@@ -10,7 +10,7 @@ client = TestClient(app)
 def test_sanitize_hook_text():
     assert sanitize_hook_text(None) == "WAIT FOR THE END..."
     assert sanitize_hook_text("") == "WAIT FOR THE END..."
-    assert sanitize_hook_text("Don't miss this: incredible!") == "Dont miss this: incredible!"
+    assert sanitize_hook_text("Don't miss this: incredible!") == "Dont miss this\\: incredible!"
     # Test length truncation
     long_txt = "A" * 150
     assert len(sanitize_hook_text(long_txt)) == 80

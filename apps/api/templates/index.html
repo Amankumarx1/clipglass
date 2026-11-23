@@ -337,31 +337,75 @@ const trim=new THREE.MeshPhysicalMaterial({color:lin(SW[0][1]),metalness:.9,roug
 const fab=new THREE.MeshStandardMaterial({color:0x08080b,roughness:.95});
 const bodyMats=[paint,gloss,cush,padM],M=(g,m)=>new THREE.Mesh(g,m);
 
-// Headphones
+// Headphones - Exploded Multi-Part Precision Assembly
 const H=new THREE.Group(),inner=new THREE.Group();H.add(inner);S.add(H);inner.position.y=.5;
-const X=1.7,bandG=new THREE.Group();inner.add(bandG);
+const X=1.7;
+
+// 1. Headband Structural Outer Arch (Spring Steel / Hard Coat)
+const bandG=new THREE.Group();inner.add(bandG);
 const arch=new THREE.CatmullRomCurve3([[-X,-.35],[-X+.02,.5],[-1.2,1.3],[0,1.78],[1.2,1.3],[X-.02,.5],[X,-.35]].map(p=>new THREE.Vector3(p[0],p[1],0)));
 const band=M(new THREE.TubeGeometry(arch,200,.07,24,false),paint);band.scale.z=2.1;bandG.add(band);
+
+// 2. Headband Ergonomic Leather Comfort Pad & End Caps
+const padG=new THREE.Group();inner.add(padG);
 const pp=[];for(let i=0;i<=40;i++){const u=.2+.6*i/40,p=arch.getPointAt(u),t=arch.getTangentAt(u);pp.push(new THREE.Vector3(p.x+t.y*.12,p.y-t.x*.12,0))}
-const pad=M(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pp),100,.1,24,false),padM);pad.scale.z=2.1;bandG.add(pad);
-[pp[0],pp[40]].forEach(p=>{const c=M(new THREE.SphereGeometry(.1,24,16),padM);c.position.copy(p);c.scale.z=2.1;bandG.add(c)});
+const pad=M(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pp),100,.1,24,false),padM);pad.scale.z=2.1;padG.add(pad);
+[pp[0],pp[40]].forEach(p=>{const c=M(new THREE.SphereGeometry(.1,24,16),padM);c.position.copy(p);c.scale.z=2.1;padG.add(c)});
+
+// 3. Telescoping Extension Slider Arms & Acoustic Rib Rings
+const armParts=[];
 [-1,1].forEach(s=>{
-  const arm=M(new THREE.CylinderGeometry(.075,.075,.34,32),trim);arm.position.set(s*X,-.22,0);bandG.add(arm);
-  for(let k=0;k<4;k++){const n=M(new THREE.TorusGeometry(.078,.01,8,32),fab);n.rotation.x=Math.PI/2;n.position.set(s*X,-.12-k*.07,0);bandG.add(n)}});
+  const armSub=new THREE.Group();armSub.position.set(s*X,-.22,0);inner.add(armSub);
+  const arm=M(new THREE.CylinderGeometry(.075,.075,.34,32),trim);armSub.add(arm);
+  for(let k=0;k<4;k++){const n=M(new THREE.TorusGeometry(.078,.01,8,32),fab);n.rotation.x=Math.PI/2;n.position.set(0,.1-k*.07,0);armSub.add(n)}
+  armParts.push(armSub);
+});
+
+// 4. Earcups Granular Exploded Sub-Assemblies (Yoke, Pins, Outer Shell, Badges, Driver Rim, Cushions)
 const cupPts=new THREE.SplineCurve([[0,.3],[.4,.3],[.46,.275],[.56,.255],[.66,.2],[.72,.1],[.74,0],[.72,-.1],[.64,-.18],[.5,-.22],[0,-.22]].map(p=>new THREE.Vector2(p[0],p[1]))).getPoints(110).map(p=>new THREE.Vector2(Math.max(0,p.x),p.y));
 const pillow=[];for(let i=0;i<=56;i++){const a=i/56*Math.PI*2;pillow.push(new THREE.Vector2(.52+.21*Math.cos(a),.16*Math.sin(a)))}
-const cupGs=[];
+
+const cupAssembly=[];
 [-1,1].forEach(s=>{
-  const A=new THREE.Group();A.position.set(s*X,-1.05,0);inner.add(A);cupGs.push(A);
-  const yoke=M(new THREE.TorusGeometry(.94,.055,16,96,Math.PI),paint);yoke.rotation.y=Math.PI/2;A.add(yoke);
-  [-1,1].forEach(z=>{const pin=M(new THREE.CylinderGeometry(.06,.06,.3,24),trim);pin.rotation.x=Math.PI/2;pin.position.z=z*.82;A.add(pin)});
-  const C2=new THREE.Group();C2.rotation.z=-s*Math.PI/2;A.add(C2);
-  const shell=M(new THREE.LatheGeometry(cupPts,110),paint);shell.scale.x=1.18;C2.add(shell);
-  const disc=M(new THREE.CylinderGeometry(.24,.24,.014,64),gloss);disc.position.y=.304;C2.add(disc);
-  const tri=M(new THREE.CylinderGeometry(.09,.09,.02,3),trim);tri.rotation.y=Math.PI/2;tri.position.y=.314;C2.add(tri);
-  const rim=M(new THREE.TorusGeometry(.69,.028,14,120),trim);rim.rotation.x=Math.PI/2;rim.position.y=-.21;rim.scale.x=1.18;C2.add(rim);
-  const cu=M(new THREE.LatheGeometry(pillow,110),cush);cu.position.y=-.34;cu.scale.x=1.18;C2.add(cu);
-  const fb=M(new THREE.CylinderGeometry(.34,.34,.03,48),fab);fb.position.y=-.4;fb.scale.x=1.18;C2.add(fb)});
+  const basePivot=new THREE.Group();basePivot.position.set(s*X,-1.05,0);inner.add(basePivot);
+
+  // A: Gimbal Yoke
+  const yokeG=new THREE.Group();basePivot.add(yokeG);
+  const yoke=M(new THREE.TorusGeometry(.94,.055,16,96,Math.PI),paint);yoke.rotation.y=Math.PI/2;yokeG.add(yoke);
+
+  // B: Hinge Pivot Pins
+  const pinMeshes=[];
+  [-1,1].forEach(z=>{const pin=M(new THREE.CylinderGeometry(.06,.06,.3,24),trim);pin.rotation.x=Math.PI/2;pin.position.z=z*.82;yokeG.add(pin);pinMeshes.push(pin)});
+
+  // C: Cup Orientation Rotator
+  const cupG=new THREE.Group();cupG.rotation.z=-s*Math.PI/2;basePivot.add(cupG);
+
+  // C1: Outer Lathe Acoustic Shell
+  const shellG=new THREE.Group();cupG.add(shellG);
+  const shell=M(new THREE.LatheGeometry(cupPts,110),paint);shell.scale.x=1.18;shellG.add(shell);
+
+  // C2: Precision Center Badge & Triangle Trim
+  const badgeG=new THREE.Group();cupG.add(badgeG);
+  const disc=M(new THREE.CylinderGeometry(.24,.24,.014,64),gloss);disc.position.y=.304;badgeG.add(disc);
+  const tri=M(new THREE.CylinderGeometry(.09,.09,.02,3),trim);tri.rotation.y=Math.PI/2;tri.position.y=.314;badgeG.add(tri);
+
+  // C3: Internal Driver Mounting Bezel Rim
+  const rimG=new THREE.Group();cupG.add(rimG);
+  const rim=M(new THREE.TorusGeometry(.69,.028,14,120),trim);rim.rotation.x=Math.PI/2;rim.position.y=-.21;rim.scale.x=1.18;rimG.add(rim);
+
+  // C4: Memory Foam Cushions & Fabric Speaker Face
+  const cushionG=new THREE.Group();cupG.add(cushionG);
+  const cu=M(new THREE.LatheGeometry(pillow,110),cush);cu.position.y=-.34;cu.scale.x=1.18;cushionG.add(cu);
+  const fb=M(new THREE.CylinderGeometry(.34,.34,.03,48),fab);fb.position.y=-.4;fb.scale.x=1.18;cushionG.add(fb);
+
+  // Holographic Assembly Caliper Alignment Ring
+  const caliperGeo=new THREE.RingGeometry(.7,.74,64);
+  const caliperMat=new THREE.MeshBasicMaterial({color:0x8655ff,transparent:true,opacity:0,side:THREE.DoubleSide,depthWrite:false,toneMapped:false});
+  const caliperRing=new THREE.Mesh(caliperGeo,caliperMat);
+  caliperRing.rotation.x=Math.PI/2;cupG.add(caliperRing);
+
+  cupAssembly.push({side:s,basePivot,yokeG,pinMeshes,cupG,shellG,badgeG,rimG,cushionG,caliperRing});
+});
 
 // Optional real model: auto-load, or drop a .glb file on the page
 let real=null,realS=1;
@@ -418,10 +462,73 @@ function tick(t){
   if(!dragging)drag*=Math.exp(-dt*1.3);
   sp+=(cl(scrollY/innerHeight,0,1)-sp)*(1-Math.exp(-dt*8));const scr=sp*4.6;
 
-  const bk=(d,n)=>cl((T-d)/n,0,1),eb=x=>1+2*Math.pow(x-1,3)+Math.pow(x-1,2);   // ease-out-back: parts click into place
-  const eBand=eb(bk(.2,1.9)),eCup=[eb(bk(.7,1.9)),eb(bk(.95,1.9))],e=ease(bk(0,2.8));
-  bandG.position.y=(1-eBand)*3.4;bandG.rotation.z=(1-eBand)*.5;
-  cupGs.forEach((A,i)=>{const s=i?1:-1,u=eCup[i];A.position.x=s*X+s*(1-u)*4.5;A.position.y=-1.05-(1-u)*1.2;A.rotation.y=s*(1-u)*2.4});
+  const bk=(d,n)=>cl((T-d)/n,0,1);
+  const eb=(x,s=1.75)=>{if(x>=1)return 1;const t=x-1;return 1+t*t*((s+1)*t+s)};
+  const e=ease(bk(0,3.4));
+
+  // 1. Headband outer structural arch drops with aerodynamic tilt
+  const uBand=eb(bk(.1,1.45),1.5);
+  bandG.position.y=(1-uBand)*3.8;
+  bandG.position.z=(1-uBand)*.45;
+  bandG.rotation.z=(1-uBand)*.4;
+  bandG.rotation.x=-(1-uBand)*.22;
+
+  // 2. Headband inner leather comfort pad floats up from below and snaps inside arch
+  const uPad=eb(bk(.35,1.35),1.9);
+  padG.position.y=-(1-uPad)*2.2;
+  padG.position.z=-(1-uPad)*1.2;
+  padG.rotation.x=(1-uPad)*.35;
+
+  // 3. Telescoping extension slider arms extend downward from headband tips
+  const uArms=eb(bk(.65,1.25),1.6);
+  armParts.forEach(arm=>{arm.position.y=-(1-uArms)*.75});
+
+  // 4. Earcups Granular Exploded Hierarchy
+  cupAssembly.forEach((cp,i)=>{
+    const s=cp.side;
+    
+    // Yoke arcs in smoothly from wide perimeter
+    const uYoke=eb(bk(.95+i*.12,1.3),1.8);
+    cp.yokeG.position.x=s*(1-uYoke)*3.6;
+    cp.yokeG.position.y=-(1-uYoke)*.85;
+    cp.yokeG.position.z=(1-uYoke)*1.6;
+    cp.yokeG.rotation.y=s*(1-uYoke)*2.2;
+    cp.yokeG.rotation.z=s*(1-uYoke)*.55;
+
+    // Pivot Pins shoot inward along Z axis
+    const uPins=eb(bk(1.35+i*.1,1.05),1.4);
+    cp.pinMeshes[0].position.z=-.82-(1-uPins)*1.7;
+    cp.pinMeshes[1].position.z=.82+(1-uPins)*1.7;
+
+    // Outer acoustic shell flies into yoke center
+    const uShell=eb(bk(1.55+i*.12,1.2),1.7);
+    cp.shellG.position.y=(1-uShell)*2.4;
+    cp.shellG.rotation.y=s*(1-uShell)*1.6;
+
+    // Machined center badges press down into the shell
+    const uBadge=eb(bk(1.85+i*.1,1.0),2.2);
+    cp.badgeG.position.y=(1-uBadge)*1.6;
+
+    // Driver bezel rim aligns inside
+    const uRim=eb(bk(1.7+i*.1,1.1),1.6);
+    cp.rimG.position.y=-(1-uRim)*.85;
+
+    // Memory foam cushions fly outward from inner listener space and dock with soft bounce
+    const uCush=eb(bk(2.05+i*.12,1.2),2.4);
+    cp.cushionG.position.y=-(1-uCush)*2.6;
+    const squish=uCush<1?(1+Math.sin(uCush*Math.PI)*.13):1;
+    cp.cushionG.scale.set(squish,1/squish,squish);
+
+    // Holographic caliper ring during assembly
+    const guideProgress=cl((T-(.8+i*.1))/2.4,0,1);
+    const guideAlpha=Math.sin(guideProgress*Math.PI);
+    if(cp.caliperRing){
+      cp.caliperRing.material.opacity=T<3.2?guideAlpha*.65:0;
+      cp.caliperRing.scale.setScalar(1+(1-uShell)*1.8);
+      cp.caliperRing.position.y=(1-uShell)*1.2;
+    }
+  });
+
   inner.scale.setScalar(.6+.4*e);
   if(real){real.scale.setScalar(realS*(.6+.4*e));real.rotation.y=MODEL_ROT_Y}
 
