@@ -808,3 +808,18 @@ input:checked + .slider:before {
   0% { transform: translateY(-100%); }
   100% { transform: translateY(100%); }
 }
+
+/* Camera Zoom-Out Animation */
+@keyframes stageCameraZoomOut {
+  0% {
+    transform: scale(1.15);
+    filter: blur(1.5px);
+  }
+  100% {
+    transform: scale(1);
+    filter: blur(0px);
+  }
+}
+.stage-camera-zooming {
+  animation: stageCameraZoomOut 0.42s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}

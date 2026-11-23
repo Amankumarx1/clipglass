@@ -90,7 +90,7 @@
       <!-- Reframe Mode (7 Models) -->
       <div>
         <label class="text-[10px] uppercase font-semibold text-[#8B8D98] tracking-wider block mb-1.5">Reframe Mode</label>
-        <select id="clipReframeSelect" onchange="syncReframeSelectToStudio(this.value)" class="w-full h-9 px-3 rounded-full text-xs bg-[#17181D] text-white border border-white/10 outline-none">
+        <select id="clipReframeSelect" onchange="syncReframeSelectToStudio(this.value)" class="w-full h-9 px-3 rounded-full text-xs bg-[#17181D] text-white border border-white/10 outline-none hover:border-white/20 transition-all cursor-pointer">
           <option value="follow-face">Follow Speaker Face (AI YuNet)</option>
           <option value="center">Center Crop 9:16</option>
           <option value="split">Split Screen Stack (Dual Layer)</option>
@@ -104,7 +104,7 @@
       <!-- Caption Style (10 Presets) -->
       <div>
         <label class="text-[10px] uppercase font-semibold text-[#8B8D98] tracking-wider block mb-1.5">Caption Preset</label>
-        <select id="clipCaptionSelect" onchange="syncCaptionSelectToStudio(this.value)" class="w-full h-9 px-3 rounded-full text-xs bg-[#17181D] text-white border border-white/10 outline-none">
+        <select id="clipCaptionSelect" onchange="syncCaptionSelectToStudio(this.value)" class="w-full h-9 px-3 rounded-full text-xs bg-[#17181D] text-white border border-white/10 outline-none hover:border-white/20 transition-all cursor-pointer">
           <option value="viral_pop">Viral Pop (Highlight)</option>
           <option value="minimalist">Clean Minimalist</option>
           <option value="neon_cyber">Neon Cyber (Glow)</option>
@@ -126,8 +126,12 @@
         <span>I confirm I own this video or have permission to clip it.</span>
       </label>
 
-      <div class="flex items-center gap-3 self-end sm:self-auto">
-        <button type="button" onclick="scrollToPreviewStudio()" class="px-4 py-2.5 rounded-full bg-[#17181D] hover:bg-[#303137] text-xs font-semibold text-[#8B8D98] hover:text-white border border-white/10 transition-all flex items-center gap-1.5">
+      <div class="flex items-center gap-3 self-end sm:self-auto flex-wrap">
+        <button type="button" onclick="openSelectionZoomOverlay('all')" class="px-3.5 py-2.5 rounded-full bg-[#17181D] hover:bg-[#303137] text-xs font-semibold text-[#8B8D98] hover:text-white border border-white/10 transition-all flex items-center gap-1.5 cursor-pointer" title="Zoom-out overlay preview for framing and captions">
+          <span>🔭</span>
+          <span>Zoom Preview</span>
+        </button>
+        <button type="button" onclick="scrollToPreviewStudio()" class="px-4 py-2.5 rounded-full bg-[#17181D] hover:bg-[#303137] text-xs font-semibold text-[#8B8D98] hover:text-white border border-white/10 transition-all flex items-center gap-1.5 cursor-pointer">
           <span>🔍</span>
           <span>Open Preset Studio</span>
         </button>
@@ -511,7 +515,173 @@
       </div>
     </div>
   </div>
+
+  <!-- ========================================================================= -->
+  <!-- SELECTION ZOOM-OUT PREVIEW OVERLAY                                       -->
+  <!-- ========================================================================= -->
+  <div id="selectionZoomOverlay" class="fixed inset-0 z-[120] bg-black/85 backdrop-blur-md flex items-center justify-center p-3 sm:p-6 transition-all duration-300 opacity-0 pointer-events-none" onclick="handleZoomOverlayBackdropClick(event)">
+    <div id="selectionZoomCard" class="relative w-full max-w-xl rounded-3xl bg-[#17181D] p-5 sm:p-7 flex flex-col gap-4 shadow-[0_25px_80px_rgba(0,0,0,0.9)] border border-white/15 transition-all duration-300 transform scale-90 overflow-hidden" onclick="event.stopPropagation()">
+      
+      <!-- Subtle Violet Atmospheric Glow behind central stage -->
+      <div class="absolute -top-24 left-1/2 -translate-x-1/2 w-80 h-80 bg-[#8655FF]/20 rounded-full blur-3xl pointer-events-none"></div>
+
+      <!-- Top Header Row -->
+      <div class="relative z-10 flex items-center justify-between pb-3 border-b border-white/10">
+        <div class="flex items-center gap-2.5">
+          <span class="w-2.5 h-2.5 rounded-full bg-[#8655FF] animate-pulse"></span>
+          <div>
+            <div class="flex items-center gap-2">
+              <h3 class="text-sm font-bold text-white tracking-tight">Active Selection Preview</h3>
+              <span id="zoomTriggerBadge" class="text-[9px] px-2 py-0.5 rounded-full bg-[#8655FF]/20 border border-[#8655FF]/40 text-[#8655FF] font-mono font-bold">PRESET CHANGED</span>
+            </div>
+            <p class="text-[11px] text-[#8B8D98]">Kinetic typography animation &amp; AI framing simulation.</p>
+          </div>
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="hidden sm:inline text-[10px] font-mono text-[#8B8D98] bg-white/5 px-2 py-1 rounded-full border border-white/10">ESC to close</span>
+          <button type="button" onclick="closeSelectionZoomOverlay()" class="w-8 h-8 rounded-full bg-white/5 hover:bg-white/15 text-white flex items-center justify-center text-xs font-bold transition-all cursor-pointer" title="Close Preview">✕</button>
+        </div>
+      </div>
+
+      <!-- Main Stage Section: 9:16 Simulated Short Canvas -->
+      <div class="relative z-10 flex flex-col items-center gap-3">
+        <div id="zoomStageContainer" class="relative w-[210px] sm:w-[230px] aspect-[9/16] rounded-2xl overflow-hidden bg-[#101113] border-2 border-white/20 shadow-2xl flex flex-col justify-between p-3.5 group select-none">
+          
+          <!-- Background Video / Image with dynamic zoom-out camera motion -->
+          <div id="zoomVideoBg" class="absolute inset-0 bg-cover bg-center transition-all duration-500 scale-100" style="background-image: url('/static/samples/nature_sample.jpg');"></div>
+
+          <!-- Dynamic Reframe Mode Guides (Face Lock, Symmetrical Center, Split line, Dual Speaker, Blur Fill, Scope Letterbox, PiP) -->
+          <div id="zoomGuideOverlay" class="absolute inset-0 pointer-events-none transition-all duration-300">
+            <!-- Injected by renderZoomFrameGuide() -->
+          </div>
+
+          <!-- Stage Top HUD -->
+          <div class="relative z-20 flex items-center justify-between w-full">
+            <span id="zoomStageModelTag" class="px-2.5 py-0.5 rounded-full bg-black/80 backdrop-blur-md border border-white/10 text-[9px] font-mono text-[#8655FF] font-bold">
+              AI YuNet Face Lock
+            </span>
+            <span class="px-2 py-0.5 rounded-full bg-[#2165F7] text-white text-[9px] font-bold tracking-wider flex items-center gap-1 shadow-sm">
+              <span class="w-1.5 h-1.5 rounded-full bg-white animate-ping"></span> 9:16
+            </span>
+          </div>
+
+          <!-- Center: Dynamic Kinetic Caption Display -->
+          <div class="relative z-20 w-full text-center my-auto px-1 pointer-events-none">
+            <div id="zoomCaptionDisplay" class="caption-preview-box caption-style-viral_pop text-center text-xs sm:text-sm drop-shadow-[0_2px_10px_rgba(0,0,0,0.9)]">
+              THIS <span class="highlight">MOMENT</span> CHANGED EVERYTHING
+            </div>
+          </div>
+
+          <!-- Bottom Stage Status & Zoom Level Tag -->
+          <div class="relative z-20 flex items-center justify-between w-full">
+            <span class="px-2 py-0.5 rounded-full bg-black/80 backdrop-blur-md border border-white/10 text-[8px] font-mono text-slate-300 flex items-center gap-1">
+              <span>🔭</span> 100% WIDE
+            </span>
+            <span id="zoomStageCapTag" class="px-2 py-0.5 rounded-full bg-black/80 backdrop-blur-md border border-white/10 text-[8px] font-mono text-yellow-300 font-semibold truncate max-w-[110px]">
+              Viral Pop
+            </span>
+          </div>
+        </div>
+
+        <!-- Sample Phrase Quick Switchers -->
+        <div class="flex items-center gap-1.5 flex-wrap justify-center">
+          <button type="button" onclick="setZoomSampleText('THIS MOMENT CHANGED EVERYTHING')" class="px-2.5 py-1 rounded-full bg-[#101113] hover:bg-white/10 text-[10px] text-white/80 border border-white/10 transition-colors cursor-pointer">
+            "THIS MOMENT CHANGED"
+          </button>
+          <button type="button" onclick="setZoomSampleText('WAIT FOR THE DROP... 🔥')" class="px-2.5 py-1 rounded-full bg-[#101113] hover:bg-white/10 text-[10px] text-white/80 border border-white/10 transition-colors cursor-pointer">
+            "WAIT FOR THE DROP... 🔥"
+          </button>
+          <button type="button" onclick="setZoomSampleText('VIRAL RETENTION JUMPED +400%')" class="px-2.5 py-1 rounded-full bg-[#101113] hover:bg-white/10 text-[10px] text-white/80 border border-white/10 transition-colors cursor-pointer">
+            "VIRAL RETENTION +400%"
+          </button>
+        </div>
+      </div>
+
+      <!-- Selection Info & Descriptions -->
+      <div class="relative z-10 grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+        <!-- Reframe Mode Info Box -->
+        <div id="zoomReframeCardBox" class="bg-[#101113]/80 rounded-2xl p-3.5 border border-white/10 flex flex-col gap-1 transition-all">
+          <div class="flex items-center justify-between">
+            <span class="text-[10px] uppercase font-bold text-[#8B8D98] tracking-wider">Reframe Mode</span>
+            <span id="zoomReframeBadge" class="text-[9px] px-2 py-0.5 rounded bg-blue-500/20 text-blue-400 font-mono font-bold">AI YuNet</span>
+          </div>
+          <p id="zoomReframeTitle" class="text-xs font-bold text-white truncate">Follow Speaker Face</p>
+          <p id="zoomReframeDesc" class="text-[11px] text-[#8B8D98] leading-tight">Tracks speaker face with deep learning and smooth camera pans.</p>
+        </div>
+
+        <!-- Caption Preset Info Box -->
+        <div id="zoomCaptionCardBox" class="bg-[#101113]/80 rounded-2xl p-3.5 border border-white/10 flex flex-col gap-1 transition-all">
+          <div class="flex items-center justify-between">
+            <span class="text-[10px] uppercase font-bold text-[#8B8D98] tracking-wider">Caption Preset</span>
+            <span id="zoomCaptionBadge" class="text-[9px] px-2 py-0.5 rounded bg-yellow-400/20 text-yellow-300 font-mono font-bold">Hormozi Style</span>
+          </div>
+          <p id="zoomCaptionTitle" class="text-xs font-bold text-white truncate">Viral Pop (Highlight)</p>
+          <p id="zoomCaptionDesc" class="text-[11px] text-[#8B8D98] leading-tight">Word-by-word bounce with bold black stroke and vivid yellow keyword highlights.</p>
+        </div>
+      </div>
+
+      <!-- Actions Row -->
+      <div class="relative z-10 flex items-center justify-between gap-3 pt-2 border-t border-white/10">
+        <button type="button" onclick="closeSelectionZoomOverlay(); scrollToPreviewStudio();" class="px-4 py-2 rounded-full bg-white/5 hover:bg-white/10 text-xs font-semibold text-[#8B8D98] hover:text-white border border-white/10 transition-all flex items-center gap-1.5 cursor-pointer">
+          <span>🔍</span>
+          <span>Open Full Preset Studio</span>
+        </button>
+        <button type="button" onclick="closeSelectionZoomOverlay()" class="px-6 py-2 rounded-full btn-pill-blue text-xs font-bold uppercase tracking-wider text-white shadow-[0_0_20px_rgba(33,101,247,0.45)] hover:scale-105 active:scale-95 transition-all flex items-center gap-1.5 cursor-pointer">
+          <span>✓ Keep &amp; Continue</span>
+        </button>
+      </div>
+    </div>
+  </div>
 </div>
+
+<style>
+  /* Selection Zoom-out Overlay Transition */
+  #selectionZoomOverlay {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity 0.26s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.26s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  #selectionZoomOverlay.active {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+  }
+  #selectionZoomCard {
+    transform: scale(0.86);
+    opacity: 0;
+    transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  #selectionZoomOverlay.active #selectionZoomCard {
+    transform: scale(1);
+    opacity: 1;
+  }
+
+  /* Camera Zoom-Out Animation */
+  @keyframes stageCameraZoomOut {
+    0% {
+      transform: scale(1.15);
+      filter: blur(1.5px);
+    }
+    100% {
+      transform: scale(1);
+      filter: blur(0px);
+    }
+  }
+  .stage-camera-zooming {
+    animation: stageCameraZoomOut 0.42s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+
+  /* Radar pulse animation for face tracking */
+  @keyframes radarPulse {
+    0% { transform: scale(0.7); opacity: 0.9; }
+    60% { transform: scale(1.3); opacity: 0.3; }
+    100% { transform: scale(1.7); opacity: 0; }
+  }
+  .radar-ring {
+    animation: radarPulse 1.8s infinite ease-out;
+  }
+</style>
 
 <script>
   let activeSource = 'url';
@@ -522,26 +692,111 @@
   let activeFrameModel = 'follow-face';
 
   const captionPresetsMap = {
-    viral_pop: { name: 'Viral Pop (Highlight)', cls: 'caption-style-viral_pop' },
-    minimalist: { name: 'Clean Minimalist', cls: 'caption-style-minimalist' },
-    neon_cyber: { name: 'Neon Cyber (Glow)', cls: 'caption-style-neon_cyber' },
-    karaoke: { name: 'Karaoke Word Bounce', cls: 'caption-style-karaoke' },
-    headline: { name: 'Bold Headline (Impact)', cls: 'caption-style-headline' },
-    dynamic_box: { name: 'Dynamic Pill Box', cls: 'caption-style-dynamic_box' },
-    glitch_cyber: { name: 'Glitch Cyberpunk', cls: 'caption-style-glitch_cyber' },
-    gold_luxury: { name: 'Gold Metallic Luxury', cls: 'caption-style-gold_luxury' },
-    comic_pop: { name: 'Retro Comic Pop', cls: 'caption-style-comic_pop' },
-    cinematic_sub: { name: 'Cinematic Subtitle', cls: 'caption-style-cinematic_sub' }
+    viral_pop: { 
+      name: 'Viral Pop (Highlight)', 
+      badge: 'Hormozi Style',
+      cls: 'caption-style-viral_pop',
+      desc: 'Word-by-word bounce with bold black stroke and vivid yellow keyword highlights.'
+    },
+    minimalist: { 
+      name: 'Clean Minimalist', 
+      badge: 'Editorial',
+      cls: 'caption-style-minimalist',
+      desc: 'Clean Swiss typography with translucent dark backing pill and soft cyan accents.'
+    },
+    neon_cyber: { 
+      name: 'Neon Cyber (Glow)', 
+      badge: 'Glow Aura',
+      cls: 'caption-style-neon_cyber',
+      desc: 'Vibrant neon cyan lettering with magenta pulsing bloom and futuristic aura.'
+    },
+    karaoke: { 
+      name: 'Karaoke Word Bounce', 
+      badge: 'Dynamic Syllable',
+      cls: 'caption-style-karaoke',
+      desc: 'Emerald syllable progression wave timed to millisecond speech audio pacing.'
+    },
+    headline: { 
+      name: 'Bold Headline (Impact)', 
+      badge: 'High CTR',
+      cls: 'caption-style-headline',
+      desc: 'Oversized heavy Impact font with heavy drop-shadows and maximum readability.'
+    },
+    dynamic_box: { 
+      name: 'Dynamic Pill Box', 
+      badge: 'High Contrast',
+      cls: 'caption-style-dynamic_box',
+      desc: 'Pristine white solid capsule background with inverted contrast text.'
+    },
+    glitch_cyber: { 
+      name: 'Glitch Cyberpunk', 
+      badge: 'RGB Shift',
+      cls: 'caption-style-glitch_cyber',
+      desc: 'Futuristic monospaced font with chromatic RGB split and digital glitching.'
+    },
+    gold_luxury: { 
+      name: 'Gold Metallic Luxury', 
+      badge: 'Luxury',
+      cls: 'caption-style-gold_luxury',
+      desc: 'Warm golden gradient shimmer with sophisticated serif aesthetic.'
+    },
+    comic_pop: { 
+      name: 'Retro Comic Pop', 
+      badge: 'Pop Art',
+      cls: 'caption-style-comic_pop',
+      desc: 'Bubbly comic book typeface with bold offset black shadows and punchy colors.'
+    },
+    cinematic_sub: { 
+      name: 'Cinematic Subtitle', 
+      badge: 'Film Festival',
+      cls: 'caption-style-cinematic_sub',
+      desc: 'Clean letterboxed film festival subtitle with subtle warm yellow typography.'
+    }
   };
 
   const frameModelsMap = {
-    'follow-face': { name: 'Follow Speaker Face', badge: 'AI YuNet Face Lock' },
-    'center': { name: 'Center Crop 9:16', badge: 'Fixed 9:16 Center' },
-    'split': { name: 'Split Screen Stack', badge: 'Dual Layer Stack' },
-    'dual-speaker': { name: 'Dual-Speaker Switcher', badge: 'Conversational Cam' },
-    'blurred-fill': { name: 'Blurred Mirror Fill', badge: '16:9 In 9:16 Blur' },
-    'letterbox': { name: 'Cinematic Letterbox', badge: '2.35:1 Anamorphic' },
-    'pip': { name: 'Picture-in-Picture', badge: 'Floating PiP' }
+    'follow-face': { 
+      name: 'Follow Speaker Face', 
+      badge: 'AI YuNet Face Lock',
+      tag: 'AI YuNet',
+      desc: 'Deep learning face detection with smoothed camera pans and snap-cuts on >25% jumps.'
+    },
+    'center': { 
+      name: 'Center Crop 9:16', 
+      badge: 'Fixed 9:16 Center',
+      tag: 'Fixed Center',
+      desc: 'Fixed symmetrical vertical crop without panning, optimal for solo interviews and center stages.'
+    },
+    'split': { 
+      name: 'Split Screen Stack', 
+      badge: 'Dual Layer Stack',
+      tag: 'Dual Layer',
+      desc: 'Stacks speaker reaction on top and contextual master gameplay/screen on bottom.'
+    },
+    'dual-speaker': { 
+      name: 'Dual-Speaker Switcher', 
+      badge: 'Conversational Cam',
+      tag: 'Conversational',
+      desc: 'Alternates framing focus between interviewer and guest based on real-time voice energy.'
+    },
+    'blurred-fill': { 
+      name: 'Blurred Mirror Fill', 
+      badge: '16:9 In 9:16 Blur',
+      tag: 'Ambient Fill',
+      desc: 'Keeps full landscape video uncropped while filling top and bottom with blurred ambient reflection.'
+    },
+    'letterbox': { 
+      name: 'Cinematic Letterbox', 
+      badge: '2.35:1 Anamorphic',
+      tag: 'Scope 2.35:1',
+      desc: 'Ultra-wide cinematic aspect framed with sleek dark header & footer branding bands.'
+    },
+    'pip': { 
+      name: 'Picture-in-Picture', 
+      badge: 'Floating PiP',
+      tag: 'Reaction PiP',
+      desc: 'Circular facecam floating overlay positioned over the full background video track.'
+    }
   };
 
   function setStudioTab(tab) {
@@ -665,6 +920,203 @@
     }
   }
 
+  function renderZoomFrameGuide(modelKey) {
+    const overlay = document.getElementById('zoomGuideOverlay');
+    if (!overlay) return;
+
+    if (modelKey === 'follow-face') {
+      overlay.innerHTML = `
+        <div class="absolute inset-x-5 top-10 bottom-24 border-2 border-blue-400 border-dashed rounded-2xl pointer-events-none flex flex-col justify-between p-2">
+          <div class="flex justify-between items-center text-[9px] font-mono text-blue-400 bg-black/80 px-2 py-0.5 rounded backdrop-blur-sm self-start border border-blue-500/30">
+            <span>[AI YuNet: FACE (0.84, 0.42)]</span>
+          </div>
+          <div class="relative w-12 h-12 self-center flex items-center justify-center">
+            <div class="absolute inset-0 border border-blue-400 rounded-full radar-ring"></div>
+            <div class="w-8 h-8 border border-blue-400 rounded-full flex items-center justify-center text-[10px] text-blue-300">👤</div>
+          </div>
+          <div class="flex justify-between items-center text-[8px] font-mono text-[#8B8D98] bg-black/70 px-1.5 py-0.5 rounded self-end">
+            <span>EMA 60FPS SMOOTH</span>
+          </div>
+        </div>
+      `;
+    } else if (modelKey === 'split') {
+      overlay.innerHTML = `
+        <div class="absolute inset-0 flex flex-col pointer-events-none">
+          <div class="flex-1 border-b-2 border-[#8655FF] shadow-[0_0_12px_#8655FF] relative flex items-center justify-center bg-purple-950/20">
+            <span class="absolute top-2 left-2 text-[8px] font-mono bg-black/80 text-purple-300 px-1.5 py-0.5 rounded border border-purple-500/30">TOP: SPEAKER CLOSE-UP</span>
+            <span class="text-xl opacity-60">👤</span>
+          </div>
+          <div class="flex-1 relative flex items-center justify-center bg-blue-950/20">
+            <span class="absolute bottom-2 left-2 text-[8px] font-mono bg-black/80 text-blue-300 px-1.5 py-0.5 rounded border border-blue-500/30">BOT: CONTEXT / SCREEN</span>
+            <span class="text-xl opacity-60">🎮</span>
+          </div>
+        </div>
+      `;
+    } else if (modelKey === 'blurred-fill') {
+      overlay.innerHTML = `
+        <div class="absolute inset-0 flex flex-col justify-between pointer-events-none">
+          <div class="h-20 bg-slate-900/60 backdrop-blur-md border-b border-white/10 flex items-center justify-center text-[9px] text-[#8B8D98] font-mono">
+            <span>▲ Ambient Blur Fill</span>
+          </div>
+          <div class="h-28 border-y-2 border-cyan-400/50 bg-transparent flex items-center justify-center text-[9px] text-cyan-300 font-mono">
+            <span>[Full 16:9 Uncropped Stream]</span>
+          </div>
+          <div class="h-20 bg-slate-900/60 backdrop-blur-md border-t border-white/10 flex items-center justify-center text-[9px] text-[#8B8D98] font-mono">
+            <span>▼ Ambient Blur Fill</span>
+          </div>
+        </div>
+      `;
+    } else if (modelKey === 'letterbox') {
+      overlay.innerHTML = `
+        <div class="absolute inset-0 flex flex-col justify-between pointer-events-none">
+          <div class="h-24 bg-black flex flex-col items-center justify-center gap-1 border-b border-white/10">
+            <span class="text-[8px] font-mono text-[#8B8D98] tracking-widest uppercase">2.35:1 ANAMORPHIC SCOPE</span>
+          </div>
+          <div class="flex-1 flex items-center justify-center">
+            <div class="w-8 h-8 rounded-full border border-white/20 flex items-center justify-center text-white/40 text-xs">🎬</div>
+          </div>
+          <div class="h-24 bg-black flex flex-col items-center justify-center gap-1 border-t border-white/10">
+            <span class="text-[8px] font-mono text-[#8B8D98] tracking-widest uppercase">CINEMATIC LETTERBOX</span>
+          </div>
+        </div>
+      `;
+    } else if (modelKey === 'pip') {
+      overlay.innerHTML = `
+        <div class="absolute inset-0 p-3 pointer-events-none">
+          <div class="absolute top-8 right-3 w-16 h-16 rounded-full border-2 border-[#8655FF] bg-black/80 shadow-[0_0_18px_rgba(134,85,255,0.5)] flex flex-col items-center justify-center text-[9px] text-purple-300 font-bold overflow-hidden">
+            <span class="text-sm">👤</span>
+            <span class="text-[7px] font-mono">PiP Cam</span>
+          </div>
+          <div class="absolute bottom-6 left-3 text-[8px] font-mono text-white/60 bg-black/60 px-2 py-0.5 rounded">
+            Master Video Background
+          </div>
+        </div>
+      `;
+    } else if (modelKey === 'dual-speaker') {
+      overlay.innerHTML = `
+        <div class="absolute inset-0 p-3 flex flex-col justify-between pointer-events-none">
+          <div class="w-24 h-24 border-2 border-blue-400 rounded-xl bg-blue-950/40 p-1.5 flex flex-col justify-between shadow-[0_0_15px_rgba(59,130,246,0.3)]">
+            <span class="text-[8px] font-mono text-blue-300 bg-black/80 px-1 rounded self-start font-bold">🎤 HOST (Active)</span>
+            <div class="text-center text-lg">🗣️</div>
+            <span class="text-[7px] font-mono text-emerald-400 self-end">Voice: 88%</span>
+          </div>
+          <div class="w-20 h-20 border border-dashed border-white/30 rounded-xl bg-black/50 p-1.5 self-end flex flex-col justify-between opacity-70">
+            <span class="text-[8px] font-mono text-slate-400 bg-black/80 px-1 rounded self-start">GUEST</span>
+            <div class="text-center text-sm">👤</div>
+            <span class="text-[7px] font-mono text-slate-500 self-end">Standby</span>
+          </div>
+        </div>
+      `;
+    } else {
+      // Center crop
+      overlay.innerHTML = `
+        <div class="absolute inset-x-5 top-10 bottom-24 border border-white/20 rounded-xl pointer-events-none flex flex-col justify-between p-2">
+          <div class="flex justify-between items-center text-[9px] font-mono text-white/70 bg-black/70 px-2 py-0.5 rounded self-start">
+            <span>[FIXED 9:16 SYMMETRY]</span>
+          </div>
+          <div class="self-center text-white/30 text-2xl">⌖</div>
+          <div class="text-[8px] font-mono text-white/50 bg-black/60 px-1.5 py-0.5 rounded self-center">
+            CENTER CROP
+          </div>
+        </div>
+      `;
+    }
+  }
+
+  function openSelectionZoomOverlay(triggerType) {
+    if (window.playGlassPop) window.playGlassPop();
+    const overlay = document.getElementById('selectionZoomOverlay');
+    if (!overlay) return;
+
+    // 1. Sync Reframe Mode
+    const reframeKey = activeFrameModel || document.getElementById('clipReframeSelect')?.value || 'follow-face';
+    const reframeData = frameModelsMap[reframeKey] || { name: reframeKey, badge: reframeKey, desc: '' };
+    
+    renderZoomFrameGuide(reframeKey);
+    const stageModelTag = document.getElementById('zoomStageModelTag');
+    if (stageModelTag) stageModelTag.textContent = reframeData.badge || reframeData.name;
+    const reframeTitle = document.getElementById('zoomReframeTitle');
+    if (reframeTitle) reframeTitle.textContent = reframeData.name;
+    const reframeBadge = document.getElementById('zoomReframeBadge');
+    if (reframeBadge) reframeBadge.textContent = reframeData.tag || 'AI Framing';
+    const reframeDesc = document.getElementById('zoomReframeDesc');
+    if (reframeDesc) reframeDesc.textContent = reframeData.desc || 'Optimized framing geometry for 9:16 vertical shorts.';
+
+    // 2. Sync Caption Preset
+    const captionKey = activeCaptionPreset || document.getElementById('clipCaptionSelect')?.value || 'viral_pop';
+    const captionData = captionPresetsMap[captionKey] || { name: captionKey, badge: captionKey, cls: 'caption-style-viral_pop', desc: '' };
+
+    const zoomCaptionDisplay = document.getElementById('zoomCaptionDisplay');
+    if (zoomCaptionDisplay) {
+      zoomCaptionDisplay.className = `caption-preview-box text-center text-xs sm:text-sm drop-shadow-[0_2px_10px_rgba(0,0,0,0.9)] ${captionData.cls || 'caption-style-viral_pop'}`;
+    }
+    const stageCapTag = document.getElementById('zoomStageCapTag');
+    if (stageCapTag) stageCapTag.textContent = captionData.name;
+    const captionTitle = document.getElementById('zoomCaptionTitle');
+    if (captionTitle) captionTitle.textContent = captionData.name;
+    const captionBadge = document.getElementById('zoomCaptionBadge');
+    if (captionBadge) captionBadge.textContent = captionData.badge || 'Typography';
+    const captionDesc = document.getElementById('zoomCaptionDesc');
+    if (captionDesc) captionDesc.textContent = captionData.desc || 'High-retention kinetic subtitle animation.';
+
+    // 3. Highlight which box was just triggered
+    const reframeCardBox = document.getElementById('zoomReframeCardBox');
+    const captionCardBox = document.getElementById('zoomCaptionCardBox');
+    const triggerBadge = document.getElementById('zoomTriggerBadge');
+    if (reframeCardBox && captionCardBox) {
+      reframeCardBox.classList.remove('border-[#2165F7]', 'border-[#8655FF]');
+      captionCardBox.classList.remove('border-[#2165F7]', 'border-[#8655FF]');
+      if (triggerType === 'reframe') {
+        reframeCardBox.classList.add('border-[#2165F7]');
+        if (triggerBadge) triggerBadge.textContent = 'REFRAME MODE CHANGED';
+      } else if (triggerType === 'caption') {
+        captionCardBox.classList.add('border-[#8655FF]');
+        if (triggerBadge) triggerBadge.textContent = 'CAPTION PRESET CHANGED';
+      } else {
+        if (triggerBadge) triggerBadge.textContent = 'ACTIVE PRESETS PREVIEW';
+      }
+    }
+
+    // 4. Trigger Camera Zoom-Out Animation on the stage
+    const stageBg = document.getElementById('zoomVideoBg');
+    if (stageBg) {
+      stageBg.classList.remove('stage-camera-zooming');
+      void stageBg.offsetWidth; // force reflow
+      stageBg.classList.add('stage-camera-zooming');
+    }
+
+    // 5. Reveal Overlay with Zoom Effect
+    overlay.classList.add('active');
+  }
+
+  function closeSelectionZoomOverlay() {
+    if (window.playGlassTick) window.playGlassTick();
+    const overlay = document.getElementById('selectionZoomOverlay');
+    if (overlay) overlay.classList.remove('active');
+  }
+
+  function handleZoomOverlayBackdropClick(event) {
+    if (event.target.id === 'selectionZoomOverlay') {
+      closeSelectionZoomOverlay();
+    }
+  }
+
+  function setZoomSampleText(text) {
+    if (window.playGlassTick) window.playGlassTick();
+    const box = document.getElementById('zoomCaptionDisplay');
+    if (!box) return;
+    const words = (text || 'THIS MOMENT CHANGED EVERYTHING').trim().split(/\s+/);
+    if (words.length <= 1) {
+      box.innerHTML = `<span class="highlight">${words[0] || 'CLIPGLASS'}</span>`;
+    } else {
+      const mid = Math.floor(words.length / 2);
+      const pre = words.slice(0, mid).join(' ');
+      const high = words[mid];
+      const post = words.slice(mid + 1).join(' ');
+      box.innerHTML = `${pre} <span class="highlight">${high}</span> ${post}`;
+    }
+  }
+
   function handleStudioTextInput(val) {
     const box = document.getElementById('studioCaptionDisplay');
     if (!box) return;
@@ -691,10 +1143,12 @@
 
   function syncCaptionSelectToStudio(val) {
     selectCaptionPreset(val);
+    openSelectionZoomOverlay('caption');
   }
 
   function syncReframeSelectToStudio(val) {
     selectFrameModel(val);
+    openSelectionZoomOverlay('reframe');
   }
 
   function scrollToPreviewStudio() {
@@ -1013,6 +1467,13 @@
   document.addEventListener('DOMContentLoaded', () => {
     selectCaptionPreset('viral_pop');
     selectFrameModel('follow-face');
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      closeSelectionZoomOverlay();
+      closePreviewModal();
+    }
   });
 </script>
 {% endblock %}

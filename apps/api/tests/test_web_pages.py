@@ -56,6 +56,11 @@ def test_auto_clip_page():
     assert "Upload Video from PC" in response.text
     assert "clipFileInput" in response.text
     assert "clipPcContainer" in response.text
+    assert "selectionZoomOverlay" in response.text
+    assert "selectionZoomCard" in response.text
+    assert "openSelectionZoomOverlay" in response.text
+    assert "zoomCaptionDisplay" in response.text
+    assert "zoomGuideOverlay" in response.text
 
 # 06. Auto Clip Editor
 def test_auto_clip_editor_page():
