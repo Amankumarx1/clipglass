@@ -3,56 +3,56 @@
 {% block title %}Settings & Preferences — ClipGlass{% endblock %}
 
 {% block content %}
-<div class="w-full max-w-4xl mx-auto flex flex-col gap-6">
+<div class="w-full max-w-4xl mx-auto flex flex-col gap-6 py-4">
   <!-- Header -->
-  <div class="flex items-center gap-3 px-2">
-    <div class="w-8 h-8 rounded-xl bg-slate-500/20 text-slate-500 flex items-center justify-center font-bold">
+  <div class="flex items-center gap-3 pb-2 border-b border-white/10">
+    <div class="w-9 h-9 rounded-2xl bg-white/5 border border-white/10 text-slate-300 flex items-center justify-center font-bold">
       ⚙
     </div>
     <div>
-      <h1 class="font-extrabold text-2xl text-slate-900 dark:text-white tracking-tight">Settings & Preferences</h1>
-      <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Configure appearance, download defaults, audio normalization, and privacy options.</p>
+      <h1 class="font-extrabold text-2xl sm:text-3xl text-white tracking-tight">Settings & Preferences</h1>
+      <p class="text-xs text-slate-400 mt-0.5">Configure appearance, download defaults, audio normalization, and privacy options.</p>
     </div>
   </div>
 
   <!-- Appearance Card -->
-  <div class="glass glass-rim rounded-[36px] p-6 shadow-xl flex flex-col gap-4">
-    <span class="text-xs font-bold uppercase text-slate-400 tracking-wider">Appearance &amp; Audio Feedback</span>
+  <div class="capsule-surface rounded-3xl p-6 sm:p-7 border border-white/10 shadow-xl flex flex-col gap-5">
+    <span class="text-[10px] font-bold uppercase text-slate-400 tracking-widest">Appearance &amp; Audio Feedback</span>
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-      <div class="glass rounded-2xl p-4 flex items-center justify-between">
+      <div class="p-4 rounded-2xl bg-[#101113]/70 border border-white/5 flex items-center justify-between">
         <div>
-          <h4 class="font-bold text-xs text-slate-900 dark:text-white">Theme Mode</h4>
+          <h4 class="font-bold text-xs text-white">Theme Mode</h4>
           <p id="themeStatusText" class="text-[11px] text-slate-400 mt-0.5">Cinematic Dark (Locked)</p>
         </div>
-        <div class="flex items-center gap-1.5 p-1 rounded-xl glass">
-          <span class="px-3.5 py-1.5 rounded-lg text-xs font-bold bg-blue-600/30 text-blue-400 border border-blue-500/30 shadow-sm flex items-center gap-1.5">
+        <div class="flex items-center gap-1.5 p-1 rounded-full bg-white/5 border border-white/10">
+          <span class="px-3.5 py-1 rounded-full text-xs font-bold bg-blue-600/30 text-blue-400 border border-blue-500/30 shadow-sm flex items-center gap-1.5">
             <span>🌙</span>
             <span>Dark</span>
           </span>
         </div>
       </div>
 
-      <div class="glass rounded-2xl p-4 flex items-center justify-between">
+      <div class="p-4 rounded-2xl bg-[#101113]/70 border border-white/5 flex items-center justify-between">
         <div>
-          <h4 class="font-bold text-xs text-slate-900 dark:text-white">Sensory Sound Effects</h4>
+          <h4 class="font-bold text-xs text-white">Sensory Sound Effects</h4>
           <p id="soundStatusText" class="text-[11px] text-slate-400 mt-0.5">Glass pops, ticks &amp; chimes</p>
         </div>
-        <div class="flex items-center gap-1.5 p-1 rounded-xl glass">
-          <button type="button" onclick="setSoundSetting(true)" id="soundBtn-on" class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all text-slate-500 dark:text-slate-400">🔊 On</button>
-          <button type="button" onclick="setSoundSetting(false)" id="soundBtn-off" class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all text-slate-500 dark:text-slate-400">🔇 Mute</button>
+        <div class="flex items-center gap-1.5 p-1 rounded-full bg-white/5 border border-white/10">
+          <button type="button" onclick="setSoundSetting(true)" id="soundBtn-on" class="px-3.5 py-1 rounded-full text-xs font-bold transition-all text-slate-400 hover:text-white">🔊 On</button>
+          <button type="button" onclick="setSoundSetting(false)" id="soundBtn-off" class="px-3.5 py-1 rounded-full text-xs font-bold transition-all text-slate-400 hover:text-white">🔇 Mute</button>
         </div>
       </div>
     </div>
 
-    <!-- Accent Color Swatches (Image A Screen 11) -->
-    <div class="glass rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+    <!-- Accent Color Swatches -->
+    <div class="p-4 rounded-2xl bg-[#101113]/70 border border-white/5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
       <div>
-        <h4 class="font-bold text-xs text-slate-900 dark:text-white">Accent Color</h4>
+        <h4 class="font-bold text-xs text-white">Accent Lighting Tone</h4>
         <p class="text-[11px] text-slate-400 mt-0.5">Choose your signature lighting and button glow tone</p>
       </div>
-      <div class="flex items-center gap-2">
-        <button type="button" onclick="setAccentColor('blue')" title="Royal Blue" class="w-6 h-6 rounded-full bg-[#2563FF] border-2 border-white shadow-md hover:scale-110 transition-transform cursor-pointer"></button>
-        <button type="button" onclick="setAccentColor('purple')" title="Cyber Purple" class="w-6 h-6 rounded-full bg-[#7C4DFF] border-2 border-transparent hover:border-white shadow-md hover:scale-110 transition-transform cursor-pointer"></button>
+      <div class="flex items-center gap-2.5">
+        <button type="button" onclick="setAccentColor('blue')" title="Royal Blue" class="w-6 h-6 rounded-full bg-[#2165F7] border-2 border-white shadow-md hover:scale-110 transition-transform cursor-pointer"></button>
+        <button type="button" onclick="setAccentColor('purple')" title="Cyber Purple" class="w-6 h-6 rounded-full bg-[#8655FF] border-2 border-transparent hover:border-white shadow-md hover:scale-110 transition-transform cursor-pointer"></button>
         <button type="button" onclick="setAccentColor('cyan')" title="Neon Cyan" class="w-6 h-6 rounded-full bg-[#06B6D4] border-2 border-transparent hover:border-white shadow-md hover:scale-110 transition-transform cursor-pointer"></button>
         <button type="button" onclick="setAccentColor('pink')" title="Electric Pink" class="w-6 h-6 rounded-full bg-[#FF2E74] border-2 border-transparent hover:border-white shadow-md hover:scale-110 transition-transform cursor-pointer"></button>
         <button type="button" onclick="setAccentColor('orange')" title="Solar Orange" class="w-6 h-6 rounded-full bg-[#FF7A45] border-2 border-transparent hover:border-white shadow-md hover:scale-110 transition-transform cursor-pointer"></button>
@@ -62,54 +62,54 @@
   </div>
 
   <!-- Media Defaults Card -->
-  <div class="glass glass-rim rounded-[36px] p-6 shadow-xl flex flex-col gap-4">
-    <span class="text-xs font-bold uppercase text-slate-400 tracking-wider">Media Download Defaults</span>
+  <div class="capsule-surface rounded-3xl p-6 sm:p-7 border border-white/10 shadow-xl flex flex-col gap-5">
+    <span class="text-[10px] font-bold uppercase text-slate-400 tracking-widest">Media Download Defaults</span>
     <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
       <!-- Resolution -->
-      <div class="glass rounded-2xl p-4">
-        <label class="text-[10px] uppercase font-bold text-slate-400 block mb-2">Default Video Quality</label>
+      <div class="p-4 rounded-2xl bg-[#101113]/70 border border-white/5 flex flex-col gap-2">
+        <label class="text-[10px] uppercase font-bold text-slate-400 block mb-1">Default Video Quality</label>
         <div class="flex flex-wrap gap-1.5" id="resButtonGroup">
-          <button type="button" onclick="setMediaPref('res', '2160p')" id="res-2160p" class="pref-btn px-2.5 py-1 rounded-lg text-xs font-bold glass text-slate-400">4K</button>
-          <button type="button" onclick="setMediaPref('res', '1440p')" id="res-1440p" class="pref-btn px-2.5 py-1 rounded-lg text-xs font-bold glass text-slate-400">1440p</button>
-          <button type="button" onclick="setMediaPref('res', '1080p')" id="res-1080p" class="pref-btn px-2.5 py-1 rounded-lg text-xs font-bold glass text-slate-400">1080p</button>
-          <button type="button" onclick="setMediaPref('res', '720p')" id="res-720p" class="pref-btn px-2.5 py-1 rounded-lg text-xs font-bold glass text-slate-400">720p</button>
+          <button type="button" onclick="setMediaPref('res', '2160p')" id="res-2160p" class="pref-btn px-3 py-1 rounded-full text-xs font-bold bg-white/5 text-slate-400 border border-white/10 transition-all">4K</button>
+          <button type="button" onclick="setMediaPref('res', '1440p')" id="res-1440p" class="pref-btn px-3 py-1 rounded-full text-xs font-bold bg-white/5 text-slate-400 border border-white/10 transition-all">1440p</button>
+          <button type="button" onclick="setMediaPref('res', '1080p')" id="res-1080p" class="pref-btn px-3 py-1 rounded-full text-xs font-bold bg-white/5 text-slate-400 border border-white/10 transition-all">1080p</button>
+          <button type="button" onclick="setMediaPref('res', '720p')" id="res-720p" class="pref-btn px-3 py-1 rounded-full text-xs font-bold bg-white/5 text-slate-400 border border-white/10 transition-all">720p</button>
         </div>
       </div>
 
       <!-- Container -->
-      <div class="glass rounded-2xl p-4">
-        <label class="text-[10px] uppercase font-bold text-slate-400 block mb-2">Default Video Format</label>
+      <div class="p-4 rounded-2xl bg-[#101113]/70 border border-white/5 flex flex-col gap-2">
+        <label class="text-[10px] uppercase font-bold text-slate-400 block mb-1">Default Video Format</label>
         <div class="flex gap-1.5" id="fmtButtonGroup">
-          <button type="button" onclick="setMediaPref('fmt', 'mp4')" id="fmt-mp4" class="pref-btn px-4 py-1 rounded-lg text-xs font-bold glass text-slate-400">MP4</button>
-          <button type="button" onclick="setMediaPref('fmt', 'webm')" id="fmt-webm" class="pref-btn px-4 py-1 rounded-lg text-xs font-bold glass text-slate-400">WEBM</button>
+          <button type="button" onclick="setMediaPref('fmt', 'mp4')" id="fmt-mp4" class="pref-btn px-4 py-1 rounded-full text-xs font-bold bg-white/5 text-slate-400 border border-white/10 transition-all">MP4</button>
+          <button type="button" onclick="setMediaPref('fmt', 'webm')" id="fmt-webm" class="pref-btn px-4 py-1 rounded-full text-xs font-bold bg-white/5 text-slate-400 border border-white/10 transition-all">WEBM</button>
         </div>
       </div>
 
       <!-- Audio Format -->
-      <div class="glass rounded-2xl p-4">
-        <label class="text-[10px] uppercase font-bold text-slate-400 block mb-2">Default Audio Quality</label>
+      <div class="p-4 rounded-2xl bg-[#101113]/70 border border-white/5 flex flex-col gap-2">
+        <label class="text-[10px] uppercase font-bold text-slate-400 block mb-1">Default Audio Quality</label>
         <div class="flex flex-wrap gap-1.5" id="abrButtonGroup">
-          <button type="button" onclick="setMediaPref('abr', '320k')" id="abr-320k" class="pref-btn px-3 py-1 rounded-lg text-xs font-bold glass text-slate-400">320k MP3</button>
-          <button type="button" onclick="setMediaPref('abr', 'flac')" id="abr-flac" class="pref-btn px-3 py-1 rounded-lg text-xs font-bold glass text-slate-400">FLAC</button>
-          <button type="button" onclick="setMediaPref('abr', 'wav')" id="abr-wav" class="pref-btn px-3 py-1 rounded-lg text-xs font-bold glass text-slate-400">WAV</button>
+          <button type="button" onclick="setMediaPref('abr', '320k')" id="abr-320k" class="pref-btn px-3 py-1 rounded-full text-xs font-bold bg-white/5 text-slate-400 border border-white/10 transition-all">320k MP3</button>
+          <button type="button" onclick="setMediaPref('abr', 'flac')" id="abr-flac" class="pref-btn px-3 py-1 rounded-full text-xs font-bold bg-white/5 text-slate-400 border border-white/10 transition-all">FLAC</button>
+          <button type="button" onclick="setMediaPref('abr', 'wav')" id="abr-wav" class="pref-btn px-3 py-1 rounded-full text-xs font-bold bg-white/5 text-slate-400 border border-white/10 transition-all">WAV</button>
         </div>
       </div>
     </div>
   </div>
 
   <!-- Privacy & Storage Card -->
-  <div class="glass glass-rim rounded-[36px] p-6 shadow-xl flex flex-col gap-4">
-    <span class="text-xs font-bold uppercase text-slate-400 tracking-wider">Privacy & Ephemeral Storage</span>
-    <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+  <div class="capsule-surface rounded-3xl p-6 sm:p-7 border border-white/10 shadow-xl flex flex-col gap-4">
+    <span class="text-[10px] font-bold uppercase text-slate-400 tracking-widest">Privacy &amp; Ephemeral Storage</span>
+    <p class="text-xs text-slate-400 leading-relaxed">
       ClipGlass processes media strictly in temporary storage. All converted and downloaded files are unlinked and permanently deleted 15 minutes after completion. No account data, personal identifiers, or search histories are ever sent to third parties.
     </p>
 
-    <div class="pt-3 border-t border-slate-200/50 dark:border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+    <div class="pt-3 border-t border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
       <div>
-        <h4 class="font-bold text-xs text-slate-900 dark:text-white">Session History Cleanup</h4>
+        <h4 class="font-bold text-xs text-white">Session History Cleanup</h4>
         <p class="text-[11px] text-slate-400 mt-0.5">Wipe all cached sessions and recent download records from this browser.</p>
       </div>
-      <button type="button" onclick="clearSessionHistory()" class="px-4 py-2 rounded-xl glass border border-rose-500/30 text-rose-500 hover:bg-rose-500/10 text-xs font-bold shadow-sm self-start sm:self-auto cursor-pointer">
+      <button type="button" onclick="clearSessionHistory()" class="px-4 py-2 rounded-full bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 text-xs font-bold shadow-sm self-start sm:self-auto cursor-pointer transition-all">
         🗑 Clear All Session History
       </button>
     </div>
@@ -140,73 +140,83 @@
     if (window.playGlassTick) window.playGlassTick();
     document.documentElement.setAttribute('data-accent', accent);
     localStorage.setItem('clipglass_accent', accent);
-    if (window.showToast) window.showToast(`Accent lighting set to ${accent.toUpperCase()}`, 'info');
+    if (window.showToast) window.showToast(`Accent tone set to ${accent.toUpperCase()}`, 'info');
   }
 
   function updateSoundUI() {
     const soundEnabled = localStorage.getItem('clipglass-sound') !== 'false';
-    document.getElementById('soundStatusText').textContent = soundEnabled ? 'Audio feedback: Enabled' : 'Audio feedback: Muted';
+    const status = document.getElementById('soundStatusText');
+    if (status) status.textContent = soundEnabled ? 'Audio feedback: Enabled' : 'Audio feedback: Muted';
     const onBtn = document.getElementById('soundBtn-on');
     const offBtn = document.getElementById('soundBtn-off');
     if (soundEnabled) {
-      onBtn.className = 'px-3 py-1.5 rounded-lg text-xs font-bold bg-blue-600 text-white shadow-sm';
-      offBtn.className = 'px-3 py-1.5 rounded-lg text-xs font-bold text-slate-500 dark:text-slate-400';
+      if (onBtn) onBtn.className = 'px-3.5 py-1 rounded-full text-xs font-bold bg-blue-600 text-white shadow-sm';
+      if (offBtn) offBtn.className = 'px-3.5 py-1 rounded-full text-xs font-bold text-slate-400 hover:text-white';
     } else {
-      offBtn.className = 'px-3 py-1.5 rounded-lg text-xs font-bold bg-blue-600 text-white shadow-sm';
-      onBtn.className = 'px-3 py-1.5 rounded-lg text-xs font-bold text-slate-500 dark:text-slate-400';
+      if (offBtn) offBtn.className = 'px-3.5 py-1 rounded-full text-xs font-bold bg-blue-600 text-white shadow-sm';
+      if (onBtn) onBtn.className = 'px-3.5 py-1 rounded-full text-xs font-bold text-slate-400 hover:text-white';
     }
   }
 
   function setSoundSetting(enabled) {
-    localStorage.setItem('clipglass-sound', enabled ? 'true' : 'false');
-    if (enabled && window.playGlassPop) window.playGlassPop();
-    updateSoundUI();
-    if (window.showToast) window.showToast(enabled ? 'Sound effects enabled' : 'Sound effects muted', 'info');
-  }
-
-  function updateMediaPrefsUI() {
-    const res = localStorage.getItem('clipglass-default-res') || '1080p';
-    const fmt = localStorage.getItem('clipglass-default-fmt') || 'mp4';
-    const abr = localStorage.getItem('clipglass-default-abr') || '320k';
-
-    document.querySelectorAll('#resButtonGroup .pref-btn').forEach(b => {
-      b.className = 'pref-btn px-2.5 py-1 rounded-lg text-xs font-bold glass text-slate-400';
-    });
-    const activeRes = document.getElementById(`res-${res}`);
-    if (activeRes) activeRes.className = 'pref-btn px-2.5 py-1 rounded-lg text-xs font-bold bg-blue-600 text-white shadow-sm';
-
-    document.querySelectorAll('#fmtButtonGroup .pref-btn').forEach(b => {
-      b.className = 'pref-btn px-4 py-1 rounded-lg text-xs font-bold glass text-slate-400';
-    });
-    const activeFmt = document.getElementById(`fmt-${fmt}`);
-    if (activeFmt) activeFmt.className = 'pref-btn px-4 py-1 rounded-lg text-xs font-bold bg-blue-600 text-white shadow-sm';
-
-    document.querySelectorAll('#abrButtonGroup .pref-btn').forEach(b => {
-      b.className = 'pref-btn px-3 py-1 rounded-lg text-xs font-bold glass text-slate-400';
-    });
-    const activeAbr = document.getElementById(`abr-${abr}`);
-    if (activeAbr) activeAbr.className = 'pref-btn px-3 py-1 rounded-lg text-xs font-bold bg-purple-600 text-white shadow-sm';
-  }
-
-  function setMediaPref(key, value) {
     if (window.playGlassTick) window.playGlassTick();
-    localStorage.setItem(`clipglass-default-${key}`, value);
-    updateMediaPrefsUI();
-    if (window.showToast) window.showToast(`Default ${key.toUpperCase()} set to ${value.toUpperCase()}`, 'info');
+    localStorage.setItem('clipglass-sound', enabled ? 'true' : 'false');
+    updateSoundUI();
+    if (window.showToast) window.showToast(`Audio feedback ${enabled ? 'Enabled' : 'Muted'}`, 'info');
+  }
+
+  function setMediaPref(key, val) {
+    if (window.playGlassTick) window.playGlassTick();
+    localStorage.setItem(`clipglass_pref_${key}`, val);
+    highlightPrefButtons();
+    if (window.showToast) window.showToast(`Default ${key.toUpperCase()} set to ${val.toUpperCase()}`, 'info');
+  }
+
+  function highlightPrefButtons() {
+    const res = localStorage.getItem('clipglass_pref_res') || '1080p';
+    const fmt = localStorage.getItem('clipglass_pref_fmt') || 'mp4';
+    const abr = localStorage.getItem('clipglass_pref_abr') || '320k';
+
+    ['2160p', '1440p', '1080p', '720p'].forEach(r => {
+      const b = document.getElementById(`res-${r}`);
+      if (b) {
+        b.className = r === res
+          ? 'pref-btn px-3 py-1 rounded-full text-xs font-bold bg-blue-600 text-white shadow-sm transition-all'
+          : 'pref-btn px-3 py-1 rounded-full text-xs font-bold bg-white/5 text-slate-400 border border-white/10 transition-all';
+      }
+    });
+
+    ['mp4', 'webm'].forEach(f => {
+      const b = document.getElementById(`fmt-${f}`);
+      if (b) {
+        b.className = f === fmt
+          ? 'pref-btn px-4 py-1 rounded-full text-xs font-bold bg-blue-600 text-white shadow-sm transition-all'
+          : 'pref-btn px-4 py-1 rounded-full text-xs font-bold bg-white/5 text-slate-400 border border-white/10 transition-all';
+      }
+    });
+
+    ['320k', 'flac', 'wav'].forEach(a => {
+      const b = document.getElementById(`abr-${a}`);
+      if (b) {
+        b.className = a === abr
+          ? 'pref-btn px-3 py-1 rounded-full text-xs font-bold bg-blue-600 text-white shadow-sm transition-all'
+          : 'pref-btn px-3 py-1 rounded-full text-xs font-bold bg-white/5 text-slate-400 border border-white/10 transition-all';
+      }
+    });
   }
 
   function clearSessionHistory() {
     if (window.playGlassPop) window.playGlassPop();
-    sessionStorage.removeItem('clipglass-history');
+    sessionStorage.clear();
     localStorage.removeItem('clipglass-history');
     if (window.updateRecentBadge) window.updateRecentBadge();
-    if (window.showToast) window.showToast('All local session history wiped successfully!', 'success');
+    if (window.showToast) window.showToast('All session media history has been wiped.', 'success');
   }
 
   document.addEventListener('DOMContentLoaded', () => {
-    updateThemeUI();
+    updateThemeUI('dark');
     updateSoundUI();
-    updateMediaPrefsUI();
+    highlightPrefButtons();
   });
 </script>
 {% endblock %}

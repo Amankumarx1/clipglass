@@ -184,15 +184,40 @@ footer{position:relative;margin-top:130px;border-top:1px solid var(--line);paddi
 
 <div class="after">
   <section id="work" class="sec wrap" style="--g:255,45,111">
-    <h2 class="rv">Four tools. One workspace.</h2>
-    <p class="lead rv">Download, trim, master and repurpose your media without installing anything.</p>
+    <h2 class="rv">All-in-One Studio Workspaces</h2>
+    <p class="lead rv">Download, trim, master and repurpose your media with effortless precision.</p>
     <div class="lbw rv"><form class="lb" id="f" data-tilt="4" novalidate>
       <input id="url" aria-label="YouTube link" placeholder="Paste a YouTube link" autocomplete="off">
       <button type="button" class="pst" id="pst" aria-label="Paste from clipboard">📋</button>
       <button class="gb" id="gb">Inspect &amp; download</button>
     </form></div>
     <p class="msg" id="msg" role="status"></p>
-    <div class="cards"><a class="cd rv3" data-tilt="9" href="/downloader" style="--c:#ff2d6f;--rgb:255,45,111"><div class="ic"><svg viewBox="0 0 24 24"><path d="M12 4v10m0 0l-4-4m4 4l4-4M5 19h14"/></svg></div><h3>Downloader</h3><p>Save videos from 360p up to 4K, or extract audio as MP3, FLAC or WAV.</p><span class="l">Open Downloader →</span></a><a class="cd rv3" data-tilt="9" href="/studio" style="--c:#19e3b1;--rgb:25,227,177"><div class="ic"><svg viewBox="0 0 24 24"><path d="M9 18V6l10-2v12"/><circle cx="6" cy="18" r="3"/><circle cx="16" cy="16" r="3"/></svg></div><h3>Audio Studio</h3><p>79 effects, an automatic mode and a modular rack, with true-peak limiting.</p><span class="l">Open Studio →</span></a><a class="cd rv3" data-tilt="9" href="/video-trimmer" style="--c:#ffd23f;--rgb:255,210,63"><div class="ic"><svg viewBox="0 0 24 24"><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M8.1 8.1L20 20M8.1 15.9L20 4"/></svg></div><h3>Video Trimmer</h3><p>Cut on a visual timeline. Lossless stream copy means no re-encoding and no waiting.</p><span class="l">Open Trimmer →</span></a><a class="cd rv3" data-tilt="9" href="/auto-clip" style="--c:#4d8aff;--rgb:77,138,255"><div class="ic"><svg viewBox="0 0 24 24"><rect x="7" y="3" width="10" height="18" rx="2"/><path d="M11 10l3 2-3 2z"/></svg></div><h3>Auto Clip</h3><p>Finds the strongest moments in a long video and exports 9:16 clips with captions.</p><span class="l">Open Auto Clip →</span></a></div>
+    <div class="cards">
+      <a class="cd rv3" data-tilt="9" href="/downloader" style="--c:#ff2d6f;--rgb:255,45,111">
+        <div class="ic"><svg viewBox="0 0 24 24"><path d="M12 4v10m0 0l-4-4m4 4l4-4M5 19h14"/></svg></div>
+        <h3>Downloader</h3>
+        <p>Save videos from 360p up to 4K, or extract audio as MP3, FLAC or WAV.</p>
+        <span class="l">Open Downloader →</span>
+      </a>
+      <a class="cd rv3" data-tilt="9" href="/studio" style="--c:#8655ff;--rgb:134,85,255">
+        <div class="ic"><svg viewBox="0 0 24 24"><path d="M9 18V6l10-2v12"/><circle cx="6" cy="18" r="3"/><circle cx="16" cy="16" r="3"/></svg></div>
+        <h3>Audio Studio</h3>
+        <p>79 effects, an automatic mode and a modular rack, with true-peak limiting.</p>
+        <span class="l">Open Studio →</span>
+      </a>
+      <a class="cd rv3" data-tilt="9" href="/video-trimmer" style="--c:#ffd23f;--rgb:255,210,63">
+        <div class="ic"><svg viewBox="0 0 24 24"><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M8.1 8.1L20 20M8.1 15.9L20 4"/></svg></div>
+        <h3>Video Trimmer</h3>
+        <p>Cut on a visual timeline. Lossless stream copy means no re-encoding and no waiting.</p>
+        <span class="l">Open Trimmer →</span>
+      </a>
+      <a class="cd rv3" data-tilt="9" href="/auto-clip" style="--c:#2165f7;--rgb:33,101,247">
+        <div class="ic"><svg viewBox="0 0 24 24"><rect x="7" y="3" width="10" height="18" rx="2"/><path d="M11 10l3 2-3 2z"/></svg></div>
+        <h3>Auto Clip Studio</h3>
+        <p>Finds the strongest moments in a long video and exports 9:16 clips with captions.</p>
+        <span class="l">Open Auto Clip →</span>
+      </a>
+    </div>
   </section>
   <section id="how" class="sec wrap" style="--g:31,102,255">
     <h2 class="rv">How it works</h2>
@@ -201,10 +226,13 @@ footer{position:relative;margin-top:130px;border-top:1px solid var(--line);paddi
   </section>
   <section class="sec" style="--g:138,92,255">
     <div class="panel rv">
-      <div><h2>Mastering-grade audio, in your browser</h2>
+      <div>
+        <p class="text-[11px] font-bold uppercase tracking-[0.2em] text-[#8655FF] mb-2">Real-time Web Audio API Processing</p>
+        <h2>Mastering-grade audio, in your browser</h2>
         <p class="lead">Measure loudness, compare before and after, and keep every file on your device.</p>
         <ul class="feat"><li>LUFS loudness metering</li><li>One-click A/B bypass</li><li>True-peak safety limiting</li><li>Nothing is uploaded</li></ul>
-        <a class="btn" href="/studio">Open Audio Studio</a></div>
+        <a class="btn" style="background:#2165f7;box-shadow:0 0 24px rgba(33,101,247,0.4)" href="/studio">Launch Audio Studio</a>
+      </div>
       <canvas id="eq" role="img" aria-label="Animated 3D equalizer"></canvas>
     </div>
   </section>

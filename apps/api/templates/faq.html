@@ -3,77 +3,72 @@
 {% block title %}Help & FAQ — ClipGlass{% endblock %}
 
 {% block content %}
-<div class="w-full max-w-4xl mx-auto flex flex-col gap-6">
+<div class="w-full max-w-4xl mx-auto flex flex-col gap-6 py-4">
   <!-- Header -->
-  <div class="flex items-center gap-3 px-2">
-    <div
-      class="w-9 h-9 rounded-2xl bg-indigo-500/20 text-indigo-500 flex items-center justify-center font-bold text-base">
-      ?
+  <div class="text-center max-w-xl mx-auto mb-2">
+    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-[11px] font-semibold text-slate-400 mb-3 tracking-wider uppercase">
+      <span>?</span> Knowledge Base &amp; FAQ
     </div>
-    <div>
-      <h1 class="font-extrabold text-2xl text-slate-900 dark:text-white tracking-tight">Frequently Asked Questions</h1>
-      <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Everything you need to know about ClipGlass audio
-        mastering, video trimming, and formats.</p>
-    </div>
+    <h1 class="font-extrabold text-3xl sm:text-4xl text-white tracking-tight">Frequently Asked Questions</h1>
+    <p class="text-xs sm:text-sm text-slate-400 mt-2">Everything you need to know about ClipGlass audio mastering, video trimming, and formats.</p>
   </div>
 
-  <!-- Search Filter -->
-  <div class="glass glass-rim rounded-2xl p-3 shadow-md flex items-center gap-3">
-    <span class="text-slate-400 text-sm ml-2">🔍</span>
+  <!-- Search Filter Capsule -->
+  <div class="capsule-surface rounded-full p-2.5 px-4 border border-white/10 shadow-lg flex items-center gap-3 max-w-xl mx-auto w-full">
+    <span class="text-slate-500 text-sm ml-1">🔍</span>
     <input type="text" id="faqSearchInput" oninput="filterFaqs()"
       placeholder="Type to search questions, shortcuts, effects..."
-      class="w-full bg-transparent border-none text-xs font-medium text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none" />
+      class="w-full bg-transparent border-none text-xs font-medium text-white placeholder:text-slate-500 focus:outline-none" />
   </div>
 
   <!-- Keyboard Shortcuts Cheatsheet -->
-  <div class="glass glass-rim rounded-[32px] p-6 shadow-xl flex flex-col gap-4">
+  <div class="capsule-surface rounded-3xl p-6 sm:p-7 border border-white/10 shadow-xl flex flex-col gap-4">
     <div class="flex items-center gap-2">
       <span class="text-base">⌨️</span>
-      <h3 class="font-extrabold text-sm text-slate-900 dark:text-white tracking-tight">Keyboard Shortcuts Cheatsheet
-      </h3>
+      <h3 class="font-extrabold text-sm text-white tracking-tight">Keyboard Shortcuts Cheatsheet</h3>
     </div>
     <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
-      <div class="glass rounded-xl p-3 flex flex-col gap-1.5">
-        <span class="text-[10px] uppercase font-bold text-blue-500">Universal Downloader</span>
-        <div class="flex items-center justify-between text-slate-600 dark:text-slate-300">
+      <div class="p-3.5 rounded-2xl bg-[#101113]/70 border border-white/5 flex flex-col gap-2">
+        <span class="text-[10px] uppercase font-bold text-blue-400 tracking-wider">Universal Downloader</span>
+        <div class="flex items-center justify-between text-slate-300">
           <span>Quick Paste Link</span>
-          <kbd class="px-1.5 py-0.5 rounded bg-black/10 dark:bg-white/10 font-mono text-[10px]">Ctrl+V</kbd>
+          <kbd class="px-2 py-0.5 rounded-md bg-white/10 text-white font-mono text-[10px] border border-white/10">Ctrl+V</kbd>
         </div>
-        <div class="flex items-center justify-between text-slate-600 dark:text-slate-300">
+        <div class="flex items-center justify-between text-slate-300">
           <span>Start Inspect</span>
-          <kbd class="px-1.5 py-0.5 rounded bg-black/10 dark:bg-white/10 font-mono text-[10px]">Enter</kbd>
+          <kbd class="px-2 py-0.5 rounded-md bg-white/10 text-white font-mono text-[10px] border border-white/10">Enter</kbd>
         </div>
       </div>
 
-      <div class="glass rounded-xl p-3 flex flex-col gap-1.5">
-        <span class="text-[10px] uppercase font-bold text-emerald-500">Video Trimmer</span>
-        <div class="flex items-center justify-between text-slate-600 dark:text-slate-300">
+      <div class="p-3.5 rounded-2xl bg-[#101113]/70 border border-white/5 flex flex-col gap-2">
+        <span class="text-[10px] uppercase font-bold text-emerald-400 tracking-wider">Video Trimmer</span>
+        <div class="flex items-center justify-between text-slate-300">
           <span>Play / Pause</span>
-          <kbd class="px-1.5 py-0.5 rounded bg-black/10 dark:bg-white/10 font-mono text-[10px]">Space</kbd>
+          <kbd class="px-2 py-0.5 rounded-md bg-white/10 text-white font-mono text-[10px] border border-white/10">Space</kbd>
         </div>
-        <div class="flex items-center justify-between text-slate-600 dark:text-slate-300">
+        <div class="flex items-center justify-between text-slate-300">
           <span>Set In / Out Point</span>
-          <kbd class="px-1.5 py-0.5 rounded bg-black/10 dark:bg-white/10 font-mono text-[10px]">[ / ]</kbd>
+          <kbd class="px-2 py-0.5 rounded-md bg-white/10 text-white font-mono text-[10px] border border-white/10">[ / ]</kbd>
         </div>
-        <div class="flex items-center justify-between text-slate-600 dark:text-slate-300">
+        <div class="flex items-center justify-between text-slate-300">
           <span>Step Frame</span>
-          <kbd class="px-1.5 py-0.5 rounded bg-black/10 dark:bg-white/10 font-mono text-[10px]">← / →</kbd>
+          <kbd class="px-2 py-0.5 rounded-md bg-white/10 text-white font-mono text-[10px] border border-white/10">← / →</kbd>
         </div>
       </div>
 
-      <div class="glass rounded-xl p-3 flex flex-col gap-1.5">
-        <span class="text-[10px] uppercase font-bold text-purple-500">Audio Studio</span>
-        <div class="flex items-center justify-between text-slate-600 dark:text-slate-300">
+      <div class="p-3.5 rounded-2xl bg-[#101113]/70 border border-white/5 flex flex-col gap-2">
+        <span class="text-[10px] uppercase font-bold text-purple-400 tracking-wider">Audio Studio</span>
+        <div class="flex items-center justify-between text-slate-300">
           <span>Play / Stop</span>
-          <kbd class="px-1.5 py-0.5 rounded bg-black/10 dark:bg-white/10 font-mono text-[10px]">Space</kbd>
+          <kbd class="px-2 py-0.5 rounded-md bg-white/10 text-white font-mono text-[10px] border border-white/10">Space</kbd>
         </div>
-        <div class="flex items-center justify-between text-slate-600 dark:text-slate-300">
+        <div class="flex items-center justify-between text-slate-300">
           <span>A/B Bypass Compare</span>
-          <kbd class="px-1.5 py-0.5 rounded bg-black/10 dark:bg-white/10 font-mono text-[10px]">B</kbd>
+          <kbd class="px-2 py-0.5 rounded-md bg-white/10 text-white font-mono text-[10px] border border-white/10">B</kbd>
         </div>
-        <div class="flex items-center justify-between text-slate-600 dark:text-slate-300">
+        <div class="flex items-center justify-between text-slate-300">
           <span>Undo FX Change</span>
-          <kbd class="px-1.5 py-0.5 rounded bg-black/10 dark:bg-white/10 font-mono text-[10px]">Ctrl+Z</kbd>
+          <kbd class="px-2 py-0.5 rounded-md bg-white/10 text-white font-mono text-[10px] border border-white/10">Ctrl+Z</kbd>
         </div>
       </div>
     </div>
@@ -82,91 +77,57 @@
   <!-- Interactive Accordion FAQs -->
   <div id="faqList" class="flex flex-col gap-3">
     <!-- Q1 -->
-    <details class="faq-item glass glass-rim rounded-2xl p-4 shadow-md transition-all group open:border-blue-500/30">
-      <summary
-        class="font-bold text-xs sm:text-sm text-slate-900 dark:text-white cursor-pointer list-none flex items-center justify-between gap-2">
+    <details class="faq-item capsule-surface rounded-2xl p-4 sm:p-5 border border-white/10 shadow-md transition-all group open:border-blue-500/30">
+      <summary class="font-bold text-xs sm:text-sm text-white cursor-pointer list-none flex items-center justify-between gap-2">
         <span>Why does ClipGlass recommend "Original" for audio instead of converting to MP3 320?</span>
         <span class="text-slate-400 group-open:rotate-180 transition-transform text-xs">▼</span>
       </summary>
-      <p
-        class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed mt-3 pt-3 border-t border-slate-200/40 dark:border-white/10">
-        YouTube streams native audio in AAC (128 kbps) or Opus (160 kbps). Converting these to MP3 320 kbps creates a
-        larger file without adding acoustic fidelity. Selecting "Original" preserves the bitstream bit-for-bit without
-        lossy recompression.
+      <p class="text-xs text-slate-400 leading-relaxed mt-3 pt-3 border-t border-white/10">
+        YouTube streams native audio in AAC (128 kbps) or Opus (160 kbps). Converting these to MP3 320 kbps creates a larger file without adding acoustic fidelity. Selecting "Original" preserves the bitstream bit-for-bit without lossy recompression.
       </p>
     </details>
 
     <!-- Q2 -->
-    <details class="faq-item glass glass-rim rounded-2xl p-4 shadow-md transition-all group open:border-blue-500/30">
-      <summary
-        class="font-bold text-xs sm:text-sm text-slate-900 dark:text-white cursor-pointer list-none flex items-center justify-between gap-2">
+    <details class="faq-item capsule-surface rounded-2xl p-4 sm:p-5 border border-white/10 shadow-md transition-all group open:border-blue-500/30">
+      <summary class="font-bold text-xs sm:text-sm text-white cursor-pointer list-none flex items-center justify-between gap-2">
         <span>How does the 79-Module Audio Studio work in Auto vs Custom Mode?</span>
         <span class="text-slate-400 group-open:rotate-180 transition-transform text-xs">▼</span>
       </summary>
-      <p
-        class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed mt-3 pt-3 border-t border-slate-200/40 dark:border-white/10">
-        In <strong>Auto Mode</strong>, you pick whichever creative and mastering effects you want (e.g. 8D Audio, Deep
-        Bass, Shimmer Reverb), and ClipGlass automatically calculates harmonious parameters, gain staging, and True-Peak
-        safety limiting. In <strong>Custom Mode</strong>, you have a modular rack with sliders and knobs to adjust every
-        single parameter manually.
+      <p class="text-xs text-slate-400 leading-relaxed mt-3 pt-3 border-t border-white/10">
+        In <strong>Auto Mode</strong>, you pick whichever creative and mastering effects you want (e.g. 8D Audio, Deep Bass, Shimmer Reverb), and ClipGlass automatically calculates harmonious parameters, gain staging, and True-Peak safety limiting. In <strong>Custom Mode</strong>, you have a modular rack with sliders and knobs to adjust every single parameter manually.
       </p>
     </details>
 
     <!-- Q3 -->
-    <details class="faq-item glass glass-rim rounded-2xl p-4 shadow-md transition-all group open:border-blue-500/30">
-      <summary
-        class="font-bold text-xs sm:text-sm text-slate-900 dark:text-white cursor-pointer list-none flex items-center justify-between gap-2">
+    <details class="faq-item capsule-surface rounded-2xl p-4 sm:p-5 border border-white/10 shadow-md transition-all group open:border-blue-500/30">
+      <summary class="font-bold text-xs sm:text-sm text-white cursor-pointer list-none flex items-center justify-between gap-2">
         <span>How long are my processed files stored on the server?</span>
         <span class="text-slate-400 group-open:rotate-180 transition-transform text-xs">▼</span>
       </summary>
-      <p
-        class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed mt-3 pt-3 border-t border-slate-200/40 dark:border-white/10">
-        All extracted videos, mastered audios, and trimmed shorts are strictly ephemeral. Files are automatically
-        unlinked and permanently purged from server memory/disk after exactly 15 minutes.
+      <p class="text-xs text-slate-400 leading-relaxed mt-3 pt-3 border-t border-white/10">
+        All extracted videos, mastered audios, and trimmed shorts are strictly ephemeral. Files are automatically unlinked and permanently purged from server memory/disk after exactly 15 minutes.
       </p>
     </details>
 
     <!-- Q4 -->
-    <details class="faq-item glass glass-rim rounded-2xl p-4 shadow-md transition-all group open:border-blue-500/30">
-      <summary
-        class="font-bold text-xs sm:text-sm text-slate-900 dark:text-white cursor-pointer list-none flex items-center justify-between gap-2">
+    <details class="faq-item capsule-surface rounded-2xl p-4 sm:p-5 border border-white/10 shadow-md transition-all group open:border-blue-500/30">
+      <summary class="font-bold text-xs sm:text-sm text-white cursor-pointer list-none flex items-center justify-between gap-2">
         <span>What makes the Video Trimmer "lossless"?</span>
         <span class="text-slate-400 group-open:rotate-180 transition-transform text-xs">▼</span>
       </summary>
-      <p
-        class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed mt-3 pt-3 border-t border-slate-200/40 dark:border-white/10">
-        ClipGlass uses stream-copying (<code class="font-mono text-blue-500">-c copy</code>) with keyframe-accurate cuts
-        when possible. This means the video stream is not re-encoded, avoiding generational quality loss and completing
-        exports in under 1 second.
+      <p class="text-xs text-slate-400 leading-relaxed mt-3 pt-3 border-t border-white/10">
+        ClipGlass uses stream-copying (<code class="font-mono text-blue-400">-c copy</code>) with keyframe-accurate cuts when possible. This means the video stream is not re-encoded, avoiding generational quality loss and completing exports in under 1 second.
       </p>
     </details>
 
     <!-- Q5 -->
-    <details class="faq-item glass glass-rim rounded-2xl p-4 shadow-md transition-all group open:border-blue-500/30">
-      <summary
-        class="font-bold text-xs sm:text-sm text-slate-900 dark:text-white cursor-pointer list-none flex items-center justify-between gap-2">
+    <details class="faq-item capsule-surface rounded-2xl p-4 sm:p-5 border border-white/10 shadow-md transition-all group open:border-blue-500/30">
+      <summary class="font-bold text-xs sm:text-sm text-white cursor-pointer list-none flex items-center justify-between gap-2">
         <span>How does the Auto Clip viral shorts algorithm work?</span>
         <span class="text-slate-400 group-open:rotate-180 transition-transform text-xs">▼</span>
       </summary>
-      <p
-        class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed mt-3 pt-3 border-t border-slate-200/40 dark:border-white/10">
-        Auto Clip analyzes multimodal signals: energy volume peaks, pitch shifts, speech transcript sentiment, and
-        speaker activity. It scores segments from 0-100 on Hook, Flow, Engagement, and Trend, selects optimal 15-60
-        second moments, and formats them in 9:16 vertical cards with karaoke-style captions.
-      </p>
-    </details>
-
-    <!-- Q6 -->
-    <details class="faq-item glass glass-rim rounded-2xl p-4 shadow-md transition-all group open:border-blue-500/30">
-      <summary
-        class="font-bold text-xs sm:text-sm text-slate-900 dark:text-white cursor-pointer list-none flex items-center justify-between gap-2">
-        <span>Are there any ads, pop-ups, or user accounts?</span>
-        <span class="text-slate-400 group-open:rotate-180 transition-transform text-xs">▼</span>
-      </summary>
-      <p
-        class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed mt-3 pt-3 border-t border-slate-200/40 dark:border-white/10">
-        Never. ClipGlass is completely free, open-source, and has zero tracking scripts, zero redirects, zero banner
-        ads, and requires no registration or login.
+      <p class="text-xs text-slate-400 leading-relaxed mt-3 pt-3 border-t border-white/10">
+        Auto Clip analyzes multimodal signals: energy volume peaks, pitch shifts, speech transcript sentiment, and speaker activity. It scores segments from 0-100 on Hook, Flow, Engagement, and Trend, selects optimal 15-60 second moments, and formats them in 9:16 vertical cards with karaoke-style captions.
       </p>
     </details>
   </div>
@@ -176,15 +137,14 @@
 {% block scripts %}
 <script>
   function filterFaqs() {
-    const query = (document.getElementById('faqSearchInput')?.value || '').toLowerCase().trim();
+    const q = (document.getElementById('faqSearchInput')?.value || '').toLowerCase().trim();
     const items = document.querySelectorAll('.faq-item');
-    items.forEach(item => {
-      const text = item.textContent.toLowerCase();
-      if (!query || text.includes(query)) {
-        item.style.display = 'block';
-        if (query) item.open = true;
+    items.forEach(it => {
+      const txt = it.textContent.toLowerCase();
+      if (!q || txt.includes(q)) {
+        it.style.display = '';
       } else {
-        item.style.display = 'none';
+        it.style.display = 'none';
       }
     });
   }

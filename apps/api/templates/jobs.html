@@ -3,50 +3,60 @@
 {% block title %}Queue & Job Manager — ClipGlass{% endblock %}
 
 {% block content %}
-<div class="w-full max-w-5xl mx-auto flex flex-col gap-6">
+<div class="w-full max-w-5xl mx-auto flex flex-col gap-6 py-4">
   <!-- Header -->
-  <div class="flex items-center gap-3 px-2">
-    <div class="w-8 h-8 rounded-xl bg-blue-500/20 text-blue-500 flex items-center justify-center font-bold">
-      ≡
+  <div class="text-center max-w-xl mx-auto mb-2">
+    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-[11px] font-semibold text-slate-400 mb-3 tracking-wider uppercase">
+      <span class="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span> Live Engine Pipeline
     </div>
-    <div>
-      <h1 class="font-extrabold text-2xl text-slate-900 dark:text-white tracking-tight">Queue & Job Manager</h1>
-      <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Real-time processing queue across Downloads, Audio Mastering, Video Trimming & Auto Clip.</p>
-    </div>
+    <h1 class="font-extrabold text-3xl sm:text-4xl text-white tracking-tight">Queue & Job Manager</h1>
+    <p class="text-xs sm:text-sm text-slate-400 mt-2">Track real-time media encoding, filter chains, and export telemetry.</p>
   </div>
 
   <!-- 4 Stats Cards -->
-  <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
-    <div class="glass glass-rim rounded-2xl p-4 shadow-md">
-      <span class="text-[10px] font-bold uppercase text-blue-500">Active</span>
-      <p id="statActive" class="text-2xl font-black text-slate-900 dark:text-white mt-1">0</p>
+  <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 max-w-4xl mx-auto w-full">
+    <div class="capsule-surface p-4 rounded-2xl flex items-center justify-between border border-white/5">
+      <div>
+        <span class="text-[10px] font-bold uppercase tracking-wider text-blue-400">Active</span>
+        <p id="statActive" class="text-2xl font-black text-white mt-0.5">0</p>
+      </div>
+      <div class="w-8 h-8 rounded-full bg-blue-500/10 text-blue-400 flex items-center justify-center text-xs">⚡</div>
     </div>
-    <div class="glass glass-rim rounded-2xl p-4 shadow-md">
-      <span class="text-[10px] font-bold uppercase text-amber-500">Queued</span>
-      <p id="statQueued" class="text-2xl font-black text-slate-900 dark:text-white mt-1">0</p>
+    <div class="capsule-surface p-4 rounded-2xl flex items-center justify-between border border-white/5">
+      <div>
+        <span class="text-[10px] font-bold uppercase tracking-wider text-amber-400">Queued</span>
+        <p id="statQueued" class="text-2xl font-black text-white mt-0.5">0</p>
+      </div>
+      <div class="w-8 h-8 rounded-full bg-amber-500/10 text-amber-400 flex items-center justify-center text-xs">⏳</div>
     </div>
-    <div class="glass glass-rim rounded-2xl p-4 shadow-md">
-      <span class="text-[10px] font-bold uppercase text-emerald-500">Completed</span>
-      <p id="statCompleted" class="text-2xl font-black text-slate-900 dark:text-white mt-1">0</p>
+    <div class="capsule-surface p-4 rounded-2xl flex items-center justify-between border border-white/5">
+      <div>
+        <span class="text-[10px] font-bold uppercase tracking-wider text-emerald-400">Completed</span>
+        <p id="statCompleted" class="text-2xl font-black text-white mt-0.5">0</p>
+      </div>
+      <div class="w-8 h-8 rounded-full bg-emerald-500/10 text-emerald-400 flex items-center justify-center text-xs">✓</div>
     </div>
-    <div class="glass glass-rim rounded-2xl p-4 shadow-md">
-      <span class="text-[10px] font-bold uppercase text-rose-500">Failed</span>
-      <p id="statFailed" class="text-2xl font-black text-slate-900 dark:text-white mt-1">0</p>
+    <div class="capsule-surface p-4 rounded-2xl flex items-center justify-between border border-white/5">
+      <div>
+        <span class="text-[10px] font-bold uppercase tracking-wider text-rose-400">Failed</span>
+        <p id="statFailed" class="text-2xl font-black text-white mt-0.5">0</p>
+      </div>
+      <div class="w-8 h-8 rounded-full bg-rose-500/10 text-rose-400 flex items-center justify-center text-xs">✕</div>
     </div>
   </div>
 
-  <!-- Filters -->
-  <div class="flex items-center gap-2 p-1 rounded-2xl glass text-xs font-bold self-start">
-    <button type="button" onclick="setJobFilter('all')" id="filterBtn-all" class="job-filter-btn px-3.5 py-1.5 rounded-xl bg-blue-600 text-white shadow-sm">All</button>
-    <button type="button" onclick="setJobFilter('download')" id="filterBtn-download" class="job-filter-btn px-3.5 py-1.5 rounded-xl text-slate-500 dark:text-slate-400">Download</button>
-    <button type="button" onclick="setJobFilter('audio')" id="filterBtn-audio" class="job-filter-btn px-3.5 py-1.5 rounded-xl text-slate-500 dark:text-slate-400">Audio</button>
-    <button type="button" onclick="setJobFilter('trim')" id="filterBtn-trim" class="job-filter-btn px-3.5 py-1.5 rounded-xl text-slate-500 dark:text-slate-400">Trim</button>
-    <button type="button" onclick="setJobFilter('autoclip')" id="filterBtn-autoclip" class="job-filter-btn px-3.5 py-1.5 rounded-xl text-slate-500 dark:text-slate-400">Auto Clip</button>
+  <!-- Filters Capsule -->
+  <div class="flex items-center gap-1.5 p-1.5 rounded-full capsule-surface border border-white/10 text-xs font-bold self-center max-w-fit overflow-x-auto">
+    <button type="button" onclick="setJobFilter('all')" id="filterBtn-all" class="job-filter-btn px-4 py-1.5 rounded-full bg-blue-600 text-white shadow-sm transition-all">All</button>
+    <button type="button" onclick="setJobFilter('download')" id="filterBtn-download" class="job-filter-btn px-4 py-1.5 rounded-full text-slate-400 hover:text-white transition-all">Download</button>
+    <button type="button" onclick="setJobFilter('audio')" id="filterBtn-audio" class="job-filter-btn px-4 py-1.5 rounded-full text-slate-400 hover:text-white transition-all">Audio</button>
+    <button type="button" onclick="setJobFilter('trim')" id="filterBtn-trim" class="job-filter-btn px-4 py-1.5 rounded-full text-slate-400 hover:text-white transition-all">Trim</button>
+    <button type="button" onclick="setJobFilter('autoclip')" id="filterBtn-autoclip" class="job-filter-btn px-4 py-1.5 rounded-full text-slate-400 hover:text-white transition-all">Auto Clip</button>
   </div>
 
-  <!-- Jobs List -->
-  <div class="w-full glass glass-rim rounded-[36px] p-6 shadow-2xl flex flex-col gap-4">
-    <div id="jobsListContainer" class="flex flex-col gap-4">
+  <!-- Jobs List Surface -->
+  <div class="w-full capsule-surface rounded-3xl p-5 sm:p-6 border border-white/10 shadow-2xl flex flex-col gap-4">
+    <div id="jobsListContainer" class="flex flex-col gap-3">
       <!-- Injected dynamically with REAL data via JS -->
     </div>
   </div>
@@ -60,23 +70,23 @@
 
   function setJobFilter(filter) {
     activeFilter = filter;
-    playGlassTick();
+    if (window.playGlassTick) window.playGlassTick();
     document.querySelectorAll('.job-filter-btn').forEach(b => {
-      b.className = 'job-filter-btn px-3.5 py-1.5 rounded-xl text-slate-500 dark:text-slate-400';
+      b.className = 'job-filter-btn px-4 py-1.5 rounded-full text-slate-400 hover:text-white transition-all';
     });
     const activeBtn = document.getElementById(`filterBtn-${filter}`);
     if (activeBtn) {
-      activeBtn.className = 'job-filter-btn px-3.5 py-1.5 rounded-xl bg-blue-600 text-white shadow-sm';
+      activeBtn.className = 'job-filter-btn px-4 py-1.5 rounded-full bg-blue-600 text-white shadow-sm transition-all';
     }
     loadRealJobs();
   }
 
   async function cancelJob(jobId) {
-    playGlassTick();
+    if (window.playGlassTick) window.playGlassTick();
     try {
       const res = await fetch(`/api/v1/jobs/${jobId}`, { method: 'DELETE' });
       if (res.ok) {
-        showToast('Job cancelled.', 'info');
+        if (window.showToast) window.showToast('Job cancelled.', 'info');
         loadRealJobs();
       }
     } catch (e) {
@@ -93,12 +103,17 @@
       }
 
       // Update counters
-      document.getElementById('statActive').textContent = data.counts.active || 0;
-      document.getElementById('statQueued').textContent = data.counts.queued || 0;
-      document.getElementById('statCompleted').textContent = data.counts.completed || 0;
-      document.getElementById('statFailed').textContent = data.counts.failed || 0;
+      const elAct = document.getElementById('statActive');
+      const elQue = document.getElementById('statQueued');
+      const elCom = document.getElementById('statCompleted');
+      const elFai = document.getElementById('statFailed');
+      if (elAct) elAct.textContent = data.counts.active || 0;
+      if (elQue) elQue.textContent = data.counts.queued || 0;
+      if (elCom) elCom.textContent = data.counts.completed || 0;
+      if (elFai) elFai.textContent = data.counts.failed || 0;
 
       const container = document.getElementById('jobsListContainer');
+      if (!container) return;
       container.innerHTML = '';
 
       let jobs = data.jobs || [];
@@ -116,13 +131,13 @@
 
       if (jobs.length === 0) {
         container.innerHTML = `
-          <div class="text-center py-12 glass rounded-2xl flex flex-col items-center justify-center gap-3">
-            <div class="w-12 h-12 rounded-2xl bg-blue-500/10 text-blue-500 flex items-center justify-center text-xl font-bold">
+          <div class="text-center py-14 rounded-2xl bg-[#101113]/50 border border-white/5 flex flex-col items-center justify-center gap-3">
+            <div class="w-12 h-12 rounded-2xl bg-white/5 border border-white/10 text-slate-400 flex items-center justify-center text-lg font-bold">
               ≡
             </div>
-            <h3 class="font-bold text-sm text-slate-900 dark:text-white">No active or pending jobs in queue</h3>
+            <h3 class="font-bold text-sm text-white">No active or pending jobs in queue</h3>
             <p class="text-xs text-slate-400 max-w-sm">When you download a video, extract an audio track, or trim a clip, real-time speed, ETA, and progress will appear right here.</p>
-            <a href="/downloader" class="mt-2 px-4 py-2 rounded-xl btn-blue text-white text-xs font-bold shadow hover:opacity-90">Start a Download →</a>
+            <a href="/downloader" class="mt-2 px-5 py-2 rounded-full btn-pill-blue text-xs font-bold transition-all">Start a Download →</a>
           </div>
         `;
         return;
@@ -138,47 +153,51 @@
 
         if (isActive) {
           // Real Active Job Card
-          card.className = 'glass rounded-2xl p-4 shadow flex flex-col gap-3 border border-blue-500/30';
+          card.className = 'p-4 rounded-2xl bg-[#101113]/70 border border-blue-500/30 flex flex-col gap-3 shadow-lg';
           card.innerHTML = `
             <div class="flex items-center justify-between text-xs">
               <div class="flex items-center gap-2.5">
-                <span class="text-blue-500 font-bold">↓</span>
-                <span class="font-bold text-slate-900 dark:text-white">${job.title || 'Processing Media...'}</span>
-                <span class="px-2 py-0.5 rounded-full bg-blue-500/15 text-blue-600 dark:text-blue-400 text-[10px] font-bold">${job.format || 'MP4'}</span>
+                <span class="w-2 h-2 rounded-full bg-blue-500 animate-ping"></span>
+                <span class="font-bold text-white">${job.title || 'Processing Media...'}</span>
+                <span class="px-2.5 py-0.5 rounded-full bg-blue-500/15 text-blue-400 text-[10px] font-bold border border-blue-500/20">${job.format || 'MP4'}</span>
               </div>
-              <button type="button" onclick="cancelJob('${job.jobId}')" title="Cancel job" class="text-slate-400 hover:text-rose-500 text-sm">🗑</button>
+              <div class="flex items-center gap-2">
+                <a href="/jobs/${job.jobId}" class="px-3 py-1 rounded-full bg-white/5 hover:bg-white/10 text-white text-[11px] font-bold border border-white/10 transition-all">View</a>
+                <button type="button" onclick="cancelJob('${job.jobId}')" title="Cancel job" class="w-7 h-7 rounded-full bg-white/5 hover:bg-rose-500/20 text-slate-400 hover:text-rose-400 flex items-center justify-center text-xs transition-colors">✕</button>
+              </div>
             </div>
-            <div class="w-full h-2 rounded-full bg-slate-200 dark:bg-white/10 overflow-hidden">
-              <div class="h-full bg-gradient-to-r from-blue-500 to-cyan-400 transition-all duration-300" style="width: ${percent}%"></div>
+            <div class="w-full h-2 rounded-full bg-white/10 overflow-hidden">
+              <div class="h-full bg-gradient-to-r from-blue-500 to-indigo-500 transition-all duration-300" style="width: ${percent}%"></div>
             </div>
             <div class="flex items-center justify-between text-[11px] text-slate-400 font-mono">
-              <span>Speed: ${job.speed || 'Downloading...'} ${job.eta !== null && job.eta !== undefined ? '· ETA: 00:' + String(job.eta).padStart(2, '0') : ''}</span>
-              <span>${percent}%</span>
+              <span>Speed: ${job.speed || 'Processing...'} ${job.eta !== null && job.eta !== undefined ? '· ETA: 00:' + String(job.eta).padStart(2, '0') : ''}</span>
+              <span class="text-blue-400 font-bold">${percent}%</span>
             </div>
           `;
         } else if (isCompleted) {
           // Real Completed Job Card
-          card.className = 'glass rounded-2xl p-4 shadow flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs';
+          card.className = 'p-4 rounded-2xl bg-[#101113]/50 border border-white/5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs';
           card.innerHTML = `
             <div class="flex items-center gap-2.5 min-w-0">
-              <span class="text-emerald-500 font-bold shrink-0">✓</span>
-              <span class="font-bold text-slate-900 dark:text-white truncate">${job.title || 'Completed Media'}</span>
-              <span class="px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 text-[10px] font-bold shrink-0">${job.format || 'READY'}</span>
+              <span class="w-5 h-5 rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 flex items-center justify-center text-[10px] font-bold shrink-0">✓</span>
+              <span class="font-bold text-white truncate">${job.title || 'Completed Media'}</span>
+              <span class="px-2.5 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400 text-[10px] font-bold border border-emerald-500/20 shrink-0">${job.format || 'READY'}</span>
             </div>
             <div class="flex items-center gap-2 shrink-0 flex-wrap">
-              <a href="/studio?title=${encodeURIComponent(job.title || '')}&jobId=${job.jobId}" class="px-2.5 py-1 rounded-lg glass hover:bg-purple-500/20 text-purple-600 dark:text-purple-400 text-[11px] font-bold">♫ Studio</a>
-              <a href="/video-trimmer?title=${encodeURIComponent(job.title || '')}" class="px-2.5 py-1 rounded-lg glass hover:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-[11px] font-bold">✂ Trimmer</a>
-              <button type="button" onclick="downloadFileToPc('/api/v1/jobs/${job.jobId}/file', '${(job.title || 'clipglass_download').replace(/'/g, "\\'")}')" class="px-3.5 py-1 rounded-xl btn-blue text-white font-bold text-xs shadow hover:opacity-90 cursor-pointer">↓ Save to PC</button>
+              <a href="/studio?title=${encodeURIComponent(job.title || '')}&jobId=${job.jobId}" class="px-3 py-1 rounded-full bg-purple-500/10 text-purple-400 hover:bg-purple-500/20 border border-purple-500/20 text-[11px] font-bold transition-all">♫ Studio</a>
+              <a href="/video-trimmer?title=${encodeURIComponent(job.title || '')}" class="px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 border border-emerald-500/20 text-[11px] font-bold transition-all">✂ Trimmer</a>
+              <a href="/jobs/${job.jobId}" class="px-3 py-1 rounded-full bg-white/5 hover:bg-white/10 text-white text-[11px] font-bold border border-white/10 transition-all">View</a>
+              <button type="button" onclick="downloadFileToPc('/api/v1/jobs/${job.jobId}/file', '${(job.title || 'clipglass_download').replace(/'/g, "\\'")}')" class="px-4 py-1 rounded-full btn-pill-blue text-xs font-bold cursor-pointer transition-all">↓ Save</button>
             </div>
           `;
         } else {
           // Failed Job Card
-          card.className = 'glass rounded-2xl p-4 shadow flex items-center justify-between text-xs border border-rose-500/20';
+          card.className = 'p-4 rounded-2xl bg-[#101113]/50 border border-rose-500/20 flex items-center justify-between text-xs';
           card.innerHTML = `
             <div class="flex items-center gap-2.5">
-              <span class="text-rose-500 font-bold">✕</span>
-              <span class="font-bold text-slate-900 dark:text-white">${job.title || 'Failed Job'}</span>
-              <span class="px-2 py-0.5 rounded-full bg-rose-500/15 text-rose-600 dark:text-rose-400 text-[10px] font-bold">FAILED</span>
+              <span class="w-5 h-5 rounded-full bg-rose-500/15 text-rose-400 border border-rose-500/30 flex items-center justify-center text-[10px] font-bold">✕</span>
+              <span class="font-bold text-white">${job.title || 'Failed Job'}</span>
+              <span class="px-2.5 py-0.5 rounded-full bg-rose-500/15 text-rose-400 text-[10px] font-bold border border-rose-500/20">FAILED</span>
             </div>
             <span class="text-rose-400 text-xs">${(job.error && job.error.explanation) || 'Error during processing'}</span>
           `;
@@ -206,7 +225,6 @@
 
   document.addEventListener('DOMContentLoaded', () => {
     loadRealJobs();
-    // Poll every 3 seconds to keep stats synchronized
     setInterval(loadRealJobs, 3000);
   });
 </script>

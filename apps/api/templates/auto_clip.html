@@ -1,234 +1,182 @@
 {% extends "base.html" %}
 
-{% block title %}Auto Clip (9:16 Shorts & Reels Engine) — ClipGlass{% endblock %}
+{% block title %}Auto Clip Studio — ClipGlass{% endblock %}
 
 {% block content %}
-<div class="flex flex-col gap-6 max-w-6xl mx-auto pb-12">
-  <!-- Hero Section -->
+<div class="flex flex-col gap-8 max-w-5xl mx-auto pb-12">
+  <!-- Page Header (Centered, minimal & editorial) -->
   <div class="text-center flex flex-col items-center gap-2">
-    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full glass border border-orange-500/30 text-orange-400 text-xs font-semibold mb-1">
-      <span class="w-2 h-2 rounded-full bg-orange-500 animate-pulse"></span>
-      AI Viral Moment & Speaker Tracking Engine (Three-Reference Architecture)
-    </div>
-    <h1 class="text-3xl sm:text-4xl font-extrabold tracking-tight text-slate-900 dark:text-white">
-      Auto <span class="gradient-text-orange">Clip Studio</span>
+    <h1 class="text-3xl sm:text-4xl font-light text-white tracking-tight">
+      Auto Clip <span class="font-bold text-[#8655FF]">Studio</span>
     </h1>
-    <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 max-w-xl">
-      Paste a YouTube URL or upload video from PC. Get explainable 9:16 vertical clips with 4 virality sub-scores, evidence tags, word-synced captions, and opening hook titles.
+    <p class="text-xs sm:text-sm text-[#8B8D98] max-w-lg leading-relaxed">
+      Auto Clip &amp; Shorts Studio — turn long videos into viral moments with intelligent audio-visual highlight detection.
     </p>
+
+    <!-- Source Mode Switcher: YouTube URL vs Upload from PC -->
+    <div class="flex items-center gap-1.5 p-1 rounded-full bg-[#17181D] border border-white/10 mt-2">
+      <button type="button" id="clipSourceUrlBtn" onclick="switchClipSource('url')" class="px-5 py-1.5 rounded-full text-xs font-semibold bg-[#2165F7] text-white shadow-sm transition-all flex items-center gap-1.5">
+        <span>YouTube URL</span>
+      </button>
+      <button type="button" id="clipSourcePcBtn" onclick="switchClipSource('pc')" class="px-5 py-1.5 rounded-full text-xs font-semibold text-[#8B8D98] hover:text-white transition-all flex items-center gap-1.5">
+        <span>Upload Video from PC</span>
+      </button>
+    </div>
   </div>
 
-  <!-- Main Config Glass Card -->
-  <div class="glass glass-rim rounded-3xl p-6 sm:p-8 flex flex-col gap-6 shadow-2xl relative overflow-hidden">
-    <!-- Source Mode Switcher: YouTube URL vs Upload from PC -->
-    <div class="flex items-center justify-between flex-wrap gap-3 border-b border-slate-200/50 dark:border-white/10 pb-4">
-      <div class="flex items-center gap-2">
-        <span class="text-lg">🎬</span>
-        <div>
-          <h2 class="text-sm font-bold text-slate-900 dark:text-white">Video Ingest Source</h2>
-          <p class="text-[11px] text-slate-500 dark:text-slate-400">Choose to import from YouTube or select an existing file from your PC</p>
-        </div>
-      </div>
-      <div class="flex items-center gap-1.5 p-1 rounded-2xl glass">
-        <button type="button" id="clipSourceUrlBtn" onclick="switchClipSource('url')" class="px-4 py-1.5 rounded-xl text-xs font-bold bg-orange-500 text-white shadow-sm flex items-center gap-1.5">
-          <span>🔗</span>
-          <span>YouTube URL</span>
-        </button>
-        <button type="button" id="clipSourcePcBtn" onclick="switchClipSource('pc')" class="px-4 py-1.5 rounded-xl text-xs font-bold glass text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white flex items-center gap-1.5">
-          <span>💻</span>
-          <span>Upload Video from PC</span>
-        </button>
-      </div>
-    </div>
-
+  <!-- Main Config Charcoal Panel -->
+  <div class="bg-[#24252B] rounded-3xl p-6 sm:p-8 flex flex-col gap-6 border border-white/10 shadow-2xl">
     <!-- YouTube URL Input Container -->
     <div id="clipUrlContainer" class="flex flex-col gap-2">
       <div class="relative flex items-center">
         <input 
           id="clipUrlInput" 
           type="text" 
-          placeholder="https://www.youtube.com/watch?v=... or https://youtu.be/..." 
-          class="w-full h-13 pl-4 pr-24 rounded-2xl glass text-sm bg-transparent text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 border border-slate-200/50 dark:border-white/10 focus:outline-none focus:ring-2 focus:ring-orange-500/50"
+          placeholder="Paste YouTube link (e.g. https://www.youtube.com/watch?v=...)" 
+          class="w-full h-12 pl-5 pr-24 rounded-full bg-[#17181D] text-xs sm:text-sm text-white placeholder:text-[#8B8D98] border border-white/10 focus:outline-none focus:border-white/30 transition-all"
         />
         <button 
           type="button" 
           onclick="pasteClipUrl()" 
-          class="absolute right-2.5 px-3 py-1.5 rounded-xl text-xs font-semibold glass text-slate-600 dark:text-slate-300 hover:text-orange-500 transition-colors flex items-center gap-1"
+          class="absolute right-2 px-3.5 py-1.5 rounded-full text-xs font-medium bg-white/[0.06] hover:bg-white/10 text-white transition-colors flex items-center gap-1"
         >
           <span>📋</span>
           <span>Paste</span>
         </button>
       </div>
-      <p class="text-[11px] text-slate-500 dark:text-slate-400">Paste any public YouTube link (duration capped at 60 minutes for rapid processing).</p>
     </div>
 
-    <!-- PC File Upload Container (Hidden by default) -->
+    <!-- PC File Upload Container (Dropzone) -->
     <div id="clipPcContainer" class="hidden flex flex-col gap-3">
       <div 
         id="clipDropZone" 
-        class="border-2 border-dashed border-slate-300 dark:border-white/20 rounded-2xl p-6 text-center flex flex-col items-center justify-center gap-2 hover:border-orange-500 transition-all cursor-pointer bg-slate-50/50 dark:bg-white/[0.02]"
+        class="border border-dashed border-white/20 rounded-2xl p-8 text-center flex flex-col items-center justify-center gap-2 hover:border-white/40 transition-all cursor-pointer bg-[#17181D]/60"
         onclick="document.getElementById('clipFileInput').click()"
-        ondragover="event.preventDefault(); this.classList.add('border-orange-500');"
-        ondragleave="this.classList.remove('border-orange-500');"
+        ondragover="event.preventDefault(); this.classList.add('border-white/50');"
+        ondragleave="this.classList.remove('border-white/50');"
         ondrop="handleClipFileDrop(event)"
       >
-        <span class="text-3xl">📁</span>
+        <div class="w-10 h-10 rounded-full bg-white/5 text-white flex items-center justify-center text-xl">📁</div>
         <div class="flex flex-col gap-0.5">
-          <p id="clipPcFileName" class="text-sm font-bold text-slate-900 dark:text-white">Choose a video file or drag & drop here</p>
-          <p id="clipPcFileMeta" class="text-xs text-slate-500 dark:text-slate-400">MP4, MOV, MKV, WebM up to 2GB</p>
+          <p id="clipPcFileName" class="text-xs font-medium text-white">Choose a video file or drag &amp; drop here</p>
+          <p id="clipPcFileMeta" class="text-[11px] text-[#8B8D98]">MP4, MOV, MKV, WebM up to 2GB</p>
         </div>
         <input type="file" id="clipFileInput" accept="video/*" class="hidden" onchange="handleClipFileUpload(event)">
       </div>
     </div>
 
-    <!-- Clipping Configurations Matrix -->
-    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+    <!-- Clipping Options Matrix (Compact row-based) -->
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-2 border-t border-white/[0.08]">
       <!-- Target Duration -->
       <div>
-        <label class="text-[11px] font-semibold text-slate-500 dark:text-slate-300 block mb-1">Target Length</label>
-        <div class="grid grid-cols-3 gap-1">
-          <button type="button" onclick="setClipLength('30s')" class="length-btn py-1.5 rounded-lg text-xs font-bold bg-orange-500 text-white shadow-sm">30s</button>
-          <button type="button" onclick="setClipLength('45s')" class="length-btn py-1.5 rounded-lg text-xs font-bold glass text-slate-500 dark:text-slate-300">45s</button>
-          <button type="button" onclick="setClipLength('60s')" class="length-btn py-1.5 rounded-lg text-xs font-bold glass text-slate-500 dark:text-slate-300">60s</button>
+        <label class="text-[10px] uppercase font-semibold text-[#8B8D98] tracking-wider block mb-1.5">Clip Length</label>
+        <div class="grid grid-cols-3 gap-1 bg-[#17181D] p-1 rounded-full border border-white/10">
+          <button type="button" onclick="setClipLength('30s')" class="length-btn py-1 rounded-full text-xs font-semibold bg-[#2165F7] text-white">30s</button>
+          <button type="button" onclick="setClipLength('45s')" class="length-btn py-1 rounded-full text-xs font-semibold text-[#8B8D98] hover:text-white">45s</button>
+          <button type="button" onclick="setClipLength('60s')" class="length-btn py-1 rounded-full text-xs font-semibold text-[#8B8D98] hover:text-white">60s</button>
         </div>
       </div>
 
-      <!-- Count -->
+      <!-- Aspect Ratio -->
       <div>
-        <label class="text-[11px] font-semibold text-slate-500 dark:text-slate-300 block mb-1">Clips to Extract</label>
-        <select id="clipCountSelect" class="w-full glass h-8 px-2 rounded-lg text-xs bg-transparent text-slate-900 dark:text-white border border-slate-200/50 dark:border-white/10 outline-none">
-          <option value="3" class="dark:bg-slate-900">3 Top Ranked Clips</option>
-          <option value="1" class="dark:bg-slate-900">1 Best Clip</option>
-          <option value="5" class="dark:bg-slate-900">5 Top Clips</option>
-        </select>
+        <label class="text-[10px] uppercase font-semibold text-[#8B8D98] tracking-wider block mb-1.5">Aspect Ratio</label>
+        <div class="grid grid-cols-3 gap-1 bg-[#17181D] p-1 rounded-full border border-white/10">
+          <button type="button" class="py-1 rounded-full text-xs font-semibold bg-[#8655FF] text-white">9:16</button>
+          <button type="button" class="py-1 rounded-full text-xs font-semibold text-[#8B8D98] hover:text-white">1:1</button>
+          <button type="button" class="py-1 rounded-full text-xs font-semibold text-[#8B8D98] hover:text-white">16:9</button>
+        </div>
       </div>
 
       <!-- Reframe Mode -->
       <div>
-        <label class="text-[11px] font-semibold text-slate-500 dark:text-slate-300 block mb-1">9:16 Reframe</label>
-        <select id="clipReframeSelect" class="w-full glass h-8 px-2 rounded-lg text-xs bg-transparent text-slate-900 dark:text-white border border-slate-200/50 dark:border-white/10 outline-none">
-          <option value="follow-face" class="dark:bg-slate-900">Follow Face (Speaker Cut)</option>
-          <option value="center" class="dark:bg-slate-900">Center 9:16 Crop</option>
-          <option value="split" class="dark:bg-slate-900">Split Screen Stack</option>
+        <label class="text-[10px] uppercase font-semibold text-[#8B8D98] tracking-wider block mb-1.5">Reframe Mode</label>
+        <select id="clipReframeSelect" class="w-full h-9 px-3 rounded-full text-xs bg-[#17181D] text-white border border-white/10 outline-none">
+          <option value="follow-face">Follow Speaker Face</option>
+          <option value="center">Center Crop 9:16</option>
+          <option value="split">Split Screen Stack</option>
         </select>
       </div>
 
       <!-- Caption Style -->
       <div>
-        <label class="text-[11px] font-semibold text-slate-500 dark:text-slate-300 block mb-1">Caption Preset</label>
-        <select id="clipCaptionSelect" class="w-full glass h-8 px-2 rounded-lg text-xs bg-transparent text-slate-900 dark:text-white border border-slate-200/50 dark:border-white/10 outline-none">
-          <option value="viral_pop" class="dark:bg-slate-900">Viral Pop (Yellow Highlight)</option>
-          <option value="minimalist" class="dark:bg-slate-900">Clean Minimalist</option>
-          <option value="neon_cyber" class="dark:bg-slate-900">Neon Cyber Glow</option>
-          <option value="karaoke" class="dark:bg-slate-900">Karaoke Bounce</option>
-          <option value="headline" class="dark:bg-slate-900">Impact Headline</option>
-          <option value="dynamic_box" class="dark:bg-slate-900">Dynamic Box</option>
-        </select>
-      </div>
-
-      <!-- Platform Preset -->
-      <div>
-        <label class="text-[11px] font-semibold text-slate-500 dark:text-slate-300 block mb-1">Platform Target</label>
-        <select id="clipPlatformSelect" class="w-full glass h-8 px-2 rounded-lg text-xs bg-transparent text-slate-900 dark:text-white border border-slate-200/50 dark:border-white/10 outline-none">
-          <option value="shorts" class="dark:bg-slate-900">YouTube Shorts (60s)</option>
-          <option value="tiktok" class="dark:bg-slate-900">TikTok (60s)</option>
-          <option value="reels" class="dark:bg-slate-900">Instagram Reels (90s)</option>
-        </select>
-      </div>
-
-      <!-- Polish Pack Style -->
-      <div>
-        <label class="text-[11px] font-semibold text-slate-500 dark:text-slate-300 block mb-1">Polish Pack</label>
-        <select id="clipPolishSelect" class="w-full glass h-8 px-2 rounded-lg text-xs bg-transparent text-slate-900 dark:text-white border border-slate-200/50 dark:border-white/10 outline-none">
-          <option value="none" class="dark:bg-slate-900">None (Pure Video)</option>
-          <option value="caption_news" class="dark:bg-slate-900">Caption News (Broadcast)</option>
-          <option value="swiss_motion" class="dark:bg-slate-900">Swiss Motion (Minimal)</option>
-          <option value="neon_tubes" class="dark:bg-slate-900">Neon Tubes (Cyber)</option>
-          <option value="dark_tech" class="dark:bg-slate-900">Dark Tech Keynote</option>
+        <label class="text-[10px] uppercase font-semibold text-[#8B8D98] tracking-wider block mb-1.5">Caption Preset</label>
+        <select id="clipCaptionSelect" class="w-full h-9 px-3 rounded-full text-xs bg-[#17181D] text-white border border-white/10 outline-none">
+          <option value="viral_pop">Viral Pop (Highlight)</option>
+          <option value="minimalist">Clean Minimalist</option>
+          <option value="karaoke">Karaoke Word Bounce</option>
         </select>
       </div>
     </div>
 
-    <!-- Required Rights Consent Checkbox -->
-    <div class="flex items-center gap-2 pt-1">
-      <input type="checkbox" id="clipConsentCheckbox" checked class="w-4 h-4 rounded text-orange-500 accent-orange-500 cursor-pointer">
-      <label for="clipConsentCheckbox" class="text-xs text-slate-600 dark:text-slate-300 select-none cursor-pointer">
-        I confirm I own this video or have permission to clip it.
+    <!-- Bottom Actions Row -->
+    <div class="pt-2 border-t border-white/[0.08] flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <label class="flex items-center gap-2.5 text-xs text-[#8B8D98] cursor-pointer">
+        <input type="checkbox" id="clipConsentCheckbox" checked class="w-4 h-4 rounded accent-[#2165F7]">
+        <span>I confirm I own this video or have permission to clip it.</span>
       </label>
-    </div>
 
-    <!-- Generate Action Button -->
-    <button type="button" onclick="generateClips()" class="w-full py-4 rounded-2xl btn-orange text-white font-bold text-sm shadow-xl hover:opacity-95 transition-all flex items-center justify-center gap-2 cursor-pointer">
-      <span>✨</span>
-      <span>Generate Ranked Auto Clips (9:16) →</span>
-    </button>
-  </div>
-
-  <!-- Showcase Header with Export All Option -->
-  <div class="flex items-center justify-between flex-wrap gap-3 mt-4">
-    <div>
-      <h3 class="font-bold text-base text-slate-900 dark:text-white flex items-center gap-2">
-        <span>🎬</span>
-        <span>Ranked Viral Clips Showcase</span>
-      </h3>
-      <p class="text-xs text-slate-500 dark:text-slate-400">Word-synced animated captions, opening hook titles, and 4 virality sub-scores.</p>
-    </div>
-    <div class="flex items-center gap-2">
-      <button type="button" onclick="exportAllClipsZip()" class="px-3.5 py-1.5 rounded-xl glass hover:bg-orange-500 hover:text-white text-slate-700 dark:text-slate-200 text-xs font-bold transition-all flex items-center gap-1.5 shadow-sm">
-        <span>📦</span>
-        <span>Export All (.ZIP)</span>
+      <button type="button" onclick="generateClips()" class="btn-pill-blue px-8 py-3 text-xs font-bold uppercase tracking-wider text-white shadow-[0_0_24px_rgba(33,101,247,0.45)] hover:scale-105 active:scale-95 transition-all flex items-center justify-center gap-2 cursor-pointer self-end sm:self-auto">
+        <span>Generate Ranked Clips</span>
+        <span>→</span>
       </button>
     </div>
   </div>
 
-  <!-- Generated Clips Showcase Grid -->
-  <div id="clipsGrid" class="grid grid-cols-1 md:grid-cols-3 gap-5">
+  <!-- Ranked Clips Showcase Header -->
+  <div class="flex items-center justify-between flex-wrap gap-3">
+    <div>
+      <h3 class="font-medium text-base text-white">
+        Highlights Found
+      </h3>
+      <p class="text-xs text-[#8B8D98]">Ranked viral moments with word-synced animated captions.</p>
+    </div>
+    <button type="button" onclick="exportAllClipsZip()" class="px-4 py-2 rounded-full bg-[#24252B] hover:bg-[#303137] text-white text-xs font-semibold border border-white/10 transition-all flex items-center gap-1.5">
+      <span>📦</span>
+      <span>Export All (.ZIP)</span>
+    </button>
+  </div>
+
+  <!-- Generated Clips Grid -->
+  <div id="clipsGrid" class="grid grid-cols-1 md:grid-cols-3 gap-6">
     <!-- Populated dynamically via JS -->
   </div>
 
-  <!-- Fullscreen 9:16 Preview Modal (Lightbox) -->
-  <div id="clipPreviewModal" class="hidden fixed inset-0 z-[100] bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
-    <div class="relative w-full max-w-sm rounded-[32px] glass glass-rim p-5 flex flex-col gap-4 shadow-2xl border border-white/20">
+  <!-- Fullscreen 9:16 Preview Modal -->
+  <div id="clipPreviewModal" class="hidden fixed inset-0 z-[100] bg-black/85 backdrop-blur-md flex items-center justify-center p-4">
+    <div class="relative w-full max-w-sm rounded-3xl bg-[#17181D] p-5 flex flex-col gap-4 shadow-2xl border border-white/15">
       <div class="flex items-center justify-between">
-        <div class="flex items-center gap-2">
-          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-          <h3 id="modalClipTitle" class="font-bold text-xs sm:text-sm text-white truncate max-w-[220px]">Preview Short</h3>
-        </div>
-        <button type="button" onclick="closePreviewModal()" class="w-8 h-8 rounded-full glass hover:bg-white/20 text-white flex items-center justify-center text-xs font-bold transition-all">✕</button>
+        <h3 id="modalClipTitle" class="font-medium text-xs text-white truncate max-w-[220px]">Preview Short</h3>
+        <button type="button" onclick="closePreviewModal()" class="w-7 h-7 rounded-full bg-white/5 hover:bg-white/10 text-white flex items-center justify-center text-xs font-bold transition-all">✕</button>
       </div>
 
       <!-- 9:16 Modal Video Player -->
       <div class="relative aspect-[9/16] w-full rounded-2xl overflow-hidden bg-black shadow-inner flex items-center justify-center group">
         <video id="modalVideo" playsinline loop class="w-full h-full object-cover"></video>
 
-        <!-- Centered Play/Pause Toggle -->
-        <button type="button" id="modalPlayBtn" onclick="toggleModalPlay()" class="absolute inset-0 m-auto w-14 h-14 rounded-full bg-black/50 backdrop-blur-md text-white flex items-center justify-center text-xl font-bold shadow-2xl border border-white/20 hover:scale-110 transition-transform z-20">
+        <button type="button" id="modalPlayBtn" onclick="toggleModalPlay()" class="absolute inset-0 m-auto w-12 h-12 rounded-full bg-black/60 text-white flex items-center justify-center text-lg font-bold shadow-2xl border border-white/20 hover:scale-105 transition-transform z-20">
           <span id="modalPlayIcon">▶</span>
         </button>
 
-        <!-- Opening Hook Banner Overlay -->
-        <div id="modalHookBanner" class="absolute top-10 inset-x-3 text-center pointer-events-none z-20">
-          <div class="inline-block px-3 py-1 rounded-xl bg-black/80 backdrop-blur-md border border-yellow-400/40 shadow-2xl">
-            <p id="modalHookText" class="font-black text-xs text-yellow-300 uppercase tracking-wider drop-shadow-lg">
-              WAIT FOR IT... THIS CHANGED EVERYTHING! 🔥
+        <div id="modalHookBanner" class="absolute top-8 inset-x-3 text-center pointer-events-none z-20">
+          <div class="inline-block px-3 py-1 rounded-full bg-black/80 backdrop-blur-md border border-white/10 shadow-2xl">
+            <p id="modalHookText" class="font-bold text-xs text-white uppercase tracking-wider">
+              WAIT FOR IT... THIS CHANGED EVERYTHING!
             </p>
           </div>
         </div>
 
-        <!-- Animated Karaoke Subtitle Overlay -->
         <div class="absolute bottom-12 inset-x-3 text-center pointer-events-none z-20">
-          <div class="inline-block px-3.5 py-1.5 rounded-xl bg-black/80 backdrop-blur-md border border-white/10 shadow-2xl">
-            <p id="modalCaptionText" class="font-extrabold text-sm text-yellow-300 uppercase tracking-wide drop-shadow-lg">
-              WAIT FOR IT... THIS CHANGED EVERYTHING! 🔥
+          <div class="inline-block px-3.5 py-1 rounded-full bg-black/80 backdrop-blur-md border border-white/10 shadow-2xl">
+            <p id="modalCaptionText" class="font-semibold text-xs text-yellow-300 uppercase tracking-wide">
+              WAIT FOR IT... THIS CHANGED EVERYTHING!
             </p>
           </div>
         </div>
 
-        <!-- Video Timecode & Progress -->
-        <div class="absolute bottom-3 inset-x-3 flex items-center justify-between text-[11px] font-mono text-white font-bold bg-black/60 px-3 py-1 rounded-full backdrop-blur-md z-20">
+        <div class="absolute bottom-3 inset-x-3 flex items-center justify-between text-[10px] font-mono text-white bg-black/70 px-3 py-1 rounded-full z-20">
           <span id="modalCurrentTime">00:00</span>
-          <div class="flex-1 mx-3 h-1.5 rounded-full bg-white/20 overflow-hidden cursor-pointer" onclick="seekModalVideo(event)">
-            <div id="modalProgressBar" class="h-full bg-gradient-to-r from-orange-500 to-amber-400 w-0"></div>
+          <div class="flex-1 mx-3 h-1 rounded-full bg-white/20 overflow-hidden cursor-pointer" onclick="seekModalVideo(event)">
+            <div id="modalProgressBar" class="h-full bg-[#8655FF] w-0"></div>
           </div>
           <span id="modalDuration">00:30</span>
         </div>
@@ -236,13 +184,12 @@
 
       <!-- Modal Bottom Actions -->
       <div class="flex items-center justify-between gap-2 pt-1">
-        <button type="button" id="modalMuteBtn" onclick="toggleModalMute()" class="px-3 py-1.5 rounded-xl glass hover:bg-white/20 text-white text-xs font-bold transition-all flex items-center gap-1.5">
+        <button type="button" id="modalMuteBtn" onclick="toggleModalMute()" class="px-3.5 py-2 rounded-full bg-[#24252B] hover:bg-[#303137] text-white text-xs font-medium border border-white/10">
           <span id="modalMuteIcon">🔊</span>
           <span id="modalMuteText">Mute</span>
         </button>
-        <button type="button" onclick="downloadCurrentModalClip()" class="flex-1 py-2 rounded-xl btn-orange text-white font-bold text-xs shadow-md hover:opacity-95 transition-all flex items-center justify-center gap-1.5">
-          <span>↓</span>
-          <span>Download 9:16 MP4</span>
+        <button type="button" onclick="downloadCurrentModalClip()" class="flex-1 py-2 rounded-full btn-pill-blue text-white font-bold text-xs tracking-wider uppercase shadow-md flex items-center justify-center gap-1.5">
+          <span>↓ Download 9:16</span>
         </button>
       </div>
     </div>

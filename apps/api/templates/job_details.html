@@ -3,21 +3,21 @@
 {% block title %}Job Details — ClipGlass{% endblock %}
 
 {% block content %}
-<div class="w-full flex flex-col gap-6 bg-geom-jobdetails">
-  <!-- Header Banner -->
-  <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-white/10">
+<div class="w-full max-w-5xl mx-auto flex flex-col gap-6 py-4">
+  <!-- Header Bar -->
+  <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-white/10">
     <div>
       <div class="flex items-center gap-3">
-        <a href="/jobs" class="w-8 h-8 rounded-full glass hover:bg-white/10 flex items-center justify-center text-slate-400 hover:text-white transition-all text-xs" title="Back to Queue">←</a>
+        <a href="/jobs" class="w-8 h-8 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 flex items-center justify-center text-slate-400 hover:text-white transition-all text-xs" title="Back to Queue">←</a>
         <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">Job Details</h1>
       </div>
       <p class="text-xs text-slate-400 mt-1 pl-11">Monitor real-time media encoding, filter chains, and export telemetry.</p>
     </div>
     <div class="flex items-center gap-3">
-      <button type="button" id="cancelJobBtn" onclick="cancelCurrentJob()" class="px-4 py-2 rounded-xl glass hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 text-xs font-semibold transition-all">
+      <button type="button" id="cancelJobBtn" onclick="cancelCurrentJob()" class="px-4 py-2 rounded-full bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 text-xs font-semibold transition-all">
         Cancel Job
       </button>
-      <a href="/jobs" class="px-4 py-2 rounded-xl btn-primary text-xs font-bold transition-all">
+      <a href="/jobs" class="px-4 py-2 rounded-full btn-pill-dark text-xs font-bold transition-all">
         Queue Manager
       </a>
     </div>
@@ -25,40 +25,40 @@
 
   <!-- Main Status Split Card -->
   <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
-    <!-- Left: Circular Gauge & Metadata -->
-    <div class="lg:col-span-5 glass rounded-3xl p-8 flex flex-col items-center justify-center text-center relative border border-white/10">
-      <!-- Circular Progress Ring (Screen 9) -->
+    <!-- Left: Circular Gauge & Metadata Capsule -->
+    <div class="lg:col-span-5 capsule-surface rounded-3xl p-6 sm:p-8 flex flex-col items-center justify-center text-center relative border border-white/10">
+      <!-- Circular Progress Ring -->
       <div class="progress-dial mb-6" style="--p: 75%;">
-        <span id="jobPercentText">75%</span>
+        <span id="jobPercentText" class="text-2xl font-black text-white">75%</span>
       </div>
 
       <h2 id="jobStatusTitle" class="text-xl font-bold text-white mb-1">Processing...</h2>
-      <p class="text-xs text-cyan-400 font-mono mb-4" id="jobEtaText">ETA: 00:00:45</p>
+      <p class="text-xs text-blue-400 font-mono mb-6" id="jobEtaText">ETA: 00:00:45</p>
 
-      <div class="w-full p-4 rounded-2xl bg-white/5 border border-white/10 flex flex-col gap-2 text-left">
-        <div class="flex justify-between text-xs">
-          <span class="text-slate-400 font-semibold">Job ID</span>
-          <span class="font-mono text-cyan-300 font-bold" id="jobIdLabel">{{ job_id or '#CLG-7364' }}</span>
+      <div class="w-full p-4 rounded-2xl bg-[#101113]/70 border border-white/5 flex flex-col gap-2.5 text-left text-xs">
+        <div class="flex justify-between">
+          <span class="text-slate-400 font-medium">Job ID</span>
+          <span class="font-mono text-blue-400 font-bold" id="jobIdLabel">{{ job_id or '#CLG-7364' }}</span>
         </div>
-        <div class="flex justify-between text-xs">
-          <span class="text-slate-400 font-semibold">Media Output</span>
+        <div class="flex justify-between">
+          <span class="text-slate-400 font-medium">Media Output</span>
           <span class="text-slate-200">MP4 • 1080p (60fps)</span>
         </div>
-        <div class="flex justify-between text-xs">
-          <span class="text-slate-400 font-semibold">Started</span>
+        <div class="flex justify-between">
+          <span class="text-slate-400 font-medium">Started</span>
           <span class="text-slate-200">2 min ago</span>
         </div>
-        <div class="flex justify-between text-xs">
-          <span class="text-slate-400 font-semibold">Retention</span>
+        <div class="flex justify-between">
+          <span class="text-slate-400 font-medium">Retention</span>
           <span class="text-amber-400 font-medium">Auto-purges in 15 mins</span>
         </div>
       </div>
     </div>
 
     <!-- Right: Pipeline Timeline Stages -->
-    <div class="lg:col-span-7 glass rounded-3xl p-8 flex flex-col justify-between border border-white/10">
+    <div class="lg:col-span-7 capsule-surface rounded-3xl p-6 sm:p-8 flex flex-col justify-between border border-white/10">
       <div>
-        <h3 class="text-sm font-bold text-slate-300 uppercase tracking-wider mb-6">Processing Pipeline</h3>
+        <h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-6">Processing Pipeline</h3>
         <div class="flex flex-col gap-6 relative">
           <!-- Stage 1 -->
           <div class="flex items-start gap-4">
@@ -82,13 +82,13 @@
           </div>
 
           <!-- Connecting Line -->
-          <div class="w-0.5 h-6 bg-cyan-500/40 ml-4 -my-4"></div>
+          <div class="w-0.5 h-6 bg-blue-500/40 ml-4 -my-4"></div>
 
           <!-- Stage 3 (Active) -->
           <div class="flex items-start gap-4">
-            <div class="w-8 h-8 rounded-full bg-cyan-500 text-black flex items-center justify-center font-bold text-xs shrink-0 animate-pulse">●</div>
+            <div class="w-8 h-8 rounded-full bg-blue-500 text-white flex items-center justify-center font-bold text-xs shrink-0 animate-pulse">●</div>
             <div>
-              <div class="text-sm font-bold text-cyan-300">Rendering Output</div>
+              <div class="text-sm font-bold text-blue-400">Rendering Output</div>
               <div class="text-xs text-slate-300">H.264 video re-encode with AAC 320 kbps spatial audio</div>
             </div>
           </div>
@@ -109,11 +109,11 @@
 
       <!-- Action Footer -->
       <div class="pt-6 border-t border-white/10 flex flex-wrap items-center justify-between gap-3 mt-6">
-        <a href="/audio-studio" class="px-4 py-2 rounded-xl glass hover:bg-white/10 text-xs font-semibold text-slate-300 transition-all">
+        <a href="/audio-studio" class="px-4 py-2 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-semibold text-slate-300 transition-all">
           Open in Studio
         </a>
-        <button type="button" id="downloadJobResultBtn" class="px-5 py-2.5 rounded-xl btn-primary text-xs font-bold shadow-lg flex items-center gap-2">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+        <button type="button" id="downloadJobResultBtn" class="px-6 py-2 rounded-full btn-pill-blue text-xs font-bold flex items-center gap-2">
+          <span>↓</span>
           <span>Download Output</span>
         </button>
       </div>
@@ -125,7 +125,7 @@
 {% block scripts %}
 <script>
   function cancelCurrentJob() {
-    playGlassTick();
+    if (window.playGlassTick) window.playGlassTick();
     if (confirm('Cancel this media rendering task?')) {
       alert('Job cancelled.');
       window.location.href = '/jobs';
@@ -147,12 +147,15 @@
           if (txt) txt.textContent = pct + '%';
         }
         if (data.status === 'completed') {
-          document.getElementById('jobStatusTitle').textContent = 'Completed';
-          document.getElementById('jobEtaText').textContent = 'Ready for download';
-          evtSource.close();
+          const title = document.getElementById('jobStatusTitle');
+          if (title) title.textContent = 'Completed';
+          const eta = document.getElementById('jobEtaText');
+          if (eta) eta.textContent = 'Ready for download';
         }
       };
-    } catch {}
+    } catch (err) {
+      console.warn('SSE notification stream offline, using fallback poll', err);
+    }
   }
 </script>
 {% endblock %}

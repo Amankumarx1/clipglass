@@ -3,19 +3,19 @@
 {% block title %}Auto Clip Editor — ClipGlass{% endblock %}
 
 {% block content %}
-<div class="w-full flex flex-col gap-6 bg-geom-editor">
-  <!-- Header Banner -->
-  <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-white/10">
+<div class="w-full flex flex-col gap-6">
+  <!-- Header Banner (Uncluttered, compact top bar) -->
+  <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-white/10">
     <div>
       <div class="flex items-center gap-3">
-        <a href="/auto-clip" class="w-8 h-8 rounded-full glass hover:bg-white/10 flex items-center justify-center text-slate-400 hover:text-white transition-all text-xs" title="Back to Auto Clip Studio">←</a>
-        <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">Auto Clip Editor</h1>
+        <a href="/auto-clip" class="w-8 h-8 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center text-[#8B8D98] hover:text-white transition-all text-xs" title="Back to Auto Clip Studio">←</a>
+        <h1 class="text-2xl sm:text-3xl font-light tracking-tight text-white">Auto Clip <span class="font-bold text-[#8655FF]">Editor</span></h1>
       </div>
-      <p class="text-xs text-slate-400 mt-1 pl-11">Fine-tune vertical safe zones, caption animations, and audio mix.</p>
+      <p class="text-xs text-[#8B8D98] mt-1 pl-11">Fine-tune vertical safe zones, caption animations, and audio mix.</p>
     </div>
     <div class="flex items-center gap-3">
-      <a href="/auto-clip" class="px-4 py-2 rounded-xl glass hover:bg-white/10 text-xs font-semibold text-slate-300 transition-all">Discard</a>
-      <button type="button" id="exportClipBtn" onclick="exportEditedClip()" class="px-5 py-2.5 rounded-xl btn-primary text-xs font-bold shadow-lg flex items-center gap-2">
+      <a href="/auto-clip" class="px-4 py-2 rounded-full bg-[#17181D] hover:bg-[#24252B] text-xs font-semibold text-[#8B8D98] hover:text-white transition-all border border-white/10">Discard</a>
+      <button type="button" id="exportClipBtn" onclick="exportEditedClip()" class="btn-pill-blue px-6 py-2 rounded-full text-xs font-bold uppercase tracking-wider text-white shadow-[0_0_20px_rgba(33,101,247,0.4)] flex items-center gap-2 cursor-pointer">
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
         <span>Export Clip</span>
       </button>
@@ -25,80 +25,75 @@
   <!-- Main Split Editor Workspace -->
   <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
     <!-- Left: Video Canvas with 9:16 Safe Zone Overlay -->
-    <div class="lg:col-span-8 flex flex-col items-center justify-center glass rounded-3xl p-6 relative overflow-hidden min-h-[460px]">
-      <div class="relative w-full max-w-[340px] aspect-[9/16] bg-slate-950 rounded-2xl overflow-hidden shadow-2xl border border-white/20 flex items-center justify-center group">
-        <!-- Mock Video Stream / Placeholder Image -->
+    <div class="lg:col-span-8 flex flex-col items-center justify-center bg-[#24252B] rounded-3xl p-6 relative overflow-hidden min-h-[460px] border border-white/10 shadow-2xl">
+      <div class="relative w-full max-w-[340px] aspect-[9/16] bg-[#101113] rounded-2xl overflow-hidden shadow-2xl border border-white/10 flex items-center justify-center group">
+        <!-- Mock Video Stream -->
         <img id="editorVideoImg" src="/static/samples/nature_sample.jpg" onerror="this.src='https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=720&auto=format&fit=crop&q=80'" alt="Video Frame" class="w-full h-full object-cover">
         
         <!-- 9:16 Safe Area Bounding Lines -->
-        <div class="absolute inset-4 border border-cyan-400/40 border-dashed rounded-lg pointer-events-none flex flex-col justify-between p-2">
-          <div class="flex items-center justify-between text-[9px] font-mono font-bold text-cyan-400 bg-black/60 px-2 py-0.5 rounded backdrop-blur-sm self-start">
+        <div class="absolute inset-4 border border-[#8655FF]/40 border-dashed rounded-lg pointer-events-none flex flex-col justify-between p-2">
+          <div class="flex items-center justify-between text-[9px] font-mono font-bold text-[#8655FF] bg-black/70 px-2 py-0.5 rounded backdrop-blur-sm self-start">
             <span>9:16 SAFE ZONE</span>
           </div>
           <!-- Live Caption Overlay Preview -->
-          <div id="liveCaptionPreview" class="text-center font-extrabold text-lg text-amber-300 drop-shadow-[0_2px_8px_rgba(0,0,0,0.9)] px-2 py-1 bg-black/40 backdrop-blur-sm rounded-lg border border-white/10 uppercase tracking-wide">
+          <div id="liveCaptionPreview" class="text-center font-extrabold text-base text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.9)] px-2 py-1 bg-black/60 backdrop-blur-sm rounded-lg border border-white/10 uppercase tracking-wide">
             "THIS MOMENT CHANGED EVERYTHING"
           </div>
-          <div class="text-[9px] font-mono text-slate-400 bg-black/60 px-2 py-0.5 rounded backdrop-blur-sm self-end">
+          <div class="text-[9px] font-mono text-[#8B8D98] bg-black/70 px-2 py-0.5 rounded backdrop-blur-sm self-end">
             1080 × 1920
           </div>
         </div>
 
         <!-- Video Transport Control Bar -->
-        <div class="absolute bottom-2 inset-x-2 glass rounded-xl px-3 py-2 flex items-center justify-between text-xs text-white opacity-90 group-hover:opacity-100 transition-opacity">
-          <button type="button" id="editorPlayBtn" onclick="toggleEditorPlayback()" class="w-7 h-7 rounded-full bg-cyan-500 hover:bg-cyan-400 text-black flex items-center justify-center font-bold text-[11px] shadow">▶</button>
-          <span class="font-mono text-[11px] text-slate-300" id="editorTimeDisplay">00:04.2 / 00:15.0</span>
-          <div class="flex items-center gap-2">
-            <button type="button" onclick="cycleAspectRatio()" class="px-2 py-0.5 rounded bg-white/10 text-[10px] font-semibold text-slate-300 hover:text-white" title="Cycle Reframe Ratio">9:16</button>
-          </div>
+        <div class="absolute bottom-2 inset-x-2 bg-[#17181D]/90 backdrop-blur-md rounded-xl px-3 py-2 flex items-center justify-between text-xs text-white border border-white/10 opacity-90 group-hover:opacity-100 transition-opacity">
+          <button type="button" id="editorPlayBtn" onclick="toggleEditorPlayback()" class="w-7 h-7 rounded-full btn-pill-blue text-white flex items-center justify-center font-bold text-[11px] shadow">▶</button>
+          <span class="font-mono text-[11px] text-[#8B8D98]" id="editorTimeDisplay">00:04.2 / 00:15.0</span>
+          <button type="button" onclick="cycleAspectRatio()" class="px-2 py-0.5 rounded bg-white/10 text-[10px] font-semibold text-[#8B8D98] hover:text-white" title="Cycle Reframe Ratio">9:16</button>
         </div>
       </div>
     </div>
 
     <!-- Right: Property & Style Inspector Tabs -->
-    <div class="lg:col-span-4 glass rounded-3xl p-5 flex flex-col gap-5 border border-white/10">
+    <div class="lg:col-span-4 bg-[#24252B] rounded-3xl p-5 flex flex-col gap-5 border border-white/10 shadow-2xl">
       <!-- Tab Header -->
-      <div class="flex items-center p-1 rounded-2xl bg-white/5 border border-white/10 text-xs font-semibold">
-        <button type="button" onclick="switchEditorTab('caption')" id="tabBtnCaption" class="flex-1 py-1.5 rounded-xl bg-cyan-500/20 text-cyan-400 font-bold text-center transition-all">Caption</button>
-        <button type="button" onclick="switchEditorTab('style')" id="tabBtnStyle" class="flex-1 py-1.5 rounded-xl text-slate-400 hover:text-white text-center transition-all">Style</button>
-        <button type="button" onclick="switchEditorTab('effects')" id="tabBtnEffects" class="flex-1 py-1.5 rounded-xl text-slate-400 hover:text-white text-center transition-all">Effects</button>
+      <div class="flex items-center p-1 rounded-full bg-[#17181D] border border-white/10 text-xs font-semibold">
+        <button type="button" onclick="switchEditorTab('caption')" id="tabBtnCaption" class="flex-1 py-1.5 rounded-full bg-[#2165F7] text-white font-semibold text-center transition-all">Caption</button>
+        <button type="button" onclick="switchEditorTab('style')" id="tabBtnStyle" class="flex-1 py-1.5 rounded-full text-[#8B8D98] hover:text-white text-center transition-all">Style</button>
+        <button type="button" onclick="switchEditorTab('effects')" id="tabBtnEffects" class="flex-1 py-1.5 rounded-full text-[#8B8D98] hover:text-white text-center transition-all">Effects</button>
       </div>
 
       <!-- Tab Content: Caption -->
       <div id="tabContentCaption" class="flex flex-col gap-4">
         <div>
-          <label class="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1.5">Subtitle Script</label>
-          <textarea id="captionTextInput" rows="3" class="w-full glass rounded-xl p-3 text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-cyan-400 resize-none">THIS MOMENT CHANGED EVERYTHING</textarea>
+          <label class="block text-[10px] uppercase font-semibold text-[#8B8D98] tracking-wider mb-1.5">Subtitle Script</label>
+          <textarea id="captionTextInput" rows="3" class="w-full bg-[#17181D] rounded-xl p-3 text-xs text-white placeholder-[#8B8D98] focus:outline-none border border-white/10 focus:border-white/30 resize-none">THIS MOMENT CHANGED EVERYTHING</textarea>
         </div>
 
         <div>
-          <label class="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1.5">Font Family</label>
-          <select id="captionFontSelect" onchange="updateCaptionPreview()" class="w-full glass rounded-xl px-3 py-2 text-xs text-white bg-slate-900 border border-white/10 focus:outline-none focus:ring-1 focus:ring-cyan-400">
+          <label class="block text-[10px] uppercase font-semibold text-[#8B8D98] tracking-wider mb-1.5">Font Family</label>
+          <select id="captionFontSelect" onchange="updateCaptionPreview()" class="w-full bg-[#17181D] rounded-full px-4 py-2 text-xs text-white border border-white/10 outline-none">
             <option value="Rubik">Rubik (Modern Punchy)</option>
-            <option value="Plus Jakarta Sans">Jakarta Sans (Clean Tech)</option>
+            <option value="Inter">Inter (Clean Editorial)</option>
             <option value="Impact">Impact (Classic Viral)</option>
-            <option value="Montserrat">Montserrat Black (Bold Heavy)</option>
           </select>
         </div>
 
         <div>
-          <label class="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1.5">Animation Kinetic Preset</label>
-          <select id="captionAnimSelect" class="w-full glass rounded-xl px-3 py-2 text-xs text-white bg-slate-900 border border-white/10 focus:outline-none focus:ring-1 focus:ring-cyan-400">
+          <label class="block text-[10px] uppercase font-semibold text-[#8B8D98] tracking-wider mb-1.5">Animation Style</label>
+          <select id="captionAnimSelect" class="w-full bg-[#17181D] rounded-full px-4 py-2 text-xs text-white border border-white/10 outline-none">
             <option value="bounce">Word Bounce Pop (Viral)</option>
-            <option value="karaoke">Karaoke Word-by-Word Highlight</option>
-            <option value="typewriter">Rapid Typewriter Reveal</option>
-            <option value="slide_up">Smooth Spring Slide Up</option>
+            <option value="karaoke">Karaoke Highlight</option>
+            <option value="typewriter">Typewriter Reveal</option>
           </select>
         </div>
 
         <div>
-          <label class="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-2">Highlight Swatch</label>
-          <div class="flex items-center gap-3">
-            <button type="button" onclick="setCaptionColor('#FACC15')" class="w-7 h-7 rounded-full bg-yellow-400 ring-2 ring-white/50 hover:scale-110 transition-transform" title="Vivid Yellow"></button>
-            <button type="button" onclick="setCaptionColor('#38BDF8')" class="w-7 h-7 rounded-full bg-sky-400 hover:scale-110 transition-transform" title="Cyan Aqua"></button>
-            <button type="button" onclick="setCaptionColor('#A855F7')" class="w-7 h-7 rounded-full bg-purple-500 hover:scale-110 transition-transform" title="Neon Purple"></button>
-            <button type="button" onclick="setCaptionColor('#22C55E')" class="w-7 h-7 rounded-full bg-emerald-500 hover:scale-110 transition-transform" title="Fresh Green"></button>
-            <button type="button" onclick="setCaptionColor('#FFFFFF')" class="w-7 h-7 rounded-full bg-white hover:scale-110 transition-transform" title="Pure White"></button>
+          <label class="block text-[10px] uppercase font-semibold text-[#8B8D98] tracking-wider mb-2">Highlight Swatch</label>
+          <div class="flex items-center gap-2.5">
+            <button type="button" onclick="setCaptionColor('#FACC15')" class="w-6 h-6 rounded-full bg-yellow-400 hover:scale-110 transition-transform" title="Vivid Yellow"></button>
+            <button type="button" onclick="setCaptionColor('#2165F7')" class="w-6 h-6 rounded-full bg-[#2165F7] hover:scale-110 transition-transform" title="Blue"></button>
+            <button type="button" onclick="setCaptionColor('#8655FF')" class="w-6 h-6 rounded-full bg-[#8655FF] hover:scale-110 transition-transform" title="Purple"></button>
+            <button type="button" onclick="setCaptionColor('#FFFFFF')" class="w-6 h-6 rounded-full bg-white hover:scale-110 transition-transform" title="Pure White"></button>
           </div>
         </div>
       </div>
@@ -106,106 +101,81 @@
       <!-- Tab Content: Style -->
       <div id="tabContentStyle" class="hidden flex flex-col gap-4">
         <div>
-          <div class="flex justify-between text-xs text-slate-300 mb-1">
+          <div class="flex justify-between text-xs text-[#8B8D98] mb-1">
             <span>Font Size</span>
-            <span id="fontSizeDisplay">28px</span>
+            <span id="fontSizeDisplay" class="text-white">28px</span>
           </div>
-          <input type="range" min="16" max="48" value="28" class="w-full" oninput="document.getElementById('fontSizeDisplay').textContent=this.value+'px'">
+          <input type="range" min="16" max="48" value="28" class="w-full accent-[#2165F7]" oninput="document.getElementById('fontSizeDisplay').textContent=this.value+'px'">
         </div>
         <div>
-          <div class="flex justify-between text-xs text-slate-300 mb-1">
+          <div class="flex justify-between text-xs text-[#8B8D98] mb-1">
             <span>Vertical Placement</span>
-            <span id="posDisplay">75% (Lower Third)</span>
+            <span id="posDisplay" class="text-white">75% (Lower Third)</span>
           </div>
-          <input type="range" min="20" max="85" value="75" class="w-full" oninput="document.getElementById('posDisplay').textContent=this.value+'%'">
-        </div>
-        <div class="flex items-center justify-between pt-2">
-          <span class="text-xs text-slate-300 font-semibold">Drop Shadow Blur</span>
-          <label class="switch">
-            <input type="checkbox" checked>
-            <span class="slider"></span>
-          </label>
+          <input type="range" min="20" max="85" value="75" class="w-full accent-[#2165F7]" oninput="document.getElementById('posDisplay').textContent=this.value+'%'">
         </div>
       </div>
 
       <!-- Tab Content: Effects -->
-      <div id="tabContentEffects" class="hidden flex flex-col gap-4">
-        <div class="p-3 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-between">
+      <div id="tabContentEffects" class="hidden flex flex-col gap-3">
+        <div class="p-3 rounded-2xl bg-[#17181D] border border-white/10 flex items-center justify-between">
           <div>
-            <div class="text-xs font-bold text-white">Smart Zoom &amp; Pan</div>
-            <div class="text-[10px] text-slate-400">Track speaker motion dynamically</div>
+            <div class="text-xs font-medium text-white">Smart Zoom &amp; Pan</div>
+            <div class="text-[10px] text-[#8B8D98]">Track speaker motion dynamically</div>
           </div>
-          <label class="switch">
-            <input type="checkbox" checked>
-            <span class="slider"></span>
-          </label>
+          <input type="checkbox" checked class="w-4 h-4 rounded accent-[#2165F7]">
         </div>
-        <div class="p-3 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-between">
+        <div class="p-3 rounded-2xl bg-[#17181D] border border-white/10 flex items-center justify-between">
           <div>
-            <div class="text-xs font-bold text-white">Voice Audio Polish</div>
-            <div class="text-[10px] text-slate-400">Normalize loudness &amp; remove hum</div>
+            <div class="text-xs font-medium text-white">Voice Audio Polish</div>
+            <div class="text-[10px] text-[#8B8D98]">Normalize loudness &amp; remove hum</div>
           </div>
-          <label class="switch">
-            <input type="checkbox" checked>
-            <span class="slider"></span>
-          </label>
+          <input type="checkbox" checked class="w-4 h-4 rounded accent-[#2165F7]">
         </div>
       </div>
     </div>
   </div>
 
   <!-- Multi-Track Timeline Canvas -->
-  <div class="glass rounded-3xl p-5 border border-white/10 flex flex-col gap-3">
+  <div class="bg-[#24252B] rounded-3xl p-6 border border-white/10 shadow-2xl flex flex-col gap-3">
     <div class="flex items-center justify-between text-xs">
-      <span class="font-bold text-slate-300 uppercase tracking-wider">Multi-Track Sequence</span>
-      <div class="flex items-center gap-3 text-[11px] text-slate-400 font-mono">
+      <span class="font-semibold text-white uppercase tracking-[0.14em]">Timeline Sequence</span>
+      <div class="flex items-center gap-3 text-[11px] text-[#8B8D98] font-mono">
         <span>IN: 00:00.00</span>
         <span>OUT: 00:15.00</span>
-        <span class="text-cyan-400 font-bold">LEN: 15.00s</span>
+        <span class="text-[#8655FF] font-bold">LEN: 15.00s</span>
       </div>
     </div>
 
     <!-- Timeline Tracks -->
-    <div class="flex flex-col gap-2 bg-slate-950/70 p-3 rounded-2xl border border-white/10">
+    <div class="flex flex-col gap-2 bg-[#17181D] p-3 rounded-2xl border border-white/10">
       <!-- Video Track -->
       <div class="flex items-center gap-3">
-        <span class="w-16 text-[10px] font-bold text-slate-400 uppercase tracking-wider shrink-0">Video</span>
-        <div class="flex-1 h-9 bg-blue-950/40 rounded-lg border border-blue-500/30 flex items-center overflow-hidden relative">
-          <div class="absolute inset-0 flex items-center justify-around opacity-40">
-            <div class="w-12 h-7 bg-white/10 rounded"></div>
-            <div class="w-12 h-7 bg-white/10 rounded"></div>
-            <div class="w-12 h-7 bg-white/10 rounded"></div>
-            <div class="w-12 h-7 bg-white/10 rounded"></div>
-          </div>
-          <span class="relative z-10 text-[10px] text-blue-200 font-semibold px-3">Nature_4K_Clip_01.mp4</span>
+        <span class="w-16 text-[10px] font-semibold text-[#8B8D98] uppercase tracking-wider shrink-0">Video</span>
+        <div class="flex-1 h-8 bg-[#24252B] rounded-lg border border-white/10 flex items-center px-3 text-[10px] text-white">
+          Nature_4K_Clip_01.mp4
         </div>
       </div>
 
       <!-- Audio Track -->
       <div class="flex items-center gap-3">
-        <span class="w-16 text-[10px] font-bold text-slate-400 uppercase tracking-wider shrink-0">Audio</span>
-        <div class="flex-1 h-8 bg-purple-950/40 rounded-lg border border-purple-500/30 flex items-center px-3 relative overflow-hidden">
-          <div class="w-full flex items-center gap-0.5 opacity-60">
-            <span class="h-3 w-1 bg-purple-400 rounded-full"></span>
-            <span class="h-5 w-1 bg-purple-400 rounded-full"></span>
-            <span class="h-2 w-1 bg-purple-400 rounded-full"></span>
-            <span class="h-6 w-1 bg-purple-400 rounded-full"></span>
-            <span class="h-4 w-1 bg-purple-400 rounded-full"></span>
-            <span class="h-5 w-1 bg-purple-400 rounded-full"></span>
-            <span class="h-2 w-1 bg-purple-400 rounded-full"></span>
-            <span class="h-6 w-1 bg-purple-400 rounded-full"></span>
-            <span class="h-3 w-1 bg-purple-400 rounded-full"></span>
+        <span class="w-16 text-[10px] font-semibold text-[#8B8D98] uppercase tracking-wider shrink-0">Audio</span>
+        <div class="flex-1 h-8 bg-[#24252B] rounded-lg border border-white/10 flex items-center px-3">
+          <div class="w-full flex items-center gap-1 opacity-60">
+            <span class="h-3 w-1 bg-[#8655FF] rounded-full"></span>
+            <span class="h-5 w-1 bg-[#8655FF] rounded-full"></span>
+            <span class="h-2 w-1 bg-[#8655FF] rounded-full"></span>
+            <span class="h-6 w-1 bg-[#8655FF] rounded-full"></span>
+            <span class="h-4 w-1 bg-[#8655FF] rounded-full"></span>
           </div>
         </div>
       </div>
 
       <!-- Caption Track -->
       <div class="flex items-center gap-3">
-        <span class="w-16 text-[10px] font-bold text-slate-400 uppercase tracking-wider shrink-0">Caption</span>
-        <div class="flex-1 h-7 bg-amber-950/30 rounded-lg border border-amber-500/30 flex items-center px-2">
-          <div class="h-5 px-3 rounded bg-amber-500/30 text-amber-300 text-[10px] font-semibold flex items-center border border-amber-400/40">
-            "THIS MOMENT CHANGED EVERYTHING"
-          </div>
+        <span class="w-16 text-[10px] font-semibold text-[#8B8D98] uppercase tracking-wider shrink-0">Caption</span>
+        <div class="flex-1 h-8 bg-[#24252B] rounded-lg border border-white/10 flex items-center px-3 text-[10px] text-yellow-300">
+          "THIS MOMENT CHANGED EVERYTHING"
         </div>
       </div>
     </div>
