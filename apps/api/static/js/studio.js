@@ -1510,12 +1510,86 @@
       return impulse;
     }
 
-    play(offset) {
+    async loadDefaultAudio() {
+      if (this.rawAudioBuffer) return this.rawAudioBuffer;
       const ctx = this.ensureContext();
+      try {
+        const response = await fetch('/static/samples/demo_audio.mp3');
+        if (response.ok) {
+          const arrayBuffer = await response.arrayBuffer();
+          this.rawAudioBuffer = await ctx.decodeAudioData(arrayBuffer);
+          this.trackMetadata.durationSec = Math.round(this.rawAudioBuffer.duration);
+          this.trackMetadata.durationStr = formatTime(this.trackMetadata.durationSec);
+          const totalElem = document.getElementById('timecodeTotal');
+          if (totalElem) totalElem.textContent = this.trackMetadata.durationStr;
+          return this.rawAudioBuffer;
+        }
+      } catch (e) {
+        console.warn('Failed to load demo_audio.mp3, falling back to synth preview:', e);
+      }
+
+      // High-quality musical fallback synthesizer
+      const duration = 30;
+      const sampleRate = ctx.sampleRate || 44100;
+      const length = sampleRate * duration;
+      const buffer = ctx.createBuffer(2, length, sampleRate);
+      const ch0 = buffer.getChannelData(0);
+      const ch1 = buffer.getChannelData(1);
+
+      // Chords: Dm9 -> G13 -> Cmaj9 -> Am7
+      const progression = [
+        [146.83, 220.00, 261.63, 329.63, 349.23],
+        [196.00, 246.94, 293.66, 329.63, 392.00],
+        [130.81, 196.00, 246.94, 329.63, 392.00],
+        [110.00, 164.81, 220.00, 261.63, 329.63]
+      ];
+
+      for (let i = 0; i < length; i++) {
+        const t = i / sampleRate;
+        const chordIdx = Math.floor((t % 8) / 2);
+        const chord = progression[chordIdx];
+        let valL = 0, valR = 0;
+
+        chord.forEach((freq, fi) => {
+          const osc1 = Math.sin(2 * Math.PI * freq * t);
+          const osc2 = Math.sin(2 * Math.PI * freq * 1.002 * t);
+          const env = 0.5 + 0.5 * Math.sin(2 * Math.PI * 0.5 * t);
+          const amp = (0.08 / chord.length) * env;
+          valL += (fi % 2 === 0 ? osc1 : osc2) * amp * 1.2;
+          valR += (fi % 2 === 0 ? osc2 : osc1) * amp * 1.2;
+        });
+
+        const beatPos = t % 1.0;
+        const kick = beatPos < 0.1 ? Math.sin(2 * Math.PI * 55 * Math.exp(-beatPos * 30) * beatPos) * Math.exp(-beatPos * 25) * 0.35 : 0;
+        const snare = (beatPos > 0.5 && beatPos < 0.6) ? ((Math.random() * 2 - 1) * Math.exp(-(beatPos - 0.5) * 40)) * 0.12 : 0;
+        const vinyl = (Math.random() * 2 - 1) * 0.008;
+
+        ch0[i] = Math.max(-1, Math.min(1, valL + kick + snare + vinyl));
+        ch1[i] = Math.max(-1, Math.min(1, valR + kick + snare + vinyl));
+      }
+
+      this.rawAudioBuffer = buffer;
+      this.trackMetadata.durationSec = duration;
+      this.trackMetadata.durationStr = formatTime(duration);
+      const totalElem = document.getElementById('timecodeTotal');
+      if (totalElem) totalElem.textContent = this.trackMetadata.durationStr;
+      return buffer;
+    }
+
+    async play(offset) {
+      const ctx = this.ensureContext();
+      if (ctx.state === 'suspended') {
+        try { await ctx.resume(); } catch (e) {}
+      }
       this.initGraph();
       if (this.isPlaying) this.pause();
 
       if (offset !== undefined) this.pauseOffset = offset;
+
+      if (!this.rawAudioBuffer) {
+        await this.loadDefaultAudio();
+      }
+
       if (this.rawAudioBuffer) {
         this.sourceNode = ctx.createBufferSource();
         this.sourceNode.buffer = this.rawAudioBuffer;
@@ -1531,6 +1605,7 @@
           }
         };
       }
+      window.updatePlayerUI && window.updatePlayerUI();
     }
 
     pause() {
@@ -1543,13 +1618,14 @@
         this.pauseOffset = Math.max(0, this.audioCtx.currentTime - this.startTime);
       }
       this.isPlaying = false;
+      window.updatePlayerUI && window.updatePlayerUI();
     }
 
-    seek(seconds) {
+    async seek(seconds) {
       const wasPlaying = this.isPlaying;
       if (wasPlaying) this.pause();
       this.pauseOffset = Math.max(0, seconds);
-      if (wasPlaying) this.play(this.pauseOffset);
+      if (wasPlaying) await this.play(this.pauseOffset);
     }
   }
 

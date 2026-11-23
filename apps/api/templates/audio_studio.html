@@ -3,7 +3,24 @@
 {% block title %}Audio Studio — ClipGlass Media Workspace{% endblock %}
 
 {% block content %}
-<div class="w-full max-w-7xl mx-auto flex flex-col gap-6 pb-16 bg-geom-studio">
+<style>
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 5px;
+    height: 5px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: 999px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: rgba(134, 85, 255, 0.35);
+    border-radius: 999px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: rgba(134, 85, 255, 0.7);
+  }
+</style>
+<div class="w-full max-w-7xl mx-auto flex flex-col gap-4 pb-8 bg-geom-studio">
 
   <!-- ========================================================================= -->
   <!-- TOP SUBHEADER (Matches Wireframe):                                       -->
@@ -166,10 +183,10 @@
     <!-- LEFT COLUMN (lg:col-span-7): AUDIO PLAYER WAVEFORM                      -->
     <!-- Contains: Waveform display box, play/progress scrubber, preview & download -->
     <!-- ======================================================================= -->
-    <div class="lg:col-span-7 flex flex-col gap-5">
-      <div class="bg-[#24252B] rounded-3xl p-6 sm:p-8 shadow-2xl flex flex-col gap-6 border border-white/10 relative">
+    <div class="lg:col-span-7 flex flex-col gap-4">
+      <div class="bg-[#24252B] rounded-3xl p-5 sm:p-6 shadow-2xl flex flex-col gap-4 border border-white/10 relative">
         <!-- Container Header -->
-        <div class="flex items-center justify-between border-b border-white/10 pb-3">
+        <div class="flex items-center justify-between border-b border-white/10 pb-2.5">
           <div class="flex items-center gap-2">
             <span class="w-2 h-2 rounded-full bg-[#8655FF]"></span>
             <h2 class="text-xs font-semibold text-white uppercase tracking-[0.14em]">
@@ -185,7 +202,7 @@
         <div
           id="waveformDisplayBox"
           onclick="handleScrubberSeek(event)"
-          class="relative w-full h-32 sm:h-36 rounded-2xl bg-[#17181D] p-3 flex items-center cursor-pointer overflow-hidden border border-white/10 select-none group shadow-inner"
+          class="relative w-full h-24 sm:h-28 rounded-2xl bg-[#17181D] p-2.5 flex items-center cursor-pointer overflow-hidden border border-white/10 select-none group shadow-inner"
         >
           <!-- 64 Animated Audio Bars -->
           <div id="waveformBigBars" class="w-full h-full flex items-center gap-1 sm:gap-1.5 px-2">
@@ -205,7 +222,7 @@
         </div>
 
         <!-- Play Button & Scrubber Bar -->
-        <div class="flex items-center gap-3.5 pt-1">
+        <div class="flex items-center gap-3 pt-0.5">
           <!-- Play / Pause Button -->
           <button
             type="button"
@@ -233,19 +250,19 @@
 
           <!-- Total Duration Timecode -->
           <span id="timecodeTotal" class="font-mono text-xs font-semibold text-[#8B8D98] w-12 text-right shrink-0">
-            04:32
+            00:30
           </span>
         </div>
 
         <!-- Two Action Buttons (Wireframe: [ preview ] [ download ]) -->
-        <div class="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-white/10">
+        <div class="flex flex-wrap items-center justify-between gap-3 pt-2.5 border-t border-white/10">
           <div class="flex items-center gap-2">
             <!-- [ preview ] Action Button -->
             <button
               type="button"
               onclick="toggleAuditionMode()"
               id="previewToggleBtn"
-              class="px-5 py-2 rounded-full bg-[#17181D] hover:bg-[#303137] text-xs font-semibold text-white border border-white/10 transition-all flex items-center gap-2 cursor-pointer"
+              class="px-4 py-1.5 rounded-full bg-[#17181D] hover:bg-[#303137] text-xs font-semibold text-white border border-white/10 transition-all flex items-center gap-2 cursor-pointer"
             >
               <span>🎧</span>
               <span id="previewBtnLabel">Preview Effects</span>
@@ -256,7 +273,7 @@
               type="button"
               onclick="setAuditionMode('dry')"
               id="autoPreviewOriginalBtn"
-              class="px-3.5 py-2 rounded-full bg-[#17181D] hover:bg-[#303137] text-[11px] font-medium text-[#8B8D98] hover:text-white transition-all cursor-pointer border border-white/10"
+              class="px-3.5 py-1.5 rounded-full bg-[#17181D] hover:bg-[#303137] text-[11px] font-medium text-[#8B8D98] hover:text-white transition-all cursor-pointer border border-white/10"
               title="A/B Compare with original raw audio"
             >
               Original
@@ -268,7 +285,7 @@
             type="button"
             onclick="startProcessingAndDownload()"
             id="mainDownloadAudioBtn"
-            class="btn-pill-blue px-7 py-2.5 rounded-full text-xs font-bold uppercase tracking-wider text-white shadow-[0_0_24px_rgba(33,101,247,0.45)] hover:scale-105 active:scale-95 transition-all flex items-center gap-2 cursor-pointer"
+            class="btn-pill-blue px-6 py-2 rounded-full text-xs font-bold uppercase tracking-wider text-white shadow-[0_0_24px_rgba(33,101,247,0.45)] hover:scale-105 active:scale-95 transition-all flex items-center gap-2 cursor-pointer"
           >
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
             <span>Download Audio</span>
@@ -279,9 +296,9 @@
       <!-- ===================================================================== -->
       <!-- 1-CLICK DIMENSIONAL & SPATIAL SONG EDITS                              -->
       <!-- ===================================================================== -->
-      <div class="bg-[#24252B] rounded-3xl p-6 sm:p-7 shadow-2xl flex flex-col gap-5 border border-white/10">
+      <div class="bg-[#24252B] rounded-3xl p-5 sm:p-6 shadow-2xl flex flex-col gap-3.5 border border-white/10">
         <!-- Section Header -->
-        <div class="flex items-center justify-between border-b border-white/10 pb-3">
+        <div class="flex items-center justify-between border-b border-white/10 pb-2.5">
           <div class="flex items-center gap-2.5">
             <span class="w-2.5 h-2.5 rounded-full bg-[#8655FF] animate-pulse"></span>
             <h3 class="text-xs sm:text-sm font-bold text-white uppercase tracking-[0.14em] flex items-center gap-2">
@@ -302,17 +319,17 @@
           </div>
         </div>
 
-        <p class="text-xs text-[#8B8D98] -mt-1 leading-relaxed">
-          Instantly transform any song into multi-directional spatial audio. Click any edit below to reconfigure the real-time filtergraph and preview with headphones.
+        <p class="text-xs text-[#8B8D98] -mt-1 leading-snug">
+          Instantly transform any song into multi-directional spatial audio. Scroll options below and click to audition live:
         </p>
 
-        <!-- 10 Spatial Edit Cards (2-Column Grid) -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3" id="spatialEditsGrid">
+        <!-- 10 Spatial Edit Cards (Scrollable 2-Column Grid) -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 max-h-[300px] overflow-y-auto pr-1.5 custom-scrollbar" id="spatialEditsGrid">
           <!-- 1. 3D Audio -->
-          <div id="spatialCard-3d_audio" onclick="applySpatialSongEdit('3d_audio')" class="spatial-card p-3.5 rounded-2xl bg-[#17181D] hover:bg-[#202128] border border-white/10 transition-all cursor-pointer flex flex-col justify-between gap-2.5 group">
+          <div id="spatialCard-3d_audio" onclick="applySpatialSongEdit('3d_audio')" class="spatial-card p-3 rounded-2xl bg-[#17181D] hover:bg-[#202128] border border-white/10 transition-all cursor-pointer flex flex-col justify-between gap-2 group">
             <div class="flex items-center justify-between">
               <div class="flex items-center gap-2">
-                <span class="w-7 h-7 rounded-lg bg-blue-500/15 text-blue-400 border border-blue-500/25 flex items-center justify-center text-xs font-bold">🌐</span>
+                <span class="w-6 h-6 rounded-lg bg-blue-500/15 text-blue-400 border border-blue-500/25 flex items-center justify-center text-xs font-bold">🌐</span>
                 <span class="text-xs font-bold text-white">3D Audio</span>
               </div>
               <span class="px-2 py-0.5 rounded-full bg-blue-500/15 text-blue-400 text-[9px] font-bold border border-blue-500/20">3D SPATIAL</span>
@@ -327,10 +344,10 @@
           </div>
 
           <!-- 2. 4D Audio -->
-          <div id="spatialCard-4d_audio" onclick="applySpatialSongEdit('4d_audio')" class="spatial-card p-3.5 rounded-2xl bg-[#17181D] hover:bg-[#202128] border border-white/10 transition-all cursor-pointer flex flex-col justify-between gap-2.5 group">
+          <div id="spatialCard-4d_audio" onclick="applySpatialSongEdit('4d_audio')" class="spatial-card p-3 rounded-2xl bg-[#17181D] hover:bg-[#202128] border border-white/10 transition-all cursor-pointer flex flex-col justify-between gap-2 group">
             <div class="flex items-center justify-between">
               <div class="flex items-center gap-2">
-                <span class="w-7 h-7 rounded-lg bg-purple-500/15 text-purple-400 border border-purple-500/25 flex items-center justify-center text-xs font-bold">💫</span>
+                <span class="w-6 h-6 rounded-lg bg-purple-500/15 text-purple-400 border border-purple-500/25 flex items-center justify-center text-xs font-bold">💫</span>
                 <span class="text-xs font-bold text-white">4D Audio</span>
               </div>
               <span class="px-2 py-0.5 rounded-full bg-purple-500/15 text-purple-400 text-[9px] font-bold border border-purple-500/20">4D MOTION</span>
@@ -345,10 +362,10 @@
           </div>
 
           <!-- 3. 8D Audio -->
-          <div id="spatialCard-8d_audio" onclick="applySpatialSongEdit('8d_audio')" class="spatial-card p-3.5 rounded-2xl bg-[#17181D] hover:bg-[#202128] border border-white/10 transition-all cursor-pointer flex flex-col justify-between gap-2.5 group">
+          <div id="spatialCard-8d_audio" onclick="applySpatialSongEdit('8d_audio')" class="spatial-card p-3 rounded-2xl bg-[#17181D] hover:bg-[#202128] border border-white/10 transition-all cursor-pointer flex flex-col justify-between gap-2 group">
             <div class="flex items-center justify-between">
               <div class="flex items-center gap-2">
-                <span class="w-7 h-7 rounded-lg bg-[#8655FF]/15 text-[#8655FF] border border-[#8655FF]/25 flex items-center justify-center text-xs font-bold">🎧</span>
+                <span class="w-6 h-6 rounded-lg bg-[#8655FF]/15 text-[#8655FF] border border-[#8655FF]/25 flex items-center justify-center text-xs font-bold">🎧</span>
                 <span class="text-xs font-bold text-white">8D Audio</span>
               </div>
               <span class="px-2 py-0.5 rounded-full bg-[#8655FF]/15 text-[#8655FF] text-[9px] font-bold border border-[#8655FF]/20">8D PANNING</span>
@@ -363,10 +380,10 @@
           </div>
 
           <!-- 4. 12D Audio -->
-          <div id="spatialCard-12d_audio" onclick="applySpatialSongEdit('12d_audio')" class="spatial-card p-3.5 rounded-2xl bg-[#17181D] hover:bg-[#202128] border border-white/10 transition-all cursor-pointer flex flex-col justify-between gap-2.5 group">
+          <div id="spatialCard-12d_audio" onclick="applySpatialSongEdit('12d_audio')" class="spatial-card p-3 rounded-2xl bg-[#17181D] hover:bg-[#202128] border border-white/10 transition-all cursor-pointer flex flex-col justify-between gap-2 group">
             <div class="flex items-center justify-between">
               <div class="flex items-center gap-2">
-                <span class="w-7 h-7 rounded-lg bg-pink-500/15 text-pink-400 border border-pink-500/25 flex items-center justify-center text-xs font-bold">🪐</span>
+                <span class="w-6 h-6 rounded-lg bg-pink-500/15 text-pink-400 border border-pink-500/25 flex items-center justify-center text-xs font-bold">🪐</span>
                 <span class="text-xs font-bold text-white">12D Audio</span>
               </div>
               <span class="px-2 py-0.5 rounded-full bg-pink-500/15 text-pink-400 text-[9px] font-bold border border-pink-500/20">12D REMIX</span>
@@ -381,10 +398,10 @@
           </div>
 
           <!-- 5. 360° Audio -->
-          <div id="spatialCard-three_sixty_audio" onclick="applySpatialSongEdit('three_sixty_audio')" class="spatial-card p-3.5 rounded-2xl bg-[#17181D] hover:bg-[#202128] border border-white/10 transition-all cursor-pointer flex flex-col justify-between gap-2.5 group">
+          <div id="spatialCard-three_sixty_audio" onclick="applySpatialSongEdit('three_sixty_audio')" class="spatial-card p-3 rounded-2xl bg-[#17181D] hover:bg-[#202128] border border-white/10 transition-all cursor-pointer flex flex-col justify-between gap-2 group">
             <div class="flex items-center justify-between">
               <div class="flex items-center gap-2">
-                <span class="w-7 h-7 rounded-lg bg-cyan-500/15 text-cyan-400 border border-cyan-500/25 flex items-center justify-center text-xs font-bold">🔄</span>
+                <span class="w-6 h-6 rounded-lg bg-cyan-500/15 text-cyan-400 border border-cyan-500/25 flex items-center justify-center text-xs font-bold">🔄</span>
                 <span class="text-xs font-bold text-white">360° Audio</span>
               </div>
               <span class="px-2 py-0.5 rounded-full bg-cyan-500/15 text-cyan-400 text-[9px] font-bold border border-cyan-500/20">360° CIRCLE</span>
@@ -399,10 +416,10 @@
           </div>
 
           <!-- 6. Binaural Audio -->
-          <div id="spatialCard-binaural_audio" onclick="applySpatialSongEdit('binaural_audio')" class="spatial-card p-3.5 rounded-2xl bg-[#17181D] hover:bg-[#202128] border border-white/10 transition-all cursor-pointer flex flex-col justify-between gap-2.5 group">
+          <div id="spatialCard-binaural_audio" onclick="applySpatialSongEdit('binaural_audio')" class="spatial-card p-3 rounded-2xl bg-[#17181D] hover:bg-[#202128] border border-white/10 transition-all cursor-pointer flex flex-col justify-between gap-2 group">
             <div class="flex items-center justify-between">
               <div class="flex items-center gap-2">
-                <span class="w-7 h-7 rounded-lg bg-emerald-500/15 text-emerald-400 border border-emerald-500/25 flex items-center justify-center text-xs font-bold">👂</span>
+                <span class="w-6 h-6 rounded-lg bg-emerald-500/15 text-emerald-400 border border-emerald-500/25 flex items-center justify-center text-xs font-bold">👂</span>
                 <span class="text-xs font-bold text-white">Binaural Audio</span>
               </div>
               <span class="px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400 text-[9px] font-bold border border-emerald-500/20">HRTF DUMMY-HEAD</span>
@@ -417,10 +434,10 @@
           </div>
 
           <!-- 7. Holophonic Sound -->
-          <div id="spatialCard-holophonic_sound" onclick="applySpatialSongEdit('holophonic_sound')" class="spatial-card p-3.5 rounded-2xl bg-[#17181D] hover:bg-[#202128] border border-white/10 transition-all cursor-pointer flex flex-col justify-between gap-2.5 group">
+          <div id="spatialCard-holophonic_sound" onclick="applySpatialSongEdit('holophonic_sound')" class="spatial-card p-3 rounded-2xl bg-[#17181D] hover:bg-[#202128] border border-white/10 transition-all cursor-pointer flex flex-col justify-between gap-2 group">
             <div class="flex items-center justify-between">
               <div class="flex items-center gap-2">
-                <span class="w-7 h-7 rounded-lg bg-amber-500/15 text-amber-400 border border-amber-500/25 flex items-center justify-center text-xs font-bold">🔮</span>
+                <span class="w-6 h-6 rounded-lg bg-amber-500/15 text-amber-400 border border-amber-500/25 flex items-center justify-center text-xs font-bold">🔮</span>
                 <span class="text-xs font-bold text-white">Holophonic Sound</span>
               </div>
               <span class="px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-400 text-[9px] font-bold border border-amber-500/20">HOLOPHONIC</span>
@@ -435,10 +452,10 @@
           </div>
 
           <!-- 8. 8K Audio -->
-          <div id="spatialCard-eight_k_audio" onclick="applySpatialSongEdit('eight_k_audio')" class="spatial-card p-3.5 rounded-2xl bg-[#17181D] hover:bg-[#202128] border border-white/10 transition-all cursor-pointer flex flex-col justify-between gap-2.5 group">
+          <div id="spatialCard-eight_k_audio" onclick="applySpatialSongEdit('eight_k_audio')" class="spatial-card p-3 rounded-2xl bg-[#17181D] hover:bg-[#202128] border border-white/10 transition-all cursor-pointer flex flex-col justify-between gap-2 group">
             <div class="flex items-center justify-between">
               <div class="flex items-center gap-2">
-                <span class="w-7 h-7 rounded-lg bg-teal-500/15 text-teal-400 border border-teal-500/25 flex items-center justify-center text-xs font-bold">💎</span>
+                <span class="w-6 h-6 rounded-lg bg-teal-500/15 text-teal-400 border border-teal-500/25 flex items-center justify-center text-xs font-bold">💎</span>
                 <span class="text-xs font-bold text-white">8K Audio</span>
               </div>
               <span class="px-2 py-0.5 rounded-full bg-teal-500/15 text-teal-400 text-[9px] font-bold border border-teal-500/20">8K REMIX</span>
@@ -453,10 +470,10 @@
           </div>
 
           <!-- 9. Spatial Audio (Dolby Atmos) -->
-          <div id="spatialCard-spatial_audio_atmos" onclick="applySpatialSongEdit('spatial_audio_atmos')" class="spatial-card p-3.5 rounded-2xl bg-[#17181D] hover:bg-[#202128] border border-white/10 transition-all cursor-pointer flex flex-col justify-between gap-2.5 group">
+          <div id="spatialCard-spatial_audio_atmos" onclick="applySpatialSongEdit('spatial_audio_atmos')" class="spatial-card p-3 rounded-2xl bg-[#17181D] hover:bg-[#202128] border border-white/10 transition-all cursor-pointer flex flex-col justify-between gap-2 group">
             <div class="flex items-center justify-between">
               <div class="flex items-center gap-2">
-                <span class="w-7 h-7 rounded-lg bg-indigo-500/15 text-indigo-400 border border-indigo-500/25 flex items-center justify-center text-xs font-bold">🎬</span>
+                <span class="w-6 h-6 rounded-lg bg-indigo-500/15 text-indigo-400 border border-indigo-500/25 flex items-center justify-center text-xs font-bold">🎬</span>
                 <span class="text-xs font-bold text-white">Spatial Audio (Dolby Atmos)</span>
               </div>
               <span class="px-2 py-0.5 rounded-full bg-indigo-500/15 text-indigo-400 text-[9px] font-bold border border-indigo-500/20">DOLBY ATMOS</span>
@@ -471,10 +488,10 @@
           </div>
 
           <!-- 10. Ambisonic Audio -->
-          <div id="spatialCard-ambisonic_audio" onclick="applySpatialSongEdit('ambisonic_audio')" class="spatial-card p-3.5 rounded-2xl bg-[#17181D] hover:bg-[#202128] border border-white/10 transition-all cursor-pointer flex flex-col justify-between gap-2.5 group">
+          <div id="spatialCard-ambisonic_audio" onclick="applySpatialSongEdit('ambisonic_audio')" class="spatial-card p-3 rounded-2xl bg-[#17181D] hover:bg-[#202128] border border-white/10 transition-all cursor-pointer flex flex-col justify-between gap-2 group">
             <div class="flex items-center justify-between">
               <div class="flex items-center gap-2">
-                <span class="w-7 h-7 rounded-lg bg-rose-500/15 text-rose-400 border border-rose-500/25 flex items-center justify-center text-xs font-bold">🌌</span>
+                <span class="w-6 h-6 rounded-lg bg-rose-500/15 text-rose-400 border border-rose-500/25 flex items-center justify-center text-xs font-bold">🌌</span>
                 <span class="text-xs font-bold text-white">Ambisonic Audio</span>
               </div>
               <span class="px-2 py-0.5 rounded-full bg-rose-500/15 text-rose-400 text-[9px] font-bold border border-rose-500/20">FULL SPHERE</span>
@@ -492,13 +509,13 @@
     </div>
 
     <!-- RIGHT COLUMN (lg:col-span-5): CATEGORIES & EFFECTS -->
-    <div class="lg:col-span-5 flex flex-col gap-5">
-      <div class="bg-[#24252B] rounded-3xl p-6 shadow-2xl flex flex-col gap-5 border border-white/10">
+    <div class="lg:col-span-5 flex flex-col gap-4">
+      <div class="bg-[#24252B] rounded-3xl p-5 sm:p-6 shadow-2xl flex flex-col gap-4 border border-white/10">
 
         <!-- ------------------------------------------------------------------- -->
         <!-- 1. CATEGORIES SECTION (Wireframe: Categories)                       -->
         <!-- ------------------------------------------------------------------- -->
-        <div class="flex flex-col gap-3 pb-3 border-b border-white/10">
+        <div class="flex flex-col gap-2.5 pb-2.5 border-b border-white/10">
           <div class="flex items-center justify-between">
             <h3 class="text-sm font-extrabold text-white uppercase tracking-wider flex items-center gap-2">
               <span>Categories</span>
@@ -510,13 +527,13 @@
 
           <!-- Search Input in Categories -->
           <div class="relative w-full">
-            <span class="absolute left-3 top-2.5 text-slate-400 text-xs">🔍</span>
+            <span class="absolute left-3 top-2 text-slate-400 text-xs">🔍</span>
             <input
               type="text"
               id="autoSearchInput"
               oninput="handleAutoSearch(this.value)"
               placeholder="Search 60+ effects..."
-              class="w-full pl-8 pr-3 py-2 rounded-xl glass text-xs text-white placeholder:text-slate-500 outline-none border border-white/10 focus:border-purple-400"
+              class="w-full pl-8 pr-3 py-1.5 rounded-xl glass text-xs text-white placeholder:text-slate-500 outline-none border border-white/10 focus:border-purple-400"
             />
           </div>
 
@@ -537,7 +554,7 @@
         <!-- 2. EFFECTS SECTION (Wireframe: Effects)                             -->
         <!-- Toggles between Auto selection grid and Custom modular rack chain   -->
         <!-- ------------------------------------------------------------------- -->
-        <div class="flex flex-col gap-3">
+        <div class="flex flex-col gap-2.5">
           <!-- Section Title & Controls -->
           <div class="flex items-center justify-between">
             <h3 class="text-sm font-extrabold text-white uppercase tracking-wider flex items-center gap-2">
@@ -596,7 +613,7 @@
           </div>
 
           <!-- AUTO MODE: Selected Effects Chips Summary -->
-          <div id="autoSelectedBox" class="p-2.5 rounded-xl bg-white/5 border border-white/10 flex items-center gap-2 flex-wrap">
+          <div id="autoSelectedBox" class="p-2 rounded-xl bg-white/5 border border-white/10 flex items-center gap-2 flex-wrap">
             <span class="text-[10px] font-extrabold uppercase text-cyan-300 shrink-0">Selected:</span>
             <div id="autoSelectedChipsList" class="flex items-center gap-1.5 flex-wrap">
               <!-- Rendered via JS -->
@@ -607,30 +624,30 @@
           <div id="autoModeContainer" class="flex flex-col gap-2">
             <div
               id="autoEffectsGrid"
-              class="grid grid-cols-2 sm:grid-cols-3 gap-2.5 max-h-[380px] overflow-y-auto pr-1"
+              class="grid grid-cols-2 sm:grid-cols-3 gap-2 max-h-[360px] overflow-y-auto pr-1.5 custom-scrollbar"
             >
               <!-- Rendered via renderAutoEffectsGrid() -->
             </div>
           </div>
 
           <!-- CUSTOM MODE: Your Effect Chain & Modular Rack (Wireframe Custom State) -->
-          <div id="customModeContainer" class="hidden flex flex-col gap-4">
+          <div id="customModeContainer" class="hidden flex flex-col gap-3">
             <div class="flex items-center justify-between text-xs text-slate-300 font-bold border-b border-white/10 pb-1.5">
               <span>Your Effect Chain &bull; Export Settings</span>
               <span class="text-[10px] text-slate-400 italic">Drag to reorder</span>
             </div>
 
-            <div id="customModularRack" class="flex flex-col gap-2.5 max-h-[260px] overflow-y-auto pr-1">
+            <div id="customModularRack" class="flex flex-col gap-2 max-h-[210px] overflow-y-auto pr-1.5 custom-scrollbar">
               <!-- Populated via renderCustomModularRack() -->
             </div>
 
             <!-- Effect Library in Custom Mode -->
-            <div class="border-t border-white/10 pt-3 flex flex-col gap-2">
+            <div class="border-t border-white/10 pt-2.5 flex flex-col gap-2">
               <div class="flex items-center justify-between text-xs font-bold text-white">
                 <span>Effect Library</span>
                 <span class="text-[10px] text-slate-400">Click to add to rack</span>
               </div>
-              <div id="customLibraryGrid" class="grid grid-cols-2 gap-2 max-h-[160px] overflow-y-auto pr-1">
+              <div id="customLibraryGrid" class="grid grid-cols-2 gap-2 max-h-[150px] overflow-y-auto pr-1.5 custom-scrollbar">
                 <!-- Rendered via renderCustomLibraryGrid() -->
               </div>
             </div>
@@ -819,13 +836,25 @@
       name: 'Jaadu — Darshan Raval.mp3',
       format: 'MP3',
       bitrate: '320 kbps',
-      durationStr: '04:32',
-      durationSec: 272,
-      sizeStr: '8.5 MB',
+      durationStr: '00:30',
+      durationSec: 30,
+      sizeStr: '1.2 MB',
       thumbnail: null
     };
 
     window.studioEngine.hasMediaLoaded = true;
+
+    // Load default audio in background immediately so play button works
+    if (window.studioEngine.loadDefaultAudio) {
+      window.studioEngine.loadDefaultAudio().then(() => {
+        if (window.studioEngine.trackMetadata) {
+          const metaElem = document.getElementById('workspaceSongMeta');
+          if (metaElem) metaElem.textContent = `${window.studioEngine.trackMetadata.format} · 320 kbps · ${window.studioEngine.trackMetadata.durationStr}`;
+          const totalElem = document.getElementById('timecodeTotal');
+          if (totalElem) totalElem.textContent = window.studioEngine.trackMetadata.durationStr;
+        }
+      });
+    }
 
     // Render initial UI components
     window.studioEngine.rebuildDSPChain();
@@ -834,8 +863,8 @@
     renderCustomModularRack();
     renderCustomLibraryGrid();
 
-    // Scrubber update timer
-    setInterval(updateScrubberProgress, 250);
+    // Scrubber update timer (60ms for smooth 60fps playhead & bar animation)
+    setInterval(updateScrubberProgress, 60);
   });
 
   function renderWaveformBars() {
@@ -846,6 +875,7 @@
       const h = Math.max(16, Math.min(96, Math.sin(i * 0.18) * 38 + Math.cos(i * 0.28) * 22 + 48));
       const bar = document.createElement('div');
       bar.className = 'flex-1 rounded-full bg-gradient-to-t from-blue-500/50 via-cyan-400/60 to-purple-400/80 group-hover:from-blue-400 group-hover:to-cyan-300 transition-all';
+      bar.dataset.baseHeight = h;
       bar.style.height = `${h}%`;
       container.appendChild(bar);
     }
@@ -1396,13 +1426,13 @@
     }
   };
 
-  window.togglePlay = function() {
+  window.togglePlay = async function() {
     playGlassTick();
     const engine = window.studioEngine;
     if (engine.isPlaying) {
       engine.pause();
     } else {
-      engine.play();
+      await engine.play();
     }
     updatePlayerUI();
   };
@@ -1418,7 +1448,7 @@
   function updateScrubberProgress() {
     const engine = window.studioEngine;
     if (!engine) return;
-    const totalSec = engine.trackMetadata.durationSec || 272;
+    const totalSec = engine.trackMetadata.durationSec || 30;
     let curSec = engine.pauseOffset;
     if (engine.isPlaying && engine.audioCtx) {
       curSec = (engine.audioCtx.currentTime - engine.startTime);
@@ -1436,15 +1466,27 @@
 
     const curElem = document.getElementById('timecodeCurrent');
     if (curElem) curElem.textContent = window.formatTime(curSec);
+
+    // Dynamic dancing waveform bars while playing
+    if (engine.isPlaying) {
+      const bars = document.querySelectorAll('#waveformBigBars > div');
+      const timeMs = Date.now();
+      bars.forEach((bar, idx) => {
+        const factor = Math.sin((timeMs / 140) + idx * 0.35) * 0.35 + 0.75;
+        const baseH = parseFloat(bar.dataset.baseHeight || 50);
+        bar.style.height = `${Math.min(98, Math.max(16, baseH * factor))}%`;
+      });
+    }
   }
 
   window.handleScrubberSeek = function(e) {
     const container = document.getElementById('timelineScrubber') || document.getElementById('waveformDisplayBox');
     const rect = container.getBoundingClientRect();
     const ratio = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
-    const totalSec = window.studioEngine.trackMetadata.durationSec || 272;
+    const totalSec = window.studioEngine.trackMetadata.durationSec || 30;
     window.studioEngine.seek(ratio * totalSec);
     updateScrubberProgress();
+    updatePlayerUI();
   };
 
   // --- PROCESSING & TRUE EXPORT ---
