@@ -454,6 +454,36 @@
     handleEndInputChange();
   }
 
+  let previewBoundaryListener = null;
+
+  function previewTrimmedClip() {
+    if (typeof playGlassTick === 'function') playGlassTick();
+    if (!realVideo || !realVideo.src || realVideo.classList.contains('hidden')) {
+      showToast(`Previewing trimmed range: ${formatDuration(Math.round(trimStartSec))} - ${formatDuration(Math.round(trimEndSec))}`, 'info');
+      return;
+    }
+
+    if (previewBoundaryListener) {
+      realVideo.removeEventListener('timeupdate', previewBoundaryListener);
+      previewBoundaryListener = null;
+    }
+
+    realVideo.currentTime = trimStartSec;
+    realVideo.play().catch(e => console.warn(e));
+
+    previewBoundaryListener = function() {
+      if (realVideo.currentTime >= trimEndSec) {
+        realVideo.pause();
+        realVideo.currentTime = trimStartSec;
+        realVideo.removeEventListener('timeupdate', previewBoundaryListener);
+        previewBoundaryListener = null;
+        showToast('Trimmed clip preview reached end point', 'info');
+      }
+    };
+    realVideo.addEventListener('timeupdate', previewBoundaryListener);
+    showToast(`Playing trimmed preview (${formatDuration(Math.round(trimEndSec - trimStartSec))})`, 'info');
+  }
+
   // Zoom Controller
   function setZoom(z) {
     currentZoom = z;

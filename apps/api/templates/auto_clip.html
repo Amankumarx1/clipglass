@@ -1120,6 +1120,15 @@
     if (icon) icon.textContent = vid.muted ? '🔇' : '🔊';
   }
 
+  let currentModalClipIdx = 0;
+
+  function formatModalTime(sec) {
+    if (!sec || isNaN(sec)) return '00:00';
+    const m = Math.floor(sec / 60);
+    const s = Math.floor(sec % 60);
+    return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+  }
+
   function openPreviewModal(idx, event) {
     if (event) event.stopPropagation();
     currentModalClipIdx = idx;
@@ -1133,14 +1142,74 @@
       vid.src = c.videoUrl;
       vid.currentTime = 0;
       modal.classList.remove('hidden');
-      vid.play();
+
+      vid.ontimeupdate = () => {
+        const cur = document.getElementById('modalCurrentTime');
+        const dur = document.getElementById('modalDuration');
+        const bar = document.getElementById('modalProgressBar');
+        if (cur) cur.textContent = formatModalTime(vid.currentTime);
+        if (dur && vid.duration) dur.textContent = formatModalTime(vid.duration);
+        if (bar && vid.duration) bar.style.width = `${(vid.currentTime / vid.duration) * 100}%`;
+      };
+
+      vid.onplay = () => {
+        const playIcon = document.getElementById('modalPlayIcon');
+        if (playIcon) playIcon.textContent = '⏸';
+      };
+      vid.onpause = () => {
+        const playIcon = document.getElementById('modalPlayIcon');
+        if (playIcon) playIcon.textContent = '▶';
+      };
+
+      vid.play().catch(() => {});
+    }
+  }
+
+  function toggleModalPlay() {
+    const vid = document.getElementById('modalVideo');
+    const playIcon = document.getElementById('modalPlayIcon');
+    if (!vid) return;
+    if (vid.paused) {
+      vid.play().catch(() => {});
+      if (playIcon) playIcon.textContent = '⏸';
+    } else {
+      vid.pause();
+      if (playIcon) playIcon.textContent = '▶';
+    }
+  }
+
+  function toggleModalMute() {
+    const vid = document.getElementById('modalVideo');
+    const icon = document.getElementById('modalMuteIcon');
+    const text = document.getElementById('modalMuteText');
+    if (!vid) return;
+    vid.muted = !vid.muted;
+    if (icon) icon.textContent = vid.muted ? '🔇' : '🔊';
+    if (text) text.textContent = vid.muted ? 'Unmute' : 'Mute';
+  }
+
+  function seekModalVideo(event) {
+    const vid = document.getElementById('modalVideo');
+    if (!vid || !vid.duration) return;
+    const rect = event.currentTarget.getBoundingClientRect();
+    const ratio = Math.max(0, Math.min(1, (event.clientX - rect.left) / rect.width));
+    vid.currentTime = ratio * vid.duration;
+  }
+
+  function downloadCurrentModalClip() {
+    const c = activeClips[currentModalClipIdx] || sampleClipsData[currentModalClipIdx];
+    if (c) {
+      downloadClipDirect(c.videoUrl, c.title);
     }
   }
 
   function closePreviewModal() {
     const modal = document.getElementById('clipPreviewModal');
     const vid = document.getElementById('modalVideo');
-    if (vid) vid.pause();
+    if (vid) {
+      vid.pause();
+      vid.ontimeupdate = null;
+    }
     if (modal) modal.classList.add('hidden');
   }
 
