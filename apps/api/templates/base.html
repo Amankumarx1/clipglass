@@ -8,17 +8,11 @@
   <script>
     (function() {
       try {
-        var savedTheme = localStorage.getItem('clipglass_theme') || 'dark';
-        var theme = savedTheme;
-        if (savedTheme === 'system') {
-          theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-        }
-        document.documentElement.setAttribute('data-theme', theme);
-        if (theme === 'dark') {
-          document.documentElement.classList.add('dark');
-        } else {
-          document.documentElement.classList.remove('dark');
-        }
+        document.documentElement.setAttribute('data-theme', 'dark');
+        document.documentElement.classList.add('dark');
+        localStorage.setItem('clipglass_theme', 'dark');
+        localStorage.setItem('clipglass-theme', 'dark');
+        localStorage.setItem('cg_theme', 'dark');
         var savedAccent = localStorage.getItem('clipglass_accent') || 'blue';
         document.documentElement.setAttribute('data-accent', savedAccent);
       } catch (e) {}
@@ -149,12 +143,6 @@
         <a href="/settings" onclick="playGlassTick()" title="Settings" class="w-9 h-9 rounded-full flex items-center justify-center glass text-slate-300 hover:text-white transition-all {% if active_page == 'settings' %}ring-2 ring-blue-500 text-blue-400{% endif %}">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
         </a>
-
-        <!-- Theme Toggle -->
-        <button type="button" data-toggle-theme aria-label="Toggle theme" class="w-9 h-9 rounded-full flex items-center justify-center glass text-slate-300 hover:text-amber-300 transition-all shadow-sm">
-          <span class="dark:hidden text-slate-400 text-xs">🌙</span>
-          <span class="hidden dark:inline text-amber-300 text-xs">☀️</span>
-        </button>
 
         <!-- Mobile Hamburger -->
         <button type="button" id="mobileMenuBtn" aria-label="Toggle mobile menu" class="lg:hidden w-9 h-9 rounded-full flex items-center justify-center glass text-white ml-1">

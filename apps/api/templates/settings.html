@@ -22,12 +22,13 @@
       <div class="glass rounded-2xl p-4 flex items-center justify-between">
         <div>
           <h4 class="font-bold text-xs text-slate-900 dark:text-white">Theme Mode</h4>
-          <p id="themeStatusText" class="text-[11px] text-slate-400 mt-0.5">Current: Liquid Dark</p>
+          <p id="themeStatusText" class="text-[11px] text-slate-400 mt-0.5">Cinematic Dark (Locked)</p>
         </div>
         <div class="flex items-center gap-1.5 p-1 rounded-xl glass">
-          <button type="button" onclick="setAppTheme('light')" id="themeBtn-light" class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all text-slate-500 dark:text-slate-400">☀️ Light</button>
-          <button type="button" onclick="setAppTheme('dark')" id="themeBtn-dark" class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all text-slate-500 dark:text-slate-400">🌙 Dark</button>
-          <button type="button" onclick="setAppTheme('system')" id="themeBtn-system" class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all text-slate-500 dark:text-slate-400">💻 System</button>
+          <span class="px-3.5 py-1.5 rounded-lg text-xs font-bold bg-blue-600/30 text-blue-400 border border-blue-500/30 shadow-sm flex items-center gap-1.5">
+            <span>🌙</span>
+            <span>Dark</span>
+          </span>
         </div>
       </div>
 
@@ -119,35 +120,20 @@
 {% block scripts %}
 <script>
   function updateThemeUI(currentTheme) {
-    const saved = currentTheme || localStorage.getItem('clipglass_theme') || (document.documentElement.classList.contains('dark') ? 'dark' : 'light');
-    const isDark = document.documentElement.classList.contains('dark');
-    document.getElementById('themeStatusText').textContent = saved === 'system' ? 'Current: System Preference' : (isDark ? 'Current: Liquid Dark' : 'Current: Liquid Light');
-    const lightBtn = document.getElementById('themeBtn-light');
-    const darkBtn = document.getElementById('themeBtn-dark');
-    const sysBtn = document.getElementById('themeBtn-system');
-    
-    lightBtn.className = saved === 'light' ? 'px-3 py-1.5 rounded-lg text-xs font-bold bg-blue-600 text-white shadow-sm' : 'px-3 py-1.5 rounded-lg text-xs font-bold text-slate-500 dark:text-slate-400';
-    darkBtn.className = saved === 'dark' ? 'px-3 py-1.5 rounded-lg text-xs font-bold bg-blue-600 text-white shadow-sm' : 'px-3 py-1.5 rounded-lg text-xs font-bold text-slate-500 dark:text-slate-400';
-    if (sysBtn) {
-      sysBtn.className = saved === 'system' ? 'px-3 py-1.5 rounded-lg text-xs font-bold bg-blue-600 text-white shadow-sm' : 'px-3 py-1.5 rounded-lg text-xs font-bold text-slate-500 dark:text-slate-400';
-    }
+    document.documentElement.classList.add('dark');
+    document.documentElement.dataset.theme = 'dark';
+    const statusText = document.getElementById('themeStatusText');
+    if (statusText) statusText.textContent = 'Cinematic Dark (Locked)';
   }
 
   function setAppTheme(theme) {
     if (window.playGlassTick) window.playGlassTick();
-    let isDark = true;
-    if (theme === 'system') {
-      isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    } else {
-      isDark = theme === 'dark';
-    }
-    document.documentElement.classList.toggle('dark', isDark);
-    document.documentElement.dataset.theme = isDark ? 'dark' : 'light';
-    localStorage.setItem('clipglass_theme', theme);
-    localStorage.setItem('clipglass-theme', isDark ? 'dark' : 'light');
-    localStorage.setItem('cg_theme', isDark ? 'dark' : 'light');
-    updateThemeUI(theme);
-    if (window.showToast) window.showToast(`Theme switched to ${theme.toUpperCase()}`, 'info');
+    document.documentElement.classList.add('dark');
+    document.documentElement.dataset.theme = 'dark';
+    localStorage.setItem('clipglass_theme', 'dark');
+    localStorage.setItem('clipglass-theme', 'dark');
+    localStorage.setItem('cg_theme', 'dark');
+    updateThemeUI('dark');
   }
 
   function setAccentColor(accent) {

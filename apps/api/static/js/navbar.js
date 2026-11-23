@@ -1,21 +1,12 @@
 // ClipGlass Liquid Navigation & Sensory Engine
 (function() {
-  // Theme Manager
+  // Single Dark Theme Enforcer
   function initTheme() {
-    const saved = localStorage.getItem('clipglass-theme') || localStorage.getItem('cg_theme');
-    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    const isDark = saved === 'dark' || (!saved && prefersDark) || !saved;
-    if (isDark) {
-      document.documentElement.classList.add('dark');
-      document.documentElement.dataset.theme = 'dark';
-      localStorage.setItem('clipglass-theme', 'dark');
-      localStorage.setItem('cg_theme', 'dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-      document.documentElement.dataset.theme = 'light';
-      localStorage.setItem('clipglass-theme', 'light');
-      localStorage.setItem('cg_theme', 'light');
-    }
+    document.documentElement.classList.add('dark');
+    document.documentElement.dataset.theme = 'dark';
+    localStorage.setItem('clipglass-theme', 'dark');
+    localStorage.setItem('cg_theme', 'dark');
+    localStorage.setItem('clipglass_theme', 'dark');
   }
   initTheme();
 
@@ -72,18 +63,6 @@
   window.playGlassPop = playGlassPop;
 
   document.addEventListener('DOMContentLoaded', () => {
-    // Theme Toggle
-    const themeBtns = document.querySelectorAll('[data-toggle-theme]');
-    themeBtns.forEach(btn => {
-      btn.addEventListener('click', () => {
-        playGlassTick();
-        const isDark = document.documentElement.classList.toggle('dark');
-        document.documentElement.dataset.theme = isDark ? 'dark' : 'light';
-        localStorage.setItem('clipglass-theme', isDark ? 'dark' : 'light');
-        localStorage.setItem('cg_theme', isDark ? 'dark' : 'light');
-      });
-    });
-
     // Sound Toggle
     const soundBtns = document.querySelectorAll('[data-toggle-sound]');
     soundBtns.forEach(btn => {
