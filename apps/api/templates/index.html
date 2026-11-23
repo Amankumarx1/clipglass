@@ -260,8 +260,8 @@ const SL=[
 const SW=[[0x17181c,0x2a2c33],[0xe9e9ec,0xb9bcc4],[0xe6d9b5,0xc9b98a],[0x5a3cb4,0x8a74d6],[0xc9202b,0xe0707a],[0xe98bb5,0xf3b5cf]];
 const CG=window.CG={ready:false,fail:false,started:false,skip:false};
 const still=matchMedia('(prefers-reduced-motion:reduce)').matches;
-let seen=false;try{seen=!!sessionStorage.getItem('cg_intro')}catch(e){}
-const quick=seen||still;
+try{sessionStorage.removeItem('cg_intro');localStorage.removeItem('cg_intro')}catch(e){}
+const quick=still;
 let cur=0,lock=false;
 
 // ---- Opening: wordmark preloader, then the 3D sequence takes over ----
@@ -276,7 +276,7 @@ function begin(){if(begun)return;begun=true;intro.classList.add('hide');document
   if(!begun)requestAnimationFrame(load)})();
 $('#skip').onclick=()=>{CG.skip=true};
 addEventListener('keydown',e=>{if(e.key==='Escape')CG.skip=true});
-$('#replay').onclick=e=>{e.preventDefault();try{sessionStorage.removeItem('cg_intro')}catch(x){}scrollTo(0,0);location.reload()};
+$('#replay').onclick=e=>{e.preventDefault();scrollTo(0,0);location.reload()};
 
 // ---- Header, reveals, hero carousel ----
 const hd=$('#hd');addEventListener('scroll',()=>hd.classList.toggle('sc',scrollY>30),{passive:true});
@@ -419,7 +419,7 @@ function tick(t){
   const dt=Math.min(.05,(t-(last||t))*.001);last=t;const sec=t*.001,ds=dt*(CG.skip?5:1);
   if(CG.started){
     if(quick&&!tick.q){tick.q=1;T=99;bars.forEach((b,k)=>b.userData.wait=.2+k*.1)}else T+=ds;
-    if(T>3.9&&!tick.rv){tick.rv=1;document.body.classList.add('ready');try{sessionStorage.setItem('cg_intro','1')}catch(e){}}
+    if(T>3.9&&!tick.rv){tick.rv=1;document.body.classList.add('ready')}
     if(T>5.2)CG.skip=false;
     const wi=T<.5?-1:T<1.45?0:T<2.4?1:T<3.45?2:-1;if(wi!==tick.w){tick.w=wi;$$('.kw span').forEach((w,k)=>w.classList.toggle('on',k===wi))}}
   const m=innerWidth<820,halfH=Math.tan(C.fov*Math.PI/360)*10.5,visW=2*halfH*C.aspect;
