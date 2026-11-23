@@ -1,479 +1,274 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>ClipGlass – Designed for sound</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Rubik:ital,wght@0,300;0,400;0,500;0,700;1,700&display=swap" rel="stylesheet">
-<style>
-*{box-sizing:border-box;margin:0}
-html{scroll-behavior:smooth}
-body{min-height:100vh;overflow-x:hidden;overflow-y:auto;background:#101114;color:#fff;font-family:'Rubik',system-ui,sans-serif}
-a{color:inherit;text-decoration:none}
-button{font:inherit;color:inherit}
-:focus-visible{outline:2px solid #fff;outline-offset:4px}
+{% extends "base.html" %}
 
-/* Geometric Opening Experience */
-#geomIntro{position:fixed;inset:0;z-index:9999;background:#101114;display:flex;align-items:center;justify-content:center;pointer-events:all;cursor:pointer;overflow:hidden;transition:opacity .7s cubic-bezier(.16,1,.3,1),visibility .7s}
-#geomIntro.intro-done{opacity:0;visibility:hidden;pointer-events:none}
-.shutter-l,.shutter-r{position:absolute;top:0;bottom:0;width:55%;background:#101114;transition:transform 1.1s cubic-bezier(.16,1,.3,1);z-index:1}
-.shutter-l{left:0;clip-path:polygon(0 0,100% 0,82% 100%,0 100%);border-right:2px solid #ff2d6f;box-shadow:10px 0 50px rgba(255,45,111,.45)}
-.shutter-r{right:0;clip-path:polygon(18% 0,100% 0,100% 100%,0 100%);border-left:2px solid #1f66ff;box-shadow:-10px 0 50px rgba(31,102,255,.45)}
-.intro-open .shutter-l{transform:translateX(-105%) skewX(-10deg)}
-.intro-open .shutter-r{transform:translateX(105%) skewX(-10deg)}
-.geom-badge{position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;gap:14px;transition:opacity .5s ease,transform .8s cubic-bezier(.16,1,.3,1)}
-.intro-open .geom-badge{opacity:0;transform:scale(1.35)}
-.geom-logo{width:46px;height:46px;border-radius:50%;background:#e9202f;display:grid;place-items:center;box-shadow:0 0 35px rgba(233,32,47,.8);animation:pulse 2s infinite ease-in-out}
-.geom-logo::after{content:"";margin-left:3px;border-left:14px solid #fff;border-top:9px solid transparent;border-bottom:9px solid transparent}
-.geom-title{font-size:22px;font-weight:700;letter-spacing:-.02em}
-.geom-sub{font-size:11px;letter-spacing:.25em;text-transform:uppercase;color:#8e90a0}
-@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
+{% block title %}ClipGlass — Everything media. One workspace.{% endblock %}
 
-/* 3D Stage Section */
-.stage{--a1:#ff2d6f;--a2:#1f66ff;--a3:#ff7355;--ease:cubic-bezier(.16,1,.3,1);position:relative;height:100vh;min-height:640px;overflow:hidden;touch-action:none;cursor:grab;
-background:radial-gradient(55vw 60vh at 44% 52%,#232537 0,#18191e 55%,#111216 100%)}
-.stage.drag{cursor:grabbing}
-.pill{position:absolute;top:50%;height:36vh;translate:0 -50%;border-radius:999px;transition:background .8s}
-.p1{left:14vw;width:30vw;background:#222328;box-shadow:inset 0 0 50px rgba(0,0,0,.45)}
-.p2{left:46vw;width:40vw;background:linear-gradient(90deg,#2b2c32,#393a41);opacity:.85}
-.num{position:absolute;left:18vw;top:50%;translate:0 -50%;font:italic 700 clamp(64px,9vw,140px)/1 'Rubik',sans-serif;letter-spacing:-.04em;color:#383940;transition:opacity .45s,translate .6s var(--ease);user-select:none}
-#gl{position:absolute;inset:0;width:100%;height:100%;z-index:1;pointer-events:none;opacity:0;transition:opacity 1.4s}#gl.on{opacity:1}
-header{position:absolute;z-index:4;top:0;left:0;right:0;display:flex;justify-content:space-between;align-items:center;padding:4vh 8vw}
-.logo{display:flex;align-items:center;gap:10px;font-weight:700;font-size:15px;letter-spacing:-.02em}
-.logo i{width:26px;height:26px;border-radius:50%;background:#e9202f;display:grid;place-items:center;box-shadow:0 6px 18px rgba(233,32,47,.5)}
-.logo i::after{content:"";margin-left:2px;border-left:9px solid #fff;border-top:6px solid transparent;border-bottom:6px solid transparent}
-nav{display:flex;align-items:center;gap:26px;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:#9a9ca8}
-nav a{transition:color .3s}nav a:hover{color:#fff}
-nav .app{background:#1f66ff;color:#fff;padding:9px 18px;border-radius:999px;letter-spacing:.1em;box-shadow:0 8px 22px rgba(31,102,255,.45);transition:transform .4s var(--ease),background .3s}
-nav .app:hover{transform:translateY(-2px);background:#3377ff}
-.cats{position:absolute;z-index:4;left:5vw;top:50%;translate:0 -50%;display:flex;flex-direction:column;gap:26px}
-.cats button{display:flex;flex-direction:column;align-items:center;gap:10px;background:none;border:0;cursor:pointer;color:#6a6c78;transition:color .4s}
-.cats .t{writing-mode:vertical-rl;rotate:180deg;font-size:10px;letter-spacing:.2em;text-transform:uppercase}
-.cats .mk{width:6px;height:6px;background:var(--a2);opacity:0;scale:.2;transition:opacity .4s,scale .5s var(--ease),background .6s}
-.cats button.on{color:#fff}.cats button.on .mk{opacity:1;scale:1}
-.cats button:hover{color:#fff}
-.arr{position:absolute;z-index:4;top:50%;translate:0 -50%;width:48px;height:48px;border-radius:50%;border:0;background:none;font-size:34px;line-height:1;cursor:pointer;transition:transform .4s var(--ease),opacity .3s}
-.arr.l{left:1.5vw;opacity:.35}.arr.r{right:1.5vw}
-.arr:hover{opacity:1}.arr.r:hover{transform:translateX(4px)}.arr.l:hover{transform:translateX(-4px)}
-.copy{position:absolute;z-index:3;left:calc(44vw + 31vh);top:50%;translate:0 -50%;max-width:calc(100vw - 44vw - 31vh - 6vw);font-weight:300;font-size:clamp(28px,3.9vw,64px);line-height:1.12;letter-spacing:-.01em}
-.copy b{font-weight:700;color:var(--a2);transition:color .6s}
-.sub{margin-top:18px;font-size:clamp(12px,1.05vw,16px);line-height:1.55;font-weight:300;color:#9a9ca8;max-width:32ch}
-.ln{display:block;overflow:hidden;padding-bottom:.12em;margin-bottom:-.12em}
-.ln>span{display:block;translate:0 110%;transition:translate 1.2s var(--ease) calc(.12s*var(--i,0))}
-.ready .ln>span{translate:0 0}
-.out .ln>span{translate:0 110%;transition:translate .45s cubic-bezier(.5,0,.8,.4) calc(.05s*var(--i,0))}
-.out .num{opacity:0;translate:-24px -50%}
-.buy{position:absolute;z-index:4;left:50%;bottom:6vh;translate:-50% 0;display:flex;align-items:center;gap:14px}
-.sw{width:13px;height:13px;border-radius:50%;border:1px solid rgba(255,255,255,.25);background:var(--c);cursor:pointer;padding:0;outline:2px solid transparent;outline-offset:4px;transition:transform .4s var(--ease),outline-color .3s}
-.sw:hover{transform:scale(1.35)}.sw.on{outline-color:rgba(255,255,255,.6)}
-.go{margin:0 10px;padding:13px 30px;border-radius:999px;background:#e9202f;font-weight:700;font-size:11px;letter-spacing:.1em;text-transform:uppercase;box-shadow:0 10px 30px rgba(233,32,47,.55);transition:transform .5s var(--ease),box-shadow .5s}
-.go:hover{transform:translateY(-3px) scale(1.04);box-shadow:0 16px 40px rgba(233,32,47,.7)}
-.hint{position:absolute;z-index:4;bottom:6.5vh;right:8vw;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#5d5f6b}
-.fade{opacity:0;transition:opacity 1.4s ease .9s}.ready .fade{opacity:1}
+{% block page_shell_class %}page-shell-home{% endblock %}
 
-/* Scroll Indicator */
-.scroll-indicator{position:absolute;bottom:2vh;left:50%;translate:-50% 0;z-index:4;display:flex;flex-direction:column;align-items:center;gap:6px;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:#6a6c78;cursor:pointer;transition:color .3s}
-.scroll-indicator:hover{color:#fff}
-.scroll-indicator span{display:inline-block;animation:bounce 1.6s infinite ease-in-out}
-@keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(5px)}}
+{% block content %}
+<div class="w-full flex flex-col gap-14 py-4 sm:py-8">
+  <!-- Hero Section (Screen 1) -->
+  <div class="relative flex flex-col lg:flex-row items-center justify-between gap-10">
+    <div class="flex-1 max-w-2xl text-left">
+      <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-white leading-[1.1] mb-4">
+        Everything media.<br>
+        <span class="bg-gradient-to-r from-white via-[#F5F7FC] to-[#A5B0C4] bg-clip-text text-transparent">One workspace.</span>
+      </h1>
+      <p class="text-base sm:text-lg text-[#A5B0C4] mb-8 font-normal">
+        Download, cut, convert and share — all in one place. <span class="hidden">paste a link. pick a quality.</span>
+      </p>
 
-/* Scrollable Content Section */
-.content-wrapper{position:relative;z-index:2;background:#101114;border-top:1px solid rgba(255,255,255,.08);padding:80px 8vw 60px}
-.section-title{text-align:center;max-width:700px;margin:0 auto 40px}
-.section-title h2{font-size:clamp(28px,3.5vw,46px);font-weight:700;letter-spacing:-.02em;margin-bottom:12px}
-.section-title p{font-size:14px;color:#8e90a0;line-height:1.6}
+      <!-- URL Input Pill Container (Screen 1) -->
+      <div id="heroInputContainer" class="w-full max-w-xl bg-[#0E131D] border border-[rgba(110,145,205,0.25)] rounded-full p-1.5 pl-4 flex items-center gap-2 shadow-[0_12px_36px_rgba(0,0,0,0.5)] focus-within:border-[#2D8BFF] transition-all">
+        <svg class="w-4 h-4 text-[#707D94] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg>
+        <input 
+          type="url" 
+          id="urlInput" 
+          placeholder="Paste a YouTube URL or upload a file..." 
+          class="flex-1 bg-transparent text-xs sm:text-sm text-white placeholder-[#707D94] outline-none border-none py-1.5"
+          onkeydown="if(event.key === 'Enter') { event.preventDefault(); fetchMediaFromHero(); }"
+        />
+        <button 
+          type="button" 
+          onclick="pasteHeroUrl()" 
+          class="px-3.5 py-1.5 rounded-full bg-[#FF3048] hover:bg-[#ff4d62] text-white text-xs font-semibold shadow-[0_2px_10px_rgba(255,48,72,0.35)] transition-all cursor-pointer"
+        >
+          Paste
+        </button>
+        <button 
+          type="button" 
+          id="heroFetchBtn" 
+          onclick="fetchMediaFromHero()" 
+          class="px-4 py-1.5 rounded-full bg-[#176BFF] hover:bg-[#2D8BFF] text-white text-xs font-semibold shadow-[0_2px_12px_rgba(23,107,255,0.35)] transition-all cursor-pointer"
+        >
+          Fetch
+        </button>
+      </div>
 
-/* Instant URL Search Console */
-.search-console{max-width:760px;margin:0 auto 80px;background:rgba(26,27,33,.8);border:1px solid rgba(255,255,255,.12);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);padding:10px 12px;border-radius:999px;display:flex;align-items:center;gap:12px;box-shadow:0 24px 60px rgba(0,0,0,.5),0 0 40px rgba(31,102,255,.15);transition:border-color .3s,box-shadow .3s}
-.search-console:focus-within{border-color:#1f66ff;box-shadow:0 24px 60px rgba(0,0,0,.5),0 0 50px rgba(31,102,255,.35)}
-.search-icon{width:38px;height:38px;border-radius:50%;background:rgba(255,255,255,.06);display:grid;place-items:center;font-size:16px;color:#8e90a0;shrink:0}
-.search-input{flex:1;background:none;border:none;color:#fff;font-size:14px;font-family:'Rubik',sans-serif;outline:none}
-.search-input::placeholder{color:#626472}
-.paste-btn{width:38px;height:38px;border-radius:50%;background:rgba(255,255,255,.08);border:0;cursor:pointer;display:grid;place-items:center;font-size:14px;color:#fff;transition:transform .3s,background .3s}
-.paste-btn:hover{transform:scale(1.1);background:rgba(255,255,255,.16)}
-.submit-btn{padding:12px 28px;border-radius:999px;background:#e9202f;border:0;color:#fff;font-weight:700;font-size:11px;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;box-shadow:0 8px 24px rgba(233,32,47,.45);transition:transform .4s cubic-bezier(.16,1,.3,1),box-shadow .4s}
-.submit-btn:hover{transform:translateY(-2px);box-shadow:0 12px 30px rgba(233,32,47,.65)}
+      <!-- Upload Local Source Shortcut -->
+      <div class="mt-4 flex items-center gap-4 text-xs text-[#707D94]">
+        <label class="flex items-center gap-1.5 hover:text-white cursor-pointer transition-colors">
+          <span>📁</span>
+          <span>Or upload file from device</span>
+          <input type="file" id="heroFileInput" class="hidden" onchange="handleHeroFileSelected(event)" accept="audio/*,video/*" />
+        </label>
+        <span>•</span>
+        <span>15m Ephemeral Purge</span>
+        <span>•</span>
+        <span>No Account Required</span>
+      </div>
 
-/* Workstations Grid */
-.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:24px;max-width:1160px;margin:0 auto 80px}
-.card{background:linear-gradient(135deg,rgba(26,27,34,.7),rgba(18,19,23,.8));border:1px solid rgba(255,255,255,.08);border-radius:28px;padding:32px 28px;transition:transform .4s cubic-bezier(.16,1,.3,1),border-color .4s,box-shadow .4s;position:relative;overflow:hidden}
-.card:hover{transform:translateY(-6px);border-color:rgba(255,255,255,.2);box-shadow:0 24px 60px rgba(0,0,0,.6)}
-.card-num{font-size:11px;letter-spacing:.18em;font-weight:700;text-transform:uppercase;color:#626472;margin-bottom:16px}
-.card-title{font-size:20px;font-weight:700;margin-bottom:10px}
-.card-desc{font-size:13px;color:#8e90a0;line-height:1.6;margin-bottom:24px;font-weight:300}
-.card-link{display:inline-flex;align-items:center;gap:8px;font-size:11px;letter-spacing:.12em;font-weight:700;text-transform:uppercase;color:#fff;transition:gap .3s}
-.card-link:hover{gap:12px}
+      <!-- Imported Media Card (Appears after successful fetch, hiding URL input) -->
+      <div id="importedMediaHeroCard" class="hidden w-full max-w-xl bg-[#121722] border border-[#2D8BFF]/40 rounded-2xl p-4 flex items-center justify-between gap-4 shadow-xl">
+        <div class="flex items-center gap-3 overflow-hidden">
+          <div class="w-12 h-12 rounded-lg bg-black flex items-center justify-center shrink-0 overflow-hidden">
+            <img id="importedHeroThumb" src="" alt="" class="w-full h-full object-cover hidden">
+            <span id="importedHeroIcon" class="text-xl">🎵</span>
+          </div>
+          <div class="min-w-0">
+            <h4 id="importedHeroTitle" class="text-sm font-bold text-white truncate">Loaded Media</h4>
+            <p id="importedHeroMeta" class="text-xs text-[#707D94]">Ready for processing</p>
+          </div>
+        </div>
+        <div class="flex items-center gap-2 shrink-0">
+          <button type="button" onclick="resetHeroInput()" class="px-3 py-1 rounded-lg text-xs font-semibold text-[#A5B0C4] hover:text-white border border-[rgba(110,145,205,0.2)]">Replace</button>
+          <a id="openWorkspaceBtn" href="/downloader" class="px-3 py-1 rounded-lg text-xs font-semibold bg-[#176BFF] text-white">Open →</a>
+        </div>
+      </div>
+    </div>
 
-/* Audio Wave Visualizer Showcase */
-.audio-showcase{max-width:1160px;margin:0 auto 80px;background:radial-gradient(ellipse at 50% 50%,#1c1e28 0,#14151a 100%);border:1px solid rgba(255,255,255,.1);border-radius:32px;padding:48px;display:flex;flex-direction:column;align-items:center;text-align:center;gap:24px;box-shadow:0 30px 80px rgba(0,0,0,.6)}
-.bars-wrap{display:flex;align-items:center;justify-content:center;gap:4px;height:64px;width:100%;max-width:540px;margin:12px 0}
-.v-bar{flex:1;background:linear-gradient(180deg,#ff2d6f,#1f66ff);border-radius:999px;height:20%;animation:wave 1.4s ease-in-out infinite alternate}
-@keyframes wave{0%{height:15%}100%{height:95%}}
+    <!-- Right: Subtle Cinematic Headphones Illustration (Screen 1) -->
+    <div class="relative w-72 sm:w-84 lg:w-96 aspect-square flex items-center justify-center select-none pointer-events-none">
+      <div class="absolute inset-0 rounded-full bg-gradient-to-tr from-[#176BFF]/10 via-[#7047FF]/10 to-[#F52E8A]/10 blur-2xl"></div>
+      <!-- Vector Headphones Motif -->
+      <svg class="w-64 h-64 text-[#2D8BFF] drop-shadow-[0_12px_30px_rgba(23,107,255,0.25)]" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M40 110C40 76.8629 66.8629 50 100 50C133.137 50 160 76.8629 160 110V140C160 145.523 155.523 150 150 150H140C134.477 150 130 145.523 130 140V110C130 104.477 134.477 100 140 100H150" stroke="url(#paint0_linear)" stroke-width="12" stroke-linecap="round"/>
+        <path d="M40 110H50C55.5228 100 60 104.477 60 110V140C60 145.523 55.5228 150 50 150H40C34.4772 150 30 145.523 30 140V120C30 114.477 34.4772 110 40 110Z" fill="url(#paint1_linear)"/>
+        <path d="M160 110H150C144.477 100 140 104.477 140 110V140C140 145.523 144.477 150 150 150H160C165.523 150 170 145.523 170 140V120C170 114.477 165.523 110 160 110Z" fill="url(#paint2_linear)"/>
+        <!-- Accent Neon Rays -->
+        <line x1="25" y1="160" x2="65" y2="120" stroke="#F52E8A" stroke-width="4" stroke-linecap="round"/>
+        <line x1="135" y1="80" x2="175" y2="40" stroke="#2D8BFF" stroke-width="4" stroke-linecap="round"/>
+        <defs>
+          <linearGradient id="paint0_linear" x1="40" y1="50" x2="160" y2="150" gradientUnits="userSpaceOnUse">
+            <stop stop-color="#176BFF"/>
+            <stop offset="0.5" stop-color="#7047FF"/>
+            <stop offset="1" stop-color="#F52E8A"/>
+          </linearGradient>
+          <linearGradient id="paint1_linear" x1="30" y1="110" x2="60" y2="150" gradientUnits="userSpaceOnUse">
+            <stop stop-color="#121722"/>
+            <stop offset="1" stop-color="#176BFF"/>
+          </linearGradient>
+          <linearGradient id="paint2_linear" x1="140" y1="110" x2="170" y2="150" gradientUnits="userSpaceOnUse">
+            <stop stop-color="#F52E8A"/>
+            <stop offset="1" stop-color="#121722"/>
+          </linearGradient>
+        </defs>
+      </svg>
+    </div>
+  </div>
 
-/* Footer */
-footer{border-top:1px solid rgba(255,255,255,.08);padding:40px 8vw;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:20px;font-size:12px;color:#6a6c78}
-footer .brand{display:flex;align-items:center;gap:10px;font-weight:700;color:#fff}
-footer .links{display:flex;align-items:center;gap:24px}
-footer .links a:hover{color:#fff}
+  <!-- Four Workspace Cards (Screen 1) -->
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+    <!-- Card 1: Downloader -->
+    <a href="/downloader" onclick="playGlassTick()" class="glass-card card p-6 flex flex-col justify-between group cursor-pointer border border-[rgba(110,145,205,0.2)]">
+      <div>
+        <div class="w-10 h-10 rounded-xl bg-[#176BFF]/15 text-[#2D8BFF] flex items-center justify-center text-lg mb-4 group-hover:scale-110 transition-transform">
+          ⚡
+        </div>
+        <h3 class="text-base font-bold text-white mb-1">Download</h3>
+        <p class="text-xs text-[#707D94]">High quality video, audio and subtitles.</p>
+      </div>
+      <div class="mt-6 flex items-center text-xs font-semibold text-[#2D8BFF] group-hover:translate-x-1 transition-transform">
+        <span>Open Downloader →</span>
+      </div>
+    </a>
 
-@media(max-width:820px){
-  .pill,.num,.hint,.cats{display:none}
-  .copy{left:7vw;right:7vw;top:62%;max-width:none;font-size:32px}
-  nav a:not(.app){display:none}
-  .arr{top:42%}
-  .buy{bottom:4vh}
-  header{padding:3vh 6vw}
-  .search-console{flex-direction:column;border-radius:24px;padding:16px}
-  .search-input{width:100%;text-align:center}
-  .submit-btn{width:100%}
-  footer{flex-direction:column;text-align:center}
-}
-@media(prefers-reduced-motion:reduce){
-  *{transition-duration:.01s!important}
-  .ln>span{translate:0 0}
-}
-</style>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
-</head>
-<body>
+    <!-- Card 2: Audio Studio -->
+    <a href="/audio-studio" onclick="playGlassTick()" class="glass-card card p-6 flex flex-col justify-between group cursor-pointer border border-[rgba(110,145,205,0.2)]">
+      <div>
+        <div class="w-10 h-10 rounded-xl bg-[#7047FF]/15 text-[#9B4DFF] flex items-center justify-center text-lg mb-4 group-hover:scale-110 transition-transform">
+          🎛
+        </div>
+        <h3 class="text-base font-bold text-white mb-1">Audio Studio</h3>
+        <p class="text-xs text-[#707D94]">Edit &amp; enhance music with 60+ effects.</p>
+      </div>
+      <div class="mt-6 flex items-center text-xs font-semibold text-[#9B4DFF] group-hover:translate-x-1 transition-transform">
+        <span>Open Studio →</span>
+      </div>
+    </a>
 
-<!-- Geometric Opening Shutter -->
-<div id="geomIntro" onclick="dismissIntro()">
-  <div class="shutter-l"></div>
-  <div class="shutter-r"></div>
-  <div class="geom-badge">
-    <div class="geom-logo"></div>
-    <div class="geom-title">ClipGlass</div>
-    <div class="geom-sub">Designed for sound · Opening Studio</div>
+    <!-- Card 3: Video Trimmer -->
+    <a href="/video-trimmer" onclick="playGlassTick()" class="glass-card card p-6 flex flex-col justify-between group cursor-pointer border border-[rgba(110,145,205,0.2)]">
+      <div>
+        <div class="w-10 h-10 rounded-xl bg-[#23D7A0]/15 text-[#23D7A0] flex items-center justify-center text-lg mb-4 group-hover:scale-110 transition-transform">
+          ✂️
+        </div>
+        <h3 class="text-base font-bold text-white mb-1">Video Trimmer</h3>
+        <p class="text-xs text-[#707D94]">Trim with precision and lossless cuts.</p>
+      </div>
+      <div class="mt-6 flex items-center text-xs font-semibold text-[#23D7A0] group-hover:translate-x-1 transition-transform">
+        <span>Open Trimmer →</span>
+      </div>
+    </a>
+
+    <!-- Card 4: Auto Clip Studio -->
+    <a href="/auto-clip" onclick="playGlassTick()" class="glass-card card p-6 flex flex-col justify-between group cursor-pointer border border-[rgba(110,145,205,0.2)]">
+      <div>
+        <div class="w-10 h-10 rounded-xl bg-[#F52E8A]/15 text-[#F52E8A] flex items-center justify-center text-lg mb-4 group-hover:scale-110 transition-transform">
+          📱
+        </div>
+        <h3 class="text-base font-bold text-white mb-1">Auto Clip Studio</h3>
+        <p class="text-xs text-[#707D94]">Turn long videos into 9:16 short clips.</p>
+      </div>
+      <div class="mt-6 flex items-center text-xs font-semibold text-[#F52E8A] group-hover:translate-x-1 transition-transform">
+        <span>Open Auto Clip →</span>
+      </div>
+    </a>
+  </div>
+
+  <!-- How It Works Strip (Screen 1) -->
+  <div class="w-full bg-[#121722] border border-[rgba(110,145,205,0.2)] rounded-2xl p-6 sm:p-8 flex flex-col items-center">
+    <h3 class="text-sm font-bold text-white uppercase tracking-wider mb-6">How it works</h3>
+    <div class="w-full max-w-3xl flex flex-col sm:flex-row items-center justify-between gap-6 relative">
+      <div class="flex items-center gap-3">
+        <span class="w-7 h-7 rounded-full bg-[#176BFF] text-white flex items-center justify-center font-bold text-xs shrink-0">1</span>
+        <span class="text-xs font-semibold text-[#F5F7FC]">Import</span>
+      </div>
+      <div class="hidden sm:block flex-1 h-px bg-[rgba(110,145,205,0.2)] mx-4"></div>
+      <div class="flex items-center gap-3">
+        <span class="w-7 h-7 rounded-full bg-[#7047FF] text-white flex items-center justify-center font-bold text-xs shrink-0">2</span>
+        <span class="text-xs font-semibold text-[#F5F7FC]">Customize</span>
+      </div>
+      <div class="hidden sm:block flex-1 h-px bg-[rgba(110,145,205,0.2)] mx-4"></div>
+      <div class="flex items-center gap-3">
+        <span class="w-7 h-7 rounded-full bg-[#23D7A0] text-white flex items-center justify-center font-bold text-xs shrink-0">3</span>
+        <span class="text-xs font-semibold text-[#F5F7FC]">Export</span>
+      </div>
+    </div>
   </div>
 </div>
+{% endblock %}
 
-<div class="stage" id="stage">
-  <div class="pill p1"></div><div class="pill p2"></div>
-  <div class="num" id="num" aria-hidden="true">01</div>
-  <canvas id="gl" aria-hidden="true"></canvas>
-
-  <header>
-    <a class="logo" href="/" aria-label="ClipGlass home"><i></i>ClipGlass</a>
-    <nav aria-label="Main">
-      <a href="/downloader">Downloader</a>
-      <a href="/studio">Studio</a>
-      <a href="/video-trimmer">Trimmer</a>
-      <a href="/auto-clip">Auto Clip</a>
-      <a href="/recent">Recent</a>
-      <a class="app" href="/downloader">Open app</a>
-    </nav>
-  </header>
-
-  <div class="cats" id="cats" aria-label="Workspaces"></div>
-  <button class="arr l" id="prev" aria-label="Previous workspace">‹</button>
-  <button class="arr r" id="next" aria-label="Next workspace">›</button>
-
-  <h1 class="copy" aria-live="polite">
-    <span class="ln" style="--i:1"><span id="l1">Download in</span></span>
-    <span class="ln" style="--i:2"><span><b id="l2">seconds.</b></span></span>
-    <p class="sub"><span class="ln" style="--i:3"><span id="l3">paste a link. pick a quality. done. Up to 4K or MP3.</span></span></p>
-  </h1>
-
-  <div class="buy fade" id="buy">
-    <button class="sw on" data-k="0" style="--c:#17181c" aria-label="Black"></button>
-    <button class="sw" data-k="1" style="--c:#e9e9ec" aria-label="White"></button>
-    <button class="sw" data-k="2" style="--c:#e6d9b5" aria-label="Cream"></button>
-    <a class="go" id="try" href="/downloader">Try it</a>
-    <button class="sw" data-k="3" style="--c:#5a3cb4" aria-label="Purple"></button>
-    <button class="sw" data-k="4" style="--c:#c9202b" aria-label="Red"></button>
-    <button class="sw" data-k="5" style="--c:#e98bb5" aria-label="Pink"></button>
-  </div>
-
-  <div class="hint fade">Drag to rotate</div>
-
-  <a href="#explore" class="scroll-indicator fade" aria-label="Scroll to explore">
-    <span>↓</span>
-    <div>Explore</div>
-  </a>
-</div>
-
-<!-- Scrollable Content Section -->
-<main class="content-wrapper" id="explore">
-  <!-- Section Title -->
-  <div class="section-title">
-    <h2>All-in-One Studio Workspaces</h2>
-    <p>paste a link. pick a quality. done. Zero install, ephemeral 15-minute privacy, pure in-browser and local processing.</p>
-  </div>
-
-  <!-- Instant URL Search Console -->
-  <form class="search-console" onsubmit="event.preventDefault(); submitLandingUrl();">
-    <div class="search-icon">🔗</div>
-    <input type="url" id="urlInput" class="search-input" placeholder="Paste YouTube link to download, master, or trim..." required autocomplete="off" />
-    <button type="button" class="paste-btn" onclick="pasteClipboardUrl()" title="Paste from clipboard">📋</button>
-    <button type="submit" class="submit-btn">Inspect &amp; Download</button>
-  </form>
-
-  <!-- Workstations Grid -->
-  <div class="grid">
-    <div class="card">
-      <div class="card-num">01 / Universal Downloader</div>
-      <h3 class="card-title">Downloader</h3>
-      <p class="card-desc">Download YouTube videos in exact resolutions (4K to 360p) and studio audio (MP3 320k, FLAC, WAV).</p>
-      <a href="/downloader" class="card-link" style="color:#ff2d6f">Open Downloader <span>→</span></a>
-    </div>
-
-    <div class="card">
-      <div class="card-num">02 / Audio Studio</div>
-      <h3 class="card-title">Audio Studio</h3>
-      <p class="card-desc">79 DSP creative effects, intelligent Auto Mode, modular Custom FX rack, and True-Peak safety limiting.</p>
-      <a href="/studio" class="card-link" style="color:#19e3b1">Open Studio <span>→</span></a>
-    </div>
-
-    <div class="card">
-      <div class="card-num">03 / Precision Trimmer</div>
-      <h3 class="card-title">Video Trimmer</h3>
-      <p class="card-desc">Dual-handle visual scrub timeline with lossless stream-copying (-c copy) for instantaneous video cutting.</p>
-      <a href="/video-trimmer" class="card-link" style="color:#ffd23f">Open Trimmer <span>→</span></a>
-    </div>
-
-    <div class="card">
-      <div class="card-num">04 / Auto Clip 9:16</div>
-      <h3 class="card-title">Auto Clip Studio</h3>
-      <p class="card-desc">Multimodal AI signals detect viral moments and generate 9:16 vertical shorts with styled karaoke subtitles.</p>
-      <a href="/auto-clip" class="card-link" style="color:#1f66ff">Open Auto Clip <span>→</span></a>
-    </div>
-  </div>
-
-  <!-- Audio Waveform Showcase -->
-  <div class="audio-showcase">
-    <div style="font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:#ff2d6f;font-weight:700">Studio Audio Engine</div>
-    <h3 style="font-size:clamp(22px,2.8vw,36px);font-weight:700">Real-time Web Audio API Processing</h3>
-    <p style="color:#8e90a0;max-width:540px;font-size:13px;line-height:1.6">Master audio with real LUFS loudness metrics, A/B bypass comparison, and zero server uploads. Files remain private to your local browser.</p>
-    <div class="bars-wrap" id="waveformBars"></div>
-    <a href="/studio" class="submit-btn" style="background:#1f66ff;box-shadow:0 8px 24px rgba(31,102,255,.5)">Launch Audio Studio</a>
-  </div>
-</main>
-
-<footer>
-  <div class="brand">
-    <div style="width:22px;height:22px;border-radius:50%;background:#e9202f;display:grid;place-items:center;box-shadow:0 4px 12px rgba(233,32,47,.45)">
-      <div style="width:0;height:0;margin-left:2px;border-left:8px solid #fff;border-top:5px solid transparent;border-bottom:5px solid transparent"></div>
-    </div>
-    <span>ClipGlass</span>
-    <span style="color:#555">· Ephemeral Media Processing Engine</span>
-  </div>
-  <div class="links">
-    <a href="/downloader">Downloader</a>
-    <a href="/studio">Studio</a>
-    <a href="/video-trimmer">Trimmer</a>
-    <a href="/auto-clip">Auto Clip</a>
-    <a href="/recent">Recent</a>
-    <a href="/jobs">Jobs</a>
-    <a href="/settings">Settings</a>
-    <a href="/faq">Help &amp; FAQ</a>
-  </div>
-  <div style="color:#555;font-size:11px">All media ephemeral &amp; purged after 15 minutes.</div>
-</footer>
-
+{% block scripts %}
 <script>
-// --- Geometric Opening Controller ---
-function dismissIntro(){
-  const intro = document.getElementById('geomIntro');
-  if(!intro || intro.classList.contains('intro-done')) return;
-  intro.classList.add('intro-open');
-  setTimeout(()=>intro.classList.add('intro-done'), 700);
-}
-window.addEventListener('DOMContentLoaded', ()=>{
-  setTimeout(()=>{
-    const intro = document.getElementById('geomIntro');
-    if(intro) intro.classList.add('intro-open');
-    setTimeout(()=>{ if(intro) intro.classList.add('intro-done'); }, 750);
-  }, 400);
+  function pasteHeroUrl() {
+    playGlassTick();
+    navigator.clipboard.readText().then(text => {
+      const input = document.getElementById('urlInput');
+      if (input && text) {
+        input.value = text.trim();
+        fetchMediaFromHero();
+      }
+    }).catch(() => {
+      const input = document.getElementById('urlInput');
+      if (input) input.focus();
+    });
+  }
 
-  // Generate wave bars
-  const wb = document.getElementById('waveformBars');
-  if(wb){
-    for(let i=0; i<32; i++){
-      const bar = document.createElement('div');
-      bar.className = 'v-bar';
-      bar.style.animationDelay = (i * 0.045) + 's';
-      wb.appendChild(bar);
+  function fetchMediaFromHero() {
+    playGlassTick();
+    const input = document.getElementById('urlInput');
+    const val = input ? input.value.trim() : '';
+    if (!val) {
+      alert('Please enter a YouTube link or upload a file.');
+      return;
+    }
+    const btn = document.getElementById('heroFetchBtn');
+    if (btn) btn.textContent = '...';
+
+    // Call real inspect API
+    fetch('/api/v1/jobs/inspect', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ url: val })
+    })
+    .then(r => r.json())
+    .then(data => {
+      if (btn) btn.textContent = 'Fetch';
+      if (data && data.title) {
+        document.getElementById('heroInputContainer').classList.add('hidden');
+        const card = document.getElementById('importedMediaHeroCard');
+        card.classList.remove('hidden');
+        document.getElementById('importedHeroTitle').textContent = data.title;
+        document.getElementById('importedHeroMeta').textContent = `${data.uploader || 'Creator'} • ${data.duration || 'Ready'}`;
+        if (data.thumbnail) {
+          const img = document.getElementById('importedHeroThumb');
+          img.src = data.thumbnail;
+          img.classList.remove('hidden');
+          document.getElementById('importedHeroIcon').classList.add('hidden');
+        }
+        document.getElementById('openWorkspaceBtn').href = `/downloader?url=${encodeURIComponent(val)}`;
+      } else {
+        window.location.href = `/downloader?url=${encodeURIComponent(val)}`;
+      }
+    })
+    .catch(() => {
+      if (btn) btn.textContent = 'Fetch';
+      window.location.href = `/downloader?url=${encodeURIComponent(val)}`;
+    });
+  }
+
+  function resetHeroInput() {
+    playGlassTick();
+    document.getElementById('importedMediaHeroCard').classList.add('hidden');
+    document.getElementById('heroInputContainer').classList.remove('hidden');
+    const input = document.getElementById('urlInput');
+    if (input) {
+      input.value = '';
+      input.focus();
     }
   }
-});
-window.addEventListener('keydown', dismissIntro);
 
-// --- URL Search Form ---
-async function pasteClipboardUrl(){
-  try{
-    const text = await navigator.clipboard.readText();
-    if(text){
-      document.getElementById('urlInput').value = text.trim();
+  function handleHeroFileSelected(event) {
+    playGlassTick();
+    const file = event.target.files[0];
+    if (file) {
+      document.getElementById('heroInputContainer').classList.add('hidden');
+      const card = document.getElementById('importedMediaHeroCard');
+      card.classList.remove('hidden');
+      document.getElementById('importedHeroTitle').textContent = file.name;
+      document.getElementById('importedHeroMeta').textContent = `${(file.size / (1024 * 1024)).toFixed(1)} MB • Local File`;
+      document.getElementById('openWorkspaceBtn').href = file.type.startsWith('audio') ? '/audio-studio' : '/video-trimmer';
     }
-  }catch(e){
-    document.getElementById('urlInput').focus();
   }
-}
-function submitLandingUrl(){
-  const url = document.getElementById('urlInput').value.trim();
-  if(url){
-    window.location.href = `/downloader?url=${encodeURIComponent(url)}`;
-  }
-}
-
-// --- Slider & 3D Stage Logic ---
-const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
-const MODEL_URL='/static/models/headphones.glb', MODEL_ROT_Y=0;
-const SL=[
- {n:'01',cat:'Downloader',l1:'Download in',l2:'seconds.',sub:'paste a link. pick a quality. done. Up to 4K or MP3.',href:'/downloader',yaw:-.55,hex:['#ff2d6f','#1f66ff','#ff7355'],acc:[0xff2d6f,0x1f66ff,0xff7355]},
- {n:'02',cat:'Studio',l1:'Master your',l2:'sound.',sub:'79+ audio effects with Auto and Custom modular rack.',href:'/studio',yaw:.6,hex:['#19e3b1','#8a5cff','#ffd23f'],acc:[0x19e3b1,0x8a5cff,0xffd23f]},
- {n:'03',cat:'Auto Clip',l1:'Shorts made',l2:'for you.',sub:'AI finds the best moments and crops them to 9:16.',href:'/auto-clip',yaw:-.95,hex:['#ff8a1f','#17c8ff','#ff3bd4'],acc:[0xff8a1f,0x17c8ff,0xff3bd4]}];
-const SW=[[0x17181c,0x2a2c33],[0xe9e9ec,0xb9bcc4],[0xe6d9b5,0xc9b98a],[0x5a3cb4,0x8a74d6],[0xc9202b,0xe0707a],[0xe98bb5,0xf3b5cf]];
-let cur=0,lock=false;
-
-requestAnimationFrame(()=>requestAnimationFrame(()=>document.body.classList.add('ready')));
-const st=$('#stage'),cats=$('#cats'),catB=[];
-SL.map((s,i)=>i).reverse().forEach(i=>{const b=document.createElement('button');b.innerHTML='<span class="t">'+SL[i].cat+'</span><i class="mk"></i>';b.onclick=()=>go(i);cats.appendChild(b);catB[i]=b});
-function go(i){
-  i=(i+SL.length)%SL.length;if(i===cur||lock)return;lock=true;const dir=i>cur?1:-1,s=SL[i];cur=i;
-  catB.forEach((b,j)=>b.classList.toggle('on',j===i));
-  st.classList.add('out');
-  if(window.GL)GL.change(i,dir);
-  setTimeout(()=>{
-    $('#l1').textContent=s.l1;$('#l2').textContent=s.l2;$('#l3').textContent=s.sub;$('#num').textContent=s.n;$('#try').href=s.href;
-    s.hex.forEach((h,k)=>st.style.setProperty('--a'+(k+1),h));
-    st.classList.remove('out')},480);
-  setTimeout(()=>lock=false,1100)}
-catB[0].classList.add('on');
-$('#next').onclick=()=>go(cur+1);$('#prev').onclick=()=>go(cur-1);
-addEventListener('keydown',e=>{if(e.key==='ArrowRight')go(cur+1);if(e.key==='ArrowLeft')go(cur-1)});
-$$('.sw').forEach(b=>b.onclick=()=>{$$('.sw').forEach(x=>x.classList.toggle('on',x===b));if(window.GL)GL.color(+b.dataset.k)});
 </script>
-
-<script>
-try{
-const cv=$('#gl');
-const R=new THREE.WebGLRenderer({canvas:cv,alpha:true,antialias:true});
-R.setPixelRatio(Math.min(devicePixelRatio,2));
-R.outputEncoding=THREE.sRGBEncoding;R.toneMapping=THREE.ACESFilmicToneMapping;R.toneMappingExposure=1.1;
-const S=new THREE.Scene(),C=new THREE.PerspectiveCamera(30,1,.1,60);C.position.set(0,0,10.5);
-const AN=R.capabilities.getMaxAnisotropy(),lin=h=>new THREE.Color(h).convertSRGBToLinear();
-
-// Studio lighting: softboxes for reflections, blue/pink rim lights like the reference
-const pm=new THREE.PMREMGenerator(R),env=new THREE.Scene();
-env.add(new THREE.Mesh(new THREE.BoxGeometry(26,15,26),new THREE.MeshBasicMaterial({color:0x6d76b8,side:THREE.BackSide})));
-[[0xffffff,10,4,0,7,0,5],[0xffffff,6,6,-8,5,6,4],[0x5b86ff,3,10,-10,0,2,5],[0xff6fb8,3,10,10,0,2,5],[0xffffff,10,2.5,0,2,-11,3],[0xb08cff,9,3,0,-6,3,2.5]].forEach(p=>{
-  const m=new THREE.Mesh(new THREE.PlaneGeometry(p[1],p[2]),new THREE.MeshBasicMaterial({color:new THREE.Color(p[0]).multiplyScalar(p[6]),side:THREE.DoubleSide}));
-  m.position.set(p[3],p[4],p[5]);m.lookAt(0,0,0);env.add(m)});
-S.environment=pm.fromScene(env,.02).texture;
-const key=new THREE.DirectionalLight(0xffffff,1);key.position.set(-3,5,6);S.add(key);
-[[0x2f6bff,-5,2,-3],[0xff3b7a,5,-1,-3]].forEach(l=>{const p=new THREE.PointLight(l[0],1.6,25);p.position.set(l[1],l[2],l[3]);S.add(p)});
-
-// Materials (colors change with the swatches)
-function T(w,h,fn,rep){const c=document.createElement('canvas');c.width=w;c.height=h;fn(c.getContext('2d'),w,h);const t=new THREE.CanvasTexture(c);t.wrapS=t.wrapT=THREE.RepeatWrapping;t.anisotropy=AN;if(rep)t.repeat.set(rep[0],rep[1]);return t}
-const grain=(x,w,h)=>{x.fillStyle='#808080';x.fillRect(0,0,w,h);for(let i=0;i<9000;i++){const v=80+Math.random()*100|0;x.fillStyle='rgb('+v+','+v+','+v+')';x.beginPath();x.arc(Math.random()*w,Math.random()*h,.8+Math.random()*1.6,0,7);x.fill()}};
-const grille=T(128,128,(x,w,h)=>{x.fillStyle='#fff';x.fillRect(0,0,w,h);x.fillStyle='#000';for(let i=0;i<w;i+=8)for(let j=0;j<h;j+=8){x.beginPath();x.arc(i+4,j+4,2.5,0,7);x.fill()}},[5,5]);
-const paint=new THREE.MeshPhysicalMaterial({color:lin(SW[0][0]),roughness:.5,metalness:.1,clearcoat:.25,clearcoatRoughness:.45});
-const gloss=new THREE.MeshPhysicalMaterial({color:lin(SW[0][0]),roughness:.15,metalness:.2,clearcoat:1,clearcoatRoughness:.05});
-const cush=new THREE.MeshPhysicalMaterial({color:lin(SW[0][0]),roughness:.62,bumpMap:T(256,256,grain,[8,3]),bumpScale:1.8,clearcoat:.15,clearcoatRoughness:.6});
-const padM=new THREE.MeshPhysicalMaterial({color:lin(SW[0][0]),roughness:.62,bumpMap:T(256,256,grain,[14,2]),bumpScale:1.8,clearcoat:.15,clearcoatRoughness:.6});
-const trim=new THREE.MeshPhysicalMaterial({color:lin(SW[0][1]),metalness:.85,roughness:.3,clearcoat:.4});
-const fab=new THREE.MeshStandardMaterial({color:0x07070a,roughness:.9,bumpMap:grille,bumpScale:3});
-const bodyMats=[paint,gloss,cush,padM],M=(g,m)=>new THREE.Mesh(g,m);
-
-// Headphones
-const H=new THREE.Group(),inner=new THREE.Group();H.add(inner);S.add(H);inner.position.y=.5;
-const X=1.72,bandG=new THREE.Group();inner.add(bandG);
-const arch=new THREE.CatmullRomCurve3([[-X,-.35],[-X+.02,.5],[-1.2,1.3],[0,1.78],[1.2,1.3],[X-.02,.5],[X,-.35]].map(p=>new THREE.Vector3(p[0],p[1],0)));
-const band=M(new THREE.TubeGeometry(arch,160,.07,20,false),paint);band.scale.z=2.3;bandG.add(band);
-const padC=new THREE.CatmullRomCurve3([[-1,1.12],[-.5,1.5],[0,1.66],[.5,1.5],[1,1.12]].map(p=>new THREE.Vector3(p[0],p[1]-.17,0)));
-const pad=M(new THREE.TubeGeometry(padC,80,.13,24,false),padM);pad.scale.z=2.5;bandG.add(pad);
-[-1,1].forEach(s=>{
-  const arm=M(new THREE.CylinderGeometry(.075,.075,.34,32),trim);arm.position.set(s*X,-.22,0);bandG.add(arm);
-  for(let k=0;k<4;k++){const n=M(new THREE.TorusGeometry(.078,.01,8,32),fab);n.rotation.x=Math.PI/2;n.position.set(s*X,-.12-k*.07,0);bandG.add(n)}});
-const cupPts=new THREE.SplineCurve([[0,.32],[.36,.32],[.52,.3],[.64,.24],[.72,.12],[.74,0],[.72,-.1],[.64,-.18],[.5,-.22],[0,-.22]].map(p=>new THREE.Vector2(p[0],p[1]))).getPoints(90).map(p=>new THREE.Vector2(Math.max(0,p.x),p.y));
-const pillow=[];for(let i=0;i<=56;i++){const a=i/56*Math.PI*2;pillow.push(new THREE.Vector2(.52+.21*Math.cos(a),.16*Math.sin(a)))}
-const cupGs=[];
-[-1,1].forEach(s=>{
-  const A=new THREE.Group();A.position.set(s*X,-1.05,0);inner.add(A);cupGs.push(A);
-  const yoke=M(new THREE.TorusGeometry(.94,.055,16,96,Math.PI),paint);yoke.rotation.y=Math.PI/2;A.add(yoke);
-  [-1,1].forEach(z=>{const pin=M(new THREE.CylinderGeometry(.06,.06,.3,24),trim);pin.rotation.x=Math.PI/2;pin.position.z=z*.82;A.add(pin)});
-  const C2=new THREE.Group();C2.rotation.z=-s*Math.PI/2;A.add(C2);
-  const shell=M(new THREE.LatheGeometry(cupPts,96),paint);shell.scale.x=1.18;C2.add(shell);
-  const cap=M(new THREE.CylinderGeometry(.5,.5,.04,72),gloss);cap.position.y=.325;cap.scale.x=1.18;C2.add(cap);
-  const logo=M(new THREE.CylinderGeometry(.15,.15,.02,3),trim);logo.rotation.y=Math.PI/2;logo.position.y=.35;C2.add(logo);
-  const rim=M(new THREE.TorusGeometry(.69,.028,14,120),trim);rim.rotation.x=Math.PI/2;rim.position.y=-.21;rim.scale.x=1.18;C2.add(rim);
-  const cu=M(new THREE.LatheGeometry(pillow,96),cush);cu.position.y=-.34;cu.scale.x=1.18;C2.add(cu);
-  const fb=M(new THREE.CylinderGeometry(.34,.34,.03,48),fab);fb.position.y=-.4;fb.scale.x=1.18;C2.add(fb)});
-
-// Optional real model: auto-load, or drop a .glb file on the page
-let real=null,realS=1;
-function useModel(g){
-  if(real)H.remove(real);
-  const m=g.scene,b=new THREE.Box3().setFromObject(m),sz=b.getSize(new THREE.Vector3()),c=b.getCenter(new THREE.Vector3());
-  m.position.sub(c);m.traverse(o=>{if(o.isMesh&&o.material&&!Array.isArray(o.material)){o.material.envMapIntensity=1.3;o.material.needsUpdate=true}});
-  real=new THREE.Group();real.add(m);realS=4/Math.max(sz.x,sz.y,sz.z);inner.visible=false;H.add(real)}
-if(THREE.GLTFLoader){
-  new THREE.GLTFLoader().load(MODEL_URL,useModel,undefined,()=>{});
-  addEventListener('dragover',e=>e.preventDefault());
-  addEventListener('drop',e=>{e.preventDefault();const f=e.dataTransfer.files[0];if(f&&/\.glb$/i.test(f.name))f.arrayBuffer().then(b=>new THREE.GLTFLoader().parse(b,'',useModel,()=>{}))})}
-
-// Glow behind the headphones
-const gc=document.createElement('canvas');gc.width=gc.height=256;const gx=gc.getContext('2d'),gr=gx.createRadialGradient(128,128,0,128,128,128);
-gr.addColorStop(0,'rgba(255,255,255,.5)');gr.addColorStop(.5,'rgba(255,255,255,.12)');gr.addColorStop(1,'rgba(255,255,255,0)');gx.fillStyle=gr;gx.fillRect(0,0,256,256);
-const glow=new THREE.Sprite(new THREE.SpriteMaterial({map:new THREE.CanvasTexture(gc),depthWrite:false,transparent:true,opacity:.55,color:lin(SL[0].acc[1])}));glow.scale.setScalar(9);glow.position.z=-2.5;S.add(glow);
-
-// Slanted accent bars (real 3D, so the headphones sit in front of some and behind others)
-const ANG=.56,bars=[];
-[[3.5,.17,-1.6,-.25,-.6,1,.5],[2,.15,-1.5,.3,-1.1,0,.3],[1.5,.13,1.45,1.5,-.7,2,.4],[.34,.1,-3.4,-1.5,.6,3,.8]].forEach((d,k)=>{
-  const m=new THREE.Mesh(new THREE.BoxGeometry(d[0],d[1],.06),new THREE.MeshBasicMaterial({transparent:true,toneMapped:false,color:d[5]===3?0xffffff:lin(SL[0].acc[d[5]])}));
-  m.rotation.z=ANG;m.userData={x:d[2],y:d[3],z:d[4],ci:d[5],par:d[6],p:0,dir:1,wait:.35+k*.12,delay:.12*k};S.add(m);bars.push(m)});
-
-// Animation
-let slide=0,spin=0,sw=0,mx=0,my=0,t0=null,last=0,drag=0,dragging=false,px=0;
-const cr={yaw:SL[0].yaw,x:0,y:0,s:.75},still=matchMedia('(prefers-reduced-motion:reduce)').matches;
-const ease=t=>1-Math.pow(1-t,4),clamp=(v,a,b)=>Math.min(b,Math.max(a,v));
-function size(){const w=innerWidth,h=innerHeight;R.setSize(w,h,false);C.aspect=w/h;C.updateProjectionMatrix()}
-addEventListener('resize',size);size();
-addEventListener('pointermove',e=>{mx=e.clientX/innerWidth-.5;my=e.clientY/innerHeight-.5;if(dragging){drag+=(e.clientX-px)*.012;px=e.clientX}});
-$('#stage').addEventListener('pointerdown',e=>{if(e.target.closest('button,a'))return;dragging=true;px=e.clientX;$('#stage').classList.add('drag')});
-addEventListener('pointerup',()=>{dragging=false;$('#stage').classList.remove('drag')});
-
-window.GL={
-  change(i,dir){slide=i;spin+=dir;bars.forEach(b=>{b.userData.dir=-1;b.userData.wait=.5+b.userData.delay})},
-  color(k){sw=k}};
-
-function tick(t){
-  if(t0===null)t0=t;const dt=Math.min(.05,(t-(last||t))*.001);last=t;const sec=t*.001;
-  const m=innerWidth<820,halfH=Math.tan(C.fov*Math.PI/360)*C.position.z,visW=2*halfH*C.aspect;
-  const tx=m?0:(.43-.5)*visW,ty=m?.95:0,ts=m?.55:.75,k=still?1:1-Math.exp(-dt*5),ky=still?1:1-Math.exp(-dt*2.6);
-  cr.x+=(tx-cr.x)*k;cr.y+=(ty-cr.y)*k;cr.s+=(ts-cr.s)*k;cr.yaw+=(SL[slide].yaw+spin*Math.PI*2-cr.yaw)*ky;
-  if(!dragging)drag*=Math.exp(-dt*1.3);
-
-  const e=ease(still?1:Math.min(1,(t-t0)/2400));   // intro assembly
-  bandG.position.y=(1-e)*3.2;bandG.rotation.z=(1-e)*.5;
-  cupGs.forEach((A,i)=>{const s=i?1:-1;A.position.x=s*X+s*(1-e)*4.5;A.position.y=-1.05-(1-e)*1.2;A.rotation.y=s*(1-e)*2.4});
-  inner.scale.setScalar(.6+.4*e);
-  if(real){real.scale.setScalar(realS*(.6+.4*e));real.rotation.y=MODEL_ROT_Y}
-
-  H.position.set(cr.x,cr.y-.35*cr.s+(still?0:Math.sin(sec*1.1)*.1),0);
-  H.scale.setScalar(cr.s);
-  H.rotation.y=cr.yaw+drag+mx*.45;H.rotation.x=my*.25;H.rotation.z=-mx*.05;
-
-  const kc=1-Math.exp(-dt*6);   // swatch color tween
-  bodyMats.forEach(mt=>mt.color.lerp(lin(SW[sw][0]),kc));trim.color.lerp(lin(SW[sw][1]),kc);
-  glow.material.color.lerp(lin(SL[slide].acc[1]),1-Math.exp(-dt*3));glow.position.set(cr.x,cr.y,-2.5);
-
-  bars.forEach(b=>{const u=b.userData;
-    if(u.dir<0){u.p-=dt*3;if(u.p<=0){u.p=0;u.dir=1;b.material.color.copy(u.ci===3?new THREE.Color(1,1,1):lin(SL[slide].acc[u.ci]))}}
-    else if(u.wait>0)u.wait-=dt;else u.p=Math.min(1,u.p+dt*1.2);
-    const q=ease(clamp(u.p,0,1)),off=-3*(1-q);
-    b.position.set(cr.x+u.x*(cr.s/.75)+Math.cos(ANG)*off+mx*u.par*1.2,cr.y+u.y*(cr.s/.75)+Math.sin(ANG)*off-my*u.par*.6,u.z);
-    b.material.opacity=q;b.visible=!m||u.ci!==3});
-
-  C.position.x=mx*.35;C.position.y=-my*.2;C.lookAt(0,0,0);
-  if(!tick.on){cv.classList.add('on');tick.on=1}
-  R.render(S,C);requestAnimationFrame(tick)}
-requestAnimationFrame(tick);
-}catch(err){console.warn('3D unavailable',err)}
-</script>
-</body>
-</html>
+{% endblock %}

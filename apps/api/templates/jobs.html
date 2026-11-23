@@ -1,47 +1,40 @@
 {% extends "base.html" %}
 
-{% block title %}Queue & Job Manager — ClipGlass{% endblock %}
+{% block title %}Job Queue — ClipGlass{% endblock %}
+
+{% block page_shell_class %}page-shell-workspace{% endblock %}
 
 {% block content %}
 <div class="w-full max-w-5xl mx-auto flex flex-col gap-6">
-  <!-- Header -->
-  <div class="flex items-center gap-3 px-2">
-    <div class="w-8 h-8 rounded-xl bg-blue-500/20 text-blue-500 flex items-center justify-center font-bold">
-      ≡
-    </div>
+  <!-- Header (Screen 8: Job Queue) -->
+  <div class="flex items-center justify-between gap-3 px-1">
     <div>
-      <h1 class="font-extrabold text-2xl text-slate-900 dark:text-white tracking-tight">Queue & Job Manager</h1>
-      <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Real-time processing queue across Downloads, Audio Mastering, Video Trimming & Auto Clip.</p>
+      <h1 class="font-bold text-2xl text-white tracking-tight flex items-center gap-2">
+        <span>Job Queue</span>
+        <span class="text-xs font-normal text-[#707D94] px-2 py-0.5 rounded-full bg-white/5 border border-[rgba(110,145,205,0.15)]">Queue &amp; Job Manager</span>
+      </h1>
+      <p class="text-xs text-[#707D94] mt-0.5">Track your processing jobs across Downloads, Audio Studio, Video Trimmer &amp; Auto Clip.</p>
     </div>
   </div>
 
-  <!-- 4 Stats Cards -->
-  <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
-    <div class="glass glass-rim rounded-2xl p-4 shadow-md">
-      <span class="text-[10px] font-bold uppercase text-blue-500">Active</span>
-      <p id="statActive" class="text-2xl font-black text-slate-900 dark:text-white mt-1">0</p>
-    </div>
-    <div class="glass glass-rim rounded-2xl p-4 shadow-md">
-      <span class="text-[10px] font-bold uppercase text-amber-500">Queued</span>
-      <p id="statQueued" class="text-2xl font-black text-slate-900 dark:text-white mt-1">0</p>
-    </div>
-    <div class="glass glass-rim rounded-2xl p-4 shadow-md">
-      <span class="text-[10px] font-bold uppercase text-emerald-500">Completed</span>
-      <p id="statCompleted" class="text-2xl font-black text-slate-900 dark:text-white mt-1">0</p>
-    </div>
-    <div class="glass glass-rim rounded-2xl p-4 shadow-md">
-      <span class="text-[10px] font-bold uppercase text-rose-500">Failed</span>
-      <p id="statFailed" class="text-2xl font-black text-slate-900 dark:text-white mt-1">0</p>
-    </div>
-  </div>
-
-  <!-- Filters -->
-  <div class="flex items-center gap-2 p-1 rounded-2xl glass text-xs font-bold self-start">
-    <button type="button" onclick="setJobFilter('all')" id="filterBtn-all" class="job-filter-btn px-3.5 py-1.5 rounded-xl bg-blue-600 text-white shadow-sm">All</button>
-    <button type="button" onclick="setJobFilter('download')" id="filterBtn-download" class="job-filter-btn px-3.5 py-1.5 rounded-xl text-slate-500 dark:text-slate-400">Download</button>
-    <button type="button" onclick="setJobFilter('audio')" id="filterBtn-audio" class="job-filter-btn px-3.5 py-1.5 rounded-xl text-slate-500 dark:text-slate-400">Audio</button>
-    <button type="button" onclick="setJobFilter('trim')" id="filterBtn-trim" class="job-filter-btn px-3.5 py-1.5 rounded-xl text-slate-500 dark:text-slate-400">Trim</button>
-    <button type="button" onclick="setJobFilter('autoclip')" id="filterBtn-autoclip" class="job-filter-btn px-3.5 py-1.5 rounded-xl text-slate-500 dark:text-slate-400">Auto Clip</button>
+  <!-- Filter Pills with Live Counts (Screen 8) -->
+  <div class="flex items-center gap-2 flex-wrap">
+    <button type="button" onclick="setJobFilter('active')" id="filterBtn-active" class="job-filter-btn px-4 py-1.5 rounded-full text-xs font-semibold bg-[#176BFF] text-white shadow-[0_2px_10px_rgba(23,107,255,0.3)] flex items-center gap-1.5">
+      <span>Active</span>
+      <span id="statActive" class="px-1.5 py-0.2 rounded-full bg-white/20 text-[10px]">0</span>
+    </button>
+    <button type="button" onclick="setJobFilter('queued')" id="filterBtn-queued" class="job-filter-btn px-4 py-1.5 rounded-full text-xs font-semibold bg-[#151C2A] text-[#A5B0C4] border border-[rgba(110,145,205,0.2)] hover:text-white flex items-center gap-1.5">
+      <span>Queued</span>
+      <span id="statQueued" class="px-1.5 py-0.2 rounded-full bg-white/10 text-[10px]">0</span>
+    </button>
+    <button type="button" onclick="setJobFilter('completed')" id="filterBtn-completed" class="job-filter-btn px-4 py-1.5 rounded-full text-xs font-semibold bg-[#151C2A] text-[#A5B0C4] border border-[rgba(110,145,205,0.2)] hover:text-white flex items-center gap-1.5">
+      <span>Completed</span>
+      <span id="statCompleted" class="px-1.5 py-0.2 rounded-full bg-white/10 text-[10px]">0</span>
+    </button>
+    <button type="button" onclick="setJobFilter('failed')" id="filterBtn-failed" class="job-filter-btn px-4 py-1.5 rounded-full text-xs font-semibold bg-[#151C2A] text-[#A5B0C4] border border-[rgba(110,145,205,0.2)] hover:text-white flex items-center gap-1.5">
+      <span>Failed</span>
+      <span id="statFailed" class="px-1.5 py-0.2 rounded-full bg-white/10 text-[10px]">0</span>
+    </button>
   </div>
 
   <!-- Jobs List -->

@@ -1,21 +1,28 @@
 {% extends "base.html" %}
 
-{% block title %}Auto Clip Editor — ClipGlass{% endblock %}
+{% block title %}Edit Your Clip — Auto Clip Editor — ClipGlass{% endblock %}
+
+{% block page_shell_class %}page-shell-editor{% endblock %}
 
 {% block content %}
-<div class="w-full flex flex-col gap-6 bg-geom-editor">
-  <!-- Header Banner -->
-  <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-white/10">
+<div class="w-full flex flex-col gap-6 max-w-[1920px] mx-auto">
+  <!-- Header Banner (Screen 7: Edit Your Clip) -->
+  <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-[rgba(110,145,205,0.18)]">
     <div>
       <div class="flex items-center gap-3">
-        <a href="/auto-clip" class="w-8 h-8 rounded-full glass hover:bg-white/10 flex items-center justify-center text-slate-400 hover:text-white transition-all text-xs" title="Back to Auto Clip Studio">←</a>
-        <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">Auto Clip Editor</h1>
+        <a href="/auto-clip" class="w-8 h-8 rounded-lg bg-[#151C2A] border border-[rgba(110,145,205,0.2)] hover:border-[#176BFF] flex items-center justify-center text-[#A5B0C4] hover:text-white transition-all text-xs" title="Back to Auto Clip Studio">←</a>
+        <div>
+          <h1 class="text-xl sm:text-2xl font-bold tracking-tight text-white flex items-center gap-2">
+            <span>Edit Your Clip</span>
+            <span class="text-xs px-2 py-0.5 rounded-full bg-[#176BFF]/15 text-[#2D8BFF] font-medium hidden sm:inline">Auto Clip Editor</span>
+          </h1>
+          <p class="text-xs text-[#707D94]">Fine-tune your clip with ease. Vertical safe zone, animated subtitles, and sound polish.</p>
+        </div>
       </div>
-      <p class="text-xs text-slate-400 mt-1 pl-11">Fine-tune vertical safe zones, caption animations, and audio mix.</p>
     </div>
     <div class="flex items-center gap-3">
-      <a href="/auto-clip" class="px-4 py-2 rounded-xl glass hover:bg-white/10 text-xs font-semibold text-slate-300 transition-all">Discard</a>
-      <button type="button" id="exportClipBtn" onclick="exportEditedClip()" class="px-5 py-2.5 rounded-xl btn-primary text-xs font-bold shadow-lg flex items-center gap-2">
+      <a href="/auto-clip" class="px-3.5 py-1.5 rounded-lg bg-[#151C2A] hover:bg-[#1B2436] border border-[rgba(110,145,205,0.2)] text-xs font-semibold text-[#A5B0C4] transition-all">Discard</a>
+      <button type="button" id="exportClipBtn" onclick="exportEditedClip()" class="px-5 py-2 rounded-full bg-[#176BFF] hover:bg-[#2D8BFF] text-white text-xs font-semibold shadow-[0_2px_12px_rgba(23,107,255,0.35)] flex items-center gap-2 transition-all">
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
         <span>Export Clip</span>
       </button>

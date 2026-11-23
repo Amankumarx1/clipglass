@@ -2,112 +2,106 @@
 
 {% block title %}How It Works — ClipGlass{% endblock %}
 
+{% block page_shell_class %}page-shell-home{% endblock %}
+
 {% block content %}
-<div class="w-full flex flex-col gap-10 bg-geom-how">
-  <!-- Hero Section -->
-  <div class="text-center max-w-2xl mx-auto pt-4">
-    <h1 class="text-3xl sm:text-4xl font-extrabold tracking-tight text-white mb-2">How It Works</h1>
-    <p class="text-sm text-slate-400">Transform, cut, and enhance any media in 3 simple steps without accounts or permanent data tracking.</p>
+<div class="w-full flex flex-col gap-10 py-4">
+  <!-- Hero Section (Screen 13: How It Works) -->
+  <div class="text-center max-w-2xl mx-auto">
+    <h1 class="text-3xl sm:text-4xl font-bold tracking-tight text-white mb-2">How It Works</h1>
+    <p class="text-xs sm:text-sm text-[#A5B0C4]">Get started in 3 simple steps. Transform, cut, and enhance any media without permanent data tracking.</p>
   </div>
 
   <!-- 3 Simple Steps (Screen 13) -->
-  <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-6 relative">
     <!-- Step 1 -->
-    <div class="glass card rounded-3xl p-8 flex flex-col items-center text-center relative border border-white/10 group">
-      <div class="w-16 h-16 rounded-2xl bg-gradient-to-tr from-blue-600 to-cyan-400 flex items-center justify-center text-2xl font-black text-white shadow-[0_0_30px_rgba(57,213,255,0.4)] mb-6 group-hover:scale-110 transition-transform">
+    <div class="bg-[#121722] border border-[rgba(110,145,205,0.2)] rounded-2xl p-6 sm:p-8 flex flex-col items-center text-center relative group">
+      <div class="w-14 h-14 rounded-2xl bg-[#176BFF] flex items-center justify-center text-2xl font-bold text-white shadow-[0_4px_18px_rgba(23,107,255,0.4)] mb-5 group-hover:scale-105 transition-transform">
         1
       </div>
-      <h2 class="text-xl font-bold text-white mb-2">Import Media</h2>
-      <p class="text-xs text-slate-400 leading-relaxed mb-6">
-        Paste a video or song URL from YouTube or upload any local MP4, WebM, MP3, or WAV directly from your device.
+      <h2 class="text-lg font-bold text-white mb-2">Import Media</h2>
+      <p class="text-xs text-[#707D94] leading-relaxed mb-4">
+        Paste a YouTube URL or upload an audio/video file directly from your device.
       </p>
-      <div class="mt-auto px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-[11px] font-mono text-cyan-300">
+      <div class="mt-auto px-3.5 py-1 rounded-full bg-[#0E131D] border border-[rgba(110,145,205,0.2)] text-[11px] font-mono text-[#2D8BFF]">
         Paste a link or upload
       </div>
     </div>
 
     <!-- Step 2 -->
-    <div class="glass card rounded-3xl p-8 flex flex-col items-center text-center relative border border-white/10 group">
-      <div class="w-16 h-16 rounded-2xl bg-gradient-to-tr from-purple-600 to-pink-500 flex items-center justify-center text-2xl font-black text-white shadow-[0_0_30px_rgba(146,86,249,0.4)] mb-6 group-hover:scale-110 transition-transform">
+    <div class="bg-[#121722] border border-[rgba(110,145,205,0.2)] rounded-2xl p-6 sm:p-8 flex flex-col items-center text-center relative group">
+      <div class="w-14 h-14 rounded-2xl bg-[#7047FF] flex items-center justify-center text-2xl font-bold text-white shadow-[0_4px_18px_rgba(112,71,255,0.4)] mb-5 group-hover:scale-105 transition-transform">
         2
       </div>
-      <h2 class="text-xl font-bold text-white mb-2">Customize &amp; Enhance</h2>
-      <p class="text-xs text-slate-400 leading-relaxed mb-6">
-        Select from 60+ audio studio effects, trim exact video timestamps, choose 4K/1080p formats, or generate auto 9:16 vertical shorts.
+      <h2 class="text-lg font-bold text-white mb-2">Customize</h2>
+      <p class="text-xs text-[#707D94] leading-relaxed mb-4">
+        Choose tools &amp; settings. Select 60+ audio effects, trim exact timestamps, or create 9:16 clips.
       </p>
-      <div class="mt-auto px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-[11px] font-mono text-purple-300">
-        Add effects &amp; edit
+      <div class="mt-auto px-3.5 py-1 rounded-full bg-[#0E131D] border border-[rgba(110,145,205,0.2)] text-[11px] font-mono text-[#9B4DFF]">
+        Choose tools &amp; settings
       </div>
     </div>
 
     <!-- Step 3 -->
-    <div class="glass card rounded-3xl p-8 flex flex-col items-center text-center relative border border-white/10 group">
-      <div class="w-16 h-16 rounded-2xl bg-gradient-to-tr from-cyan-500 to-emerald-400 flex items-center justify-center text-2xl font-black text-white shadow-[0_0_30px_rgba(25,227,177,0.4)] mb-6 group-hover:scale-110 transition-transform">
+    <div class="bg-[#121722] border border-[rgba(110,145,205,0.2)] rounded-2xl p-6 sm:p-8 flex flex-col items-center text-center relative group">
+      <div class="w-14 h-14 rounded-2xl bg-[#23D7A0] flex items-center justify-center text-2xl font-bold text-white shadow-[0_4px_18px_rgba(35,215,160,0.4)] mb-5 group-hover:scale-105 transition-transform">
         3
       </div>
-      <h2 class="text-xl font-bold text-white mb-2">Instant Export</h2>
-      <p class="text-xs text-slate-400 leading-relaxed mb-6">
-        Download high-bitrate output files in seconds. Background cleanup purges all temporary files automatically after 15 minutes.
+      <h2 class="text-lg font-bold text-white mb-2">Export</h2>
+      <p class="text-xs text-[#707D94] leading-relaxed mb-4">
+        Download your file. High-speed encoding with automatic 15-minute file purge.
       </p>
-      <div class="mt-auto px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-[11px] font-mono text-emerald-300">
-        Download your media
+      <div class="mt-auto px-3.5 py-1 rounded-full bg-[#0E131D] border border-[rgba(110,145,205,0.2)] text-[11px] font-mono text-[#23D7A0]">
+        Download your file
       </div>
     </div>
   </div>
 
-  <!-- Detailed Engine Workspaces -->
-  <div class="glass rounded-3xl p-8 border border-white/10 mt-4 flex flex-col gap-8">
-    <div class="border-b border-white/10 pb-4">
-      <h3 class="text-lg font-bold text-white mb-1">Architecture &amp; Processing Pipelines</h3>
-      <p class="text-xs text-slate-400">Under the hood of ClipGlass's high-speed media workstation.</p>
+  <!-- Detailed Workspace Architectures -->
+  <div class="bg-[#121722] border border-[rgba(110,145,205,0.2)] rounded-2xl p-6 sm:p-8 flex flex-col gap-6 mt-2">
+    <div class="border-b border-[rgba(110,145,205,0.15)] pb-3">
+      <h3 class="text-base font-bold text-white">Workstation Pipelines</h3>
+      <p class="text-xs text-[#707D94]">Technical architecture of each tool in the workspace.</p>
     </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-      <div class="p-5 rounded-2xl bg-white/5 border border-white/10 flex flex-col gap-2">
-        <div class="flex items-center gap-2 text-sm font-bold text-cyan-400">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div class="p-4 rounded-xl bg-[#0E131D] border border-[rgba(110,145,205,0.15)]">
+        <div class="flex items-center gap-2 text-xs font-bold text-[#2D8BFF] mb-1">
           <span>⚡</span>
-          <h4>Streamlined Downloader</h4>
+          <h4>Universal Downloader</h4>
         </div>
-        <p class="text-xs text-slate-400 leading-relaxed">
-          Demuxes high-resolution video streams up to 4K (2160p) with native AAC or FLAC audio streams. Supports selective audio extraction and subtitle synchronization.
-        </p>
+        <p class="text-xs text-[#707D94]">Demuxes streams up to 4K 60fps with native audio extraction. Keyframe-accurate stream copying.</p>
       </div>
 
-      <div class="p-5 rounded-2xl bg-white/5 border border-white/10 flex flex-col gap-2">
-        <div class="flex items-center gap-2 text-sm font-bold text-purple-400">
+      <div class="p-4 rounded-xl bg-[#0E131D] border border-[rgba(110,145,205,0.15)]">
+        <div class="flex items-center gap-2 text-xs font-bold text-[#9B4DFF] mb-1">
           <span>🎛</span>
-          <h4>60+ Effect Audio Studio</h4>
+          <h4>60+ Effects Audio Studio</h4>
         </div>
-        <p class="text-xs text-slate-400 leading-relaxed">
-          Provides both Auto Mode (preset-driven curated chains) and Custom Mode (full modular rack control over Reverb, Chorus, EQ, Pitch Shift, Lo-fi, 8D Spatial, and Bass Boost).
-        </p>
+        <p class="text-xs text-[#707D94]">Dual workspace: Auto Mode with intensity presets and Custom Mode with a full modular DSP rack.</p>
       </div>
 
-      <div class="p-5 rounded-2xl bg-white/5 border border-white/10 flex flex-col gap-2">
-        <div class="flex items-center gap-2 text-sm font-bold text-emerald-400">
+      <div class="p-4 rounded-xl bg-[#0E131D] border border-[rgba(110,145,205,0.15)]">
+        <div class="flex items-center gap-2 text-xs font-bold text-[#23D7A0] mb-1">
           <span>✂️</span>
-          <h4>Lossless Video Trimmer</h4>
+          <h4>Precision Video Trimmer</h4>
         </div>
-        <p class="text-xs text-slate-400 leading-relaxed">
-          Offers keyframe-aligned stream copying for near-instant rendering without re-encoding, alongside frame-accurate re-encoding when applying aspect cuts.
-        </p>
+        <p class="text-xs text-[#707D94]">Lossless stream-copying for instant video cutting without generational quality loss or recompression.</p>
       </div>
 
-      <div class="p-5 rounded-2xl bg-white/5 border border-white/10 flex flex-col gap-2">
-        <div class="flex items-center gap-2 text-sm font-bold text-pink-400">
+      <div class="p-4 rounded-xl bg-[#0E131D] border border-[rgba(110,145,205,0.15)]">
+        <div class="flex items-center gap-2 text-xs font-bold text-[#F52E8A] mb-1">
           <span>📱</span>
-          <h4>Multimodal Auto Clip Studio</h4>
+          <h4>Auto Clip Studio</h4>
         </div>
-        <p class="text-xs text-slate-400 leading-relaxed">
-          Scans video transcripts and audio heatmaps to identify the highest hook and engagement moments, applying 9:16 safe reframing and animated kinetic subtitles.
-        </p>
+        <p class="text-xs text-[#707D94]">Multimodal signal scanning for hook detection, 9:16 vertical reframing, and animated karaoke captions.</p>
       </div>
     </div>
   </div>
 
   <!-- Bottom CTA -->
-  <div class="text-center pt-2 pb-6">
-    <a href="/downloader" class="inline-flex items-center gap-2 px-8 py-3.5 rounded-full btn-primary font-bold text-sm shadow-xl hover:scale-105 transition-all">
+  <div class="text-center pt-2">
+    <a href="/downloader" class="inline-flex items-center gap-2 px-6 py-2.5 rounded-full bg-[#176BFF] hover:bg-[#2D8BFF] text-white font-semibold text-xs shadow-lg transition-all">
       <span>Get Started Now</span>
       <span>→</span>
     </a>

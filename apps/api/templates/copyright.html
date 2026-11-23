@@ -2,60 +2,54 @@
 
 {% block title %}Copyright & DMCA — ClipGlass{% endblock %}
 
+{% block page_shell_class %}page-shell-home{% endblock %}
+
 {% block content %}
-<div class="w-full flex flex-col gap-8 bg-geom-copyright">
+<div class="w-full max-w-5xl mx-auto flex flex-col gap-8 py-2">
   <!-- Header Banner -->
-  <div class="border-b border-white/10 pb-4">
-    <h1 class="text-3xl font-extrabold tracking-tight text-white mb-2">Copyright &amp; DMCA Compliance</h1>
-    <p class="text-xs text-slate-400">ClipGlass respects the intellectual property rights of others and expects users to do the same.</p>
+  <div class="border-b border-[rgba(110,145,205,0.18)] pb-4">
+    <h1 class="text-2xl sm:text-3xl font-bold tracking-tight text-white mb-1">Copyright &amp; DMCA Compliance</h1>
+    <p class="text-xs text-[#707D94]">ClipGlass respects the intellectual property rights of others and expects users to do the same.</p>
   </div>
 
   <!-- Main Split Layout -->
   <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
     <!-- Left Navigation -->
-    <div class="lg:col-span-4 glass rounded-3xl p-6 border border-white/10 sticky top-24">
-      <h2 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">Copyright Policy</h2>
-      <nav class="flex flex-col gap-2 text-xs font-semibold">
-        <a href="#overview" class="p-2.5 rounded-xl bg-white/10 text-cyan-300 flex items-center justify-between">
-          <span>1. Policy Overview</span>
-          <span>→</span>
-        </a>
-        <a href="#dmca" class="p-2.5 rounded-xl hover:bg-white/5 text-slate-400 hover:text-white transition-colors flex items-center justify-between">
-          <span>2. DMCA Takedown Notice</span>
-          <span>→</span>
-        </a>
-        <a href="#fairuse" class="p-2.5 rounded-xl hover:bg-white/5 text-slate-400 hover:text-white transition-colors flex items-center justify-between">
-          <span>3. Fair Use &amp; Transformation</span>
-          <span>→</span>
-        </a>
-        <a href="#infringement" class="p-2.5 rounded-xl hover:bg-white/5 text-slate-400 hover:text-white transition-colors flex items-center justify-between">
-          <span>4. Repeat Infringer Policy</span>
-          <span>→</span>
-        </a>
-      </nav>
-
-      <div class="mt-8 p-4 rounded-2xl bg-purple-500/10 border border-purple-500/20 text-center flex flex-col items-center">
-        <div class="w-12 h-12 rounded-xl bg-purple-500/20 text-purple-300 flex items-center justify-center text-xl mb-2 shadow">⚖️</div>
-        <div class="text-xs font-bold text-white">DMCA Safe Harbor</div>
-        <div class="text-[10px] text-slate-400 mt-0.5">Prompt removal upon verified notice</div>
-      </div>
+    <div class="lg:col-span-4 bg-[#121722] border border-[rgba(110,145,205,0.2)] rounded-2xl p-4 sticky top-20 flex flex-col gap-1.5">
+      <span class="text-[10px] font-bold uppercase tracking-wider text-[#707D94] px-2 mb-1">Copyright Policy</span>
+      <a href="#overview" class="px-3 py-2 rounded-lg bg-[#176BFF]/15 text-[#2D8BFF] text-xs font-semibold flex items-center justify-between">
+        <span>1. Policy Overview</span>
+        <span>→</span>
+      </a>
+      <a href="#dmca" class="px-3 py-2 rounded-lg text-[#A5B0C4] hover:text-white hover:bg-white/5 text-xs font-semibold flex items-center justify-between transition-colors">
+        <span>2. DMCA Takedown Notice</span>
+        <span>→</span>
+      </a>
+      <a href="#fairuse" class="px-3 py-2 rounded-lg text-[#A5B0C4] hover:text-white hover:bg-white/5 text-xs font-semibold flex items-center justify-between transition-colors">
+        <span>3. Fair Use &amp; Transformation</span>
+        <span>→</span>
+      </a>
+      <a href="#infringement" class="px-3 py-2 rounded-lg text-[#A5B0C4] hover:text-white hover:bg-white/5 text-xs font-semibold flex items-center justify-between transition-colors">
+        <span>4. Repeat Infringer Policy</span>
+        <span>→</span>
+      </a>
     </div>
 
     <!-- Right Content -->
-    <div class="lg:col-span-8 glass rounded-3xl p-8 border border-white/10 flex flex-col gap-8 text-xs text-slate-300 leading-relaxed">
+    <div class="lg:col-span-8 bg-[#121722] border border-[rgba(110,145,205,0.2)] rounded-2xl p-6 sm:p-8 flex flex-col gap-6 text-xs text-[#A5B0C4] leading-relaxed">
       <section id="overview" class="flex flex-col gap-2">
-        <h3 class="text-base font-bold text-white text-cyan-300">1. Policy Overview</h3>
+        <h3 class="text-sm font-bold text-white text-[#2D8BFF]">1. Policy Overview</h3>
         <p>
-          ClipGlass is an ephemeral media processing software tool. It is designed to assist creators, editors, and researchers with transformative audio editing, trimming, and format transcoding. ClipGlass does not host, curate, or maintain a public searchable library of copyrighted works.
+          ClipGlass is an ephemeral media processing software tool designed to assist creators, editors, and researchers with transformative audio editing, trimming, and format transcoding. ClipGlass does not host, curate, or maintain a public searchable library of copyrighted works.
         </p>
       </section>
 
       <section id="dmca" class="flex flex-col gap-2">
-        <h3 class="text-base font-bold text-white text-cyan-300">2. Filing a DMCA Notice</h3>
+        <h3 class="text-sm font-bold text-white text-[#2D8BFF]">2. Filing a DMCA Notice</h3>
         <p>
           If you are a copyright owner or authorized agent thereof and believe that any content made available through or processed by our services infringes upon your copyright, you may submit a formal notification under the Digital Millennium Copyright Act (17 U.S.C. § 512(c)) containing:
         </p>
-        <ul class="list-disc pl-5 space-y-1 text-slate-400">
+        <ul class="list-disc pl-5 space-y-1 text-[#707D94]">
           <li>A physical or electronic signature of the authorized agent.</li>
           <li>Identification of the copyrighted work claimed to have been infringed.</li>
           <li>Identification of the specific URL or resource located on the service.</li>
@@ -66,14 +60,14 @@
       </section>
 
       <section id="fairuse" class="flex flex-col gap-2">
-        <h3 class="text-base font-bold text-white text-cyan-300">3. Fair Use &amp; Transformative Works</h3>
+        <h3 class="text-sm font-bold text-white text-[#2D8BFF]">3. Fair Use &amp; Transformative Works</h3>
         <p>
           Under Section 107 of the Copyright Act, allowance is made for "fair use" for purposes such as criticism, comment, news reporting, teaching, scholarship, and transformative research. Users applying effects, remixing, or excerpting short analytical clips bear sole responsibility for verifying their legal protections under relevant fair use doctrines.
         </p>
       </section>
 
       <section id="infringement" class="flex flex-col gap-2">
-        <h3 class="text-base font-bold text-white text-cyan-300">4. Repeat Infringer Policy</h3>
+        <h3 class="text-sm font-bold text-white text-[#2D8BFF]">4. Repeat Infringer Policy</h3>
         <p>
           ClipGlass reserves the right to block domains, IP addresses, or automated agents that repeatedly attempt to use the platform for unauthorized distribution of copyrighted media in violation of international intellectual property treaties.
         </p>
