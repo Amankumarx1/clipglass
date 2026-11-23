@@ -1,6 +1,8 @@
 import os
 import re
+import time
 import asyncio
+from collections import defaultdict
 from fastapi import APIRouter, Request, HTTPException, status, Header
 from fastapi.responses import FileResponse, StreamingResponse
 from sse_starlette.sse import EventSourceResponse
@@ -12,10 +14,15 @@ from services.clip_queue_service import clip_job_manager
 from services.clip_render_service import render_clip_segment, package_clips_zip
 from services.edit_box_service import EditBoxParser
 from services.polish_pack_service import get_available_polish_styles
+from services.ytdlp_service import validate_youtube_url
+from app.config import settings
 
 router = APIRouter(prefix="/api/clip", tags=["Auto Clip"])
 
 JOB_ID_REGEX = re.compile(r'^[a-fA-F0-9]{32}$')
+CLIP_ID_REGEX = re.compile(r'^[a-zA-Z0-9_-]{1,32}$')
+
+ip_clip_timestamps = defaultdict(list)
 
 def validate_job_id(job_id: str) -> str:
     if not job_id or not JOB_ID_REGEX.match(job_id):
@@ -24,6 +31,14 @@ def validate_job_id(job_id: str) -> str:
             detail="Invalid clip job ID format."
         )
     return job_id
+
+def validate_clip_id(cid: str) -> str:
+    if not cid or not CLIP_ID_REGEX.match(cid):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid clip moment ID format."
+        )
+    return cid
 
 @router.get("/polish-styles")
 async def list_polish_styles():
@@ -44,21 +59,41 @@ async def create_clip_job(request: Request, body: ClipJobCreateRequest):
             }
         )
 
-    # Basic SSRF prevention: ensure URL domain is YouTube
-    domain = re.sub(r'^https?://', '', body.url.lower()).split('/')[0].split(':')[0]
-    valid_domains = {"youtube.com", "www.youtube.com", "m.youtube.com", "youtu.be"}
-    if domain not in valid_domains:
+    client_ip = request.client.host if request.client else "127.0.0.1"
+
+    # Rate Limiting: Prevent DoS from rapid repeated clipping requests
+    now = time.time()
+    cutoff = now - 600.0
+    timestamps = [t for t in ip_clip_timestamps[client_ip] if t > cutoff]
+    if len(timestamps) >= settings.RATE_LIMIT_JOBS_PER_10_MINUTES:
+        ip_clip_timestamps[client_ip] = timestamps
+        retry_after = int(600.0 - (now - timestamps[0]))
+        raise HTTPException(
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+            headers={"Retry-After": str(max(1, retry_after))},
+            detail={
+                "code": "rate-limited",
+                "title": "Job Rate Limit Reached",
+                "explanation": f"You can create at most {settings.RATE_LIMIT_JOBS_PER_10_MINUTES} Auto Clip jobs per 10 minutes.",
+                "suggestedAction": "Please wait a few minutes before starting a new job."
+            }
+        )
+    timestamps.append(now)
+    ip_clip_timestamps[client_ip] = timestamps
+
+    # Bulletproof SSRF & Domain Validation: ensure URL is public YouTube and not private IP / userinfo spoof
+    is_valid, canonical_url, err = validate_youtube_url(body.url)
+    if not is_valid or not canonical_url:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail={
+            detail=err.model_dump() if err else {
                 "code": "invalid-media-url",
                 "title": "Invalid Media URL",
                 "explanation": "Auto Clip currently supports public YouTube videos (youtube.com or youtu.be).",
                 "suggestedAction": "Please paste a valid YouTube video link."
             }
         )
-
-    client_ip = request.client.host if request.client else "127.0.0.1"
+    body.url = canonical_url
 
     try:
         job_id = clip_job_manager.create_job(body, client_ip)
@@ -110,11 +145,12 @@ async def get_job_clips(job_id: str):
 @router.patch("/jobs/{job_id}/clips/{cid}")
 async def update_clip_moment(job_id: str, cid: str, body: ClipMomentUpdateRequest):
     valid_id = validate_job_id(job_id)
+    valid_cid = validate_clip_id(cid)
     record = clip_job_manager.get_job(valid_id)
     if not record:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Clip job not found.")
 
-    matched_clip = next((c for c in record.clips if c.clipId == cid), None)
+    matched_clip = next((c for c in record.clips if c.clipId == valid_cid), None)
     if not matched_clip:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Clip moment not found.")
 
@@ -152,11 +188,12 @@ async def update_clip_moment(job_id: str, cid: str, body: ClipMomentUpdateReques
 async def execute_edit_box_command(job_id: str, cid: str, body: EditBoxCommandRequest):
     """Executes a plain-language edit box command on a clip candidate."""
     valid_id = validate_job_id(job_id)
+    valid_cid = validate_clip_id(cid)
     record = clip_job_manager.get_job(valid_id)
     if not record:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Clip job not found.")
 
-    matched_clip = next((c for c in record.clips if c.clipId == cid), None)
+    matched_clip = next((c for c in record.clips if c.clipId == valid_cid), None)
     if not matched_clip:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Clip moment not found.")
 
@@ -172,26 +209,28 @@ async def execute_edit_box_command(job_id: str, cid: str, body: EditBoxCommandRe
 async def record_clip_feedback(job_id: str, cid: str, body: ClipFeedbackRequest):
     """Records local thumbs up / thumbs down feedback on a clip."""
     valid_id = validate_job_id(job_id)
+    valid_cid = validate_clip_id(cid)
     record = clip_job_manager.get_job(valid_id)
     if not record:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Clip job not found.")
 
-    matched_clip = next((c for c in record.clips if c.clipId == cid), None)
+    matched_clip = next((c for c in record.clips if c.clipId == valid_cid), None)
     if not matched_clip:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Clip moment not found.")
 
     matched_clip.feedback = body.thumb
     record.emit_update()
-    return {"message": "Feedback recorded", "clipId": cid, "thumb": body.thumb}
+    return {"message": "Feedback recorded", "clipId": valid_cid, "thumb": body.thumb}
 
 @router.post("/jobs/{job_id}/clips/{cid}/render")
 async def render_clip(job_id: str, cid: str):
     valid_id = validate_job_id(job_id)
+    valid_cid = validate_clip_id(cid)
     record = clip_job_manager.get_job(valid_id)
     if not record:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Clip job not found.")
 
-    matched_clip = next((c for c in record.clips if c.clipId == cid), None)
+    matched_clip = next((c for c in record.clips if c.clipId == valid_cid), None)
     if not matched_clip:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Clip moment not found.")
 
@@ -213,7 +252,7 @@ async def render_clip(job_id: str, cid: str):
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"Render failed: {err_msg}")
 
     matched_clip.status = 'ready'
-    matched_clip.videoUrl = f"/api/clip/jobs/{job_id}/clips/{cid}/download"
+    matched_clip.videoUrl = f"/api/clip/jobs/{job_id}/clips/{valid_cid}/download"
     record.emit_update()
 
     return {"message": "Clip rendered successfully", "clip": matched_clip}
@@ -221,12 +260,19 @@ async def render_clip(job_id: str, cid: str):
 @router.get("/jobs/{job_id}/clips/{cid}/download")
 async def download_clip(job_id: str, cid: str, range: str = Header(None)):
     valid_id = validate_job_id(job_id)
+    valid_cid = validate_clip_id(cid)
     record = clip_job_manager.get_job(valid_id)
     if not record:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Clip job not found.")
 
-    mp4_filename = f"clip_{cid}.mp4"
-    file_path = os.path.join(record.job_dir, mp4_filename)
+    mp4_filename = f"clip_{valid_cid}.mp4"
+    real_job_dir = os.path.realpath(record.job_dir)
+    file_path = os.path.realpath(os.path.join(record.job_dir, mp4_filename))
+
+    # Strict Path Traversal Prevention
+    if os.path.commonpath([real_job_dir, file_path]) != real_job_dir:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access denied: file path outside storage sandbox.")
+
     if not os.path.exists(file_path):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Rendered clip file not found.")
 

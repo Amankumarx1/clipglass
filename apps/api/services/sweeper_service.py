@@ -5,6 +5,7 @@ import time
 from datetime import datetime, timezone
 from app.config import settings
 from services.queue_service import job_manager
+from services.clip_queue_service import clip_job_manager
 
 def clean_stale_storage_on_startup():
     """Clear all stale ephemeral folders and files on startup so the disk can never bloat."""
@@ -25,6 +26,7 @@ async def run_cleanup_sweeper():
             await asyncio.sleep(60)
             now = datetime.now(timezone.utc)
 
+            # 1. Sweep standard download/processing jobs
             expired_ids = []
             for jid, job in list(job_manager.jobs.items()):
                 if job.expires_at and now > job.expires_at:
@@ -38,6 +40,20 @@ async def run_cleanup_sweeper():
                 if job:
                     job_manager._cleanup_job_files(job)
 
+            # 2. Sweep auto-clip jobs
+            expired_clip_ids = []
+            for jid, job in list(clip_job_manager.jobs.items()):
+                if job.expires_at and now > job.expires_at:
+                    expired_clip_ids.append(jid)
+                elif job.stage in ("failed", "cancelled") and (now - job.created_at).total_seconds() > 300:
+                    expired_clip_ids.append(jid)
+
+            for jid in expired_clip_ids:
+                job = clip_job_manager.jobs.pop(jid, None)
+                if job:
+                    clip_job_manager._cleanup_job_files(job)
+
+            # 3. Sweep any orphaned folders exceeding TTL
             if os.path.exists(settings.TEMP_STORAGE_DIR):
                 for folder in os.listdir(settings.TEMP_STORAGE_DIR):
                     folder_path = os.path.join(settings.TEMP_STORAGE_DIR, folder)

@@ -8,8 +8,9 @@ from schemas.jobs import CreativeFXConfig
 def sanitize_hook_text(text: Optional[str]) -> str:
     if not text:
         return "WAIT FOR THE END..."
-    # Escape single quotes and colons for ffmpeg drawtext filter
-    cleaned = re.sub(r'[\x00-\x1f\x7f"\']', '', text).strip()
+    # Escape quotes, colons, percent signs, and backslashes for FFmpeg drawtext filter
+    cleaned = re.sub(r'[\x00-\x1f\x7f"\'\\]', '', text).strip()
+    cleaned = cleaned.replace(":", "\\:").replace("%", "\\%")
     return cleaned[:80] or "WAIT FOR THE END..."
 
 def has_audio_stream(file_path: str) -> bool:

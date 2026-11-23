@@ -1,4 +1,5 @@
 import os
+import re
 from typing import List, Optional
 from schemas.clip import TranscriptWord, CaptionPresetType
 
@@ -181,7 +182,8 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
 
     # 1. Opening Hook Title Banner (burned at Top Center for first 3.5s)
     if hook_title and hook_title.strip():
-        clean_hook = hook_title.strip().upper()
+        # Strip curly braces and newline chars to prevent ASS override tag / event injection
+        clean_hook = re.sub(r'[\r\n{}]+', ' ', hook_title).strip().upper()
         h_start = "0:00:00.00"
         h_end = format_ass_time(hook_duration)
         # Fade in 150ms, fade out 250ms
@@ -201,7 +203,7 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
         dialogue_text = ""
         for w in chunk:
             dur_cs = max(10, int(round((w.end - w.start) * 100)))
-            clean_w = w.word.replace('{', '').replace('}', '').strip()
+            clean_w = re.sub(r'[\r\n{}]+', '', w.word).strip()
             # ASS Karaoke tag \k<duration_in_centiseconds>
             dialogue_text += f"{{\\k{dur_cs}}}{clean_w} "
 
