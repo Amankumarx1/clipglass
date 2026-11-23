@@ -1,10 +1,29 @@
 <!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="en" class="dark" data-theme="dark">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>{% block title %}ClipGlass — Dark Neon Workspace{% endblock %}</title>
+  <title>{% block title %}ClipGlass — Everything media. One workspace.{% endblock %}</title>
   <link rel="icon" type="image/svg+xml" href="/static/img/icon.svg">
+  <script>
+    (function() {
+      try {
+        var savedTheme = localStorage.getItem('clipglass_theme') || 'dark';
+        var theme = savedTheme;
+        if (savedTheme === 'system') {
+          theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        }
+        document.documentElement.setAttribute('data-theme', theme);
+        if (theme === 'dark') {
+          document.documentElement.classList.add('dark');
+        } else {
+          document.documentElement.classList.remove('dark');
+        }
+        var savedAccent = localStorage.getItem('clipglass_accent') || 'blue';
+        document.documentElement.setAttribute('data-accent', savedAccent);
+      } catch (e) {}
+    })();
+  </script>
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
@@ -13,21 +32,15 @@
       theme: {
         extend: {
           colors: {
-            canvas: '#0B0D12',
-            'canvas-raised': '#10141D',
-            surface: '#121722',
-            'surface-raised': '#171D2A',
-            card: '#151C2A',
-            'card-hover': '#1B2436',
-            input: '#0E131D',
             brand: {
-              blue: '#176BFF',
-              'blue-bright': '#2D8BFF',
-              cyan: '#26C6F5',
-              purple: '#7047FF',
-              violet: '#9B4DFF',
-              pink: '#F52E8A',
-              red: '#FF3048'
+              blue: '#2563FF',
+              cyan: '#39D5FF',
+              purple: '#7C4DFF',
+              pink: '#FF2E74',
+              red: '#D91F2C',
+              dark: '#07090F',
+              surface: '#12162A',
+              card: '#171C36'
             }
           }
         }
@@ -37,265 +50,208 @@
   <link rel="stylesheet" href="/static/css/liquid-glass.css">
   {% block head %}{% endblock %}
 </head>
-<body class="relative min-h-screen flex flex-col justify-between selection:bg-[#176BFF] selection:text-white">
+<body class="relative min-h-screen flex flex-col justify-between selection:bg-blue-600 selection:text-white">
   <!-- Geometric Opening Shutter (Runs once on first app load) -->
   <div id="geomIntroGlobal" onclick="dismissGlobalIntro()" style="display:none">
     <div class="shutter-l"></div>
     <div class="shutter-r"></div>
     <div class="geom-badge">
-      <div class="geom-logo"></div>
-      <div class="geom-title">ClipGlass</div>
-      <div class="geom-sub">Dark Neon Workspace · Media Production Engine</div>
+      <div class="w-14 h-14 rounded-full bg-[#D91F2C] shadow-[0_0_35px_rgba(217,31,44,0.7)] flex items-center justify-center">
+        <span class="ml-1 border-l-[14px] border-l-white border-y-[9px] border-y-transparent"></span>
+      </div>
+      <div class="geom-title font-['Rubik']">ClipGlass</div>
+      <div class="geom-sub">Everything media · One workspace</div>
     </div>
   </div>
 
-  <!-- Ambient Morphing Lighting (Quiet and Subdued) -->
+  <!-- Ambient Morphing Gradient Blobs -->
   <div class="fixed inset-0 pointer-events-none -z-10 overflow-hidden">
-    <div class="absolute -top-32 -left-32 w-[30rem] h-[30rem] rounded-full bg-blue-600/10 blur-[130px]"></div>
-    <div class="absolute top-1/3 -right-32 w-[28rem] h-[28rem] rounded-full bg-purple-600/08 blur-[150px]"></div>
-    <div class="absolute -bottom-40 left-1/4 w-[28rem] h-[28rem] rounded-full bg-cyan-500/08 blur-[140px]"></div>
+    <div class="absolute -top-32 -left-32 w-[34rem] h-[34rem] rounded-full bg-blue-600/12 blur-[140px]"></div>
+    <div class="absolute top-1/3 -right-32 w-[36rem] h-[36rem] rounded-full bg-purple-600/12 blur-[150px]"></div>
+    <div class="absolute -bottom-40 left-1/3 w-[32rem] h-[32rem] rounded-full bg-cyan-500/10 blur-[140px]"></div>
   </div>
 
-  <!-- Compact Top Workspace Navigation (Section 4.A) -->
-  <header class="sticky top-0 z-50 w-full border-b border-[rgba(110,145,205,0.16)] bg-[#0B0D12]/95 backdrop-blur-md select-none">
-    <nav class="max-w-[1920px] mx-auto px-4 sm:px-8 h-14 flex items-center justify-between relative">
-      <!-- Left: Brand Logo -->
-      <a href="/" onclick="playGlassTick()" class="logo flex items-center gap-2.5 font-bold text-sm tracking-tight text-white shrink-0 group">
-        <span class="logo-playmark group-hover:scale-105 transition-transform"></span>
-        <span class="font-bold text-white text-base tracking-tight">ClipGlass</span>
+  <!-- Global Floating Pill Navbar (Matches Image A & Image B) -->
+  <header class="sticky top-4 z-50 w-full max-w-6xl mx-auto px-3 sm:px-6 select-none">
+    <nav class="glass glass-rim rounded-full h-16 px-4 sm:px-6 flex items-center justify-between shadow-2xl backdrop-blur-2xl relative border border-white/10">
+      <!-- Left: Red Circle Brand Logo -->
+      <a href="/" onclick="playGlassTick()" class="logo flex items-center gap-2.5 font-extrabold text-base tracking-tight text-white shrink-0 group">
+        <span class="w-7 h-7 rounded-full bg-[#D91F2C] shadow-[0_0_16px_rgba(217,31,44,0.65)] flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+          <span class="ml-0.5 border-l-[7px] border-l-white border-y-[4.5px] border-y-transparent"></span>
+        </span>
+        <span class="font-['Rubik'] font-bold text-white text-base tracking-tight">ClipGlass</span>
       </a>
 
-      <!-- Center: Desktop Nav Links with Dropdowns -->
-      <div class="links hidden lg:flex items-center gap-1 xl:gap-2 text-xs font-semibold tracking-wide text-[#A5B0C4]">
-        <!-- Home Link -->
-        <a href="/" onclick="playGlassTick()" class="px-3 py-1.5 rounded-lg hover:text-white transition-colors {% if active_page == 'home' %}text-white bg-white/5{% endif %}">
-          Home
+      <!-- Center: Desktop Nav Links (Matching Design Board) -->
+      <div class="links hidden lg:flex items-center gap-1 xl:gap-2 text-xs font-bold tracking-wider text-[#A9B0C7]">
+        <!-- Downloader -->
+        <a href="/downloader" onclick="playGlassTick()" class="px-3 py-1.5 rounded-full hover:text-white transition-colors uppercase {% if active_page == 'downloader' %}text-white bg-white/10{% endif %}">
+          Downloader
         </a>
 
-        <!-- Downloader Dropdown -->
-        <div class="nav-dropdown">
-          <button type="button" class="dropdown-trigger px-3 py-1.5 rounded-lg flex items-center gap-1 hover:text-white transition-colors {% if active_page == 'downloader' %}text-white bg-white/5{% endif %}">
-            <span>Downloader</span>
-            <svg class="w-3 h-3 opacity-60" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-          </button>
-          <div class="dropdown-menu hidden absolute top-full left-0 mt-2 w-52 dropdown-card p-2 shadow-2xl flex flex-col gap-1 z-50">
-            <a href="/downloader" onclick="playGlassTick()" class="px-3 py-2 rounded-lg text-xs hover:bg-white/10 flex items-center gap-2 text-white">
-              <span class="text-blue-400">⚡</span>
-              <span>Universal Downloader</span>
-            </a>
-            <a href="/downloader?type=audio" onclick="playGlassTick()" class="px-3 py-2 rounded-lg text-xs hover:bg-white/10 flex items-center gap-2 text-slate-300">
-              <span class="text-purple-400">🎵</span>
-              <span>Audio Extractor</span>
-            </a>
-            <a href="/faq#formats" onclick="playGlassTick()" class="px-3 py-2 rounded-lg text-xs hover:bg-white/10 flex items-center gap-2 text-slate-300">
-              <span class="text-cyan-400">🎞</span>
-              <span>Supported Formats</span>
-            </a>
-          </div>
-        </div>
+        <!-- Studio -->
+        <a href="/audio-studio" onclick="playGlassTick()" class="px-3 py-1.5 rounded-full hover:text-white transition-colors uppercase {% if active_page in ['studio', 'audio_studio'] %}text-white bg-white/10{% endif %}">
+          Studio
+        </a>
 
-        <!-- Studio Dropdown -->
-        <div class="nav-dropdown">
-          <button type="button" class="dropdown-trigger px-3 py-1.5 rounded-lg flex items-center gap-1 hover:text-white transition-colors {% if active_page in ['studio', 'audio_studio'] %}text-white bg-white/5{% endif %}">
-            <span>Studio</span>
-            <svg class="w-3 h-3 opacity-60" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-          </button>
-          <div class="dropdown-menu hidden absolute top-full left-0 mt-2 w-56 dropdown-card p-2 shadow-2xl flex flex-col gap-1 z-50">
-            <a href="/audio-studio" onclick="playGlassTick()" class="px-3 py-2 rounded-lg text-xs hover:bg-white/10 flex items-center gap-2 text-white">
-              <span class="text-purple-400">🎛</span>
-              <span>Audio Effects Studio</span>
-            </a>
-            <a href="/audio-studio?mode=auto" onclick="playGlassTick()" class="px-3 py-2 rounded-lg text-xs hover:bg-white/10 flex items-center gap-2 text-slate-300">
-              <span class="text-cyan-400">✨</span>
-              <span>Auto Mode (60+ FX)</span>
-            </a>
-            <a href="/audio-studio?mode=custom" onclick="playGlassTick()" class="px-3 py-2 rounded-lg text-xs hover:bg-white/10 flex items-center gap-2 text-slate-300">
-              <span class="text-pink-400">⚙️</span>
-              <span>Custom Modular Rack</span>
-            </a>
-          </div>
-        </div>
+        <!-- Trimmer -->
+        <a href="/video-trimmer" onclick="playGlassTick()" class="px-3 py-1.5 rounded-full hover:text-white transition-colors uppercase {% if active_page == 'video_trimmer' %}text-white bg-white/10{% endif %}">
+          Trimmer
+        </a>
 
-        <!-- Video Tools Dropdown -->
-        <div class="nav-dropdown">
-          <button type="button" class="dropdown-trigger px-3 py-1.5 rounded-lg flex items-center gap-1 hover:text-white transition-colors {% if active_page in ['video_trimmer', 'auto_clip', 'auto_clip_editor'] %}text-white bg-white/5{% endif %}">
-            <span>Video Tools</span>
-            <svg class="w-3 h-3 opacity-60" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-          </button>
-          <div class="dropdown-menu hidden absolute top-full left-0 mt-2 w-52 dropdown-card p-2 shadow-2xl flex flex-col gap-1 z-50">
-            <a href="/video-trimmer" onclick="playGlassTick()" class="px-3 py-2 rounded-lg text-xs hover:bg-white/10 flex items-center gap-2 text-white">
-              <span class="text-emerald-400">✂️</span>
-              <span>Video Trimmer</span>
-            </a>
-            <a href="/auto-clip" onclick="playGlassTick()" class="px-3 py-2 rounded-lg text-xs hover:bg-white/10 flex items-center gap-2 text-slate-300">
-              <span class="text-pink-400">📱</span>
-              <span>Auto Clip Studio</span>
-            </a>
-            <a href="/auto-clip/editor" onclick="playGlassTick()" class="px-3 py-2 rounded-lg text-xs hover:bg-white/10 flex items-center gap-2 text-slate-300">
-              <span class="text-blue-400">🎬</span>
-              <span>Auto Clip Editor</span>
-            </a>
-          </div>
-        </div>
+        <!-- Auto Clip -->
+        <a href="/auto-clip" onclick="playGlassTick()" class="px-3 py-1.5 rounded-full hover:text-white transition-colors uppercase {% if active_page in ['auto_clip', 'auto_clip_editor'] %}text-white bg-white/10{% endif %}">
+          Auto Clip
+        </a>
 
-        <!-- Jobs Dropdown -->
-        <div class="nav-dropdown">
-          <button type="button" class="dropdown-trigger px-3 py-1.5 rounded-lg flex items-center gap-1 hover:text-white transition-colors {% if active_page in ['jobs', 'recent'] %}text-white bg-white/5{% endif %}">
-            <span>Jobs</span>
-            <svg class="w-3 h-3 opacity-60" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-          </button>
-          <div class="dropdown-menu hidden absolute top-full left-0 mt-2 w-48 dropdown-card p-2 shadow-2xl flex flex-col gap-1 z-50">
-            <a href="/jobs" onclick="playGlassTick()" class="px-3 py-2 rounded-lg text-xs hover:bg-white/10 flex items-center gap-2 text-white">
-              <span class="text-cyan-400">📊</span>
-              <span>Queue Manager</span>
-            </a>
-            <a href="/recent" onclick="playGlassTick()" class="px-3 py-2 rounded-lg text-xs hover:bg-white/10 flex items-center gap-2 text-slate-300">
-              <span class="text-amber-400">⏱</span>
-              <span>Recent Downloads</span>
-            </a>
-          </div>
-        </div>
+        <!-- Recent -->
+        <a href="/recent" onclick="playGlassTick()" class="px-3 py-1.5 rounded-full hover:text-white transition-colors uppercase {% if active_page == 'recent' %}text-white bg-white/10{% endif %}">
+          Recent
+        </a>
 
-        <!-- Help Dropdown -->
+        <!-- More / Help Dropdown -->
         <div class="nav-dropdown">
-          <button type="button" class="dropdown-trigger px-3 py-1.5 rounded-lg flex items-center gap-1 hover:text-white transition-colors {% if active_page in ['how_it_works', 'faq', 'terms', 'privacy', 'copyright', 'design'] %}text-white bg-white/5{% endif %}">
-            <span>Help</span>
+          <button type="button" class="dropdown-trigger px-2.5 py-1.5 rounded-full flex items-center gap-1 hover:text-white transition-colors uppercase {% if active_page in ['how_it_works', 'faq', 'terms', 'privacy', 'copyright', 'design', 'jobs'] %}text-white bg-white/10{% endif %}">
+            <span>More</span>
             <svg class="w-3 h-3 opacity-60" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
           </button>
           <div class="dropdown-menu hidden absolute top-full right-0 mt-2 w-52 dropdown-card p-2 shadow-2xl flex flex-col gap-1 z-50">
-            <a href="/how-it-works" onclick="playGlassTick()" class="px-3 py-2 rounded-lg text-xs hover:bg-white/10 flex items-center gap-2 text-white">
+            <a href="/jobs" onclick="playGlassTick()" class="px-3 py-2 rounded-xl text-xs hover:bg-white/10 flex items-center gap-2 text-white">
+              <span class="text-blue-400">📊</span>
+              <span>Queue Manager</span>
+            </a>
+            <a href="/how-it-works" onclick="playGlassTick()" class="px-3 py-2 rounded-xl text-xs hover:bg-white/10 flex items-center gap-2 text-white">
               <span class="text-cyan-400">💡</span>
               <span>How It Works</span>
             </a>
-            <a href="/faq" onclick="playGlassTick()" class="px-3 py-2 rounded-lg text-xs hover:bg-white/10 flex items-center gap-2 text-slate-300">
+            <a href="/faq" onclick="playGlassTick()" class="px-3 py-2 rounded-xl text-xs hover:bg-white/10 flex items-center gap-2 text-slate-300">
               <span class="text-blue-400">❓</span>
               <span>FAQ</span>
             </a>
-            <a href="/design" onclick="playGlassTick()" class="px-3 py-2 rounded-lg text-xs hover:bg-white/10 flex items-center gap-2 text-slate-300">
+            <a href="/design" onclick="playGlassTick()" class="px-3 py-2 rounded-xl text-xs hover:bg-white/10 flex items-center gap-2 text-slate-300">
               <span class="text-purple-400">🎨</span>
               <span>Design Showcase</span>
             </a>
             <div class="h-px bg-white/10 my-1"></div>
-            <a href="/terms" onclick="playGlassTick()" class="px-3 py-1.5 rounded-lg text-[11px] hover:bg-white/10 text-slate-400">Terms of Service</a>
-            <a href="/privacy" onclick="playGlassTick()" class="px-3 py-1.5 rounded-lg text-[11px] hover:bg-white/10 text-slate-400">Privacy Policy</a>
-            <a href="/copyright" onclick="playGlassTick()" class="px-3 py-1.5 rounded-lg text-[11px] hover:bg-white/10 text-slate-400">Copyright & DMCA</a>
+            <a href="/terms" onclick="playGlassTick()" class="px-3 py-1.5 rounded-xl text-[11px] hover:bg-white/10 text-slate-400">Terms of Service</a>
+            <a href="/privacy" onclick="playGlassTick()" class="px-3 py-1.5 rounded-xl text-[11px] hover:bg-white/10 text-slate-400">Privacy Policy</a>
+            <a href="/copyright" onclick="playGlassTick()" class="px-3 py-1.5 rounded-xl text-[11px] hover:bg-white/10 text-slate-400">Copyright &amp; DMCA</a>
           </div>
         </div>
       </div>
 
-      <!-- Right: Controls & Actions -->
+      <!-- Right: Action Controls (Open App, Jobs, History, Settings, Theme) -->
       <div class="r flex items-center gap-2">
-        <!-- Bright Blue Pill Action "Open App" -->
-        <a href="/downloader" class="hidden sm:inline-flex items-center px-4 py-1.5 rounded-full text-xs font-semibold bg-[#176BFF] hover:bg-[#2D8BFF] text-white shadow-[0_2px_12px_rgba(23,107,255,0.35)] transition-all">
+        <a href="/downloader" class="hidden sm:inline-flex items-center px-4 py-2 rounded-full text-xs font-extrabold tracking-wider uppercase btn-primary hover:scale-105 active:scale-95 transition-all shadow-[0_0_20px_rgba(37,99,255,0.4)]">
           Open App
         </a>
 
+        <!-- Jobs Queue Icon with Active Count Badge -->
+        <a href="/jobs" onclick="playGlassTick()" title="Job Queue Manager" class="relative w-9 h-9 rounded-full flex items-center justify-center glass text-slate-300 hover:text-white hover:border-blue-400/50 transition-all {% if active_page == 'jobs' %}ring-2 ring-blue-500 text-blue-400{% endif %}">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+          <span id="activeJobsBadge" class="hidden absolute -top-1 -right-1 min-w-4 h-4 px-1 rounded-full bg-blue-600 text-white text-[9px] font-bold flex items-center justify-center shadow-sm">1</span>
+        </a>
+
         <!-- Recent Session Drawer Button -->
-        <button type="button" onclick="event.preventDefault(); playGlassTick(); toggleSessionDrawer()" title="Recent session downloads" class="relative w-8 h-8 rounded-lg flex items-center justify-center bg-[#151C2A] border border-[rgba(110,145,205,0.2)] text-[#A5B0C4] hover:text-white hover:border-[#2D8BFF] transition-all cursor-pointer {% if active_page == 'recent' %}border-[#176BFF] text-white{% endif %}">
+        <button type="button" onclick="event.preventDefault(); playGlassTick(); toggleSessionDrawer()" title="Recent session downloads" class="relative w-9 h-9 rounded-full flex items-center justify-center glass text-slate-300 hover:text-white hover:border-cyan-400/50 transition-all cursor-pointer {% if active_page == 'recent' %}ring-2 ring-cyan-400{% endif %}">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-          <span data-history-count class="hidden absolute -top-1 -right-1 w-4 h-4 rounded-full bg-[#176BFF] text-white text-[9px] font-bold items-center justify-center shadow-sm">0</span>
+          <span data-history-count class="hidden absolute -top-1 -right-1 w-4 h-4 rounded-full bg-cyan-500 text-white text-[9px] font-bold items-center justify-center shadow-sm">0</span>
         </button>
 
         <!-- Settings Button -->
-        <a href="/settings" onclick="playGlassTick()" title="Settings" class="w-8 h-8 rounded-lg flex items-center justify-center bg-[#151C2A] border border-[rgba(110,145,205,0.2)] text-[#A5B0C4] hover:text-white transition-all {% if active_page == 'settings' %}border-[#176BFF] text-[#2D8BFF]{% endif %}">
+        <a href="/settings" onclick="playGlassTick()" title="Settings" class="w-9 h-9 rounded-full flex items-center justify-center glass text-slate-300 hover:text-white transition-all {% if active_page == 'settings' %}ring-2 ring-blue-500 text-blue-400{% endif %}">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
         </a>
 
-        <!-- Sound Toggle -->
-        <button type="button" data-toggle-sound title="Toggle audio feedback" class="w-8 h-8 rounded-lg hidden sm:flex items-center justify-center bg-[#151C2A] border border-[rgba(110,145,205,0.2)] text-[#A5B0C4] hover:text-white transition-all">
-          <svg data-sound-icon class="w-4 h-4 text-[#2D8BFF]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"></path></svg>
-        </button>
-
         <!-- Theme Toggle -->
-        <button type="button" data-toggle-theme aria-label="Toggle theme" class="w-8 h-8 rounded-lg flex items-center justify-center bg-[#151C2A] border border-[rgba(110,145,205,0.2)] text-[#A5B0C4] hover:text-amber-300 transition-all shadow-sm">
+        <button type="button" data-toggle-theme aria-label="Toggle theme" class="w-9 h-9 rounded-full flex items-center justify-center glass text-slate-300 hover:text-amber-300 transition-all shadow-sm">
           <span class="dark:hidden text-slate-400 text-xs">🌙</span>
           <span class="hidden dark:inline text-amber-300 text-xs">☀️</span>
         </button>
 
         <!-- Mobile Hamburger -->
-        <button type="button" id="mobileMenuBtn" aria-label="Toggle mobile menu" class="lg:hidden w-8 h-8 rounded-lg flex items-center justify-center bg-[#151C2A] border border-[rgba(110,145,205,0.2)] text-white ml-1">
+        <button type="button" id="mobileMenuBtn" aria-label="Toggle mobile menu" class="lg:hidden w-9 h-9 rounded-full flex items-center justify-center glass text-white ml-1">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
         </button>
       </div>
     </nav>
 
-    <!-- Mobile Drawer -->
-    <div id="mobileMenuDrawer" class="hidden lg:hidden p-4 bg-[#10141D] border-b border-[rgba(110,145,205,0.2)] shadow-2xl flex flex-col gap-2 text-sm font-semibold">
-      <a href="/" onclick="playGlassTick()" class="py-2.5 px-3 rounded-lg hover:bg-white/5 flex items-center gap-2.5 text-white">
-        <span class="w-2 h-2 rounded-full bg-[#176BFF]"></span>
+    <!-- Mobile Drawer (All 16 routes) -->
+    <div id="mobileMenuDrawer" class="hidden lg:hidden mt-2 glass glass-rim rounded-3xl p-4 shadow-2xl flex flex-col gap-2 text-sm font-semibold border border-white/10">
+      <a href="/" onclick="playGlassTick()" class="py-2.5 px-3 rounded-2xl hover:bg-white/10 flex items-center gap-2.5 text-white">
+        <span class="w-2 h-2 rounded-full bg-blue-500"></span>
         <span>Home</span>
       </a>
-      <a href="/downloader" onclick="playGlassTick()" class="py-2.5 px-3 rounded-lg hover:bg-white/5 flex items-center gap-2.5 text-blue-400">
+      <a href="/downloader" onclick="playGlassTick()" class="py-2.5 px-3 rounded-2xl hover:bg-white/10 flex items-center gap-2.5 text-blue-400">
         <span>⚡</span>
         <span>Downloader</span>
       </a>
-      <a href="/audio-studio" onclick="playGlassTick()" class="py-2.5 px-3 rounded-lg hover:bg-white/5 flex items-center gap-2.5 text-purple-400">
+      <a href="/audio-studio" onclick="playGlassTick()" class="py-2.5 px-3 rounded-2xl hover:bg-white/10 flex items-center gap-2.5 text-purple-400">
         <span>🎛</span>
-        <span>Audio Studio (Auto & Custom)</span>
+        <span>Audio Studio (Auto &amp; Custom)</span>
       </a>
-      <a href="/video-trimmer" onclick="playGlassTick()" class="py-2.5 px-3 rounded-lg hover:bg-white/5 flex items-center gap-2.5 text-emerald-400">
+      <a href="/video-trimmer" onclick="playGlassTick()" class="py-2.5 px-3 rounded-2xl hover:bg-white/10 flex items-center gap-2.5 text-emerald-400">
         <span>✂️</span>
         <span>Video Trimmer</span>
       </a>
-      <a href="/auto-clip" onclick="playGlassTick()" class="py-2.5 px-3 rounded-lg hover:bg-white/5 flex items-center gap-2.5 text-pink-400">
+      <a href="/auto-clip" onclick="playGlassTick()" class="py-2.5 px-3 rounded-2xl hover:bg-white/10 flex items-center gap-2.5 text-pink-400">
         <span>📱</span>
         <span>Auto Clip Studio</span>
       </a>
-      <a href="/auto-clip/editor" onclick="playGlassTick()" class="py-2.5 px-3 rounded-lg hover:bg-white/5 flex items-center gap-2.5 text-blue-400">
+      <a href="/auto-clip/editor" onclick="playGlassTick()" class="py-2.5 px-3 rounded-2xl hover:bg-white/10 flex items-center gap-2.5 text-blue-400">
         <span>🎬</span>
         <span>Auto Clip Editor</span>
       </a>
-      <div class="h-px bg-white/10 my-1"></div>
-      <a href="/jobs" onclick="playGlassTick()" class="py-2 px-3 rounded-lg hover:bg-white/5 flex items-center gap-2 text-xs text-slate-300">
+      <a href="/jobs" onclick="playGlassTick()" class="py-2 px-3 rounded-xl hover:bg-white/10 flex items-center gap-2 text-xs text-slate-300">
         <span>Queue Manager</span>
       </a>
-      <a href="/recent" onclick="playGlassTick()" class="py-2 px-3 rounded-lg hover:bg-white/5 flex items-center gap-2 text-xs text-slate-300">
+      <a href="/recent" onclick="playGlassTick()" class="py-2 px-3 rounded-xl hover:bg-white/10 flex items-center gap-2 text-xs text-slate-300">
         <span>Recent Downloads</span>
       </a>
-      <a href="/settings" onclick="playGlassTick()" class="py-2 px-3 rounded-lg hover:bg-white/5 flex items-center gap-2 text-xs text-slate-300">
+      <a href="/settings" onclick="playGlassTick()" class="py-2 px-3 rounded-xl hover:bg-white/10 flex items-center gap-2 text-xs text-slate-300">
         <span>Settings</span>
       </a>
-      <a href="/how-it-works" onclick="playGlassTick()" class="py-2 px-3 rounded-lg hover:bg-white/5 flex items-center gap-2 text-xs text-slate-300">
+      <a href="/how-it-works" onclick="playGlassTick()" class="py-2 px-3 rounded-xl hover:bg-white/10 flex items-center gap-2 text-xs text-slate-300">
         <span>How It Works</span>
       </a>
-      <a href="/faq" onclick="playGlassTick()" class="py-2 px-3 rounded-lg hover:bg-white/5 flex items-center gap-2 text-xs text-slate-300">
-        <span>Help & FAQ</span>
+      <a href="/faq" onclick="playGlassTick()" class="py-2 px-3 rounded-xl hover:bg-white/10 flex items-center gap-2 text-xs text-slate-300">
+        <span>Help &amp; FAQ</span>
       </a>
-      <a href="/design" onclick="playGlassTick()" class="py-2 px-3 rounded-lg hover:bg-white/5 flex items-center gap-2 text-xs text-slate-300">
+      <a href="/design" onclick="playGlassTick()" class="py-2 px-3 rounded-xl hover:bg-white/10 flex items-center gap-2 text-xs text-slate-300">
         <span>Design Showcase</span>
       </a>
     </div>
   </header>
 
-  <!-- Flexible Page Shell Content Block (Section 5) -->
-  <main class="flex-1 w-full">
-    <div class="page-shell {% block page_shell_class %}page-shell-home{% endblock %}">
-      {% block content %}{% endblock %}
-    </div>
+  <!-- Page Content Block -->
+  <main class="flex-1 flex flex-col justify-between py-6 px-3 sm:px-6 max-w-6xl mx-auto w-full">
+    {% block content %}{% endblock %}
   </main>
 
-  <!-- Global Dark Workspace Footer -->
-  <footer class="w-full border-t border-[rgba(110,145,205,0.15)] bg-[#0B0D12] py-8 text-center text-xs text-[#707D94] mt-12">
-    <div class="max-w-[1920px] mx-auto px-4 sm:px-8 flex flex-col md:flex-row items-center justify-between gap-4 mb-4">
-      <div class="flex items-center gap-2.5">
-        <span class="logo-playmark !w-5 !h-5"></span>
-        <span class="font-bold text-sm text-white">ClipGlass</span>
-        <span class="text-[#707D94] hidden sm:inline">· Dark Neon Workspace · Ephemeral Media Engine</span>
+  <!-- Global Liquid Glass Footer -->
+  <footer class="w-full max-w-6xl mx-auto px-4 py-10 border-t border-white/10 mt-16 text-center text-xs text-slate-400">
+    <div class="flex flex-col md:flex-row items-center justify-between gap-6 mb-6">
+      <div class="flex items-center gap-3">
+        <span class="w-6 h-6 rounded-full bg-[#D91F2C] shadow-[0_0_12px_rgba(217,31,44,0.6)] flex items-center justify-center shrink-0">
+          <span class="ml-0.5 border-l-[6px] border-l-white border-y-[3.5px] border-y-transparent"></span>
+        </span>
+        <span class="font-['Rubik'] font-bold text-white text-base">ClipGlass</span>
+        <span class="text-slate-500 hidden sm:inline">· Everything media · One workspace</span>
       </div>
-      <div class="flex flex-wrap items-center justify-center gap-4 text-xs font-medium text-[#A5B0C4]">
-        <a href="/downloader" class="hover:text-white transition-colors">Downloader</a>
-        <a href="/audio-studio" class="hover:text-white transition-colors">Studio</a>
-        <a href="/video-trimmer" class="hover:text-white transition-colors">Trimmer</a>
-        <a href="/auto-clip" class="hover:text-white transition-colors">Auto Clip</a>
-        <a href="/jobs" class="hover:text-white transition-colors">Jobs</a>
-        <a href="/recent" class="hover:text-white transition-colors">Recent</a>
+      <div class="flex flex-wrap items-center justify-center gap-5 text-xs font-medium text-slate-400">
+        <a href="/downloader" class="hover:text-cyan-400 transition-colors">Downloader</a>
+        <a href="/audio-studio" class="hover:text-purple-400 transition-colors">Studio</a>
+        <a href="/video-trimmer" class="hover:text-emerald-400 transition-colors">Trimmer</a>
+        <a href="/auto-clip" class="hover:text-pink-400 transition-colors">Auto Clip</a>
+        <a href="/jobs" class="hover:text-cyan-400 transition-colors">Jobs</a>
+        <a href="/recent" class="hover:text-amber-400 transition-colors">Recent</a>
         <a href="/how-it-works" class="hover:text-white transition-colors">How It Works</a>
         <a href="/design" class="hover:text-white transition-colors">Design</a>
         <a href="/settings" class="hover:text-white transition-colors">Settings</a>
         <a href="/faq" class="hover:text-white transition-colors">FAQ</a>
       </div>
     </div>
-    <div class="flex flex-wrap items-center justify-center gap-4 text-[11px] text-[#707D94] mb-3">
+    <div class="flex flex-wrap items-center justify-center gap-4 text-[11px] text-slate-500 mb-4">
       <a href="/terms" class="hover:text-slate-300 transition-colors">Terms of Service</a>
       <span>•</span>
       <a href="/privacy" class="hover:text-slate-300 transition-colors">Privacy Policy</a>
@@ -304,32 +260,32 @@
       <span>•</span>
       <span>15-Minute Ephemeral Storage Purge</span>
     </div>
-    <p class="text-[11px] text-[#515C70] max-w-2xl mx-auto px-4">
+    <p class="text-[11px] text-slate-600 max-w-2xl mx-auto">
       Disclaimer: ClipGlass is an ephemeral browser-based media utility. All downloaded and processed media are automatically deleted after 15 minutes. Users are responsible for complying with content copyrights.
     </p>
   </footer>
 
   <!-- Persistent Session History Slide-out Drawer -->
   <div id="sessionHistoryDrawer" class="hidden fixed inset-0 z-[200]">
-    <div class="absolute inset-0 bg-black/70 backdrop-blur-sm" onclick="toggleSessionDrawer()"></div>
-    <div class="absolute top-0 right-0 bottom-0 w-full max-w-md bg-[#10141D] p-6 shadow-2xl flex flex-col justify-between border-l border-[rgba(110,145,205,0.2)] overflow-y-auto">
+    <div class="absolute inset-0 bg-black/60 backdrop-blur-md" onclick="toggleSessionDrawer()"></div>
+    <div class="absolute top-0 right-0 bottom-0 w-full max-w-md bg-[#0d1226]/95 dark:bg-[#080B1A]/95 backdrop-blur-2xl p-6 shadow-2xl flex flex-col justify-between border-l border-white/10 overflow-y-auto">
       <div>
-        <div class="flex items-center justify-between pb-4 border-b border-[rgba(110,145,205,0.15)]">
+        <div class="flex items-center justify-between pb-4 border-b border-white/10">
           <div class="flex items-center gap-2.5">
-            <span class="w-8 h-8 rounded-lg bg-[#176BFF]/20 text-[#2D8BFF] flex items-center justify-center font-bold">⏱</span>
+            <span class="w-8 h-8 rounded-xl bg-cyan-500/20 text-cyan-400 flex items-center justify-center font-bold">⏱</span>
             <div>
-              <h2 class="font-bold text-base text-white">Recent Session</h2>
-              <p class="text-[11px] text-[#707D94]">15-minute ephemeral files</p>
+              <h2 class="font-extrabold text-base text-white">Recent Session</h2>
+              <p class="text-[11px] text-slate-400">15-minute ephemeral files</p>
             </div>
           </div>
-          <button type="button" onclick="toggleSessionDrawer()" class="w-7 h-7 rounded-lg bg-[#151C2A] border border-[rgba(110,145,205,0.2)] flex items-center justify-center text-xs text-[#A5B0C4] hover:text-white cursor-pointer">✕</button>
+          <button type="button" onclick="toggleSessionDrawer()" class="w-7 h-7 rounded-full glass hover:bg-white/10 flex items-center justify-center text-xs text-slate-400 cursor-pointer">✕</button>
         </div>
         <div id="sessionDrawerList" class="mt-4 flex flex-col gap-3">
           <!-- Populated dynamically -->
         </div>
       </div>
-      <div class="pt-4 border-t border-[rgba(110,145,205,0.15)] flex items-center justify-between">
-        <a href="/recent" class="text-xs font-bold text-[#2D8BFF] hover:underline">View All History →</a>
+      <div class="pt-4 border-t border-white/10 flex items-center justify-between">
+        <a href="/recent" class="text-xs font-bold text-cyan-400 hover:underline">View All History →</a>
         <button type="button" onclick="clearSessionHistory()" class="text-[11px] font-semibold text-rose-400 hover:underline cursor-pointer">Clear Session</button>
       </div>
     </div>

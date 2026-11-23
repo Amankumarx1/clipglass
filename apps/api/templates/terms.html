@@ -2,95 +2,95 @@
 
 {% block title %}Terms of Service — ClipGlass{% endblock %}
 
-{% block page_shell_class %}page-shell-home{% endblock %}
-
 {% block content %}
-<div class="w-full max-w-5xl mx-auto flex flex-col gap-8 py-2">
-  <!-- Header Banner (Screen 14: Terms of Service) -->
-  <div class="border-b border-[rgba(110,145,205,0.18)] pb-4">
-    <h1 class="text-2xl sm:text-3xl font-bold tracking-tight text-white mb-1">Terms of Service</h1>
-    <p class="text-xs text-[#707D94]">Please read our terms carefully before using ClipGlass tools.</p>
+<div class="w-full flex flex-col gap-8 bg-geom-terms">
+  <!-- Header Banner -->
+  <div class="border-b border-white/10 pb-4">
+    <h1 class="text-3xl font-extrabold tracking-tight text-white mb-2">Terms of Service</h1>
+    <p class="text-xs text-slate-400">Effective Date: November 2026 • Please read these terms carefully before using ClipGlass.</p>
   </div>
 
   <!-- Main Editorial Layout (Screen 14) -->
   <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
     <!-- Left Navigation / Table of Contents -->
-    <div class="lg:col-span-4 bg-[#121722] border border-[rgba(110,145,205,0.2)] rounded-2xl p-4 sticky top-20 flex flex-col gap-1.5">
-      <span class="text-[10px] font-bold uppercase tracking-wider text-[#707D94] px-2 mb-1">Contents</span>
-      <a href="#intro" class="px-3 py-2 rounded-lg bg-[#176BFF]/15 text-[#2D8BFF] text-xs font-semibold flex items-center justify-between">
-        <span>1. Introduction</span>
-        <span>→</span>
-      </a>
-      <a href="#license" class="px-3 py-2 rounded-lg text-[#A5B0C4] hover:text-white hover:bg-white/5 text-xs font-semibold flex items-center justify-between transition-colors">
-        <span>2. Use License</span>
-        <span>→</span>
-      </a>
-      <a href="#conduct" class="px-3 py-2 rounded-lg text-[#A5B0C4] hover:text-white hover:bg-white/5 text-xs font-semibold flex items-center justify-between transition-colors">
-        <span>3. User Conduct</span>
-        <span>→</span>
-      </a>
-      <a href="#limitations" class="px-3 py-2 rounded-lg text-[#A5B0C4] hover:text-white hover:bg-white/5 text-xs font-semibold flex items-center justify-between transition-colors">
-        <span>4. Limitations</span>
-        <span>→</span>
-      </a>
-      <a href="#contact" class="px-3 py-2 rounded-lg text-[#A5B0C4] hover:text-white hover:bg-white/5 text-xs font-semibold flex items-center justify-between transition-colors">
-        <span>5. Contact</span>
-        <span>→</span>
-      </a>
+    <div class="lg:col-span-4 glass rounded-3xl p-6 border border-white/10 sticky top-24">
+      <h2 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">Contents</h2>
+      <nav class="flex flex-col gap-2 text-xs font-semibold">
+        <a href="#acceptance" class="p-2.5 rounded-xl bg-white/10 text-cyan-300 flex items-center justify-between">
+          <span>1. Acceptance of Terms</span>
+          <span>→</span>
+        </a>
+        <a href="#license" class="p-2.5 rounded-xl hover:bg-white/5 text-slate-400 hover:text-white transition-colors flex items-center justify-between">
+          <span>2. Use License</span>
+          <span>→</span>
+        </a>
+        <a href="#responsibilities" class="p-2.5 rounded-xl hover:bg-white/5 text-slate-400 hover:text-white transition-colors flex items-center justify-between">
+          <span>3. User Responsibilities</span>
+          <span>→</span>
+        </a>
+        <a href="#prohibited" class="p-2.5 rounded-xl hover:bg-white/5 text-slate-400 hover:text-white transition-colors flex items-center justify-between">
+          <span>4. Prohibited Activities</span>
+          <span>→</span>
+        </a>
+        <a href="#liability" class="p-2.5 rounded-xl hover:bg-white/5 text-slate-400 hover:text-white transition-colors flex items-center justify-between">
+          <span>5. Limitation of Liability</span>
+          <span>→</span>
+        </a>
+      </nav>
+
+      <!-- Decorative Document Emblem -->
+      <div class="mt-8 p-4 rounded-2xl bg-cyan-500/10 border border-cyan-500/20 text-center flex flex-col items-center">
+        <div class="w-12 h-12 rounded-xl bg-cyan-500/20 text-cyan-300 flex items-center justify-center text-xl mb-2 shadow">📄</div>
+        <div class="text-xs font-bold text-white">Ephemeral Utility</div>
+        <div class="text-[10px] text-slate-400 mt-0.5">Zero permanent storage • 15m file purge</div>
+      </div>
     </div>
 
     <!-- Right: Editorial Clauses Pane -->
-    <div class="lg:col-span-8 bg-[#121722] border border-[rgba(110,145,205,0.2)] rounded-2xl p-6 sm:p-8 flex flex-col gap-6 text-xs text-[#A5B0C4] leading-relaxed">
+    <div class="lg:col-span-8 glass rounded-3xl p-8 border border-white/10 flex flex-col gap-8 text-xs text-slate-300 leading-relaxed">
       <!-- Section 1 -->
-      <section id="intro" class="flex flex-col gap-2">
-        <h3 class="text-sm font-bold text-white text-[#2D8BFF]">1. Introduction (Acceptance of Terms)</h3>
+      <section id="acceptance" class="flex flex-col gap-2">
+        <h3 class="text-base font-bold text-white text-cyan-300">1. Acceptance of Terms</h3>
         <p>
-          By accessing ClipGlass, you agree to these Terms of Service. These terms govern your use of our services and your relationship with ClipGlass.
+          By accessing and using ClipGlass ("the Service"), you agree to be bound by these Terms of Service and all applicable laws and regulations. If you do not agree with any of these terms, you are prohibited from using or accessing this site.
         </p>
       </section>
 
       <!-- Section 2 -->
       <section id="license" class="flex flex-col gap-2">
-        <h3 class="text-sm font-bold text-white text-[#2D8BFF]">2. Use License</h3>
+        <h3 class="text-base font-bold text-white text-cyan-300">2. Use License</h3>
         <p>
-          Permission is granted to use ClipGlass for personal, non-commercial, and transformative media editing purposes. You may process media files for trimming, audio enhancement, and short-form creation provided that you hold the necessary intellectual property rights.
+          Permission is granted to use ClipGlass for personal, non-commercial, and legitimate transformative editing purposes. You may process media files for trimming, audio enhancement, formatting, and short-form creation provided that you hold the necessary intellectual property rights or fair-use authorizations.
         </p>
       </section>
 
       <!-- Section 3 -->
-      <section id="conduct" class="flex flex-col gap-2">
-        <h3 class="text-sm font-bold text-white text-[#2D8BFF]">3. User Conduct &amp; Responsibilities</h3>
+      <section id="responsibilities" class="flex flex-col gap-2">
+        <h3 class="text-base font-bold text-white text-cyan-300">3. User Responsibilities &amp; Copyright Compliance</h3>
         <p>
-          You represent that you own or have obtained all legal licenses, permissions, and consents required to process content using ClipGlass. ClipGlass operates as a neutral technological utility and does not maintain a permanent directory of user content.
+          You represent and warrant that you own or have obtained all legal licenses, permissions, and consents required to process and extract content using ClipGlass. ClipGlass operates as a neutral technological tool and does not maintain a permanent directory or index of user content.
         </p>
       </section>
 
       <!-- Section 4 -->
-      <section id="limitations" class="flex flex-col gap-2">
-        <h3 class="text-sm font-bold text-white text-[#2D8BFF]">4. Limitations of Liability</h3>
-        <p>
-          In no event shall ClipGlass or its developers be liable for any damages arising out of the use or inability to use the platform. Media files are stored ephemerally and automatically purged after 15 minutes.
-        </p>
+      <section id="prohibited" class="flex flex-col gap-2">
+        <h3 class="text-base font-bold text-white text-cyan-300">4. Prohibited Activities</h3>
+        <p>When using ClipGlass, you expressly agree not to:</p>
+        <ul class="list-disc pl-5 space-y-1 text-slate-400">
+          <li>Infringe upon copyrights, trademarks, or proprietary rights of third parties.</li>
+          <li>Circumvent technological DRM or anti-piracy protection mechanisms beyond lawful exemptions.</li>
+          <li>Perform automated scraping, high-volume denial of service, or SSRF attacks against host infrastructure.</li>
+          <li>Distribute malicious payloads, spyware, or offensive illegal media through the platform.</li>
+        </ul>
       </section>
 
       <!-- Section 5 -->
-      <section id="contact" class="flex flex-col gap-2">
-        <h3 class="text-sm font-bold text-white text-[#2D8BFF]">5. Contact Information</h3>
+      <section id="liability" class="flex flex-col gap-2">
+        <h3 class="text-base font-bold text-white text-cyan-300">5. Limitation of Liability</h3>
         <p>
-          If you have any questions about these Terms of Service, please reach out via our community documentation and support channels.
+          In no event shall ClipGlass, its developers, or affiliates be liable for any damages (including, without limitation, damages for loss of data, copyright disputes, or business interruption) arising out of the use or inability to use the platform. Media files are stored ephemerally and automatically purged after 15 minutes.
         </p>
       </section>
-
-      <!-- Agreement Checkbox & Continue Button (Screen 14) -->
-      <div class="pt-4 border-t border-[rgba(110,145,205,0.15)] flex flex-col sm:flex-row items-center justify-between gap-4">
-        <label class="flex items-center gap-2 cursor-pointer select-none">
-          <input type="checkbox" id="termsCheck" checked class="w-4 h-4 rounded text-[#176BFF] focus:ring-0">
-          <span class="text-xs text-white font-medium">I agree to the terms</span>
-        </label>
-        <a href="/downloader" class="px-6 py-2 rounded-full bg-[#176BFF] hover:bg-[#2D8BFF] text-white font-semibold text-xs shadow transition-all">
-          Continue
-        </a>
-      </div>
     </div>
   </div>
 </div>

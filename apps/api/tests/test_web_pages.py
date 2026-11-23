@@ -37,15 +37,16 @@ def test_audio_studio_page():
 
 # 04. Video Trimmer
 def test_video_trimmer_page():
-    response = client.get("/video-trimmer")
-    assert response.status_code == 200
-    assert "Precision Video Trimmer" in response.text
-    assert "+ Import Video" in response.text
-    assert "videoFileInput" in response.text
-    assert "videoImportDrawer" in response.text
-    assert "Upload from PC" in response.text
-    assert "quickVideoUrlInput" in response.text
-    assert "fetchVideoFromUrl" in response.text
+    for route in ["/video-trimmer", "/trimmer"]:
+        response = client.get(route)
+        assert response.status_code == 200
+        assert "Precision Video Trimmer" in response.text
+        assert "+ Import Video" in response.text
+        assert "videoFileInput" in response.text
+        assert "videoImportDrawer" in response.text
+        assert "Upload from PC" in response.text
+        assert "quickVideoUrlInput" in response.text
+        assert "fetchVideoFromUrl" in response.text
 
 # 05. Auto Clip Studio
 def test_auto_clip_page():
@@ -58,11 +59,12 @@ def test_auto_clip_page():
 
 # 06. Auto Clip Editor
 def test_auto_clip_editor_page():
-    response = client.get("/auto-clip/editor")
-    assert response.status_code == 200
-    assert "Auto Clip Editor" in response.text
-    assert "9:16 SAFE ZONE" in response.text
-    assert "exportClipBtn" in response.text
+    for route in ["/auto-clip/editor", "/auto-clip/edit/CLG-9988"]:
+        response = client.get(route)
+        assert response.status_code == 200
+        assert "Auto Clip Editor" in response.text
+        assert "9:16 SAFE ZONE" in response.text
+        assert "exportClipBtn" in response.text
 
 # 07. Queue Manager / Jobs
 def test_jobs_page():
@@ -139,3 +141,15 @@ def test_static_css_and_js():
     js_res = client.get("/static/js/navbar.js")
     assert js_res.status_code == 200
     assert "playGlassTick" in js_res.text
+
+# 17. 404 Page
+def test_not_found_page():
+    res = client.get("/404")
+    assert res.status_code == 404
+    assert "404" in res.text
+    assert "vanished" in res.text or "Back to Home" in res.text
+
+    # Unknown HTML route returns 404 page
+    res_html = client.get("/some-random-unknown-page", headers={"accept": "text/html"})
+    assert res_html.status_code == 404
+    assert "404" in res_html.text

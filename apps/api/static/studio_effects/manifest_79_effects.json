@@ -1,0 +1,541 @@
+[
+  {
+    "index": 1,
+    "filename": "01_M01_Lush_Plate_Reverb.mp3",
+    "effect": "M01_Lush_Plate_Reverb",
+    "filter": "aecho=0.8:0.88:40|80:0.4|0.3,lowpass=f=12000",
+    "size": 1210041
+  },
+  {
+    "index": 2,
+    "filename": "02_M02_Cathedral_Hall.mp3",
+    "effect": "M02_Cathedral_Hall",
+    "filter": "aecho=0.8:0.9:60|120|180:0.5|0.35|0.25",
+    "size": 1213881
+  },
+  {
+    "index": 3,
+    "filename": "03_M03_Ping_Pong_Delay.mp3",
+    "effect": "M03_Ping_Pong_Delay",
+    "filter": "aecho=0.8:0.7:280|560:0.4|0.25",
+    "size": 1229241
+  },
+  {
+    "index": 4,
+    "filename": "04_M04_Tape_Echo_1974.mp3",
+    "effect": "M04_Tape_Echo_1974",
+    "filter": "aecho=0.8:0.65:220:0.4,lowpass=f=6000",
+    "size": 1215801
+  },
+  {
+    "index": 5,
+    "filename": "05_M05_Vintage_Chorus.mp3",
+    "effect": "M05_Vintage_Chorus",
+    "filter": "chorus=0.7:0.9:55:0.4:0.25:2",
+    "size": 1209081
+  },
+  {
+    "index": 6,
+    "filename": "06_M06_Optical_Flanger.mp3",
+    "effect": "M06_Optical_Flanger",
+    "filter": "flanger=delay=3:depth=3:regen=65:width=80:speed=0.3",
+    "size": 1206201
+  },
+  {
+    "index": 7,
+    "filename": "07_M07_Harmonic_Tremolo.mp3",
+    "effect": "M07_Harmonic_Tremolo",
+    "filter": "tremolo=f=4.5:d=0.65",
+    "size": 1206201
+  },
+  {
+    "index": 8,
+    "filename": "08_M08_Parametric_10Band_EQ.mp3",
+    "effect": "M08_Parametric_10Band_EQ",
+    "filter": "equalizer=f=60:width_type=o:w=1:g=2.5,equalizer=f=350:width_type=o:w=1:g=-2,equalizer=f=10000:width_type=o:w=1:g=3",
+    "size": 1206201
+  },
+  {
+    "index": 9,
+    "filename": "09_M09_Warm_Analog_Pultec.mp3",
+    "effect": "M09_Warm_Analog_Pultec",
+    "filter": "bass=g=4:f=60,treble=g=3:f=10000",
+    "size": 1206201
+  },
+  {
+    "index": 10,
+    "filename": "10_M10_Air_Band_20kHz.mp3",
+    "effect": "M10_Air_Band_20kHz",
+    "filter": "treble=g=4.5:f=16000",
+    "size": 1206201
+  },
+  {
+    "index": 11,
+    "filename": "11_M11_Bus_Compressor.mp3",
+    "effect": "M11_Bus_Compressor",
+    "filter": "acompressor=threshold=-18dB:ratio=3.2:attack=10:release=200",
+    "size": 1206201
+  },
+  {
+    "index": 12,
+    "filename": "12_M12_Brickwall_Limiter.mp3",
+    "effect": "M12_Brickwall_Limiter",
+    "filter": "alimiter=limit=-0.1dB:level=true:attack=2:release=50",
+    "size": 1206201
+  },
+  {
+    "index": 13,
+    "filename": "13_M13_Optical_Leveler_LA2A.mp3",
+    "effect": "M13_Optical_Leveler_LA2A",
+    "filter": "acompressor=threshold=-22dB:ratio=2.5:attack=15:release=350",
+    "size": 1206201
+  },
+  {
+    "index": 14,
+    "filename": "14_M14_Tube_Saturation.mp3",
+    "effect": "M14_Tube_Saturation",
+    "filter": "aexciter=level_in=1.2:level_out=0.9:amount=3",
+    "size": 1206201
+  },
+  {
+    "index": 15,
+    "filename": "15_M15_Bitcrusher_LoFi.mp3",
+    "effect": "M15_Bitcrusher_LoFi",
+    "filter": "acrusher=bits=8:samples=4:mode=log",
+    "size": 1206201
+  },
+  {
+    "index": 16,
+    "filename": "16_M16_Haas_Stereo_Widener.mp3",
+    "effect": "M16_Haas_Stereo_Widener",
+    "filter": "stereotools=mlev=0.85:slev=1.4",
+    "size": 1206201
+  },
+  {
+    "index": 17,
+    "filename": "17_M17_Bass_Mono_Maker.mp3",
+    "effect": "M17_Bass_Mono_Maker",
+    "filter": "stereotools=mlev=1:slev=1,highpass=f=20",
+    "size": 1206201
+  },
+  {
+    "index": 18,
+    "filename": "18_M18_De_Esser_Sibilance.mp3",
+    "effect": "M18_De_Esser_Sibilance",
+    "filter": "deesser=i=0.8:m=0.5:f=0.5:s=o",
+    "size": 1206201
+  },
+  {
+    "index": 19,
+    "filename": "19_M19_Vocal_Clarity_Exciter.mp3",
+    "effect": "M19_Vocal_Clarity_Exciter",
+    "filter": "equalizer=f=3200:width_type=o:w=1.2:g=3.5,treble=g=2:f=8000",
+    "size": 1206201
+  },
+  {
+    "index": 20,
+    "filename": "20_A01_Slow_Mo.mp3",
+    "effect": "A01_Slow_Mo",
+    "filter": "atempo=0.80",
+    "size": 1506681
+  },
+  {
+    "index": 21,
+    "filename": "21_A02_Slowed_Reverb.mp3",
+    "effect": "A02_Slowed_Reverb",
+    "filter": "atempo=0.85,asetrate=48000*0.9,aecho=0.8:0.85:80|160:0.4|0.25",
+    "size": 1581031
+  },
+  {
+    "index": 22,
+    "filename": "22_A03_Speed_Up_Nightcore.mp3",
+    "effect": "A03_Speed_Up_Nightcore",
+    "filter": "atempo=1.25,asetrate=48000*1.15,treble=g=2.5:f=12000",
+    "size": 842361
+  },
+  {
+    "index": 23,
+    "filename": "23_A04_Tempo_Match_128BPM.mp3",
+    "effect": "A04_Tempo_Match_128BPM",
+    "filter": "atempo=1.05",
+    "size": 1150521
+  },
+  {
+    "index": 24,
+    "filename": "24_A05_Key_Transpose_2Semis.mp3",
+    "effect": "A05_Key_Transpose_2Semis",
+    "filter": "asetrate=48000*1.12246,atempo=0.8909",
+    "size": 1206201
+  },
+  {
+    "index": 25,
+    "filename": "25_A06_Half_Time.mp3",
+    "effect": "A06_Half_Time",
+    "filter": "atempo=0.5,lowpass=f=5000",
+    "size": 2406201
+  },
+  {
+    "index": 26,
+    "filename": "26_A07_Reverse.mp3",
+    "effect": "A07_Reverse",
+    "filter": "areverse",
+    "size": 1206201
+  },
+  {
+    "index": 27,
+    "filename": "27_A08_Tape_Stop_Vinyl_Brake.mp3",
+    "effect": "A08_Tape_Stop_Vinyl_Brake",
+    "filter": "asetrate=48000*0.75,atempo=1.33",
+    "size": 1211001
+  },
+  {
+    "index": 28,
+    "filename": "28_A09_Smart_Ambience_Fit.mp3",
+    "effect": "A09_Smart_Ambience_Fit",
+    "filter": "aecho=0.85:0.8:25|50:0.25|0.15",
+    "size": 1209081
+  },
+  {
+    "index": 29,
+    "filename": "29_A10_Club_Room_Simulator.mp3",
+    "effect": "A10_Club_Room_Simulator",
+    "filter": "aecho=0.8:0.75:35|70:0.35|0.2,lowpass=f=5500",
+    "size": 1209081
+  },
+  {
+    "index": 30,
+    "filename": "30_A11_Concert_Arena_Bloom.mp3",
+    "effect": "A11_Concert_Arena_Bloom",
+    "filter": "aecho=0.75:0.85:120|240|360:0.45|0.3|0.2",
+    "size": 1220601
+  },
+  {
+    "index": 31,
+    "filename": "31_A12_Vocal_Depth_Creator.mp3",
+    "effect": "A12_Vocal_Depth_Creator",
+    "filter": "aecho=0.85:0.7:15|30:0.2|0.1,equalizer=f=2500:width_type=o:w=1:g=2",
+    "size": 1208121
+  },
+  {
+    "index": 32,
+    "filename": "32_A13_Sunset_LoFi_Space.mp3",
+    "effect": "A13_Sunset_LoFi_Space",
+    "filter": "aecho=0.8:0.7:45|90:0.3|0.15,lowpass=f=4500,tremolo=f=0.8:d=0.25",
+    "size": 1210041
+  },
+  {
+    "index": 33,
+    "filename": "33_A14_80s_Gated_Verb.mp3",
+    "effect": "A14_80s_Gated_Verb",
+    "filter": "aecho=0.8:0.9:50|100:0.5|0.35,agate=threshold=-30dB:ratio=10:release=120",
+    "size": 1211001
+  },
+  {
+    "index": 34,
+    "filename": "34_A15_Shimmering_Octave_Verb.mp3",
+    "effect": "A15_Shimmering_Octave_Verb",
+    "filter": "aecho=0.8:0.8:60|120:0.4|0.25,treble=g=5:f=12000",
+    "size": 1211001
+  },
+  {
+    "index": 35,
+    "filename": "35_A16_50_60Hz_Hum_Killer.mp3",
+    "effect": "A16_50_60Hz_Hum_Killer",
+    "filter": "equalizer=f=60:width_type=q:w=25:g=-30,equalizer=f=120:width_type=q:w=25:g=-24,equalizer=f=180:width_type=q:w=25:g=-18",
+    "size": 1206201
+  },
+  {
+    "index": 36,
+    "filename": "36_A17_Harsh_Resonance_Tamer.mp3",
+    "effect": "A17_Harsh_Resonance_Tamer",
+    "filter": "equalizer=f=3500:width_type=q:w=6:g=-4.5,equalizer=f=5800:width_type=q:w=6:g=-4",
+    "size": 1206201
+  },
+  {
+    "index": 38,
+    "filename": "38_A19_Room_Echo_Reducer.mp3",
+    "effect": "A19_Room_Echo_Reducer",
+    "filter": "dynaudnorm=f=75:g=15:p=0.9",
+    "size": 1206201
+  },
+  {
+    "index": 39,
+    "filename": "39_A20_Clip_Repair_Declip.mp3",
+    "effect": "A20_Clip_Repair_Declip",
+    "filter": "alimiter=limit=-1.0dB:level=true:attack=1:release=50",
+    "size": 1206201
+  },
+  {
+    "index": 40,
+    "filename": "40_A21_Breath_Plosive_Reducer.mp3",
+    "effect": "A21_Breath_Plosive_Reducer",
+    "filter": "highpass=f=95,equalizer=f=120:width_type=q:w=2:g=-3",
+    "size": 1206201
+  },
+  {
+    "index": 41,
+    "filename": "41_A22_DC_Offset_Remover.mp3",
+    "effect": "A22_DC_Offset_Remover",
+    "filter": "highpass=f=15",
+    "size": 1206201
+  },
+  {
+    "index": 42,
+    "filename": "42_A23_Silence_Trimmer_Tightener.mp3",
+    "effect": "A23_Silence_Trimmer_Tightener",
+    "filter": "silenceremove=stop_periods=-1:stop_duration=0.5:stop_threshold=-45dB",
+    "size": 1206201
+  },
+  {
+    "index": 43,
+    "filename": "43_A24_Streaming_Target_14LUFS.mp3",
+    "effect": "A24_Streaming_Target_14LUFS",
+    "filter": "loudnorm=I=-14:LRA=7:TP=-1.0",
+    "size": 1206201
+  },
+  {
+    "index": 44,
+    "filename": "44_A25_Club_Banger_9LUFS.mp3",
+    "effect": "A25_Club_Banger_9LUFS",
+    "filter": "loudnorm=I=-9:LRA=5:TP=-0.5,bass=g=3:f=65",
+    "size": 1206201
+  },
+  {
+    "index": 45,
+    "filename": "45_A26_Broadcast_Voice_16LUFS.mp3",
+    "effect": "A26_Broadcast_Voice_16LUFS",
+    "filter": "loudnorm=I=-16:LRA=8:TP=-1.0,acompressor=threshold=-20dB:ratio=2.5",
+    "size": 1206201
+  },
+  {
+    "index": 46,
+    "filename": "46_A27_Dynamic_Range_Preserver_18LUFS.mp3",
+    "effect": "A27_Dynamic_Range_Preserver_18LUFS",
+    "filter": "loudnorm=I=-18:LRA=11:TP=-1.5",
+    "size": 1206201
+  },
+  {
+    "index": 47,
+    "filename": "47_A28_Punch_Transient_Snap.mp3",
+    "effect": "A28_Punch_Transient_Snap",
+    "filter": "acompressor=threshold=-15dB:ratio=4:attack=25:release=100",
+    "size": 1206201
+  },
+  {
+    "index": 49,
+    "filename": "49_A30_Sidechain_Pump_Generator.mp3",
+    "effect": "A30_Sidechain_Pump_Generator",
+    "filter": "tremolo=f=2.1:d=0.7",
+    "size": 1206201
+  },
+  {
+    "index": 50,
+    "filename": "50_A31_Smile_Curve_Sheen.mp3",
+    "effect": "A31_Smile_Curve_Sheen",
+    "filter": "bass=g=3:f=70,equalizer=f=800:width_type=q:w=1:g=-2,treble=g=3.5:f=11000",
+    "size": 1206201
+  },
+  {
+    "index": 51,
+    "filename": "51_A32_Mid_Range_Clarifier.mp3",
+    "effect": "A32_Mid_Range_Clarifier",
+    "filter": "equalizer=f=380:width_type=q:w=1.5:g=-3.5,equalizer=f=2800:width_type=q:w=1.5:g=2.5",
+    "size": 1206201
+  },
+  {
+    "index": 52,
+    "filename": "52_A33_Sub_Bass_Tightener.mp3",
+    "effect": "A33_Sub_Bass_Tightener",
+    "filter": "highpass=f=32,bass=g=3:f=60",
+    "size": 1206201
+  },
+  {
+    "index": 53,
+    "filename": "53_A34_Vintage_Vinyl_EQ.mp3",
+    "effect": "A34_Vintage_Vinyl_EQ",
+    "filter": "bass=g=2:f=100,lowpass=f=13500",
+    "size": 1206201
+  },
+  {
+    "index": 54,
+    "filename": "54_A35_Telephone_Radio_Bandpass.mp3",
+    "effect": "A35_Telephone_Radio_Bandpass",
+    "filter": "highpass=f=450,lowpass=f=3400,equalizer=f=1500:width_type=q:w=2:g=4",
+    "size": 1206201
+  },
+  {
+    "index": 55,
+    "filename": "55_A36_Air_Sheen_16kHz.mp3",
+    "effect": "A36_Air_Sheen_16kHz",
+    "filter": "treble=g=4:f=16000",
+    "size": 1206201
+  },
+  {
+    "index": 56,
+    "filename": "56_A37_Mono_Compatibility_Guard.mp3",
+    "effect": "A37_Mono_Compatibility_Guard",
+    "filter": "stereotools=slev=0.7:mlev=1.1",
+    "size": 1206201
+  },
+  {
+    "index": 57,
+    "filename": "57_A38_Wide_Stereo_Imager.mp3",
+    "effect": "A38_Wide_Stereo_Imager",
+    "filter": "stereotools=slev=1.35:mlev=0.9",
+    "size": 1206201
+  },
+  {
+    "index": 58,
+    "filename": "58_A39_Sub_120Hz_Center.mp3",
+    "effect": "A39_Sub_120Hz_Center",
+    "filter": "highpass=f=25,stereotools=slev=1.1:mlev=1.0",
+    "size": 1206201
+  },
+  {
+    "index": 59,
+    "filename": "59_A40_3D_Headphone_Spatializer.mp3",
+    "effect": "A40_3D_Headphone_Spatializer",
+    "filter": "stereowiden=delay=20:feedback=0.3:crossfeed=0.4",
+    "size": 1206201
+  },
+  {
+    "index": 60,
+    "filename": "60_A41_Auto_Panner.mp3",
+    "effect": "A41_Auto_Panner",
+    "filter": "apulsator=mode=sine:hz=0.5:width=0.8",
+    "size": 1206201
+  },
+  {
+    "index": 61,
+    "filename": "61_A42_Center_Karaoke_Reducer.mp3",
+    "effect": "A42_Center_Karaoke_Reducer",
+    "filter": "pan=stereo|c0=c0-0.8*c1|c1=c1-0.8*c0",
+    "size": 1206201
+  },
+  {
+    "index": 62,
+    "filename": "62_A43_Podcast_Voice_Polish.mp3",
+    "effect": "A43_Podcast_Voice_Polish",
+    "filter": "highpass=f=80,equalizer=f=3000:width_type=q:w=1.2:g=2.5,acompressor=threshold=-18dB:ratio=3:attack=10:release=180",
+    "size": 1206201
+  },
+  {
+    "index": 63,
+    "filename": "63_A44_Intimate_ASMR_Vocal.mp3",
+    "effect": "A44_Intimate_ASMR_Vocal",
+    "filter": "treble=g=5:f=10000,acompressor=threshold=-26dB:ratio=4:attack=5:release=80",
+    "size": 1206201
+  },
+  {
+    "index": 64,
+    "filename": "64_A45_De_Esser_Adaptive.mp3",
+    "effect": "A45_De_Esser_Adaptive",
+    "filter": "deesser=i=0.85:m=0.6:f=0.5",
+    "size": 1206201
+  },
+  {
+    "index": 65,
+    "filename": "65_A46_Radio_DJ_Voice.mp3",
+    "effect": "A46_Radio_DJ_Voice",
+    "filter": "bass=g=4:f=120,treble=g=2.5:f=5000,acompressor=threshold=-20dB:ratio=4",
+    "size": 1206201
+  },
+  {
+    "index": 66,
+    "filename": "66_A47_Vocal_Warmth_Body.mp3",
+    "effect": "A47_Vocal_Warmth_Body",
+    "filter": "equalizer=f=280:width_type=q:w=1.5:g=3.2,aexciter=amount=2",
+    "size": 1206201
+  },
+  {
+    "index": 67,
+    "filename": "67_A48_Vocal_Sheen_Air.mp3",
+    "effect": "A48_Vocal_Sheen_Air",
+    "filter": "treble=g=4:f=14000",
+    "size": 1206201
+  },
+  {
+    "index": 68,
+    "filename": "68_A49_Voice_Clarity_Expander.mp3",
+    "effect": "A49_Voice_Clarity_Expander",
+    "filter": "agate=threshold=-38dB:ratio=2.5:attack=10:release=250",
+    "size": 1206201
+  },
+  {
+    "index": 69,
+    "filename": "69_A50_Vintage_Cassette_Flutter.mp3",
+    "effect": "A50_Vintage_Cassette_Flutter",
+    "filter": "tremolo=f=3.2:d=0.2,lowpass=f=9000,highpass=f=60",
+    "size": 1206201
+  },
+  {
+    "index": 70,
+    "filename": "70_A51_LoFi_Radio_Crush.mp3",
+    "effect": "A51_LoFi_Radio_Crush",
+    "filter": "highpass=f=500,lowpass=f=4000,acrusher=bits=10:samples=2",
+    "size": 1206201
+  },
+  {
+    "index": 71,
+    "filename": "71_A52_8Bit_Game_Console.mp3",
+    "effect": "A52_8Bit_Game_Console",
+    "filter": "acrusher=bits=8:samples=4:mode=lin",
+    "size": 1206201
+  },
+  {
+    "index": 72,
+    "filename": "72_A53_Tape_Saturation_Heat.mp3",
+    "effect": "A53_Tape_Saturation_Heat",
+    "filter": "aexciter=amount=3.5:level_in=1.1,bass=g=2:f=80",
+    "size": 1206201
+  },
+  {
+    "index": 73,
+    "filename": "73_A54_Tube_Warmth_Glow.mp3",
+    "effect": "A54_Tube_Warmth_Glow",
+    "filter": "aexciter=amount=2.8:level_in=1.05",
+    "size": 1206201
+  },
+  {
+    "index": 74,
+    "filename": "74_A55_Beat_Synced_Tremolo.mp3",
+    "effect": "A55_Beat_Synced_Tremolo",
+    "filter": "tremolo=f=4:d=0.75",
+    "size": 1206201
+  },
+  {
+    "index": 75,
+    "filename": "75_A56_Auto_Fades.mp3",
+    "effect": "A56_Auto_Fades",
+    "filter": "afade=t=in:ss=0:d=1.5,afade=t=out:st=28.5:d=1.5",
+    "size": 1206201
+  },
+  {
+    "index": 76,
+    "filename": "76_A57_Seamless_Loop_Maker.mp3",
+    "effect": "A57_Seamless_Loop_Maker",
+    "filter": "afade=t=in:ss=0:d=0.3,afade=t=out:st=29.7:d=0.3",
+    "size": 1206201
+  },
+  {
+    "index": 77,
+    "filename": "77_A58_Vocal_Doubler.mp3",
+    "effect": "A58_Vocal_Doubler",
+    "filter": "chorus=0.7:0.8:25:0.3:0.25:1",
+    "size": 1208121
+  },
+  {
+    "index": 78,
+    "filename": "78_A59_Auto_Harmonizer.mp3",
+    "effect": "A59_Auto_Harmonizer",
+    "filter": "aecho=0.8:0.7:15:0.3,equalizer=f=1200:width_type=q:w=1:g=3",
+    "size": 1207161
+  },
+  {
+    "index": 79,
+    "filename": "79_A60_Genre_Smart_Master.mp3",
+    "effect": "A60_Genre_Smart_Master",
+    "filter": "bass=g=2:f=60,treble=g=2.5:f=12000,stereotools=slev=1.15,loudnorm=I=-14:TP=-1.0",
+    "size": 1206201
+  }
+]

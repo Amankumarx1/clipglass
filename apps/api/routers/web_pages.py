@@ -27,6 +27,7 @@ async def audio_studio_page(request: Request):
 
 # 04. Video Trimmer
 @router.get("/video-trimmer", response_class=HTMLResponse)
+@router.get("/trimmer", response_class=HTMLResponse)
 async def video_trimmer_page(request: Request):
     return templates.TemplateResponse(request=request, name="video_trimmer.html", context={"active_page": "video_trimmer"})
 
@@ -37,8 +38,9 @@ async def auto_clip_page(request: Request):
 
 # 06. Auto Clip Editor
 @router.get("/auto-clip/editor", response_class=HTMLResponse)
-async def auto_clip_editor_page(request: Request):
-    return templates.TemplateResponse(request=request, name="auto_clip_editor.html", context={"active_page": "auto_clip_editor"})
+@router.get("/auto-clip/edit/{clip_id}", response_class=HTMLResponse)
+async def auto_clip_editor_page(request: Request, clip_id: str = None):
+    return templates.TemplateResponse(request=request, name="auto_clip_editor.html", context={"active_page": "auto_clip_editor", "clip_id": clip_id})
 
 # 07. Queue Manager / Jobs
 @router.get("/jobs", response_class=HTMLResponse)
@@ -89,3 +91,8 @@ async def copyright_page(request: Request):
 @router.get("/design", response_class=HTMLResponse)
 async def design_page(request: Request):
     return templates.TemplateResponse(request=request, name="design.html", context={"active_page": "design"})
+
+# 17. 404 Page
+@router.get("/404", response_class=HTMLResponse)
+async def not_found_page(request: Request):
+    return templates.TemplateResponse(request=request, name="404.html", context={"active_page": "404"}, status_code=404)
