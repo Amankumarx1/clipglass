@@ -31,19 +31,19 @@ button{font:inherit;color:inherit}
 
 /* Opening preloader mask */
 @property --r{syntax:'<length-percentage>';inherits:false;initial-value:-4%}
-#intro{--r:-4%;position:fixed;inset:0;z-index:100;background:#08090d;display:grid;place-items:center;-webkit-mask-image:radial-gradient(ellipse at 50% 50%,transparent var(--r),#000 calc(var(--r) + 4%));mask-image:radial-gradient(ellipse at 50% 50%,transparent var(--r),#000 calc(var(--r) + 4%));transition:--r 1.6s cubic-bezier(.76,0,.24,1),visibility 0s 1.7s;border:none}
+#intro{--r:-4%;position:fixed;inset:0;z-index:100;background:#08090d;display:grid;place-items:center;-webkit-mask-image:radial-gradient(ellipse at 50% 50%,transparent var(--r),#000 calc(var(--r) + 4%));mask-image:radial-gradient(ellipse at 50% 50%,transparent var(--r),#000 calc(var(--r) + 4%));transition:--r 1.4s cubic-bezier(.76,0,.24,1),visibility 0s 1.5s;border:none}
 #intro.hide{--r:150%;visibility:hidden;pointer-events:none}
-.il{display:grid;justify-items:center;gap:26px;transition:transform 1.4s var(--ease),opacity .9s}
-#intro.hide .il{transform:scale(1.3);opacity:0}
+.il{display:grid;justify-items:center;gap:26px;transition:transform 1.2s var(--ease),opacity .8s}
+#intro.hide .il{transform:scale(1.25);opacity:0}
 .wmk{position:relative;font:800 clamp(2.4rem,9vw,8rem)/1 'Space Grotesk',sans-serif;text-transform:uppercase;letter-spacing:-.01em;user-select:none}
 .wmk span{display:block;color:transparent;-webkit-text-stroke:1.5px rgba(255,255,255,.35)}
 .wmk .fill{position:absolute;inset:0;--p:0%;-webkit-text-stroke:1.5px #fff;background:linear-gradient(90deg,#ff2a55,#ff6a1f);-webkit-background-clip:text;background-clip:text;clip-path:inset(0 calc(100% - var(--p)) 0 0)}
 .ibar{width:min(320px,60vw);height:2px;background:rgba(255,255,255,.12);overflow:hidden;border:none}
-.ibar span{display:block;height:100%;background:linear-gradient(90deg,#ff2a55,#ff6a1f);transform-origin:0 50%;transform:scaleX(0)}
-#cnt{position:absolute;right:6vw;bottom:6vh;font:italic 700 clamp(40px,7vw,96px)/1 'Rubik',sans-serif;letter-spacing:-.04em;color:#24252e;font-variant-numeric:tabular-nums}
-#skip{position:fixed;z-index:101;right:4vw;top:4vh;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.16);border-radius:999px;padding:8px 16px;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#c9cbd3;cursor:pointer;opacity:.7;transition:opacity .4s}
-#skip:hover{opacity:1;background:rgba(255,255,255,.1)}.ready #skip{opacity:0;pointer-events:none}
-.lbx{position:fixed;left:0;right:0;height:12vh;background:#000;z-index:95;border:none!important;outline:none!important;transition:transform 1.6s var(--ease)}
+.ibar span{display:block;height:100%;background:linear-gradient(90deg,#ff2a55,#ff6a1f);transform-origin:0 50%;transform:scaleX(0);transition:transform .1s linear}
+#cnt{position:absolute;right:6vw;bottom:6vh;font:italic 700 clamp(40px,7vw,96px)/1 'Rubik',sans-serif;letter-spacing:-.04em;color:#282a35;font-variant-numeric:tabular-nums}
+#skip{position:fixed;z-index:101;right:4vw;top:4vh;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.18);border-radius:999px;padding:8px 16px;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#c9cbd3;cursor:pointer;opacity:.85;transition:opacity .3s,background .3s}
+#skip:hover{opacity:1;background:rgba(255,255,255,.15);border-color:rgba(255,90,31,.6)}.ready #skip{opacity:0;pointer-events:none}
+.lbx{position:fixed;left:0;right:0;height:12vh;background:#000;z-index:95;border:none!important;outline:none!important;transition:transform 1.4s var(--ease)}
 .lbx.t{top:0}.lbx.b{bottom:0}.ready .lbx.t{transform:translateY(-100%)}.ready .lbx.b{transform:translateY(100%)}
 
 /* Hide chrome & tools completely during intro opening to eliminate rogue lines */
@@ -237,7 +237,7 @@ footer{position:relative;margin-top:130px;padding:90px 6vw 34px;text-align:cente
 </head>
 <body>
 <div id="intro" role="status" aria-label="Loading ClipGlass"><div class="il"><div class="wmk" aria-hidden="true"><span>ClipGlass</span><span class="fill" id="wf">ClipGlass</span></div><div class="ibar"><span id="pg"></span></div></div><b id="cnt" aria-hidden="true">000</b></div>
-<button id="skip">Skip intro</button>
+<button id="skip" onclick="skipIntro()">Skip intro</button>
 <i class="lbx t"></i><i class="lbx b"></i>
 <canvas id="gl" aria-hidden="true"></canvas>
 
@@ -490,6 +490,18 @@ footer{position:relative;margin-top:130px;padding:90px 6vw 34px;text-align:cente
 </main>
 
 <script>
+// Global Skip Function (Accessible anywhere, even if inline or from HTML)
+function skipIntro(){
+  try{sessionStorage.setItem('cg_intro','1')}catch(e){}
+  const introEl=document.getElementById('intro');
+  if(introEl)introEl.classList.add('hide');
+  document.body.classList.add('ready');
+  document.body.classList.add('started');
+  if(window.CG){window.CG.skip=true;window.CG.ready=true;window.CG.started=true}
+  if(typeof T!=='undefined')T=99;
+}
+window.skipIntro=skipIntro;
+
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
 const MODEL_URL='/static/models/headphones.glb', MODEL_ROT_Y=0;
 
@@ -507,35 +519,47 @@ let seen=false;try{seen=!!sessionStorage.getItem('cg_intro')}catch(e){}
 const quick=seen||still;
 let cur=0,lock=false;
 
-// Opening preloader
+// Opening preloader elements
 if(!quick){try{history.scrollRestoration='manual'}catch(e){}scrollTo(0,0)}else $$('.lbx').forEach(x=>x.remove());
-const intro=$('#intro'),cnt=$('#cnt'),wf=$('#wf'),pg=$('#pg');let lp=0,lt=performance.now(),begun=false,hold=0;
+const intro=$('#intro'),cnt=$('#cnt'),wf=$('#wf'),pg=$('#pg');
+let lp=0,lt=performance.now(),begun=false,hold=0;
+
 function begin(){
   if(begun)return;
   begun=true;
-  document.body.classList.remove('ready');
-  intro.classList.add('hide');
+  if(intro)intro.classList.add('hide');
   document.body.classList.add('started');
   CG.started=true;
   if(CG.fail||!window.THREE)document.body.classList.add('ready');
-  setTimeout(()=>document.body.classList.add('ready'),10000);
+  setTimeout(()=>document.body.classList.add('ready'),quick?100:350);
 }
+
+// Active Preloader Loop (Self-sustaining 000 -> 100 countdown)
 (function load(){
-  const n=performance.now(),dt=Math.min(.1,(n-lt)/1000);lt=n;
-  lp=Math.min(CG.ready||CG.fail?1:.92,lp+dt*(quick?4:.55));
-  cnt.textContent=String(Math.round(lp*100)).padStart(3,'0');
-  wf.style.setProperty('--p',lp*100+'%');
-  pg.style.transform='scaleX('+lp+')';
-  if(lp>=1){hold+=dt;if(hold>(quick?0:.35))begin()}
-  if(n>9000)begin();
+  const n=performance.now(),dt=Math.min(.05,(n-lt)/1000);
+  lt=n;
+  lp=Math.min(1,lp+dt*(quick?6:1.15));
+  if(cnt)cnt.textContent=String(Math.round(lp*100)).padStart(3,'0');
+  if(wf)wf.style.setProperty('--p',(lp*100)+'%');
+  if(pg)pg.style.transform='scaleX('+lp+')';
+  if(lp>=1){
+    hold+=dt;
+    if(hold>(quick?0:.2))begin();
+  }
+  // Failsafe auto-start after 2.2s
+  if(n>2200)begin();
   if(!begun)requestAnimationFrame(load);
 })();
-const skipBtn=$('#skip');if(skipBtn)skipBtn.onclick=()=>{CG.skip=true;T=99};
-addEventListener('keydown',e=>{if(e.key==='Escape'){CG.skip=true;T=99}});
-$('#replay').onclick=e=>{e.preventDefault();try{sessionStorage.removeItem('cg_intro')}catch(x){}scrollTo(0,0);location.reload()};
+
+const skipBtn=$('#skip');
+if(skipBtn)skipBtn.onclick=skipIntro;
+addEventListener('keydown',e=>{if(e.key==='Escape')skipIntro()});
+const replayBtn=$('#replay');
+if(replayBtn)replayBtn.onclick=e=>{e.preventDefault();try{sessionStorage.removeItem('cg_intro')}catch(x){}scrollTo(0,0);location.reload()};
 
 // Header scroll effect
-const hd=$('#hd');addEventListener('scroll',()=>hd.classList.toggle('sc',scrollY>30),{passive:true});
+const hd=$('#hd');
+if(hd)addEventListener('scroll',()=>hd.classList.toggle('sc',scrollY>30),{passive:true});
 
 // Intersection observer for scroll reveals
 const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}}),{threshold:.15});
@@ -553,10 +577,11 @@ function go(i){
   $$('.hp-dot').forEach((d,idx)=>d.classList.toggle('active',idx===i));
   
   if(window.GL)GL.change(i,dir);
-  $('#l1').textContent=s.l1;
-  $('#l2').textContent=s.l2;
-  $('#l3').textContent=s.sub;
-  $('#getStartedBtn').href=s.href;
+  const l1=$('#l1'),l2=$('#l2'),l3=$('#l3'),btn=$('#getStartedBtn');
+  if(l1)l1.textContent=s.l1;
+  if(l2)l2.textContent=s.l2;
+  if(l3)l3.textContent=s.sub;
+  if(btn)btn.href=s.href;
   setTimeout(()=>lock=false,600);
 }
 const prevHero=$('#prevHero'),nextHero=$('#nextHero');
@@ -580,7 +605,7 @@ $$('.hp-dot').forEach(dot=>{
 
 // Sidebar dock active state tracking
 $$('.dock-item').forEach(item=>{
-  item.addEventListener('click',e=>{
+  item.addEventListener('click',()=>{
     $$('.dock-item').forEach(x=>x.classList.remove('active'));
     item.classList.add('active');
     const indicator=$('#dockIndicator');
@@ -592,29 +617,43 @@ $$('.dock-item').forEach(item=>{
 });
 
 // Link bar form
-const f=$('#f'),url=$('#url'),msg=$('#msg'),gb=$('#gb');
-$('#pst').onclick=async()=>{try{url.value=await navigator.clipboard.readText();url.focus();msg.textContent=''}catch(e){msg.textContent='Clipboard access is blocked. Press Ctrl+V to paste.'}};
-url.addEventListener('input',()=>msg.textContent='');
-f.onsubmit=e=>{e.preventDefault();const v=url.value.trim();
-  if(!/^(https?:\/\/)?((www|m|music)\.)?(youtube\.com|youtu\.be)\/\S+/i.test(v)){msg.textContent='Enter a valid YouTube or YouTube Music link.';f.classList.remove('err');void f.offsetWidth;f.classList.add('err');return}
-  gb.classList.add('busy');gb.textContent='Opening…';location.href='/downloader?url='+encodeURIComponent(v)};
+const f=$('#f'),url=$('#url'),msg=$('#msg'),gb=$('#gb'),pst=$('#pst');
+if(pst)pst.onclick=async()=>{try{if(url){url.value=await navigator.clipboard.readText();url.focus()}if(msg)msg.textContent=''}catch(e){if(msg)msg.textContent='Clipboard access is blocked. Press Ctrl+V to paste.'}};
+if(url)url.addEventListener('input',()=>{if(msg)msg.textContent=''});
+if(f)f.onsubmit=e=>{
+  e.preventDefault();
+  const v=url?url.value.trim():'';
+  if(!/^(https?:\/\/)?((www|m|music)\.)?(youtube\.com|youtu\.be)\/\S+/i.test(v)){
+    if(msg)msg.textContent='Enter a valid YouTube or YouTube Music link.';
+    f.classList.remove('err');void f.offsetWidth;f.classList.add('err');
+    return;
+  }
+  if(gb){gb.classList.add('busy');gb.textContent='Opening…'}
+  location.href='/downloader?url='+encodeURIComponent(v);
+};
 
 // Tilt & spotlight effects
-$$('[data-tilt]').forEach(c=>{const k=+c.dataset.tilt||8;
-  c.addEventListener('pointermove',e=>{const r=c.getBoundingClientRect(),x=(e.clientX-r.left)/r.width,y=(e.clientY-r.top)/r.height;
+$$('[data-tilt]').forEach(c=>{
+  const k=+c.dataset.tilt||8;
+  c.addEventListener('pointermove',e=>{
+    const r=c.getBoundingClientRect(),x=(e.clientX-r.left)/r.width,y=(e.clientY-r.top)/r.height;
     c.style.setProperty('--mx',x*100+'%');c.style.setProperty('--my',y*100+'%');
-    if(!still)c.style.transform='rotateX('+((.5-y)*k).toFixed(2)+'deg) rotateY('+((x-.5)*k*1.4).toFixed(2)+'deg) translateZ(14px)'});
-  c.addEventListener('pointerleave',()=>c.style.transform='')});
-const how=$('#how');how.addEventListener('pointermove',e=>{const r=how.getBoundingClientRect();if(!still)$('#fan').style.setProperty('--fy',((e.clientX-r.left)/r.width-.5)*9+'deg')});
-how.addEventListener('pointerleave',()=>$('#fan').style.setProperty('--fy','0deg'));
-const wm=$('#wm'),setL=(x,y)=>{wm.style.setProperty('--x',x+'px');wm.style.setProperty('--y',y+'px')};
-wm.addEventListener('pointermove',e=>{const r=wm.getBoundingClientRect();setL(e.clientX-r.left,e.clientY-r.top)});
-if(matchMedia('(hover:none)').matches&&!still){wm.classList.add('auto');(function s(t){const r=wm.getBoundingClientRect();setL(r.width*(.5+.42*Math.sin(t*.0006)),r.height*(.5+.3*Math.sin(t*.0009)));requestAnimationFrame(s)})(0)}
+    if(!still)c.style.transform='rotateX('+((.5-y)*k).toFixed(2)+'deg) rotateY('+((x-.5)*k*1.4).toFixed(2)+'deg) translateZ(14px)';
+  });
+  c.addEventListener('pointerleave',()=>c.style.transform='');
+});
+const how=$('#how');
+if(how)how.addEventListener('pointermove',e=>{const r=how.getBoundingClientRect();if(!still)$('#fan').style.setProperty('--fy',((e.clientX-r.left)/r.width-.5)*9+'deg')});
+if(how)how.addEventListener('pointerleave',()=>$('#fan').style.setProperty('--fy','0deg'));
+const wm=$('#wm'),setL=(x,y)=>{if(wm){wm.style.setProperty('--x',x+'px');wm.style.setProperty('--y',y+'px')}};
+if(wm)wm.addEventListener('pointermove',e=>{const r=wm.getBoundingClientRect();setL(e.clientX-r.left,e.clientY-r.top)});
+if(matchMedia('(hover:none)').matches&&!still&&wm){wm.classList.add('auto');(function s(t){const r=wm.getBoundingClientRect();setL(r.width*(.5+.42*Math.sin(t*.0006)),r.height*(.5+.3*Math.sin(t*.0009)));requestAnimationFrame(s)})(0)}
 </script>
 
 <script>
 try{
 const cv=$('#gl');
+if(!cv||!window.THREE){throw new Error('Canvas or Three.js missing')}
 const R=new THREE.WebGLRenderer({canvas:cv,alpha:true,antialias:true});
 R.setPixelRatio(Math.min(devicePixelRatio,2));
 R.outputEncoding=THREE.sRGBEncoding;R.toneMapping=THREE.ACESFilmicToneMapping;R.toneMappingExposure=1.08;
@@ -749,7 +788,7 @@ function useModel(g){
   const m=g.scene,b=new THREE.Box3().setFromObject(m),sz=b.getSize(new THREE.Vector3()),c=b.getCenter(new THREE.Vector3());
   m.position.sub(c);m.traverse(o=>{if(o.isMesh&&o.material&&!Array.isArray(o.material)){o.material.envMapIntensity=1.3;o.material.needsUpdate=true}});
   real=new THREE.Group();real.add(m);realS=4/Math.max(sz.x,sz.y,sz.z);inner.visible=false;H.add(real)}
-if(THREE.GLTFLoader){
+if(window.THREE&&THREE.GLTFLoader){
   new THREE.GLTFLoader().load(MODEL_URL,useModel,undefined,()=>{});
   addEventListener('dragover',e=>e.preventDefault());
   addEventListener('drop',e=>{e.preventDefault();const f=e.dataTransfer.files[0];if(f&&/\.glb$/i.test(f.name))f.arrayBuffer().then(b=>new THREE.GLTFLoader().parse(b,'',useModel,()=>{}))})}
@@ -800,8 +839,11 @@ const ease=t=>1-Math.pow(1-t,4),cl=(v,a,b)=>Math.min(b,Math.max(a,v)),L=(a,b,t)=
 function size(){const w=innerWidth,h=innerHeight;R.setSize(w,h,false);C.aspect=w/h;C.updateProjectionMatrix()}
 addEventListener('resize',size);size();
 addEventListener('pointermove',e=>{mx=e.clientX/innerWidth-.5;my=e.clientY/innerHeight-.5;if(dragging){drag+=(e.clientX-px)*.012;px=e.clientX}});
-$('.stage').addEventListener('pointerdown',e=>{if(e.target.closest('button,a'))return;dragging=true;px=e.clientX;$('.stage').classList.add('drag')});
-addEventListener('pointerup',()=>{dragging=false;$('.stage').classList.remove('drag')});
+const stageEl=$('.stage');
+if(stageEl){
+  stageEl.addEventListener('pointerdown',e=>{if(e.target.closest('button,a'))return;dragging=true;px=e.clientX;stageEl.classList.add('drag')});
+  addEventListener('pointerup',()=>{dragging=false;stageEl.classList.remove('drag')});
+}
 window.GL={change(i,dir){slide=i;spin+=dir},color(k){sw=k}};
 
 function tick(t){
@@ -962,7 +1004,13 @@ function tick(t){
   requestAnimationFrame(tick)}
 CG.ready=true;
 requestAnimationFrame(tick);
-}catch(err){console.warn('3D unavailable',err);CG.fail=true;document.body.classList.add('ready')}
+}catch(err){
+  console.warn('3D unavailable, using fallback',err);
+  CG.fail=true;
+  document.body.classList.add('ready');
+  const introEl=document.getElementById('intro');
+  if(introEl)introEl.classList.add('hide');
+}
 </script>
 </body>
 </html>
