@@ -52,29 +52,36 @@
   <!-- Editorial Top Navigation (Flat, restrained & spacious) -->
   <header class="w-full max-w-7xl mx-auto px-6 lg:px-12 py-5 select-none z-50">
     <nav class="flex items-center justify-between">
-      <!-- Left: Red Circular Play Mark + ClipGlass Wordmark -->
-      <a href="/" onclick="playGlassTick()" class="flex items-center gap-2.5 font-medium text-sm tracking-tight text-white group shrink-0">
-        <span class="w-6 h-6 rounded-full bg-[#F51F36] shadow-[0_0_14px_rgba(245,31,54,0.55)] flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
-          <span class="ml-0.5 border-l-[6px] border-l-white border-y-[3.5px] border-y-transparent"></span>
-        </span>
-        <span class="font-['Rubik'] font-medium text-white text-sm tracking-tight">ClipGlass</span>
+      <!-- Left: Faceted Crimson Play Mark + ClipGlass Wordmark -->
+      <a href="/" onclick="playGlassTick()" class="flex items-center gap-2.5 font-bold text-sm tracking-tight text-white group shrink-0 font-['Space_Grotesk']">
+        <svg class="w-7 h-7 drop-shadow-[0_2px_8px_rgba(245,31,54,0.45)] group-hover:scale-105 transition-transform" viewBox="0 0 28 28">
+          <defs>
+            <linearGradient id="baseLogoG" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#f51f36"/>
+              <stop offset="100%" stop-color="#ff5a1f"/>
+            </linearGradient>
+          </defs>
+          <path d="M5 4l18 10-18 10V4z" fill="url(#baseLogoG)"/>
+          <path d="M11 10.5l8 3.5-8 3.5v-7z" fill="#fff" opacity="0.95"/>
+        </svg>
+        <span class="font-bold text-white text-[15px] tracking-tight">ClipGlass</span>
       </a>
 
       <!-- Center/Right: Compact Uppercase Gray Links with Wide Letter Spacing -->
       <div class="hidden lg:flex items-center gap-8 text-[11px] font-semibold tracking-[0.14em] uppercase text-[#8B8D98]">
-        <a href="/downloader" onclick="playGlassTick()" class="hover:text-white transition-colors {% if active_page == 'downloader' %}text-white relative after:content-[''] after:absolute after:-bottom-1.5 after:left-0 after:right-0 after:h-0.5 after:bg-[#8655FF]{% endif %}">
+        <a href="/downloader" onclick="playGlassTick()" class="hover:text-white transition-colors {% if active_page == 'downloader' %}text-white relative after:content-[''] after:absolute after:-bottom-1.5 after:left-0 after:right-0 after:h-0.5 after:bg-[#ff5a1f] after:shadow-[0_0_8px_#ff5a1f]{% endif %}">
           Downloader
         </a>
-        <a href="/audio-studio" onclick="playGlassTick()" class="hover:text-white transition-colors {% if active_page in ['studio', 'audio_studio'] %}text-white relative after:content-[''] after:absolute after:-bottom-1.5 after:left-0 after:right-0 after:h-0.5 after:bg-[#8655FF]{% endif %}">
+        <a href="/audio-studio" onclick="playGlassTick()" class="hover:text-white transition-colors {% if active_page in ['studio', 'audio_studio'] %}text-white relative after:content-[''] after:absolute after:-bottom-1.5 after:left-0 after:right-0 after:h-0.5 after:bg-[#ff5a1f] after:shadow-[0_0_8px_#ff5a1f]{% endif %}">
           Studio
         </a>
-        <a href="/video-trimmer" onclick="playGlassTick()" class="hover:text-white transition-colors {% if active_page == 'video_trimmer' %}text-white relative after:content-[''] after:absolute after:-bottom-1.5 after:left-0 after:right-0 after:h-0.5 after:bg-[#8655FF]{% endif %}">
+        <a href="/video-trimmer" onclick="playGlassTick()" class="hover:text-white transition-colors {% if active_page == 'video_trimmer' %}text-white relative after:content-[''] after:absolute after:-bottom-1.5 after:left-0 after:right-0 after:h-0.5 after:bg-[#ff5a1f] after:shadow-[0_0_8px_#ff5a1f]{% endif %}">
           Trimmer
         </a>
-        <a href="/auto-clip" onclick="playGlassTick()" class="hover:text-white transition-colors {% if active_page in ['auto_clip', 'auto_clip_editor'] %}text-white relative after:content-[''] after:absolute after:-bottom-1.5 after:left-0 after:right-0 after:h-0.5 after:bg-[#8655FF]{% endif %}">
+        <a href="/auto-clip" onclick="playGlassTick()" class="hover:text-white transition-colors {% if active_page in ['auto_clip', 'auto_clip_editor'] %}text-white relative after:content-[''] after:absolute after:-bottom-1.5 after:left-0 after:right-0 after:h-0.5 after:bg-[#ff5a1f] after:shadow-[0_0_8px_#ff5a1f]{% endif %}">
           Auto Clip
         </a>
-        <a href="/recent" onclick="playGlassTick()" class="hover:text-white transition-colors {% if active_page == 'recent' %}text-white relative after:content-[''] after:absolute after:-bottom-1.5 after:left-0 after:right-0 after:h-0.5 after:bg-[#8655FF]{% endif %}">
+        <a href="/recent" onclick="playGlassTick()" class="hover:text-white transition-colors {% if active_page == 'recent' %}text-white relative after:content-[''] after:absolute after:-bottom-1.5 after:left-0 after:right-0 after:h-0.5 after:bg-[#ff5a1f] after:shadow-[0_0_8px_#ff5a1f]{% endif %}">
           Recent
         </a>
 

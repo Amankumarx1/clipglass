@@ -3,124 +3,203 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>ClipGlass – Download, trim and master your media</title>
+<title>ClipGlass – Download in seconds</title>
 <meta name="keywords" content="paste a link. pick a quality. done. clipglass youtube downloader audio studio video trimmer">
 <meta name="description" content="Download videos up to 4K, trim without re-encoding, master audio and export vertical shorts. No install, no account.">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='16' fill='%23e9202f'/%3E%3Cpath d='M13 10l9 6-9 6z' fill='%23fff'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Rubik:ital,wght@0,300;0,500;0,700;1,700&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Rubik:ital,wght@0,300;0,400;0,500;0,600;0,700;1,700&family=Space+Grotesk:wght@500;600;700;800&display=swap" rel="stylesheet">
 <style>
-:root{--ease:cubic-bezier(.16,1,.3,1);--bg:#101114;--panel:#15161b;--line:rgba(255,255,255,.07);--mut:#9a9ca8}
+:root{
+  --ease:cubic-bezier(.16,1,.3,1);
+  --bg:#090a0f;
+  --panel:#12131a;
+  --orange:#ff5a1f;
+  --orange-glow:rgba(255,90,31,.45);
+  --red-cta:#f51f36;
+  --blue-btn:#1f66ff;
+  --line:rgba(255,255,255,.07);
+  --mut:#9a9ca8;
+}
 *{box-sizing:border-box;margin:0}
 html{scroll-behavior:smooth}
 body{background:var(--bg);color:#fff;font-family:'Rubik',system-ui,sans-serif;overflow-x:hidden}
 body:not(.ready){overflow:hidden}
 a{color:inherit;text-decoration:none}
 button{font:inherit;color:inherit}
-:focus-visible{outline:2px solid #fff;outline-offset:4px}
-/* opening */
+:focus-visible{outline:2px solid var(--orange);outline-offset:4px}
+
+/* Opening preloader mask */
 @property --r{syntax:'<length-percentage>';inherits:false;initial-value:-4%}
-#intro{--r:-4%;position:fixed;inset:0;z-index:30;background:#0b0c0f;display:grid;place-items:center;-webkit-mask-image:radial-gradient(ellipse at 50% 50%,transparent var(--r),#000 calc(var(--r) + 4%));mask-image:radial-gradient(ellipse at 50% 50%,transparent var(--r),#000 calc(var(--r) + 4%));transition:--r 1.6s cubic-bezier(.76,0,.24,1),visibility 0s 1.7s}
+#intro{--r:-4%;position:fixed;inset:0;z-index:100;background:#08090d;display:grid;place-items:center;-webkit-mask-image:radial-gradient(ellipse at 50% 50%,transparent var(--r),#000 calc(var(--r) + 4%));mask-image:radial-gradient(ellipse at 50% 50%,transparent var(--r),#000 calc(var(--r) + 4%));transition:--r 1.6s cubic-bezier(.76,0,.24,1),visibility 0s 1.7s;border:none}
 #intro.hide{--r:150%;visibility:hidden;pointer-events:none}
 .il{display:grid;justify-items:center;gap:26px;transition:transform 1.4s var(--ease),opacity .9s}
 #intro.hide .il{transform:scale(1.3);opacity:0}
 .wmk{position:relative;font:800 clamp(2.4rem,9vw,8rem)/1 'Space Grotesk',sans-serif;text-transform:uppercase;letter-spacing:-.01em;user-select:none}
 .wmk span{display:block;color:transparent;-webkit-text-stroke:1.5px rgba(255,255,255,.35)}
-.wmk .fill{position:absolute;inset:0;--p:0%;-webkit-text-stroke:1.5px #fff;background:linear-gradient(90deg,#ff2d6f,#1f66ff);-webkit-background-clip:text;background-clip:text;clip-path:inset(0 calc(100% - var(--p)) 0 0)}
-.ibar{width:min(320px,60vw);height:2px;background:rgba(255,255,255,.12);overflow:hidden}
-.ibar span{display:block;height:100%;background:#fff;transform-origin:0 50%;transform:scaleX(0)}
-#cnt{position:absolute;right:6vw;bottom:6vh;font:italic 700 clamp(40px,7vw,96px)/1 'Rubik',sans-serif;letter-spacing:-.04em;color:#2b2c33;font-variant-numeric:tabular-nums}
-#skip{position:fixed;z-index:31;right:4vw;top:4vh;background:none;border:1px solid rgba(255,255,255,.2);border-radius:999px;padding:8px 16px;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#c9cbd3;cursor:pointer;opacity:.7;transition:opacity .4s}
-#skip:hover{opacity:1}.ready #skip{opacity:0;pointer-events:none}
-.lbx{position:fixed;left:0;right:0;height:12vh;background:#000;z-index:25;transition:transform 1.6s var(--ease)}
+.wmk .fill{position:absolute;inset:0;--p:0%;-webkit-text-stroke:1.5px #fff;background:linear-gradient(90deg,#ff2a55,#ff6a1f);-webkit-background-clip:text;background-clip:text;clip-path:inset(0 calc(100% - var(--p)) 0 0)}
+.ibar{width:min(320px,60vw);height:2px;background:rgba(255,255,255,.12);overflow:hidden;border:none}
+.ibar span{display:block;height:100%;background:linear-gradient(90deg,#ff2a55,#ff6a1f);transform-origin:0 50%;transform:scaleX(0)}
+#cnt{position:absolute;right:6vw;bottom:6vh;font:italic 700 clamp(40px,7vw,96px)/1 'Rubik',sans-serif;letter-spacing:-.04em;color:#24252e;font-variant-numeric:tabular-nums}
+#skip{position:fixed;z-index:101;right:4vw;top:4vh;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.16);border-radius:999px;padding:8px 16px;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#c9cbd3;cursor:pointer;opacity:.7;transition:opacity .4s}
+#skip:hover{opacity:1;background:rgba(255,255,255,.1)}.ready #skip{opacity:0;pointer-events:none}
+.lbx{position:fixed;left:0;right:0;height:12vh;background:#000;z-index:95;border:none!important;outline:none!important;transition:transform 1.6s var(--ease)}
 .lbx.t{top:0}.lbx.b{bottom:0}.ready .lbx.t{transform:translateY(-100%)}.ready .lbx.b{transform:translateY(100%)}
-/* Intro sequential keywords on the right side of stage (clean, not behind headphone) */
-.kw{position:absolute;z-index:3;left:calc(44vw + 31vh);top:50%;translate:0 -50%;max-width:calc(100vw - 44vw - 31vh - 6vw);pointer-events:none;display:grid;place-items:start;transition:opacity .5s var(--ease),visibility .5s}
+
+/* Hide chrome & tools completely during intro opening to eliminate rogue lines */
+body:not(.ready) header.hd,
+body:not(.ready) .side-dock,
+body:not(.ready) .cad-tools,
+body:not(.ready) .trust-badge,
+body:not(.ready) .hp-dots,
+body:not(.ready) .after {
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
+/* Left Vertical Navigation Dock */
+.side-dock{position:fixed;left:0;top:0;bottom:0;width:76px;z-index:60;background:rgba(12,13,18,.82);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border-right:1px solid rgba(255,255,255,.06);display:flex;flex-direction:column;align-items:center;padding:24px 0 20px;transition:opacity .8s var(--ease),visibility 0s,transform .4s var(--ease)}
+.dock-indicator{position:absolute;left:0;top:104px;width:3px;height:34px;background:#ff5a1f;border-radius:0 3px 3px 0;box-shadow:0 0 12px #ff5a1f;transition:top .35s var(--ease)}
+.dock-nav{display:flex;flex-direction:column;align-items:center;gap:22px;margin-top:68px;width:100%}
+.dock-item{display:flex;flex-direction:column;align-items:center;gap:5px;width:100%;color:#7e8191;transition:all .3s ease;position:relative;padding:8px 0}
+.dock-item:hover{color:#fff;transform:translateY(-1px)}
+.dock-item.active{color:#ff5a1f}
+.dock-icon{width:20px;height:20px;transition:stroke .3s}
+.dock-label{font-size:10px;font-weight:500;letter-spacing:.02em}
+.dock-equalizer{margin-top:auto;width:40px;height:30px;border-radius:999px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .3s}
+.dock-equalizer:hover{border-color:rgba(255,90,31,.5);box-shadow:0 0 14px rgba(255,90,31,.3)}
+.eq-bars{display:flex;align-items:center;gap:2px;height:14px}
+.eq-bars span{display:inline-block;width:2.5px;height:14px;background:#ff5a1f;border-radius:1px;transform-origin:50% 100%;animation:eqPulse 1.2s ease-in-out infinite}
+.eq-bars .b1{animation-delay:0s;height:8px}
+.eq-bars .b2{animation-delay:.25s;height:14px}
+.eq-bars .b3{animation-delay:.5s;height:10px}
+.eq-bars .b4{animation-delay:.15s;height:12px}
+@keyframes eqPulse{0%,100%{transform:scaleY(.35)}50%{transform:scaleY(1)}}
+
+/* Top Header Bar */
+header.hd{position:fixed;z-index:55;top:0;left:76px;right:0;height:74px;display:flex;justify-content:space-between;align-items:center;padding:0 4vw;background:rgba(9,10,15,.65);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1px solid rgba(255,255,255,.05);transition:opacity .8s var(--ease),background .4s,border-color .4s}
+header.sc{background:rgba(9,10,15,.92);border-bottom-color:rgba(255,255,255,.08)}
+.logo{display:flex;align-items:center;gap:11px;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:17px;letter-spacing:-.02em}
+.logo-mark{width:28px;height:28px;filter:drop-shadow(0 2px 8px rgba(245,31,54,.45))}
+.center-nav{display:flex;align-items:center;gap:32px;font-size:13px;font-weight:500;color:#9496a4}
+.nav-item{position:relative;transition:color .3s;padding:8px 0}
+.nav-item:hover{color:#fff}
+.nav-item.active{color:#fff}
+.nav-item.active::after{content:"";position:absolute;bottom:0;left:0;right:0;height:2px;background:#ff5a1f;border-radius:2px;box-shadow:0 0 8px #ff5a1f}
+.header-right{display:flex;align-items:center;gap:12px}
+.icon-btn{width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);display:flex;align-items:center;justify-content:center;color:#b2b5c4;cursor:pointer;transition:all .3s}
+.icon-btn:hover{background:rgba(255,255,255,.09);color:#fff;border-color:rgba(255,255,255,.2);transform:translateY(-1px)}
+.btn-download-pill{display:inline-flex;align-items:center;gap:8px;padding:9px 20px;border-radius:999px;background:#1f66ff;color:#fff;font-size:12px;font-weight:600;letter-spacing:.02em;box-shadow:0 4px 18px rgba(31,102,255,.45);transition:all .3s var(--ease)}
+.btn-download-pill:hover{background:#1a56db;transform:translateY(-1px);box-shadow:0 8px 24px rgba(31,102,255,.6)}
+
+/* Main Hero Stage */
+#gl{position:fixed;inset:0;width:100%;height:100%;z-index:1;pointer-events:none}
+.stage{position:relative;height:100vh;min-height:680px;padding-left:76px;overflow:hidden;touch-action:pan-y;cursor:grab;display:flex;align-items:center;
+background:
+  radial-gradient(ellipse 70% 6% at 50% 100%,rgba(255,90,31,.45) 0%,transparent 70%),
+  radial-gradient(circle 650px at 35% 48%,rgba(255,90,31,.11),transparent 60%),
+  radial-gradient(circle 900px at 50% 50%,#151722 0%,#0d0e14 55%,#08090d 100%)}
+.stage.drag{cursor:grabbing}
+
+/* Subtle Perspective Grid in Background */
+.grid-bg{position:absolute;inset:0;pointer-events:none;z-index:0;
+background-size:60px 60px;
+background-image:linear-gradient(to right,rgba(255,255,255,.025) 1px,transparent 1px),linear-gradient(to bottom,rgba(255,255,255,.025) 1px,transparent 1px);
+mask-image:radial-gradient(ellipse at 50% 50%,#000 35%,transparent 75%);-webkit-mask-image:radial-gradient(ellipse at 50% 50%,#000 35%,transparent 75%)}
+
+/* Floating Angled Glass Parallelogram Plates Behind Headphone */
+.glass-plate{position:absolute;pointer-events:none;z-index:1;border-radius:24px;border:1px solid rgba(255,90,31,.28);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);box-shadow:0 20px 50px rgba(0,0,0,.7),inset 0 0 25px rgba(255,90,31,.12);transform:skewX(-24deg);transition:transform .8s var(--ease)}
+.plate-left{left:calc(12vw + 76px);top:22vh;width:24vw;height:34vh;background:linear-gradient(135deg,rgba(35,38,50,.35),rgba(20,22,30,.25))}
+.plate-bottom{left:calc(16vw + 76px);top:46vh;width:28vw;height:24vh;background:linear-gradient(135deg,rgba(255,90,31,.12),rgba(20,22,30,.3));border-color:rgba(255,90,31,.45);box-shadow:0 0 35px rgba(255,90,31,.25)}
+.plate-right{right:4vw;top:24vh;width:16vw;height:42vh;background:linear-gradient(135deg,rgba(255,90,31,.18),rgba(20,22,30,.15));border-color:rgba(255,90,31,.5);box-shadow:0 0 40px rgba(255,90,31,.2)}
+
+/* 5 Headphone Pagination Dots (Under the Headphone) */
+.hp-dots{position:absolute;left:calc(32vw + 38px);bottom:12vh;translate:-50% 0;z-index:4;display:flex;align-items:center;gap:9px;transition:opacity .8s var(--ease)}
+.hp-dot{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.3);cursor:pointer;transition:all .3s var(--ease)}
+.hp-dot:hover{background:rgba(255,255,255,.6);transform:scale(1.2)}
+.hp-dot.active{width:8px;height:8px;background:#fff;box-shadow:0 0 10px rgba(255,255,255,.8);transform:scale(1.1)}
+
+/* Intro Keyword Cues (Paste / Pick / Done) on the Right Side */
+.kw{position:absolute;z-index:5;left:calc(48vw + 76px);top:50%;translate:0 -50%;max-width:calc(100vw - 48vw - 76px - 6vw);pointer-events:none;display:grid;place-items:start;transition:opacity .5s var(--ease),visibility .5s}
 .ready .kw{opacity:0;visibility:hidden;pointer-events:none}
 .kw-item{grid-area:1/1;display:flex;flex-direction:column;align-items:flex-start;opacity:0;translate:0 18px;filter:blur(8px);pointer-events:none;transition:opacity .45s ease,translate .5s var(--ease),filter .45s ease}
 .kw-item.on{opacity:1;translate:0 0;filter:blur(0)}
-.kw-tag{display:inline-flex;align-items:center;gap:8px;font-size:11px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--a2);margin-bottom:10px}
+.kw-tag{display:inline-flex;align-items:center;gap:8px;font-size:11px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:#ff5a1f;margin-bottom:10px}
 .kw-word{font:800 clamp(36px,5.2vw,76px)/1 'Space Grotesk',sans-serif;letter-spacing:-.02em;text-transform:uppercase;color:#fff;margin-bottom:14px}
-.kw-word.kw-grad{background:linear-gradient(90deg,#ff2d6f,#1f66ff);-webkit-background-clip:text;background-clip:text;-webkit-text-stroke:0;color:transparent}
+.kw-word.kw-grad{background:linear-gradient(90deg,#f51f36,#ff5a1f);-webkit-background-clip:text;background-clip:text;-webkit-text-stroke:0;color:transparent}
 .kw-sub{font-size:clamp(13px,1.1vw,16px);line-height:1.55;font-weight:300;color:var(--mut);max-width:32ch}
-@media(max-width:820px){.kw{left:7vw;right:7vw;top:66%;max-width:none}}
-.pill{opacity:0;transition:opacity 1.8s ease .3s}.ready .pill{opacity:1}.ready .p2{opacity:.85}
-.num{opacity:0}.ready .num{opacity:1}
-.cats,.arr{visibility:hidden}.ready .cats,.ready .arr{visibility:visible;animation:fin 1.4s ease .7s backwards}
-@keyframes fin{from{opacity:0}}
-/* header */
-header{position:fixed;z-index:8;top:0;left:0;right:0;display:flex;justify-content:space-between;align-items:center;padding:3.6vh 8vw;transition:background .5s,padding .5s var(--ease),opacity 1.2s,backdrop-filter .5s}
-header.sc{background:rgba(16,17,20,.82);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);padding:1.8vh 8vw;border-bottom:1px solid var(--line)}
-.hd{opacity:0}.ready .hd{opacity:1}
-.logo{display:flex;align-items:center;gap:10px;font-weight:700;font-size:15px;letter-spacing:-.02em}
-.logo i{width:26px;height:26px;border-radius:50%;background:#e9202f;display:grid;place-items:center;box-shadow:0 6px 18px rgba(233,32,47,.5)}
-.logo i::after{content:"";margin-left:2px;border-left:9px solid #fff;border-top:6px solid transparent;border-bottom:6px solid transparent}
-nav{display:flex;align-items:center;gap:28px;font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--mut)}
-nav a{transition:color .3s}nav a:hover{color:#fff}
-nav .app{background:#1f66ff;color:#fff;padding:10px 18px;border-radius:999px;letter-spacing:.1em;box-shadow:0 8px 22px rgba(31,102,255,.45);transition:transform .4s var(--ease)}
-nav .app:hover{transform:translateY(-2px)}
-#gl{position:fixed;inset:0;width:100%;height:100%;z-index:1;pointer-events:none;opacity:0;transition:opacity 1.4s}#gl.on{opacity:1}
-/* hero */
-.stage{--a1:#ff2d6f;--a2:#1f66ff;--a3:#ff7355;position:relative;height:100vh;min-height:620px;overflow:hidden;touch-action:pan-y;cursor:grab;
-background:radial-gradient(55vw 60vh at 44% 52%,#222435 0,#17181d 55%,#101114 100%)}
-.stage.drag{cursor:grabbing}
-.pill{position:absolute;top:50%;height:36vh;translate:0 -50%;border-radius:999px}
-.p1{left:14vw;width:30vw;background:#202126;box-shadow:inset 0 0 50px rgba(0,0,0,.45)}
-.p2{left:46vw;width:40vw;background:linear-gradient(90deg,#2a2b31,#383940)}
-.num{position:absolute;left:18vw;top:50%;translate:0 -50%;font:italic 700 clamp(64px,9vw,140px)/1 'Rubik',sans-serif;letter-spacing:-.04em;color:#373840;transition:opacity .45s,translate .6s var(--ease)}
-.cats{position:absolute;z-index:4;left:5vw;top:50%;translate:0 -50%;display:flex;flex-direction:column;gap:24px}
-.cats button{display:flex;flex-direction:column;align-items:center;gap:10px;background:none;border:0;cursor:pointer;color:#6a6c78;transition:color .4s}
-.cats .t{writing-mode:vertical-rl;rotate:180deg;font-size:10px;letter-spacing:.2em;text-transform:uppercase}
-.cats .mk{width:6px;height:6px;background:var(--a2);opacity:0;scale:.2;transition:opacity .4s,scale .5s var(--ease),background .6s}
-.cats button.on{color:#fff}.cats button.on .mk{opacity:1;scale:1}.cats button:hover{color:#fff}
-.arr{position:absolute;z-index:4;top:50%;translate:0 -50%;width:48px;height:48px;border:0;background:none;font-size:34px;line-height:1;cursor:pointer;transition:transform .4s var(--ease),opacity .3s}
-.arr.l{left:1.5vw;opacity:.4}.arr.r{right:1.5vw}.arr:hover{opacity:1}.arr.r:hover{transform:translateX(4px)}.arr.l:hover{transform:translateX(-4px)}
-.copy{position:absolute;z-index:3;left:calc(44vw + 31vh);top:50%;translate:0 -50%;max-width:calc(100vw - 44vw - 31vh - 6vw);font-weight:300;font-size:clamp(28px,3.9vw,64px);line-height:1.12;letter-spacing:-.01em;opacity:0;visibility:hidden;pointer-events:none;transition:opacity 1s var(--ease) .3s,visibility 0s 1s}
+
+/* Right-Hand Hero Copy Area */
+.copy{position:absolute;z-index:5;left:calc(48vw + 76px);top:50%;translate:0 -50%;max-width:calc(100vw - 48vw - 76px - 6vw);opacity:0;visibility:hidden;pointer-events:none;transition:opacity 1s var(--ease) .3s,visibility 0s 1s}
 .ready .copy{opacity:1;visibility:visible;pointer-events:auto;transition:opacity 1s var(--ease) .3s,visibility 0s 0s}
-.copy b{font-weight:700;color:var(--a2);transition:color .6s}
-.sub{margin-top:18px;font-size:clamp(12px,1.05vw,16px);line-height:1.55;font-weight:300;color:var(--mut);max-width:32ch;letter-spacing:0}
-.ln{display:block;overflow:hidden;padding-bottom:.12em;margin-bottom:-.12em}
-.ln>span{display:block;translate:0 110%;transition:translate 1.2s var(--ease) calc(.12s*var(--i,0))}
-.ready .ln>span{translate:0 0}
-.out .ln>span{translate:0 110%;transition:translate .45s cubic-bezier(.5,0,.8,.4)}
-.out .num{opacity:0;translate:-24px -50%}
-.buy{position:absolute;z-index:4;left:50%;bottom:9vh;translate:-50% 0;display:flex;align-items:center;gap:14px}
-.sw{width:13px;height:13px;border-radius:50%;border:1px solid rgba(255,255,255,.25);background:var(--c);cursor:pointer;padding:0;outline:2px solid transparent;outline-offset:4px;transition:transform .4s var(--ease),outline-color .3s}
-.sw:hover{transform:scale(1.35)}.sw.on{outline-color:rgba(255,255,255,.6)}
-.go{margin:0 10px;padding:13px 30px;border-radius:999px;background:#e9202f;font-weight:700;font-size:11px;letter-spacing:.1em;text-transform:uppercase;box-shadow:0 10px 30px rgba(233,32,47,.55);transition:transform .5s var(--ease),box-shadow .5s}
-.go:hover{transform:translateY(-3px) scale(1.04);box-shadow:0 16px 40px rgba(233,32,47,.7)}
-.explore{position:absolute;z-index:4;left:50%;bottom:3.4vh;translate:-50% 0;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:#7d808d;display:flex;flex-direction:column;align-items:center;gap:6px;transition:color .3s}
-.explore:hover{color:#fff}.explore i{font-style:normal;animation:bob 2s ease-in-out infinite}
-@keyframes bob{50%{translate:0 4px}}
-.hint{position:absolute;z-index:4;bottom:9.6vh;right:8vw;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#5d5f6b}
-.cad-tools{position:absolute;z-index:5;top:3.4vh;right:5vw;display:flex;align-items:center;gap:10px}
-.cad-btn{display:inline-flex;align-items:center;gap:7px;padding:8px 16px;border-radius:999px;background:rgba(21,22,27,0.78);border:1px solid rgba(255,255,255,0.14);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);font-size:11px;font-weight:600;letter-spacing:0.04em;color:#c9cbd3;cursor:pointer;transition:all 0.3s var(--ease);box-shadow:0 10px 24px -8px rgba(0,0,0,0.6)}
-.cad-btn:hover{background:rgba(33,35,43,0.92);border-color:rgba(255,255,255,0.3);color:#fff;transform:translateY(-1px)}
-.cad-btn.active{background:linear-gradient(135deg,rgba(31,102,255,0.35),rgba(255,45,111,0.3));border-color:rgba(134,85,255,0.7);color:#fff;box-shadow:0 0 18px rgba(134,85,255,0.4)}
-@media(max-width:820px){.cad-tools{top:auto;bottom:16vh;right:auto;left:50%;translate:-50% 0;gap:8px}.cad-btn{padding:7px 12px;font-size:10px}}
-.fade{opacity:0;transition:opacity 1.4s ease .9s}.ready .fade{opacity:1}
-/* sections */
-.after{position:relative;z-index:2;background:var(--bg)}
+.hero-title{display:block;font-family:'Space Grotesk',system-ui,sans-serif;font-weight:700;font-size:clamp(46px,6vw,92px);line-height:1.04;letter-spacing:-.035em}
+.hero-title .line-white{display:block;color:#fff}
+.hero-title .line-orange{display:block;color:#ff5a1f;text-shadow:0 0 28px rgba(255,90,31,.45)}
+.hero-sub{margin-top:18px;font-size:clamp(14px,1.15vw,18px);line-height:1.55;font-weight:400;color:#9a9ca8;max-width:36ch}
+.hero-actions{margin-top:28px}
+.btn-get-started{display:inline-flex;align-items:center;gap:12px;padding:15px 36px;border-radius:999px;background:#f51f36;color:#fff;font-weight:700;font-size:13px;letter-spacing:.06em;text-transform:uppercase;box-shadow:0 10px 32px rgba(245,31,54,.55),0 0 20px rgba(245,31,54,.25);transition:all .35s var(--ease)}
+.btn-get-started:hover{background:#ff2d55;transform:translateY(-2px) scale(1.03);box-shadow:0 14px 40px rgba(245,31,54,.7),0 0 28px rgba(245,31,54,.35)}
+
+/* Carousel Pagination Dots & Arrow Controls */
+.hero-carousel-ctrl{margin-top:34px;display:flex;align-items:center;gap:22px;user-select:none}
+.h-dots{display:flex;align-items:center;gap:7px}
+.h-dot{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.28);cursor:pointer;transition:all .3s}
+.h-dot.active{width:22px;height:6px;border-radius:999px;background:#fff;box-shadow:0 0 8px rgba(255,255,255,.6)}
+.h-arrows{display:flex;align-items:center;gap:8px}
+.h-arr{width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,.8);font-size:18px;cursor:pointer;transition:all .3s}
+.h-arr:hover{background:rgba(255,255,255,.14);color:#fff;border-color:rgba(255,90,31,.6);box-shadow:0 0 12px rgba(255,90,31,.3);transform:scale(1.08)}
+
+/* Bottom Right Trust Badges */
+.trust-badge{position:absolute;bottom:5vh;right:4vw;z-index:5;display:flex;align-items:center;gap:14px;padding:10px 22px;border-radius:999px;background:rgba(18,20,28,.82);border:1px solid rgba(255,255,255,.1);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);font-size:12px;font-weight:500;color:#d2d4de;box-shadow:0 12px 30px rgba(0,0,0,.6);transition:opacity .8s var(--ease)}
+.t-item{display:flex;align-items:center;gap:7px}
+.t-item svg{color:#ff5a1f}
+.t-sep{width:1px;height:12px;background:rgba(255,255,255,.15)}
+
+/* CAD Assembly HUD Tools */
+.cad-tools{position:absolute;z-index:10;top:88px;right:4vw;display:flex;align-items:center;gap:10px;transition:opacity .8s var(--ease)}
+.cad-btn{display:inline-flex;align-items:center;gap:7px;padding:8px 16px;border-radius:999px;background:rgba(18,20,28,.78);border:1px solid rgba(255,255,255,.12);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);font-size:11px;font-weight:600;letter-spacing:.03em;color:#c9cbd3;cursor:pointer;transition:all .3s var(--ease);box-shadow:0 10px 24px -8px rgba(0,0,0,.6)}
+.cad-btn:hover{background:rgba(30,33,45,.92);border-color:rgba(255,90,31,.5);color:#fff;transform:translateY(-1px)}
+.cad-btn.active{background:linear-gradient(135deg,rgba(255,90,31,.35),rgba(245,31,54,.3));border-color:rgba(255,90,31,.8);color:#fff;box-shadow:0 0 18px rgba(255,90,31,.4)}
+.hint{position:absolute;z-index:5;bottom:7vh;left:calc(48vw + 76px);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#6d7080}
+
+/* Responsive adjustments */
+@media(max-width:1024px){
+  header.hd{left:0;padding:0 5vw}
+  .side-dock{display:none}
+  .stage{padding-left:0}
+  .plate-right{display:none}
+  .hp-dots{left:50%;bottom:18vh}
+  .copy{left:7vw;right:7vw;top:66%;max-width:none}
+  .kw{left:7vw;right:7vw;top:66%;max-width:none}
+  .trust-badge{bottom:2vh;right:50%;translate:50% 0}
+  .cad-tools{top:auto;bottom:12vh;right:50%;translate:50% 0}
+  .hint{display:none}
+}
+
+/* Sections below hero */
+.after{position:relative;z-index:2;background:var(--bg);padding-left:76px;transition:opacity .8s var(--ease)}
+@media(max-width:1024px){.after{padding-left:0}}
 .wrap{max-width:1180px;margin:0 auto;padding:0 6vw}
-.sec{position:relative;padding:130px 0 20px;text-align:center}
+.sec{position:relative;padding:120px 0 20px;text-align:center}
 .sec::before{content:"";position:absolute;left:50%;top:50px;translate:-50% 0;width:min(900px,90vw);height:440px;background:radial-gradient(closest-side,rgba(var(--g),.14),transparent);pointer-events:none;z-index:-1}
 h2{font-size:clamp(30px,4vw,52px);font-weight:700;letter-spacing:-.03em;line-height:1.08}
 .lead{margin:18px auto 0;max-width:56ch;color:var(--mut);line-height:1.65;font-weight:300;font-size:17px}
 .lbw{max-width:720px;margin:44px auto 0;perspective:900px}
 .lb{display:flex;align-items:center;gap:8px;padding:8px;border-radius:999px;background:linear-gradient(160deg,#1c1d25,#14151a);border:1px solid var(--line);transform-style:preserve-3d;box-shadow:0 40px 60px -30px rgba(31,102,255,.45);transition:transform .45s var(--ease),border-color .3s,box-shadow .3s}
-.lb:focus-within{border-color:rgba(255,255,255,.25);box-shadow:0 0 0 4px rgba(31,102,255,.2),0 40px 60px -30px rgba(31,102,255,.45)}
+.lb:focus-within{border-color:rgba(255,90,31,.5);box-shadow:0 0 0 4px rgba(255,90,31,.2),0 40px 60px -30px rgba(31,102,255,.45)}
 .lb.err{animation:shake .45s}
 @keyframes shake{20%,60%{translate:-7px 0}40%,80%{translate:7px 0}}
 .lb input{flex:1;min-width:0;border:0;background:none;padding:0 12px 0 20px;font:inherit;font-size:15px;color:#fff;outline:0;transform:translateZ(14px)}
 .lb .pst{width:40px;height:40px;border-radius:50%;border:0;background:rgba(255,255,255,.07);cursor:pointer;font-size:15px;transform:translateZ(18px)}
-.lb .gb{border:0;padding:14px 26px;border-radius:999px;background:#e9202f;font-weight:700;font-size:11px;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;box-shadow:0 8px 24px rgba(233,32,47,.45);transform:translateZ(26px);transition:filter .3s}
+.lb .gb{border:0;padding:14px 26px;border-radius:999px;background:#f51f36;color:#fff;font-weight:700;font-size:11px;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;box-shadow:0 8px 24px rgba(245,31,54,.45);transform:translateZ(26px);transition:filter .3s}
 .lb .gb:hover{filter:brightness(1.12)}.lb .gb.busy{opacity:.6;pointer-events:none}
 .msg{min-height:20px;margin-top:12px;font-size:13px;color:#ff6b8b}
 .cards{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;margin-top:56px;text-align:left;perspective:1400px}
 .trio{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:56px;text-align:left;perspective:1400px}
 .cd{position:relative;display:flex;flex-direction:column;padding:28px;border-radius:24px;background:linear-gradient(160deg,#1c1d25,#13141a);border:1px solid var(--line);transform-style:preserve-3d;box-shadow:0 30px 50px -30px rgba(0,0,0,.8);transition:transform .45s var(--ease),border-color .4s,box-shadow .5s,opacity .9s var(--ease) var(--d,0s),translate .9s var(--ease) var(--d,0s),rotate .9s var(--ease) var(--d,0s)}
-.cd::before{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;opacity:0;transition:opacity .4s;background:radial-gradient(300px circle at var(--mx,50%) var(--my,0%),rgba(var(--rgb),.2),transparent 70%)}
-.cd:hover{border-color:rgba(255,255,255,.17);box-shadow:0 50px 70px -30px rgba(var(--rgb),.4)}.cd:hover::before{opacity:1}
+.cd::before{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;opacity:0;transition:opacity .4s;background:radial-gradient(300px circle at var(--mx,50%) var(--my,0%),rgba(var(--rgb),.25),transparent 70%)}
+.cd:hover{border-color:rgba(255,90,31,.45);box-shadow:0 50px 70px -30px rgba(var(--rgb),.4)}.cd:hover::before{opacity:1}
 .cd>*{transform:translateZ(var(--z,0px))}
 .ic{--z:52px;width:46px;height:46px;border-radius:13px;display:grid;place-items:center;margin-bottom:22px;background:rgba(var(--rgb),.16);color:var(--c);box-shadow:0 14px 24px -8px rgba(var(--rgb),.5)}
 .ic svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
@@ -132,28 +211,26 @@ h2{font-size:clamp(30px,4vw,52px);font-weight:700;letter-spacing:-.03em;line-hei
 .fan{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;margin-top:64px;perspective:1600px;text-align:left;transform:rotateY(var(--fy,0deg));transform-style:preserve-3d;transition:transform .7s var(--ease)}
 .st{position:relative;padding:34px 30px 32px;border-radius:26px;background:linear-gradient(160deg,#1d1e27,#13141a);border:1px solid var(--line);transform-style:preserve-3d;transform:rotateY(var(--ry,0deg)) translateZ(var(--tz,0px));box-shadow:0 40px 60px -30px rgba(0,0,0,.85);transition:transform .8s var(--ease),box-shadow .6s}
 .st:nth-child(1){--ry:20deg;--tz:-50px}.st:nth-child(2){--tz:34px}.st:nth-child(3){--ry:-20deg;--tz:-50px}
-.st:hover{transform:rotateY(0) translateZ(80px);box-shadow:0 60px 80px -30px rgba(var(--rgb),.45)}
+.st:hover{transform:rotateY(0) translateZ(80px);box-shadow:0 60px 80px -30px rgba(var(--rgb),.45);border-color:rgba(255,90,31,.4)}
 .st b{display:block;font:italic 700 72px/1 'Rubik',sans-serif;letter-spacing:-.04em;color:var(--c);transform:translateZ(60px);margin-bottom:18px}
 .st h3{font-size:21px;font-weight:700;margin-bottom:10px;transform:translateZ(36px)}
 .st p{font-size:14.5px;line-height:1.65;color:var(--mut);font-weight:300;transform:translateZ(20px)}
 .panel{display:grid;grid-template-columns:1fr 1fr;align-items:center;gap:40px;max-width:1180px;width:88vw;margin:0 auto;border-radius:34px;padding:64px 5vw;text-align:left;background:radial-gradient(90% 130% at 80% 50%,#1e1f2b,#14151a);border:1px solid var(--line);overflow:hidden}
 .panel .lead{margin-left:0}
 .feat{list-style:none;padding:0;margin:26px 0 34px;display:grid;gap:12px;color:#c9cbd3;font-size:15px;font-weight:300}
-.feat li::before{content:"";display:inline-block;width:8px;height:8px;border-radius:50%;background:linear-gradient(#ff2d6f,#2f5bff);margin-right:12px}
+.feat li::before{content:"";display:inline-block;width:8px;height:8px;border-radius:50%;background:linear-gradient(#f51f36,#ff5a1f);margin-right:12px}
 #eq{width:100%;aspect-ratio:1/.92;display:block}
 .btn{display:inline-block;padding:15px 30px;border-radius:999px;background:#1f66ff;font-weight:700;font-size:11px;letter-spacing:.1em;text-transform:uppercase;box-shadow:0 10px 28px rgba(31,102,255,.45);transition:transform .5s var(--ease)}
 .btn:hover{transform:translateY(-3px)}
 footer{position:relative;margin-top:130px;padding:90px 6vw 34px;text-align:center;overflow:hidden}
 .wm{position:relative;display:inline-block;font-family:'Space Grotesk','Bebas Neue',sans-serif;font-weight:800;font-size:clamp(3.2rem,9.5vw,10.2rem);line-height:1;text-transform:uppercase;letter-spacing:-.01em;user-select:none;cursor:default}
 .wm span{display:block;color:transparent;-webkit-text-stroke:1.5px rgba(255,255,255,.38)}
-.wm .lit{position:absolute;inset:0;-webkit-text-stroke:1.5px #fff;background:radial-gradient(circle 240px at var(--x,50%) var(--y,50%),rgba(255,255,255,.6),rgba(77,138,255,.4) 45%,rgba(255,45,111,.2) 72%,transparent);-webkit-background-clip:text;background-clip:text;-webkit-mask-image:radial-gradient(circle 280px at var(--x,50%) var(--y,50%),#000 0,rgba(0,0,0,.55) 45%,transparent);mask-image:radial-gradient(circle 280px at var(--x,50%) var(--y,50%),#000 0,rgba(0,0,0,.55) 45%,transparent);opacity:0;transition:opacity .5s;pointer-events:none}
+.wm .lit{position:absolute;inset:0;-webkit-text-stroke:1.5px #fff;background:radial-gradient(circle 240px at var(--x,50%) var(--y,50%),rgba(255,255,255,.6),rgba(255,90,31,.5) 45%,rgba(245,31,54,.25) 72%,transparent);-webkit-background-clip:text;background-clip:text;-webkit-mask-image:radial-gradient(circle 280px at var(--x,50%) var(--y,50%),#000 0,rgba(0,0,0,.55) 45%,transparent);mask-image:radial-gradient(circle 280px at var(--x,50%) var(--y,50%),#000 0,rgba(0,0,0,.55) 45%,transparent);opacity:0;transition:opacity .5s;pointer-events:none}
 .wm:hover .lit,.wm.auto .lit{opacity:1}
 .fl{margin-top:56px;padding-top:26px;display:flex;flex-wrap:wrap;gap:14px 36px;justify-content:space-between;font-size:13px;color:var(--mut)}
 .fl .links{display:flex;gap:22px;flex-wrap:wrap}.fl a:hover{color:#fff}
 @media(max-width:1100px){.cards{grid-template-columns:1fr 1fr}}
-@media(max-width:820px){.pill,.num,.hint,.cats{display:none}.copy{left:7vw;right:7vw;top:66%;max-width:none;font-size:30px}nav a:not(.app){display:none}.arr{top:42%}.buy{bottom:11vh}.cards{grid-template-columns:1fr}header,header.sc{padding:2.4vh 6vw}#work{padding-top:90px}}
-@media(max-width:820px){.fan,.trio,.panel{grid-template-columns:1fr}.st{--ry:0deg!important;--tz:0px!important}.panel{padding:44px 6vw}.fl{flex-direction:column}}
-@media(prefers-reduced-motion:reduce){.rv3{rotate:none;translate:0 0 0;opacity:1}*{transition-duration:.01s!important;animation:none!important}.ln>span{translate:0 0}.rv{opacity:1;translate:0 0}}
+@media(max-width:820px){.cards{grid-template-columns:1fr}.fan,.trio,.panel{grid-template-columns:1fr}.st{--ry:0deg!important;--tz:0px!important}.panel{padding:44px 6vw}.fl{flex-direction:column}header,header.sc{padding:0 5vw}}
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
@@ -163,17 +240,103 @@ footer{position:relative;margin-top:130px;padding:90px 6vw 34px;text-align:cente
 <button id="skip">Skip intro</button>
 <i class="lbx t"></i><i class="lbx b"></i>
 <canvas id="gl" aria-hidden="true"></canvas>
+
+<!-- Left Vertical Sidebar Dock (Mockup Navigation) -->
+<aside class="side-dock" id="sideDock">
+  <div class="dock-indicator" id="dockIndicator"></div>
+  <nav class="dock-nav" aria-label="Primary Dock">
+    <a href="#top" class="dock-item active" data-nav="home" title="Home">
+      <svg viewBox="0 0 24 24" class="dock-icon" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      <span class="dock-label">Home</span>
+    </a>
+    <a href="/downloader" class="dock-item" data-nav="apps" title="Apps">
+      <svg viewBox="0 0 24 24" class="dock-icon" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/></svg>
+      <span class="dock-label">Apps</span>
+    </a>
+    <a href="/studio" class="dock-item" data-nav="music" title="Music">
+      <svg viewBox="0 0 24 24" class="dock-icon" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+      <span class="dock-label">Music</span>
+    </a>
+    <a href="/auto-clip" class="dock-item" data-nav="videos" title="Videos">
+      <svg viewBox="0 0 24 24" class="dock-icon" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="3"/><polygon points="10 8 16 12 10 16 10 8" fill="currentColor"/></svg>
+      <span class="dock-label">Videos</span>
+    </a>
+    <a href="/downloader" class="dock-item" data-nav="downloads" title="Downloads">
+      <svg viewBox="0 0 24 24" class="dock-icon" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      <span class="dock-label">Downloads</span>
+    </a>
+    <a href="/settings" class="dock-item" data-nav="settings" title="Settings">
+      <svg viewBox="0 0 24 24" class="dock-icon" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      <span class="dock-label">Settings</span>
+    </a>
+  </nav>
+  
+  <div class="dock-equalizer" id="dockEq" title="Audio Processing Engine">
+    <div class="eq-bars">
+      <span class="b1"></span><span class="b2"></span><span class="b3"></span><span class="b4"></span>
+    </div>
+  </div>
+</aside>
+
+<!-- Top Header Navigation -->
 <header class="hd" id="hd">
-  <a class="logo" href="#top" aria-label="ClipGlass home"><i></i>ClipGlass</a>
-  <nav aria-label="Main"><a href="/downloader">Downloader</a><a href="/studio">Studio</a><a href="/video-trimmer">Trimmer</a><a href="/auto-clip">Auto Clip</a><a href="/recent">Recent</a><a class="app" href="/downloader">Open app</a></nav>
+  <a class="logo" href="#top" aria-label="ClipGlass home">
+    <svg class="logo-mark" viewBox="0 0 28 28">
+      <defs>
+        <linearGradient id="logoG" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stop-color="#f51f36"/>
+          <stop offset="100%" stop-color="#ff5a1f"/>
+        </linearGradient>
+      </defs>
+      <path d="M5 4l18 10-18 10V4z" fill="url(#logoG)"/>
+      <path d="M11 10.5l8 3.5-8 3.5v-7z" fill="#fff" opacity="0.95"/>
+    </svg>
+    <span class="logo-text">ClipGlass</span>
+  </a>
+
+  <nav class="center-nav" aria-label="Main Navigation">
+    <a href="#top" class="nav-item active">Home</a>
+    <a href="#work" class="nav-item">Features</a>
+    <a href="/downloader" class="nav-item">Download</a>
+    <a href="#how" class="nav-item">Pricing</a>
+    <a href="#privacy" class="nav-item">About</a>
+    <a href="/faq" class="nav-item">Contact</a>
+  </nav>
+
+  <div class="header-right">
+    <button class="icon-btn" id="searchBtn" title="Search" aria-label="Search">
+      <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    </button>
+    <button class="icon-btn" id="notifBtn" title="Notifications" aria-label="Notifications">
+      <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+    </button>
+    <button class="icon-btn" id="themeBtn" title="Toggle Theme" aria-label="Toggle Theme">
+      <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+    </button>
+    <a href="/downloader" class="btn-download-pill">
+      <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      <span>Download</span>
+    </a>
+  </div>
 </header>
+
 <main>
 <section class="stage" id="top">
-  <div class="pill p1"></div><div class="pill p2"></div>
-  <div class="num" id="num" aria-hidden="true">01</div>
-  <div class="cats" id="cats" aria-label="Workspaces"></div>
-  <button class="arr l" id="prev" aria-label="Previous workspace">‹</button>
-  <button class="arr r" id="next" aria-label="Next workspace">›</button>
+  <!-- Perspective Grid and Angled Floating Glass Plates Matching Mockup -->
+  <div class="grid-bg"></div>
+  <div class="glass-plate plate-left"></div>
+  <div class="glass-plate plate-bottom"></div>
+  <div class="glass-plate plate-right"></div>
+
+  <!-- 5 Headphone Pagination Dots Under the Headphone -->
+  <div class="hp-dots" id="hpDots">
+    <span class="hp-dot active" data-i="0" title="Universal Downloader"></span>
+    <span class="hp-dot" data-i="1" title="Audio Studio"></span>
+    <span class="hp-dot" data-i="2" title="Video Trimmer"></span>
+    <span class="hp-dot" data-i="3" title="Auto Clip Studio"></span>
+    <span class="hp-dot" data-i="4" title="Batch Processing"></span>
+  </div>
+
   <!-- Right-side opening sequence text (Paste / Pick / Done) -->
   <div class="kw" id="kw" aria-hidden="true">
     <div class="kw-item">
@@ -192,23 +355,55 @@ footer{position:relative;margin-top:130px;padding:90px 6vw 34px;text-align:cente
       <div class="kw-sub">Instant download. No account, no install.</div>
     </div>
   </div>
-  <h1 class="copy" aria-live="polite">
-    <span class="ln" style="--i:1"><span id="l1">Download in</span></span>
-    <span class="ln" style="--i:2"><span><b id="l2">seconds.</b></span></span>
-    <p class="sub"><span class="ln" style="--i:3"><span id="l3">Paste a link, pick a quality. Up to 4K video or MP3.</span></span></p>
-  </h1>
-  <div class="buy fade">
-    <button class="sw on" data-k="0" style="--c:#17181c" aria-label="Black"></button>
-    <button class="sw" data-k="1" style="--c:#e9e9ec" aria-label="White"></button>
-    <button class="sw" data-k="2" style="--c:#e6d9b5" aria-label="Cream"></button>
-    <a class="go" id="try" href="/downloader">Try it</a>
-    <button class="sw" data-k="3" style="--c:#5a3cb4" aria-label="Purple"></button>
-    <button class="sw" data-k="4" style="--c:#c9202b" aria-label="Red"></button>
-    <button class="sw" data-k="5" style="--c:#e98bb5" aria-label="Pink"></button>
+
+  <!-- Right-side Hero Headline and CTA (Matches the Mockup) -->
+  <div class="copy" id="heroCopy">
+    <h1 class="hero-title">
+      <span class="line-white" id="l1">Download in</span>
+      <span class="line-orange" id="l2">seconds.</span>
+    </h1>
+    <p class="hero-sub" id="l3">Everything you need — faster, simpler, better.</p>
+    
+    <div class="hero-actions">
+      <a href="/downloader" class="btn-get-started" id="getStartedBtn">
+        <span>Get Started</span>
+        <span>→</span>
+      </a>
+    </div>
+
+    <!-- Carousel pagination & arrows -->
+    <div class="hero-carousel-ctrl">
+      <div class="h-dots" id="hDots">
+        <span class="h-dot active" data-i="0"></span>
+        <span class="h-dot" data-i="1"></span>
+        <span class="h-dot" data-i="2"></span>
+        <span class="h-dot" data-i="3"></span>
+        <span class="h-dot" data-i="4"></span>
+      </div>
+      <div class="h-arrows">
+        <button type="button" class="h-arr" id="prevHero" aria-label="Previous workspace">‹</button>
+        <button type="button" class="h-arr" id="nextHero" aria-label="Next workspace">›</button>
+      </div>
+    </div>
   </div>
-  <a class="explore fade" href="#work"><i>↓</i>Explore</a>
-  <div class="hint fade">Drag to rotate</div>
-  <div class="cad-tools fade" id="cadTools">
+
+  <!-- Bottom-Right Trust Badges (Matches Mockup) -->
+  <div class="trust-badge">
+    <span class="t-item">
+      <svg viewBox="0 0 24 24" width="13" height="13" fill="#ff5a1f"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+      <span>Ultra Fast</span>
+    </span>
+    <span class="t-sep"></span>
+    <span class="t-item">
+      <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="#ff5a1f" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      <span>Secure</span>
+    </span>
+  </div>
+
+  <div class="hint">Drag to rotate</div>
+
+  <!-- CAD Interactive Controls -->
+  <div class="cad-tools" id="cadTools">
     <button type="button" id="btnExplode" class="cad-btn" aria-label="Toggle Exploded CAD View">
       <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"/></svg>
       <span id="explodeLabel">Exploded View</span>
@@ -225,35 +420,35 @@ footer{position:relative;margin-top:130px;padding:90px 6vw 34px;text-align:cente
 </section>
 
 <div class="after">
-  <section id="work" class="sec wrap" style="--g:255,45,111">
-    <h2 class="rv">All-in-One Studio Workspaces</h2>
+  <section id="work" class="sec wrap" style="--g:255,90,31">
+    <h2 class="rv">Universal Studio Workspaces</h2>
     <p class="lead rv">Download, trim, master and repurpose your media with effortless precision.</p>
     <div class="lbw rv"><form class="lb" id="f" data-tilt="4" novalidate>
-      <input id="url" aria-label="YouTube link" placeholder="Paste a YouTube link" autocomplete="off">
+      <input id="url" aria-label="YouTube link" placeholder="Paste a link. Pick a quality." autocomplete="off">
       <button type="button" class="pst" id="pst" aria-label="Paste from clipboard">📋</button>
       <button class="gb" id="gb">Inspect &amp; download</button>
     </form></div>
     <p class="msg" id="msg" role="status"></p>
     <div class="cards">
-      <a class="cd rv3" data-tilt="9" href="/downloader" style="--c:#ff2d6f;--rgb:255,45,111">
+      <a class="cd rv3" data-tilt="9" href="/downloader" style="--c:#ff5a1f;--rgb:255,90,31">
         <div class="ic"><svg viewBox="0 0 24 24"><path d="M12 4v10m0 0l-4-4m4 4l4-4M5 19h14"/></svg></div>
         <h3>Downloader</h3>
         <p>Save videos from 360p up to 4K, or extract audio as MP3, FLAC or WAV.</p>
         <span class="l">Open Downloader →</span>
       </a>
-      <a class="cd rv3" data-tilt="9" href="/studio" style="--c:#8655ff;--rgb:134,85,255">
+      <a class="cd rv3" data-tilt="9" href="/studio" style="--c:#f51f36;--rgb:245,31,54">
         <div class="ic"><svg viewBox="0 0 24 24"><path d="M9 18V6l10-2v12"/><circle cx="6" cy="18" r="3"/><circle cx="16" cy="16" r="3"/></svg></div>
         <h3>Audio Studio</h3>
         <p>79 effects, an automatic mode and a modular rack, with true-peak limiting.</p>
         <span class="l">Open Studio →</span>
       </a>
       <a class="cd rv3" data-tilt="9" href="/video-trimmer" style="--c:#ffd23f;--rgb:255,210,63">
-        <div class="ic"><svg viewBox="0 0 24 24"><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M8.1 8.1L20 20M8.1 15.9L20 4"/></svg></div>
+        <div class="ic"><svg viewBox="0 0 24 24"><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><line x1="20" y1="4" x2="8.12" y2="15.88"/><line x1="14.47" y1="14.48" x2="20" y2="20"/><line x1="8.12" y1="8.12" x2="12" y2="12"/></svg></div>
         <h3>Video Trimmer</h3>
         <p>Cut on a visual timeline. Lossless stream copy means no re-encoding and no waiting.</p>
         <span class="l">Open Trimmer →</span>
       </a>
-      <a class="cd rv3" data-tilt="9" href="/auto-clip" style="--c:#2165f7;--rgb:33,101,247">
+      <a class="cd rv3" data-tilt="9" href="/auto-clip" style="--c:#1f66ff;--rgb:31,102,255">
         <div class="ic"><svg viewBox="0 0 24 24"><rect x="7" y="3" width="10" height="18" rx="2"/><path d="M11 10l3 2-3 2z"/></svg></div>
         <h3>Auto Clip Studio</h3>
         <p>Finds the strongest moments in a long video and exports 9:16 clips with captions.</p>
@@ -261,28 +456,32 @@ footer{position:relative;margin-top:130px;padding:90px 6vw 34px;text-align:cente
       </a>
     </div>
   </section>
-  <section id="how" class="sec wrap" style="--g:31,102,255">
+
+  <section id="how" class="sec wrap" style="--g:255,90,31">
     <h2 class="rv">How it works</h2>
     <p class="lead rv">Three steps. No account, no install.</p>
-    <div class="fan" id="fan"><div class="st" style="--c:#ff2d6f;--rgb:255,45,111"><b>01</b><h3>Paste a link</h3><p>Drop in any YouTube video, Short or Music URL. The available formats are read in about two seconds.</p></div><div class="st" style="--c:#4d8aff;--rgb:77,138,255"><b>02</b><h3>Choose a format</h3><p>Pick MP4 or WebM up to 4K, or extract audio as MP3, M4A, Opus, FLAC or WAV.</p></div><div class="st" style="--c:#19e3b1;--rgb:25,227,177"><b>03</b><h3>Save the file</h3><p>Your download is assembled with FFmpeg and deleted automatically after 15 minutes.</p></div></div>
+    <div class="fan" id="fan"><div class="st" style="--c:#ff5a1f;--rgb:255,90,31"><b>01</b><h3>Paste a link</h3><p>Drop in any YouTube video, Short or Music URL. The available formats are read in about two seconds.</p></div><div class="st" style="--c:#f51f36;--rgb:245,31,54"><b>02</b><h3>Choose a format</h3><p>Pick MP4 or WebM up to 4K, or extract audio as MP3, M4A, Opus, FLAC or WAV.</p></div><div class="st" style="--c:#19e3b1;--rgb:25,227,177"><b>03</b><h3>Save the file</h3><p>Your download is assembled with FFmpeg and deleted automatically after 15 minutes.</p></div></div>
   </section>
-  <section class="sec" style="--g:138,92,255">
+
+  <section class="sec" style="--g:255,90,31">
     <div class="panel rv">
       <div>
-        <p class="text-[11px] font-bold uppercase tracking-[0.2em] text-[#8655FF] mb-2">Real-time Web Audio API Processing</p>
+        <p style="font-size:11px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:#ff5a1f;margin-bottom:8px">Real-time Web Audio API Processing</p>
         <h2>Mastering-grade audio, in your browser</h2>
         <p class="lead">Measure loudness, compare before and after, and keep every file on your device.</p>
         <ul class="feat"><li>LUFS loudness metering</li><li>One-click A/B bypass</li><li>True-peak safety limiting</li><li>Nothing is uploaded</li></ul>
-        <a class="btn" style="background:#2165f7;box-shadow:0 0 24px rgba(33,101,247,0.4)" href="/studio">Launch Audio Studio</a>
+        <a class="btn" style="background:#ff5a1f;box-shadow:0 0 24px rgba(255,90,31,0.4)" href="/studio">Launch Audio Studio</a>
       </div>
       <canvas id="eq" role="img" aria-label="Animated 3D equalizer"></canvas>
     </div>
   </section>
-  <section id="privacy" class="sec wrap" style="--g:25,227,177">
+
+  <section id="privacy" class="sec wrap" style="--g:255,90,31">
     <h2 class="rv">Private by design</h2>
     <p class="lead rv">Your media is yours. We keep as little of it as possible, for as short a time as possible.</p>
-    <div class="trio"><div class="cd rv3" data-tilt="9" style="--c:#8a5cff;--rgb:138,92,255"><div class="ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c1-4 4-6 8-6s7 2 8 6"/></svg></div><h3>No account</h3><p>Open the site and start working. There is nothing to sign up for.</p></div><div class="cd rv3" data-tilt="9" style="--c:#19e3b1;--rgb:25,227,177"><div class="ic"><svg viewBox="0 0 24 24"><path d="M12 3l7 3v5c0 4.5-3 8-7 10-4-2-7-5.5-7-10V6z"/></svg></div><h3>No ads, no trackers</h3><p>The interface is free of ads and third-party tracking scripts.</p></div><div class="cd rv3" data-tilt="9" style="--c:#ff2d6f;--rgb:255,45,111"><div class="ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></div><h3>Deleted in 15 minutes</h3><p>Files live in temporary storage and are removed automatically.</p></div></div>
+    <div class="trio"><div class="cd rv3" data-tilt="9" style="--c:#ff5a1f;--rgb:255,90,31"><div class="ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c1-4 4-6 8-6s7 2 8 6"/></svg></div><h3>No account</h3><p>Open the site and start working. There is nothing to sign up for.</p></div><div class="cd rv3" data-tilt="9" style="--c:#19e3b1;--rgb:25,227,177"><div class="ic"><svg viewBox="0 0 24 24"><path d="M12 3l7 3v5c0 4.5-3 8-7 10-4-2-7-5.5-7-10V6z"/></svg></div><h3>No ads, no trackers</h3><p>The interface is free of ads and third-party tracking scripts.</p></div><div class="cd rv3" data-tilt="9" style="--c:#f51f36;--rgb:245,31,54"><div class="ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></div><h3>Deleted in 15 minutes</h3><p>Files live in temporary storage and are removed automatically.</p></div></div>
   </section>
+
   <footer>
     <p class="wm" id="wm" aria-label="ClipGlass"><span aria-hidden="true">ClipGlass</span><span class="lit" aria-hidden="true">ClipGlass</span></p>
     <div class="fl"><div class="links"><a href="/downloader">Downloader</a><a href="/studio">Studio</a><a href="/video-trimmer">Trimmer</a><a href="/auto-clip">Auto Clip</a><a href="/recent">Recent</a><a href="/jobs">Jobs</a><a href="/settings">Settings</a><a href="/faq">Help &amp; FAQ</a><a href="#" id="replay">Replay intro</a></div><span>Media is processed temporarily and deleted after 15 minutes.</span></div>
@@ -292,53 +491,107 @@ footer{position:relative;margin-top:130px;padding:90px 6vw 34px;text-align:cente
 
 <script>
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
-// Put a real headphone model (.glb) at this path to replace the built-in one. You can also drop a .glb onto the page.
 const MODEL_URL='/static/models/headphones.glb', MODEL_ROT_Y=0;
+
+// Carousel Workspaces (5 Presets matching the 5 Dots)
 const SL=[
- {n:'01',cat:'Downloader',l1:'Download in',l2:'seconds.',sub:'Paste a link, pick a quality. Up to 4K video or MP3.',href:'/downloader',yaw:-.55,hex:['#ff2d6f','#1f66ff','#ff7355'],acc:[0xff2d6f,0x1f66ff,0xff7355]},
- {n:'02',cat:'Studio',l1:'Master your',l2:'sound.',sub:'79 effects, an automatic mode and a full custom rack.',href:'/studio',yaw:.6,hex:['#19e3b1','#8a5cff','#ffd23f'],acc:[0x19e3b1,0x8a5cff,0xffd23f]},
- {n:'03',cat:'Trimmer',l1:'Cut with',l2:'precision.',sub:'Frame-accurate trimming with lossless stream copy.',href:'/video-trimmer',yaw:-.95,hex:['#ffd23f','#ff7355','#19e3b1'],acc:[0xffd23f,0xff7355,0x19e3b1]},
- {n:'04',cat:'Auto Clip',l1:'Shorts, ready',l2:'to post.',sub:'Finds the strongest moments and exports 9:16 clips with captions.',href:'/auto-clip',yaw:.9,hex:['#ff8a1f','#17c8ff','#ff3bd4'],acc:[0xff8a1f,0x17c8ff,0xff3bd4]}];
-const SW=[[0x17181c,0x2a2c33],[0xe9e9ec,0xb9bcc4],[0xe6d9b5,0xc9b98a],[0x5a3cb4,0x8a74d6],[0xc9202b,0xe0707a],[0xe98bb5,0xf3b5cf]];
+ {n:'01',cat:'Downloader',l1:'Download in',l2:'seconds.',sub:'Everything you need — faster, simpler, better.',href:'/downloader',yaw:-.42,hex:['#ff5a1f','#f51f36','#ff8a3d'],acc:[0xff5a1f,0xf51f36,0xff8a3d]},
+ {n:'02',cat:'Studio',l1:'Master your',l2:'sound.',sub:'79 studio effects, automatic mode and modular mastering rack.',href:'/studio',yaw:.6,hex:['#19e3b1','#8a5cff','#ffd23f'],acc:[0x19e3b1,0x8a5cff,0xffd23f]},
+ {n:'03',cat:'Trimmer',l1:'Cut with',l2:'precision.',sub:'Frame-accurate visual trimming with lossless stream copy.',href:'/video-trimmer',yaw:-.95,hex:['#ffd23f','#ff7355','#19e3b1'],acc:[0xffd23f,0xff7355,0x19e3b1]},
+ {n:'04',cat:'Auto Clip',l1:'Shorts, ready',l2:'to post.',sub:'Auto-detect highlights and export 9:16 clips with animated captions.',href:'/auto-clip',yaw:.9,hex:['#ff8a1f','#17c8ff','#ff3bd4'],acc:[0xff8a1f,0x17c8ff,0xff3bd4]},
+ {n:'05',cat:'Queue',l1:'Scale your',l2:'workflow.',sub:'Background job management with live progress and instant exports.',href:'/jobs',yaw:-.15,hex:['#2165f7','#ff5a1f','#19e3b1'],acc:[0x2165f7,0xff5a1f,0x19e3b1]}
+];
 const CG=window.CG={ready:false,fail:false,started:false,skip:false};
 const still=matchMedia('(prefers-reduced-motion:reduce)').matches;
 let seen=false;try{seen=!!sessionStorage.getItem('cg_intro')}catch(e){}
 const quick=seen||still;
 let cur=0,lock=false;
 
-// ---- Opening: wordmark preloader, then the 3D sequence takes over ----
+// Opening preloader
 if(!quick){try{history.scrollRestoration='manual'}catch(e){}scrollTo(0,0)}else $$('.lbx').forEach(x=>x.remove());
 const intro=$('#intro'),cnt=$('#cnt'),wf=$('#wf'),pg=$('#pg');let lp=0,lt=performance.now(),begun=false,hold=0;
-function begin(){if(begun)return;begun=true;document.body.classList.remove('ready');intro.classList.add('hide');document.body.classList.add('started');CG.started=true;
-  if(CG.fail||!window.THREE)document.body.classList.add('ready');setTimeout(()=>document.body.classList.add('ready'),10000)}
-(function load(){const n=performance.now(),dt=Math.min(.1,(n-lt)/1000);lt=n;
+function begin(){
+  if(begun)return;
+  begun=true;
+  document.body.classList.remove('ready');
+  intro.classList.add('hide');
+  document.body.classList.add('started');
+  CG.started=true;
+  if(CG.fail||!window.THREE)document.body.classList.add('ready');
+  setTimeout(()=>document.body.classList.add('ready'),10000);
+}
+(function load(){
+  const n=performance.now(),dt=Math.min(.1,(n-lt)/1000);lt=n;
   lp=Math.min(CG.ready||CG.fail?1:.92,lp+dt*(quick?4:.55));
-  cnt.textContent=String(Math.round(lp*100)).padStart(3,'0');wf.style.setProperty('--p',lp*100+'%');pg.style.transform='scaleX('+lp+')';
-  if(lp>=1){hold+=dt;if(hold>(quick?0:.35))begin()}if(n>9000)begin();
-  if(!begun)requestAnimationFrame(load)})();
-$('#skip').onclick=()=>{CG.skip=true;T=99};
+  cnt.textContent=String(Math.round(lp*100)).padStart(3,'0');
+  wf.style.setProperty('--p',lp*100+'%');
+  pg.style.transform='scaleX('+lp+')';
+  if(lp>=1){hold+=dt;if(hold>(quick?0:.35))begin()}
+  if(n>9000)begin();
+  if(!begun)requestAnimationFrame(load);
+})();
+const skipBtn=$('#skip');if(skipBtn)skipBtn.onclick=()=>{CG.skip=true;T=99};
 addEventListener('keydown',e=>{if(e.key==='Escape'){CG.skip=true;T=99}});
 $('#replay').onclick=e=>{e.preventDefault();try{sessionStorage.removeItem('cg_intro')}catch(x){}scrollTo(0,0);location.reload()};
 
-// ---- Header, reveals, hero carousel ----
+// Header scroll effect
 const hd=$('#hd');addEventListener('scroll',()=>hd.classList.toggle('sc',scrollY>30),{passive:true});
+
+// Intersection observer for scroll reveals
 const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}}),{threshold:.15});
 $$('.rv,.rv3').forEach(el=>{el.style.setProperty('--d',[...el.parentElement.children].indexOf(el)*.08+'s');io.observe(el)});
-const st=$('.stage'),cats=$('#cats'),catB=[];
-SL.map((s,i)=>i).reverse().forEach(i=>{const b=document.createElement('button');b.innerHTML='<span class="t">'+SL[i].cat+'</span><i class="mk"></i>';b.onclick=()=>go(i);cats.appendChild(b);catB[i]=b});
-catB[0].classList.add('on');
-function go(i){
-  i=(i+SL.length)%SL.length;if(i===cur||lock||!document.body.classList.contains('ready'))return;lock=true;const dir=i>cur?1:-1,s=SL[i];cur=i;
-  catB.forEach((b,j)=>b.classList.toggle('on',j===i));st.classList.add('out');
-  if(window.GL)GL.change(i,dir);
-  setTimeout(()=>{$('#l1').textContent=s.l1;$('#l2').textContent=s.l2;$('#l3').textContent=s.sub;$('#num').textContent=s.n;$('#try').href=s.href;
-    s.hex.forEach((h,k)=>st.style.setProperty('--a'+(k+1),h));st.classList.remove('out')},480);
-  setTimeout(()=>lock=false,1100)}
-$('#next').onclick=()=>go(cur+1);$('#prev').onclick=()=>go(cur-1);
-addEventListener('keydown',e=>{if(e.key==='ArrowRight')go(cur+1);if(e.key==='ArrowLeft')go(cur-1)});
-$$('.sw').forEach(b=>b.onclick=()=>{$$('.sw').forEach(x=>x.classList.toggle('on',x===b));if(window.GL)GL.color(+b.dataset.k)});
 
-// ---- Link bar ----
+// Carousel handler
+function go(i){
+  i=(i+SL.length)%SL.length;
+  if(i===cur||lock||!document.body.classList.contains('ready'))return;
+  lock=true;
+  const dir=i>cur?1:-1,s=SL[i];cur=i;
+  
+  // Update carousel pagination dots
+  $$('.h-dot').forEach((d,idx)=>d.classList.toggle('active',idx===i));
+  $$('.hp-dot').forEach((d,idx)=>d.classList.toggle('active',idx===i));
+  
+  if(window.GL)GL.change(i,dir);
+  $('#l1').textContent=s.l1;
+  $('#l2').textContent=s.l2;
+  $('#l3').textContent=s.sub;
+  $('#getStartedBtn').href=s.href;
+  setTimeout(()=>lock=false,600);
+}
+const prevHero=$('#prevHero'),nextHero=$('#nextHero');
+if(prevHero)prevHero.onclick=()=>go(cur-1);
+if(nextHero)nextHero.onclick=()=>go(cur+1);
+addEventListener('keydown',e=>{if(e.key==='ArrowRight')go(cur+1);if(e.key==='ArrowLeft')go(cur-1)});
+
+// Connect click on both sets of dots
+$$('.h-dot').forEach(dot=>{
+  dot.addEventListener('click',()=>{
+    const idx=+dot.dataset.i;
+    if(!isNaN(idx))go(idx);
+  });
+});
+$$('.hp-dot').forEach(dot=>{
+  dot.addEventListener('click',()=>{
+    const idx=+dot.dataset.i;
+    if(!isNaN(idx))go(idx);
+  });
+});
+
+// Sidebar dock active state tracking
+$$('.dock-item').forEach(item=>{
+  item.addEventListener('click',e=>{
+    $$('.dock-item').forEach(x=>x.classList.remove('active'));
+    item.classList.add('active');
+    const indicator=$('#dockIndicator');
+    if(indicator){
+      const top=item.offsetTop;
+      indicator.style.top=top+8+'px';
+    }
+  });
+});
+
+// Link bar form
 const f=$('#f'),url=$('#url'),msg=$('#msg'),gb=$('#gb');
 $('#pst').onclick=async()=>{try{url.value=await navigator.clipboard.readText();url.focus();msg.textContent=''}catch(e){msg.textContent='Clipboard access is blocked. Press Ctrl+V to paste.'}};
 url.addEventListener('input',()=>msg.textContent='');
@@ -346,7 +599,7 @@ f.onsubmit=e=>{e.preventDefault();const v=url.value.trim();
   if(!/^(https?:\/\/)?((www|m|music)\.)?(youtube\.com|youtu\.be)\/\S+/i.test(v)){msg.textContent='Enter a valid YouTube or YouTube Music link.';f.classList.remove('err');void f.offsetWidth;f.classList.add('err');return}
   gb.classList.add('busy');gb.textContent='Opening…';location.href='/downloader?url='+encodeURIComponent(v)};
 
-// ---- 3D tilt, fan parallax, footer spotlight ----
+// Tilt & spotlight effects
 $$('[data-tilt]').forEach(c=>{const k=+c.dataset.tilt||8;
   c.addEventListener('pointermove',e=>{const r=c.getBoundingClientRect(),x=(e.clientX-r.left)/r.width,y=(e.clientY-r.top)/r.height;
     c.style.setProperty('--mx',x*100+'%');c.style.setProperty('--my',y*100+'%');
@@ -364,49 +617,59 @@ try{
 const cv=$('#gl');
 const R=new THREE.WebGLRenderer({canvas:cv,alpha:true,antialias:true});
 R.setPixelRatio(Math.min(devicePixelRatio,2));
-R.outputEncoding=THREE.sRGBEncoding;R.toneMapping=THREE.ACESFilmicToneMapping;R.toneMappingExposure=1;
+R.outputEncoding=THREE.sRGBEncoding;R.toneMapping=THREE.ACESFilmicToneMapping;R.toneMappingExposure=1.08;
 const S=new THREE.Scene(),C=new THREE.PerspectiveCamera(30,1,.1,60);C.position.set(-1.8,.6,5.2);
 const AN=R.capabilities.getMaxAnisotropy(),lin=h=>new THREE.Color(h).convertSRGBToLinear();
 
-// Neutral studio lighting with cool and warm rim strips behind
+// Studio lighting with warm amber rim light & cool fill
 const pm=new THREE.PMREMGenerator(R),env=new THREE.Scene();
-env.add(new THREE.Mesh(new THREE.BoxGeometry(26,15,26),new THREE.MeshBasicMaterial({color:0x3b4054,side:THREE.BackSide})));
-[[0xffffff,12,5,0,7.5,0,6],[0xffffff,5,8,-9,2,4,5],[0xdfe8ff,3,10,10,0,3,4],[0xffffff,10,2.5,0,2,-11,4],[0xff8fc4,3,9,8,0,-7,2.5],[0x6f96ff,3,9,-8,0,-7,2.5]].forEach(p=>{
+env.add(new THREE.Mesh(new THREE.BoxGeometry(26,15,26),new THREE.MeshBasicMaterial({color:0x1b1e2a,side:THREE.BackSide})));
+[[0xffffff,12,5,0,7.5,0,6],[0xffffff,5,8,-9,2,4,5],[0xdfe8ff,3,10,10,0,3,4],[0xffffff,10,2.5,0,2,-11,4],[0xff6a1f,5,10,8,0,-7,4],[0x2f6bff,4,10,-8,0,-7,2.5]].forEach(p=>{
   const m=new THREE.Mesh(new THREE.PlaneGeometry(p[1],p[2]),new THREE.MeshBasicMaterial({color:new THREE.Color(p[0]).multiplyScalar(p[6]),side:THREE.DoubleSide}));
   m.position.set(p[3],p[4],p[5]);m.lookAt(0,0,0);env.add(m)});
 S.environment=pm.fromScene(env,.02).texture;
-const key=new THREE.DirectionalLight(0xffffff,.8);key.position.set(-3,5,6);S.add(key);
-[[0x2f6bff,-6,2,-5],[0xff3b7a,6,-1,-5]].forEach(l=>{const p=new THREE.PointLight(l[0],1.1,30);p.position.set(l[1],l[2],l[3]);S.add(p)});
+const key=new THREE.DirectionalLight(0xffffff,.85);key.position.set(-3,5,6);S.add(key);
 
-// Materials: soft-touch paint, fine leather, brushed trim & machined aluminum grooves
+// Warm amber rim light casting from right-rear to mirror the mockup glow
+const rimAmber=new THREE.PointLight(0xff5a1f,3.0,25);rimAmber.position.set(6,1,-3);S.add(rimAmber);
+const fillBlue=new THREE.PointLight(0x2f6bff,1.0,25);fillBlue.position.set(-6,2,-5);S.add(fillBlue);
+
+// Procedural Materials
 function TX(w,h,fn,rep){const c=document.createElement('canvas');c.width=w;c.height=h;fn(c.getContext('2d'),w,h);const t=new THREE.CanvasTexture(c);t.wrapS=t.wrapT=THREE.RepeatWrapping;t.anisotropy=AN;if(rep)t.repeat.set(rep[0],rep[1]);return t}
 const grain=(x,w,h)=>{x.fillStyle='#808080';x.fillRect(0,0,w,h);for(let i=0;i<6000;i++){const v=100+Math.random()*60|0;x.fillStyle='rgb('+v+','+v+','+v+')';x.beginPath();x.arc(Math.random()*w,Math.random()*h,.7+Math.random()*.8,0,7);x.fill()}};
 const grooves=(x,w,h)=>{x.fillStyle='#808080';x.fillRect(0,0,w,h);const cx=w/2,cy=h/2;for(let r=4;r<w/2;r+=2){const v=80+Math.random()*80|0;x.strokeStyle='rgb('+v+','+v+','+v+')';x.lineWidth=1;x.beginPath();x.arc(cx,cy,r,0,Math.PI*2);x.stroke()}};
 const honeycomb=(x,w,h)=>{x.fillStyle='#08080b';x.fillRect(0,0,w,h);x.fillStyle='#14161f';const r=2.5,dx=6,dy=5.2;for(let y=0;y<h;y+=dy){const off=(Math.floor(y/dy)%2)*(dx/2);for(let i=0;i<w;i+=dx){x.beginPath();x.arc(i+off,y,r,0,Math.PI*2);x.fill()}}};
-const leather=()=>new THREE.MeshPhysicalMaterial({color:lin(SW[0][0]),roughness:.68,bumpMap:TX(256,256,grain,[26,9]),bumpScale:.35,clearcoat:.12,clearcoatRoughness:.6});
-const paint=new THREE.MeshPhysicalMaterial({color:lin(SW[0][0]),roughness:.48,metalness:.18,clearcoat:.22,clearcoatRoughness:.35});
-const gloss=new THREE.MeshPhysicalMaterial({color:lin(SW[0][0]),roughness:.14,metalness:.35,bumpMap:TX(256,256,grooves),bumpScale:.07,clearcoat:1,clearcoatRoughness:.05});
+const leather=()=>new THREE.MeshPhysicalMaterial({color:lin(0x181920),roughness:.68,bumpMap:TX(256,256,grain,[26,9]),bumpScale:.35,clearcoat:.12,clearcoatRoughness:.6});
+const paint=new THREE.MeshPhysicalMaterial({color:lin(0x1a1b22),roughness:.48,metalness:.2,clearcoat:.25,clearcoatRoughness:.35});
+const gloss=new THREE.MeshPhysicalMaterial({color:lin(0x14151b),roughness:.14,metalness:.4,bumpMap:TX(256,256,grooves),bumpScale:.07,clearcoat:1,clearcoatRoughness:.05});
 const cush=leather(),padM=leather();
-const trim=new THREE.MeshPhysicalMaterial({color:lin(SW[0][1]),metalness:.92,roughness:.24,clearcoat:.45});
-const fab=new THREE.MeshStandardMaterial({color:0x121318,map:TX(128,128,honeycomb,[4,4]),roughness:.92});
+const trim=new THREE.MeshPhysicalMaterial({color:lin(0x353844),metalness:.94,roughness:.22,clearcoat:.5});
+const fab=new THREE.MeshStandardMaterial({color:0x101116,map:TX(128,128,honeycomb,[4,4]),roughness:.92});
 const bodyMats=[paint,gloss,cush,padM],M=(g,m)=>new THREE.Mesh(g,m);
+
+// Interactive Cursor Specular Follow Light & Ground Shadow
+const followLight=new THREE.PointLight(0xff6a1f,.8,18);followLight.position.set(0,2,4.5);S.add(followLight);
+const gsc=document.createElement('canvas');gsc.width=gsc.height=256;const gsx=gsc.getContext('2d'),gsg=gsx.createRadialGradient(128,128,0,128,128,128);
+gsg.addColorStop(0,'rgba(0,0,0,.75)');gsg.addColorStop(.45,'rgba(0,0,0,.35)');gsg.addColorStop(1,'rgba(0,0,0,0)');gsx.fillStyle=gsg;gsx.fillRect(0,0,256,256);
+const groundShadow=new THREE.Mesh(new THREE.PlaneGeometry(6,3.6),new THREE.MeshBasicMaterial({map:new THREE.CanvasTexture(gsc),transparent:true,opacity:.55,depthWrite:false}));
+groundShadow.rotation.x=-Math.PI/2;groundShadow.position.set(-.4,-1.85,0);S.add(groundShadow);
 
 // Headphones - Exploded Multi-Part Precision Assembly
 const H=new THREE.Group(),inner=new THREE.Group();H.add(inner);S.add(H);inner.position.y=.5;
 const X=1.7;
 
-// 1. Headband Structural Outer Arch (Spring Steel / Hard Coat)
+// 1. Headband Structural Outer Arch
 const bandG=new THREE.Group();inner.add(bandG);
 const arch=new THREE.CatmullRomCurve3([[-X,-.35],[-X+.02,.5],[-1.2,1.3],[0,1.78],[1.2,1.3],[X-.02,.5],[X,-.35]].map(p=>new THREE.Vector3(p[0],p[1],0)));
 const band=M(new THREE.TubeGeometry(arch,200,.07,24,false),paint);band.scale.z=2.1;bandG.add(band);
 
-// 2. Headband Ergonomic Leather Comfort Pad & End Caps
+// 2. Headband Ergonomic Comfort Pad
 const padG=new THREE.Group();inner.add(padG);
 const pp=[];for(let i=0;i<=40;i++){const u=.2+.6*i/40,p=arch.getPointAt(u),t=arch.getTangentAt(u);pp.push(new THREE.Vector3(p.x+t.y*.12,p.y-t.x*.12,0))}
 const pad=M(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pp),100,.1,24,false),padM);pad.scale.z=2.1;padG.add(pad);
 [pp[0],pp[40]].forEach(p=>{const c=M(new THREE.SphereGeometry(.1,24,16),padM);c.position.copy(p);c.scale.z=2.1;padG.add(c)});
 
-// 3. Telescoping Extension Slider Arms & Acoustic Rib Rings
+// 3. Telescoping Extension Slider Arms
 const armParts=[];
 [-1,1].forEach(s=>{
   const armSub=new THREE.Group();armSub.position.set(s*X,-.22,0);inner.add(armSub);
@@ -415,7 +678,7 @@ const armParts=[];
   armParts.push(armSub);
 });
 
-// 4. Earcups Granular Exploded Sub-Assemblies (Yoke, Pins, Outer Shell, Badges, Driver Rim, Cushions)
+// 4. Earcups Granular Exploded Sub-Assemblies
 const cupPts=new THREE.SplineCurve([[0,.3],[.4,.3],[.46,.275],[.56,.255],[.66,.2],[.72,.1],[.74,0],[.72,-.1],[.64,-.18],[.5,-.22],[0,-.22]].map(p=>new THREE.Vector2(p[0],p[1]))).getPoints(110).map(p=>new THREE.Vector2(Math.max(0,p.x),p.y));
 const pillow=[];for(let i=0;i<=56;i++){const a=i/56*Math.PI*2;pillow.push(new THREE.Vector2(.52+.21*Math.cos(a),.16*Math.sin(a)))}
 
@@ -438,10 +701,11 @@ const cupAssembly=[];
   const shellG=new THREE.Group();cupG.add(shellG);
   const shell=M(new THREE.LatheGeometry(cupPts,110),paint);shell.scale.x=1.18;shellG.add(shell);
 
-  // C2: Precision Center Badge & Triangle Trim
+  // C2: Precision Center Badge & Illuminated Golden Triangle Trim
   const badgeG=new THREE.Group();cupG.add(badgeG);
   const disc=M(new THREE.CylinderGeometry(.24,.24,.014,64),gloss);disc.position.y=.304;badgeG.add(disc);
-  const tri=M(new THREE.CylinderGeometry(.09,.09,.02,3),trim);tri.rotation.y=Math.PI/2;tri.position.y=.314;badgeG.add(tri);
+  const triMat=new THREE.MeshBasicMaterial({color:0xff8a3d,toneMapped:false});
+  const tri=M(new THREE.CylinderGeometry(.09,.09,.02,3),triMat);tri.rotation.y=Math.PI/2;tri.position.y=.314;badgeG.add(tri);
 
   // C3: Internal Driver Mounting Bezel Rim
   const rimG=new THREE.Group();cupG.add(rimG);
@@ -452,22 +716,33 @@ const cupAssembly=[];
   const cu=M(new THREE.LatheGeometry(pillow,110),cush);cu.position.y=-.34;cu.scale.x=1.18;cushionG.add(cu);
   const fb=M(new THREE.CylinderGeometry(.34,.34,.03,48),fab);fb.position.y=-.4;fb.scale.x=1.18;cushionG.add(fb);
 
+  // Glowing Neon Orange Halo Ring (Matches Mockup Interior Ear Halo!)
+  const haloGeo=new THREE.TorusGeometry(.54,.025,16,64);
+  const haloMat=new THREE.MeshBasicMaterial({color:0xff5a1f,toneMapped:false});
+  const haloMesh=new THREE.Mesh(haloGeo,haloMat);
+  haloMesh.rotation.x=Math.PI/2;haloMesh.position.y=-.28;haloMesh.scale.x=1.18;cupG.add(haloMesh);
+
+  // Warm Amber / Orange Interior PointLight
+  const innerLight=new THREE.PointLight(0xff6a1f,3.2,4.5);
+  innerLight.position.set(0,-.26,0);
+  cupG.add(innerLight);
+
   // Holographic Assembly Caliper Alignment Ring
   const caliperGeo=new THREE.RingGeometry(.7,.76,64);
-  const caliperMat=new THREE.MeshBasicMaterial({color:0x8655ff,transparent:true,opacity:0,side:THREE.DoubleSide,depthWrite:false,toneMapped:false});
+  const caliperMat=new THREE.MeshBasicMaterial({color:0xff5a1f,transparent:true,opacity:0,side:THREE.DoubleSide,depthWrite:false,toneMapped:false});
   const caliperRing=new THREE.Mesh(caliperGeo,caliperMat);
   caliperRing.rotation.x=Math.PI/2;cupG.add(caliperRing);
 
   // Outer Gimbal Reticle Ring
   const reticleGeo=new THREE.RingGeometry(1.02,1.06,48);
-  const reticleMat=new THREE.MeshBasicMaterial({color:0x22d3ee,transparent:true,opacity:0,side:THREE.DoubleSide,depthWrite:false,toneMapped:false});
+  const reticleMat=new THREE.MeshBasicMaterial({color:0xff8a3d,transparent:true,opacity:0,side:THREE.DoubleSide,depthWrite:false,toneMapped:false});
   const reticleRing=new THREE.Mesh(reticleGeo,reticleMat);
   reticleRing.rotation.y=Math.PI/2;yokeG.add(reticleRing);
 
   cupAssembly.push({side:s,basePivot,yokeG,pinMeshes,cupG,shellG,badgeG,rimG,cushionG,caliperRing,reticleRing});
 });
 
-// Optional real model: auto-load, or drop a .glb file on the page
+// Real model loading
 let real=null,realS=1;
 function useModel(g){
   if(real)H.remove(real);
@@ -479,37 +754,17 @@ if(THREE.GLTFLoader){
   addEventListener('dragover',e=>e.preventDefault());
   addEventListener('drop',e=>{e.preventDefault();const f=e.dataTransfer.files[0];if(f&&/\.glb$/i.test(f.name))f.arrayBuffer().then(b=>new THREE.GLTFLoader().parse(b,'',useModel,()=>{}))})}
 
-// Glow
-const gc=document.createElement('canvas');gc.width=gc.height=256;const gx=gc.getContext('2d'),gr=gx.createRadialGradient(128,128,0,128,128,128);
-gr.addColorStop(0,'rgba(255,255,255,.5)');gr.addColorStop(.5,'rgba(255,255,255,.12)');gr.addColorStop(1,'rgba(255,255,255,0)');gx.fillStyle=gr;gx.fillRect(0,0,256,256);
-const glow=new THREE.Sprite(new THREE.SpriteMaterial({map:new THREE.CanvasTexture(gc),depthWrite:false,transparent:true,opacity:.5,color:lin(SL[0].acc[1])}));glow.scale.setScalar(9);glow.position.z=-2.5;S.add(glow);
+// Ambient orange background light sweep
+const sweep=new THREE.PointLight(0xff5a1f,0,16);sweep.position.set(-6,2,-1);S.add(sweep);
 
-// Slanted bars
-const ANG=.56,bars=[];
-[[3.5,.17,-1.6,-.25,-.6,1,.5],[2,.15,-1.5,.3,-1.1,0,.3],[1.5,.13,1.45,1.5,-.7,2,.4],[.34,.1,-3.4,-1.5,.6,3,.8]].forEach((d,k)=>{
-  const m=new THREE.Mesh(new THREE.BoxGeometry(d[0],d[1],.06),new THREE.MeshBasicMaterial({transparent:true,toneMapped:false,opacity:0,color:d[5]===3?0xffffff:lin(SL[0].acc[d[5]])}));
-  m.rotation.z=ANG;m.userData={x:d[2],y:d[3],z:d[4],ci:d[5],par:d[6],p:0,dir:1,wait:2.9+k*.15,delay:.12*k};S.add(m);bars.push(m)});
+// Shockwave lock ring
+const shockGeo=new THREE.RingGeometry(.9,1.02,64);
+const shockMat=new THREE.MeshBasicMaterial({color:0xff5a1f,transparent:true,opacity:0,side:THREE.DoubleSide,depthWrite:false,toneMapped:false});
+const shock=new THREE.Mesh(shockGeo,shockMat);shock.visible=false;S.add(shock);
 
-// Opening effects: light sweep, shockwave on lock-in, drifting dust
-const sweep=new THREE.PointLight(0xffffff,0,25);sweep.position.set(-7,1.5,3.5);S.add(sweep);
-const shock=new THREE.Mesh(new THREE.RingGeometry(.97,1,128),new THREE.MeshBasicMaterial({color:0xffffff,transparent:true,opacity:0,depthWrite:false,toneMapped:false}));shock.visible=false;S.add(shock);
-const DN=260,dg=new THREE.BufferGeometry(),dpa=new Float32Array(DN*3);
-for(let i=0;i<DN;i++){dpa[i*3]=(Math.random()-.5)*18;dpa[i*3+1]=(Math.random()-.5)*9;dpa[i*3+2]=(Math.random()-.5)*12}
-dg.setAttribute('position',new THREE.BufferAttribute(dpa,3));
-const dust=new THREE.Points(dg,new THREE.PointsMaterial({color:0xaab4ff,size:.045,transparent:true,opacity:.7,depthWrite:false}));S.add(dust);
-
-// Ground contact shadow
-const sc=document.createElement('canvas');sc.width=sc.height=256;const sx=sc.getContext('2d'),sr=sx.createRadialGradient(128,128,0,128,128,128);
-sr.addColorStop(0,'rgba(0,0,0,.75)');sr.addColorStop(.35,'rgba(0,0,0,.35)');sr.addColorStop(1,'rgba(0,0,0,0)');sx.fillStyle=sr;sx.fillRect(0,0,256,256);
-const groundShadow=new THREE.Mesh(new THREE.PlaneGeometry(6.6,4.5),new THREE.MeshBasicMaterial({map:new THREE.CanvasTexture(sc),transparent:true,depthWrite:false,opacity:0}));
-groundShadow.rotation.x=-Math.PI/2;groundShadow.position.y=-2.7;S.add(groundShadow);
-
-// Interactive Cursor Follow Specular Light
-const followLight=new THREE.PointLight(0xffffff,0.45,15);followLight.position.set(0,1,5);S.add(followLight);
-
-// Web Audio API Synthesized Sound FX
+// Web Audio API Procedural Sound Design
 let audioCtx=null,soundEnabled=false;
-function initAudio(){if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)();if(audioCtx.state==='suspended')audioCtx.resume()}
+function initAudio(){if(!audioCtx){const AC=window.AudioContext||window.webkitAudioContext;if(AC)audioCtx=new AC()}}
 function playHaptic(type){
   if(!soundEnabled)return;initAudio();if(!audioCtx)return;const now=audioCtx.currentTime;
   if(type==='click'||type==='dock'){
@@ -534,16 +789,20 @@ if(btnExp)btnExp.onclick=()=>{isExploded=!isExploded;btnExp.classList.toggle('ac
 if(btnRe)btnRe.onclick=()=>{T=0;isExploded=false;document.body.classList.remove('ready');if(btnExp)btnExp.classList.remove('active');$('#explodeLabel').textContent='Exploded View';tick.rv=0;tick.w=-1;$$('.kw-item').forEach(w=>w.classList.remove('on'));playHaptic('dock')};
 if(btnAud)btnAud.onclick=()=>{initAudio();soundEnabled=!soundEnabled;btnAud.classList.toggle('active',soundEnabled);$('#soundLabel').textContent=soundEnabled?'Sound ON':'Sound FX';if(soundEnabled)playHaptic('chime')};
 
-// Animation
+// Equalizer icon click triggers audio feedback
+const dockEq=$('#dockEq');
+if(dockEq)dockEq.onclick=()=>{if(btnAud)btnAud.click()};
+
+// Animation Loop
 let slide=0,spin=0,sw=0,mx=0,my=0,smx=0,smy=0,T=0,last=0,drag=0,dragging=false,px=0,sp=0;
-const cr={yaw:SL[0].yaw+2.6,x:0,y:0,s:.75};
+const cr={yaw:SL[0].yaw,x:-.45,y:.15,s:.75};
 const ease=t=>1-Math.pow(1-t,4),cl=(v,a,b)=>Math.min(b,Math.max(a,v)),L=(a,b,t)=>a+(b-a)*t;
 function size(){const w=innerWidth,h=innerHeight;R.setSize(w,h,false);C.aspect=w/h;C.updateProjectionMatrix()}
 addEventListener('resize',size);size();
 addEventListener('pointermove',e=>{mx=e.clientX/innerWidth-.5;my=e.clientY/innerHeight-.5;if(dragging){drag+=(e.clientX-px)*.012;px=e.clientX}});
 $('.stage').addEventListener('pointerdown',e=>{if(e.target.closest('button,a'))return;dragging=true;px=e.clientX;$('.stage').classList.add('drag')});
 addEventListener('pointerup',()=>{dragging=false;$('.stage').classList.remove('drag')});
-window.GL={change(i,dir){slide=i;spin+=dir;bars.forEach(b=>{b.userData.dir=-1;b.userData.wait=.5+b.userData.delay})},color(k){sw=k}};
+window.GL={change(i,dir){slide=i;spin+=dir},color(k){sw=k}};
 
 function tick(t){
   const dt=Math.min(.033,(t-(last||t))*.001);last=t;const sec=t*.001,ds=dt*(CG.skip?5:1);
@@ -551,9 +810,18 @@ function tick(t){
     if(CG.skip){T=99}else T+=ds;
     if(T>4.4&&!tick.rv){tick.rv=1;document.body.classList.add('ready');try{sessionStorage.setItem('cg_intro','1')}catch(e){}}
     if(T>5.8)CG.skip=false;
-    const wi=T<1.1?-1:T<2.2?0:T<3.3?1:T<4.3?2:-1;if(wi!==tick.w){tick.w=wi;$$('.kw-item').forEach((w,k)=>w.classList.toggle('on',k===wi))}}
-  const m=innerWidth<820,halfH=Math.tan(C.fov*Math.PI/360)*10.5,visW=2*halfH*C.aspect;
-  const tx=m?0:(.43-.5)*visW,ty=m?.95:.1,ts=m?.55:.75,k=1-Math.exp(-dt*5),ky=1-Math.exp(-dt*(T<4.6?1.5:2.6));
+    
+    // Right-side intro sequence (Paste -> Pick -> Done)
+    const wi=T<1.1?-1:T<2.2?0:T<3.3?1:T<4.3?2:-1;
+    if(wi!==tick.w){
+      tick.w=wi;
+      $$('.kw-item').forEach((w,k)=>w.classList.toggle('on',k===wi));
+    }
+  }
+
+  const m=innerWidth<1024,halfH=Math.tan(C.fov*Math.PI/360)*10.5,visW=2*halfH*C.aspect;
+  // Position headphone in left/center area matching the mockup
+  const tx=m?0:(.38-.5)*visW,ty=m?.8:.12,ts=m?.55:.74,k=1-Math.exp(-dt*5),ky=1-Math.exp(-dt*(T<4.6?1.5:2.6));
   cr.x+=(tx-cr.x)*k;cr.y+=(ty-cr.y)*k;cr.s+=(ts-cr.s)*k;cr.yaw+=(SL[slide].yaw+spin*Math.PI*2-cr.yaw)*ky;
   if(!dragging)drag*=Math.exp(-dt*1.3);
   sp+=(cl(scrollY/innerHeight,0,1)-sp)*(1-Math.exp(-dt*8));const scr=sp*4.6;
@@ -583,7 +851,7 @@ function tick(t){
   };
   const smRot=x=>{if(x<=0)return 0;if(x>=1)return 1;return x*x*(3-2*x)};
 
-  // 1. Headband outer structural arch drops with aerodynamic tilt
+  // 1. Headband outer structural arch drops
   const uBandPos=smDock(bk(.25,1.5),.025);
   const uBandRot=smRot(bk(.25,1.5));
   bandG.position.y=(1-uBandPos)*4.2+explodeAmt*1.6;
@@ -591,14 +859,14 @@ function tick(t){
   bandG.rotation.z=(1-uBandRot)*.32;
   bandG.rotation.x=-(1-uBandRot)*.32;
 
-  // 2. Headband inner leather comfort pad floats up from below and snaps inside arch
+  // 2. Headband inner leather comfort pad floats up
   const uPadPos=smDock(bk(.65,1.4),.02);
   const uPadRot=smRot(bk(.65,1.4));
   padG.position.y=-(1-uPadPos)*2.6-explodeAmt*1.1;
   padG.position.z=-(1-uPadPos)*1.6-explodeAmt*.4;
   padG.rotation.x=(1-uPadRot)*.4;
 
-  // 3. Telescoping extension slider arms extend downward from headband tips
+  // 3. Telescoping slider arms extend
   const uArms=smDock(bk(1.05,1.3),.03);
   armParts.forEach(arm=>{arm.position.y=-(1-uArms)*.85-explodeAmt*.35});
 
@@ -606,7 +874,7 @@ function tick(t){
   cupAssembly.forEach((cp,i)=>{
     const s=cp.side;
     
-    // Yoke arcs in smoothly from wide perimeter
+    // Yoke arcs in smoothly
     const uYokePos=smDock(bk(1.45+i*.1,1.4),.025);
     const uYokeRot=smRot(bk(1.45+i*.1,1.4));
     cp.yokeG.position.x=s*(1-uYokePos)*4.2+s*explodeAmt*1.8;
@@ -615,7 +883,7 @@ function tick(t){
     cp.yokeG.rotation.y=s*(1-uYokeRot)*2.2;
     cp.yokeG.rotation.z=s*(1-uYokeRot)*.5;
 
-    // Pivot Pins shoot inward along Z axis
+    // Pivot Pins shoot inward
     const uPins=smDock(bk(1.95+i*.08,1.15),.04);
     cp.pinMeshes[0].position.z=-.82-(1-uPins)*2.4-explodeAmt*1.2;
     cp.pinMeshes[1].position.z=.82+(1-uPins)*2.4+explodeAmt*1.2;
@@ -631,11 +899,11 @@ function tick(t){
     cp.shellG.position.x=s*(1-uShellPos)*1.4;
     cp.shellG.rotation.y=s*(1-uShellRot)*1.8;
 
-    // Machined center badges press down into the shell
+    // Machined center badges press down
     const uBadge=smDock(bk(2.75+i*.08,1.1),.04);
     cp.badgeG.position.y=(1-uBadge)*2.0+explodeAmt*1.2;
 
-    // Memory foam cushions fly outward and dock with organic viscoelastic compression
+    // Memory foam cushions dock with viscoelastic squish
     const tCush=bk(2.95+i*.1,1.2);
     const uCushPos=sm(tCush);
     cp.cushionG.position.y=-(1-uCushPos)*3.0-explodeAmt*1.6;
@@ -644,7 +912,7 @@ function tick(t){
     const comp=compP>0&&compP<1?Math.sin(compP*Math.PI)*.11:0;
     cp.cushionG.scale.set(1-comp,1+comp*.5,1+comp*.5);
 
-    // Holographic caliper & reticle rings during assembly and in exploded mode
+    // Caliper & reticle rings
     const guideProgress=cl((T-(.8+i*.1))/3.2,0,1);
     const guideAlpha=Math.sin(guideProgress*Math.PI);
     if(cp.caliperRing){
@@ -671,19 +939,7 @@ function tick(t){
   H.scale.setScalar(cr.s);
   H.rotation.y=cr.yaw+drag+smx*.45+sp*1.2;H.rotation.x=smy*.25;H.rotation.z=-smx*.05;
 
-  const kc=1-Math.exp(-dt*6);
-  bodyMats.forEach(mt=>mt.color.lerp(lin(SW[sw][0]),kc));trim.color.lerp(lin(SW[sw][1]),kc);
-  glow.material.color.lerp(lin(SL[slide].acc[1]),1-Math.exp(-dt*3));glow.position.set(cr.x,cr.y+scr,-2.5);
-
-  bars.forEach(b=>{const u=b.userData;
-    if(u.dir<0){u.p-=ds*3;if(u.p<=0){u.p=0;u.dir=1;b.material.color.copy(u.ci===3?new THREE.Color(1,1,1):lin(SL[slide].acc[u.ci]))}}
-    else if(u.wait>0)u.wait-=ds;else u.p=Math.min(1,u.p+ds*1.2);
-    const q=ease(cl(u.p,0,1)),off=-3*(1-q);
-    b.position.set(cr.x+u.x*(cr.s/.75)+Math.cos(ANG)*off+smx*u.par*1.2,cr.y+u.y*(cr.s/.75)+Math.sin(ANG)*off-smy*u.par*.6+scr,u.z);
-    b.material.opacity=q;b.visible=!m||u.ci!==3});
-
-  // Cinematic opening camera: frames the entire headphone assembly in wide isometric 3D view,
-  // orbits smoothly as parts converge, then glides into hero placement with zero jerk.
+  // Cinematic opening camera
   const uCam=cl(T/4.4,0,1);
   const qCam=sm(uCam);
   C.fov=L(34,30,qCam);C.updateProjectionMatrix();
@@ -698,44 +954,15 @@ function tick(t){
   groundShadow.position.x=H.position.x;
   groundShadow.scale.setScalar(1+(H.position.y-.5)*.2);
 
-  const sT=T-4.08;   // energetic shockwave and flash when all parts lock together
-  if(sT>0&&sT<1.4){const w=sT/1.4;shock.visible=true;shock.position.set(H.position.x,H.position.y+.35,-.2);shock.scale.setScalar(1.2+w*8.5);shock.material.opacity=(1-w)*.95;glow.material.opacity=.5+(1-w)*.8}else{shock.visible=false;glow.material.opacity=.5}
+  const sT=T-4.08;
+  if(sT>0&&sT<1.4){const w=sT/1.4;shock.visible=true;shock.position.set(H.position.x,H.position.y+.35,-.2);shock.scale.setScalar(1.2+w*8.5);shock.material.opacity=(1-w)*.95}else{shock.visible=false}
   sweep.position.x=L(-8,8,cl((T-2.8)/2.2,0,1));sweep.intensity=T>2.8&&T<5.0?3.8*Math.sin(cl((T-2.8)/2.2,0,1)*Math.PI):0;
-  const dpz=dust.geometry.attributes.position.array,dz=(.4+(1-qCam)*4)*dt;for(let i=2;i<dpz.length;i+=3){dpz[i]+=dz;if(dpz[i]>6)dpz[i]-=12}
-  dust.geometry.attributes.position.needsUpdate=true;dust.material.opacity=.25+(1-qCam)*.5;
   if(!tick.on){cv.classList.add('on');tick.on=1}
   if(sp<.995)R.render(S,C);
   requestAnimationFrame(tick)}
 CG.ready=true;
 requestAnimationFrame(tick);
 }catch(err){console.warn('3D unavailable',err);CG.fail=true;document.body.classList.add('ready')}
-</script>
-<script>
-try{
-const cv=$('#eq'),R=new THREE.WebGLRenderer({canvas:cv,alpha:true,antialias:true});
-R.setPixelRatio(Math.min(devicePixelRatio,2));R.outputEncoding=THREE.sRGBEncoding;
-const S=new THREE.Scene(),C=new THREE.PerspectiveCamera(36,1,.1,50);C.position.set(0,3.6,8.4);C.lookAt(0,.5,0);
-S.add(new THREE.AmbientLight(0xffffff,.6));
-[[0xff2d6f,-4,3,3,1.8],[0x2f6bff,4,3,3,1.8],[0xffffff,0,6,-2,.8]].forEach(l=>{const p=new THREE.PointLight(l[0],l[4],30);p.position.set(l[1],l[2],l[3]);S.add(p)});
-const G=new THREE.Group();S.add(G);const N=56,bars=[],geo=new THREE.BoxGeometry(.14,1,.14);geo.translate(0,.5,0);
-for(let i=0;i<N;i++){const a=i/N*Math.PI*2,c=new THREE.Color().setHSL(.93-.31*(.5+.5*Math.cos(a)),.9,.55).convertSRGBToLinear();
-  const m=new THREE.Mesh(geo,new THREE.MeshStandardMaterial({color:c,emissive:c,emissiveIntensity:.4,roughness:.35,metalness:.3}));
-  m.position.set(Math.cos(a)*2.5,0,Math.sin(a)*2.5);m.rotation.y=-a;G.add(m);bars.push(m)}
-const ring=new THREE.Mesh(new THREE.TorusGeometry(1.9,.02,8,160),new THREE.MeshBasicMaterial({color:0xffffff,transparent:true,opacity:.5}));ring.rotation.x=Math.PI/2;G.add(ring);
-const tri=new THREE.Mesh(new THREE.CylinderGeometry(.55,.55,.14,3),new THREE.MeshStandardMaterial({color:0xffffff,emissive:0xffffff,emissiveIntensity:.25,roughness:.2,metalness:.4}));tri.rotation.y=Math.PI/2;G.add(tri);
-const gc=document.createElement('canvas');gc.width=gc.height=256;const gx=gc.getContext('2d'),gr=gx.createRadialGradient(128,128,0,128,128,128);
-gr.addColorStop(0,'rgba(138,92,255,.5)');gr.addColorStop(1,'rgba(138,92,255,0)');gx.fillStyle=gr;gx.fillRect(0,0,256,256);
-const floor=new THREE.Mesh(new THREE.CircleGeometry(4.2,64),new THREE.MeshBasicMaterial({map:new THREE.CanvasTexture(gc),transparent:true,depthWrite:false}));floor.rotation.x=-Math.PI/2;floor.position.y=-.02;S.add(floor);
-let on=false,mx=0,my=0,w0=0;new IntersectionObserver(e=>on=e[0].isIntersecting).observe(cv);
-addEventListener('pointermove',e=>{mx=e.clientX/innerWidth-.5;my=e.clientY/innerHeight-.5});
-(function tick(t){
-  if(on){const w=cv.clientWidth,h=cv.clientHeight;if(w!==w0){w0=w;R.setSize(w,h,false);C.aspect=w/h;C.updateProjectionMatrix()}
-    const sec=t*.001;
-    bars.forEach((b,i)=>b.scale.y=still?.4+i%9*.14:.35+Math.abs(Math.sin(sec*1.7+i*.45))*Math.abs(Math.sin(sec*.7+i*.13))*2.3);
-    G.rotation.y=still?0:sec*.22+mx*.7;G.rotation.x=my*.22;tri.rotation.y=Math.PI/2+(still?0:sec*.6);
-    R.render(S,C)}
-  requestAnimationFrame(tick)})(0);
-}catch(err){console.warn('EQ unavailable',err)}
 </script>
 </body>
 </html>
