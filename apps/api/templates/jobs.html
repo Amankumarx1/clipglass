@@ -7,7 +7,7 @@
   <!-- Header -->
   <div class="text-center max-w-xl mx-auto mb-2">
     <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-[11px] font-semibold text-slate-400 mb-3 tracking-wider uppercase">
-      <span class="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span> Live Engine Pipeline
+      <span class="w-2 h-2 rounded-full bg-[#ff5a1f] animate-pulse"></span> Live Engine Pipeline
     </div>
     <h1 class="font-extrabold text-3xl sm:text-4xl text-white tracking-tight">Queue & Job Manager</h1>
     <p class="text-xs sm:text-sm text-slate-400 mt-2">Track real-time media encoding, filter chains, and export telemetry.</p>
@@ -17,10 +17,10 @@
   <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 max-w-4xl mx-auto w-full">
     <div class="capsule-surface p-4 rounded-2xl flex items-center justify-between border border-white/5">
       <div>
-        <span class="text-[10px] font-bold uppercase tracking-wider text-blue-400">Active</span>
+        <span class="text-[10px] font-bold uppercase tracking-wider text-[#ff5a1f]">Active</span>
         <p id="statActive" class="text-2xl font-black text-white mt-0.5">0</p>
       </div>
-      <div class="w-8 h-8 rounded-full bg-blue-500/10 text-blue-400 flex items-center justify-center text-xs">⚡</div>
+      <div class="w-8 h-8 rounded-full bg-[#ff5a1f]/10 text-[#ff5a1f] flex items-center justify-center text-xs">⚡</div>
     </div>
     <div class="capsule-surface p-4 rounded-2xl flex items-center justify-between border border-white/5">
       <div>
@@ -47,7 +47,7 @@
 
   <!-- Filters Capsule -->
   <div class="flex items-center gap-1.5 p-1.5 rounded-full capsule-surface border border-white/10 text-xs font-bold self-center max-w-fit overflow-x-auto">
-    <button type="button" onclick="setJobFilter('all')" id="filterBtn-all" class="job-filter-btn px-4 py-1.5 rounded-full bg-blue-600 text-white shadow-sm transition-all">All</button>
+    <button type="button" onclick="setJobFilter('all')" id="filterBtn-all" class="job-filter-btn px-4 py-1.5 rounded-full bg-[#ff5a1f] text-white shadow-sm transition-all">All</button>
     <button type="button" onclick="setJobFilter('download')" id="filterBtn-download" class="job-filter-btn px-4 py-1.5 rounded-full text-slate-400 hover:text-white transition-all">Download</button>
     <button type="button" onclick="setJobFilter('audio')" id="filterBtn-audio" class="job-filter-btn px-4 py-1.5 rounded-full text-slate-400 hover:text-white transition-all">Audio</button>
     <button type="button" onclick="setJobFilter('trim')" id="filterBtn-trim" class="job-filter-btn px-4 py-1.5 rounded-full text-slate-400 hover:text-white transition-all">Trim</button>

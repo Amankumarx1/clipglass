@@ -7,7 +7,7 @@
   <!-- Header & Metrics -->
   <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-white/10">
     <div class="flex items-center gap-3">
-      <div class="w-9 h-9 rounded-2xl bg-purple-500/10 border border-purple-500/20 text-purple-400 flex items-center justify-center font-bold text-base">
+      <div class="w-9 h-9 rounded-2xl bg-[#ff5a1f]/10 border border-[#ff5a1f]/20 text-[#ff5a1f] flex items-center justify-center font-bold text-base">
         ⏱
       </div>
       <div>
@@ -31,13 +31,13 @@
     <div class="relative w-full sm:w-72">
       <span class="absolute inset-y-0 left-3 flex items-center text-slate-500 text-xs pointer-events-none">🔍</span>
       <input type="text" id="recentSearchInput" oninput="filterRecentList()" placeholder="Search session files..."
-        class="w-full pl-8 pr-3 py-1.5 rounded-full bg-[#101113]/80 border border-white/10 text-xs font-medium text-white placeholder:text-slate-500 focus:outline-none focus:border-blue-500/50" />
+        class="w-full pl-8 pr-3 py-1.5 rounded-full bg-[#0e0f16]/90 border border-white/10 text-xs font-medium text-white placeholder:text-slate-500 focus:outline-none focus:border-[#ff5a1f]/50" />
     </div>
 
     <!-- Category Tabs -->
-    <div class="flex items-center gap-1 p-1 rounded-full bg-[#101113]/60 border border-white/5 text-xs font-bold self-stretch sm:self-auto overflow-x-auto">
+    <div class="flex items-center gap-1 p-1 rounded-full bg-[#0e0f16]/80 border border-white/5 text-xs font-bold self-stretch sm:self-auto overflow-x-auto">
       <button type="button" onclick="setCategoryFilter('all')" id="tab-all"
-        class="recent-tab-btn px-4 py-1 rounded-full bg-blue-600 text-white shadow-sm transition-all">All</button>
+        class="recent-tab-btn px-4 py-1 rounded-full bg-[#ff5a1f] text-white shadow-sm transition-all">All</button>
       <button type="button" onclick="setCategoryFilter('audio')" id="tab-audio"
         class="recent-tab-btn px-4 py-1 rounded-full text-slate-400 hover:text-white transition-all">Audio</button>
       <button type="button" onclick="setCategoryFilter('video')" id="tab-video"

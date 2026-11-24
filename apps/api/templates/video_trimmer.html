@@ -7,7 +7,7 @@
   <!-- Page Header (Centered, minimal & editorial) -->
   <div class="text-center flex flex-col items-center gap-2">
     <h1 class="text-3xl sm:text-4xl font-light text-white tracking-tight">
-      Video <span class="font-bold text-[#8655FF]">Trimmer</span>
+      Video <span class="font-bold text-[#ff5a1f]">Trimmer</span>
     </h1>
     <p class="text-xs sm:text-sm text-[#8B8D98] max-w-lg leading-relaxed">
       Precision Video Trimmer — cut on a visual timeline with lossless stream copy and frame-accurate precision.
@@ -15,17 +15,17 @@
 
     <!-- Top Action Bar -->
     <div class="flex items-center gap-2.5 mt-2">
-      <button type="button" onclick="toggleVideoImportDrawer('pc')" class="btn-pill-blue px-5 py-2 text-xs font-bold tracking-wider uppercase text-white shadow-[0_0_20px_rgba(33,101,247,0.4)] flex items-center gap-1.5 cursor-pointer">
+      <button type="button" onclick="toggleVideoImportDrawer('pc')" class="btn-pill-blue px-5 py-2 text-xs font-bold tracking-wider uppercase text-white shadow-[0_0_20px_rgba(255,90,31,0.4)] flex items-center gap-1.5 cursor-pointer">
         <span>+ Import Video</span>
       </button>
-      <button type="button" onclick="toggleVideoImportDrawer('downloader')" class="px-4 py-2 rounded-full bg-[#24252B] hover:bg-[#303137] border border-white/10 text-xs font-medium text-white transition-all cursor-pointer">
+      <button type="button" onclick="toggleVideoImportDrawer('downloader')" class="px-4 py-2 rounded-full bg-[#181924] hover:bg-[#222332] border border-white/10 text-xs font-medium text-white transition-all cursor-pointer">
         <span>From Downloader</span>
       </button>
     </div>
   </div>
 
   <!-- Collapsible Import Drawer -->
-  <div id="videoImportDrawer" class="hidden w-full bg-[#17181D] rounded-3xl p-6 shadow-2xl flex flex-col gap-4 border border-white/10">
+  <div id="videoImportDrawer" class="hidden w-full bg-[#12131a] rounded-3xl p-6 shadow-2xl flex flex-col gap-4 border border-white/10">
     <div class="flex items-center justify-between border-b border-white/10 pb-3">
       <div class="flex items-center gap-2">
         <h3 class="font-medium text-sm text-white">Import Video into Trimmer</h3>
@@ -35,7 +35,7 @@
 
     <!-- Import Tabs -->
     <div class="flex items-center gap-2 border-b border-white/10 pb-2">
-      <button type="button" id="vImportTabPcBtn" onclick="switchVideoImportTab('pc')" class="px-4 py-1.5 rounded-full text-xs font-semibold bg-[#2165F7] text-white">
+      <button type="button" id="vImportTabPcBtn" onclick="switchVideoImportTab('pc')" class="px-4 py-1.5 rounded-full text-xs font-semibold bg-[#ff5a1f] text-white">
         <span>Upload from PC</span>
       </button>
       <button type="button" id="vImportTabDownloaderBtn" onclick="switchVideoImportTab('downloader')" class="px-4 py-1.5 rounded-full text-xs font-medium text-[#8B8D98] hover:text-white">
@@ -48,7 +48,7 @@
 
     <!-- Upload from PC Dropzone -->
     <div id="vImportPcSection" class="flex flex-col gap-3">
-      <div id="videoDropZone" onclick="document.getElementById('videoFileInput').click()" ondragover="event.preventDefault(); this.classList.add('border-white/40');" ondragleave="this.classList.remove('border-white/40');" ondrop="handleVideoDrop(event)" class="w-full py-8 px-6 rounded-2xl border border-dashed border-white/20 hover:border-white/40 bg-[#24252B]/50 flex flex-col items-center justify-center gap-2 cursor-pointer transition-all text-center">
+      <div id="videoDropZone" onclick="document.getElementById('videoFileInput').click()" ondragover="event.preventDefault(); this.classList.add('border-white/40');" ondragleave="this.classList.remove('border-white/40');" ondrop="handleVideoDrop(event)" class="w-full py-8 px-6 rounded-2xl border border-dashed border-white/20 hover:border-[#ff5a1f]/50 bg-[#0e0f16] flex flex-col items-center justify-center gap-2 cursor-pointer transition-all text-center">
         <div class="w-10 h-10 rounded-full bg-white/5 text-white flex items-center justify-center text-xl">🎞</div>
         <p class="font-medium text-xs text-white">Click to browse or drag &amp; drop video file from your PC</p>
         <p class="text-[11px] text-[#8B8D98]">Supports MP4, WebM, MOV, MKV, AVI</p>
@@ -60,8 +60,8 @@
     <div id="vImportUrlSection" class="hidden flex flex-col gap-3">
       <p class="text-xs text-[#8B8D98]">Paste any YouTube or video stream link to load and cut in Trimmer:</p>
       <div class="flex items-center gap-2">
-        <input type="url" id="importVideoUrlInput" placeholder="https://www.youtube.com/watch?v=..." class="flex-1 bg-[#24252B] h-10 px-4 rounded-full text-xs text-white border border-white/10 outline-none" onkeydown="if(event.key === 'Enter') { event.preventDefault(); fetchVideoFromUrl(); }" />
-        <button type="button" onclick="handleDrawerVideoPaste()" class="h-10 px-4 rounded-full bg-[#24252B] hover:bg-[#303137] text-xs font-medium text-white border border-white/10">📋 Paste</button>
+        <input type="url" id="importVideoUrlInput" placeholder="https://www.youtube.com/watch?v=..." class="flex-1 bg-[#0e0f16] h-10 px-4 rounded-full text-xs text-white border border-white/10 outline-none" onkeydown="if(event.key === 'Enter') { event.preventDefault(); fetchVideoFromUrl(); }" />
+        <button type="button" onclick="handleDrawerVideoPaste()" class="h-10 px-4 rounded-full bg-[#181924] hover:bg-[#222332] text-xs font-medium text-white border border-white/10">📋 Paste</button>
         <button type="button" id="fetchVideoBtn" onclick="fetchVideoFromUrl()" class="h-10 px-6 rounded-full btn-pill-blue text-white text-xs font-bold tracking-wider">
           <span id="fetchVideoBtnText">Fetch &amp; Load</span>
         </button>
@@ -70,8 +70,8 @@
   </div>
 
   <!-- Inline Quick Video URL Fetch Bar -->
-  <div id="quickVideoUrlBar" class="w-full max-w-2xl mx-auto bg-[#17181D] rounded-full p-1.5 pl-4 flex items-center gap-2 border border-white/10 shadow-lg">
-    <span class="text-[#8655FF] text-xs font-bold">🔗</span>
+  <div id="quickVideoUrlBar" class="w-full max-w-2xl mx-auto bg-[#12131a] rounded-full p-1.5 pl-4 flex items-center gap-2 border border-white/10 shadow-lg">
+    <span class="text-[#ff5a1f] text-xs font-bold">🔗</span>
     <input
       type="url"
       id="quickVideoUrlInput"
@@ -102,8 +102,8 @@
   <!-- Editor Canvas (Wide Preview & Dominant Element) -->
   <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
     <!-- Left / Center: Wide Video Preview Canvas -->
-    <div class="lg:col-span-8 bg-[#24252B] rounded-3xl p-5 border border-white/10 shadow-2xl flex flex-col gap-4">
-      <div class="relative aspect-video w-full rounded-2xl overflow-hidden bg-[#17181D] border border-white/10 shadow-inner flex items-center justify-center group">
+    <div class="lg:col-span-8 bg-[#12131a] rounded-3xl p-5 border border-white/10 shadow-2xl flex flex-col gap-4">
+      <div class="relative aspect-video w-full rounded-2xl overflow-hidden bg-[#0e0f16] border border-white/10 shadow-inner flex items-center justify-center group">
         <!-- Real Video Player -->
         <video id="realTrimmerVideo" controls playsinline class="hidden w-full h-full object-contain bg-black rounded-2xl"></video>
 
@@ -124,20 +124,20 @@
     </div>
 
     <!-- Right: Narrow Output Settings Column -->
-    <div class="lg:col-span-4 bg-[#24252B] rounded-3xl p-5 border border-white/10 shadow-2xl flex flex-col gap-5">
+    <div class="lg:col-span-4 bg-[#12131a] rounded-3xl p-5 border border-white/10 shadow-2xl flex flex-col gap-5">
       <h3 class="text-xs font-semibold uppercase tracking-[0.14em] text-[#8B8D98]">Output Settings</h3>
       <div class="flex flex-col gap-3 text-xs">
         <div>
           <label class="text-[10px] uppercase font-semibold text-[#8B8D98] tracking-wider block mb-1.5">Format</label>
-          <select id="trimContainerFormat" class="w-full h-10 px-4 rounded-full bg-[#17181D] text-white border border-white/10 outline-none">
-            <option value="mp4">MP4 (H.264 / AAC)</option>
-            <option value="webm">WebM (VP9 / Opus)</option>
+          <select id="trimContainerFormat" class="w-full h-10 px-4 rounded-full bg-[#0e0f16] text-white border border-white/10 outline-none">
+            <option value="mp4" class="bg-[#0e0f16]">MP4 (H.264 / AAC)</option>
+            <option value="webm" class="bg-[#0e0f16]">WebM (VP9 / Opus)</option>
           </select>
         </div>
         <div>
           <label class="text-[10px] uppercase font-semibold text-[#8B8D98] tracking-wider block mb-1.5">Quality Mode</label>
-          <div class="flex items-center gap-1.5 p-1 rounded-full bg-[#17181D] border border-white/10">
-            <button type="button" id="cutModeCopyBtn" onclick="setCutMode('copy')" class="flex-1 py-1.5 rounded-full text-[11px] font-semibold bg-[#2165F7] text-white shadow-sm transition-all">Stream Copy</button>
+          <div class="flex items-center gap-1.5 p-1 rounded-full bg-[#0e0f16] border border-white/10">
+            <button type="button" id="cutModeCopyBtn" onclick="setCutMode('copy')" class="flex-1 py-1.5 rounded-full text-[11px] font-semibold bg-[#ff5a1f] text-white shadow-sm transition-all">Stream Copy</button>
             <button type="button" id="cutModeEncodeBtn" onclick="setCutMode('encode')" class="flex-1 py-1.5 rounded-full text-[11px] font-semibold text-[#8B8D98] hover:text-white transition-all">Re-encode</button>
           </div>
         </div>
@@ -151,22 +151,22 @@
   </div>
 
   <!-- Timeline (Single Horizontal Filmstrip Timeline with Thumbnails & Handles) -->
-  <div class="w-full bg-[#24252B] rounded-3xl p-6 border border-white/10 shadow-2xl flex flex-col gap-5">
+  <div class="w-full bg-[#12131a] rounded-3xl p-6 border border-white/10 shadow-2xl flex flex-col gap-5">
     <div class="flex items-center justify-between">
       <div class="flex items-center gap-2">
-        <span class="w-2 h-2 rounded-full bg-[#8655FF]"></span>
+        <span class="w-2 h-2 rounded-full bg-[#ff5a1f] shadow-[0_0_8px_#ff5a1f]"></span>
         <h3 class="font-semibold text-xs text-white uppercase tracking-[0.14em]">Visual Filmstrip Timeline</h3>
       </div>
       <!-- Zoom controls -->
-      <div class="flex items-center gap-1 text-xs font-semibold p-1 rounded-full bg-[#17181D] border border-white/10">
-        <button type="button" onclick="setZoom(1)" class="zoom-btn px-2.5 py-0.5 rounded-full bg-[#2165F7] text-white">1x</button>
+      <div class="flex items-center gap-1 text-xs font-semibold p-1 rounded-full bg-[#0e0f16] border border-white/10">
+        <button type="button" onclick="setZoom(1)" class="zoom-btn px-2.5 py-0.5 rounded-full bg-[#ff5a1f] text-white">1x</button>
         <button type="button" onclick="setZoom(2)" class="zoom-btn px-2.5 py-0.5 rounded-full text-[#8B8D98]">2x</button>
         <button type="button" onclick="setZoom(5)" class="zoom-btn px-2.5 py-0.5 rounded-full text-[#8B8D98]">5x</button>
       </div>
     </div>
 
     <!-- Timeline Tracks -->
-    <div id="timelineTrackWrapper" class="relative w-full rounded-2xl bg-[#17181D] border border-white/10 overflow-x-auto overflow-y-hidden select-none p-1.5">
+    <div id="timelineTrackWrapper" class="relative w-full rounded-2xl bg-[#0e0f16] border border-white/10 overflow-x-auto overflow-y-hidden select-none p-1.5">
       <div id="timelineTrackInner" class="relative h-24 w-full min-w-full transition-all flex flex-col justify-between cursor-pointer">
         <!-- Filmstrip Frames Row -->
         <div id="filmstripFrames" class="h-12 w-full flex items-center divide-x divide-black/40 opacity-70 pointer-events-none rounded-t-xl overflow-hidden"></div>
@@ -175,9 +175,9 @@
         <div id="trimmerWaveform" class="h-10 w-full flex items-center gap-0.5 px-2 opacity-80 pointer-events-none"></div>
 
         <!-- Draggable Trim Range Selection Box -->
-        <div id="trimSelectionBox" class="absolute top-0 bottom-0 left-[4.67%] right-[25.23%] bg-[#8655FF]/20 border-y border-[#8655FF] backdrop-blur-[1px] z-10 flex justify-between cursor-grab active:cursor-grabbing">
+        <div id="trimSelectionBox" class="absolute top-0 bottom-0 left-[4.67%] right-[25.23%] bg-[#ff5a1f]/20 border-y border-[#ff5a1f] backdrop-blur-[1px] z-10 flex justify-between cursor-grab active:cursor-grabbing">
           <!-- Left Handle (Trim In) -->
-          <div id="trimHandleStart" title="Drag to adjust Start Time" class="w-3.5 h-full bg-[#8655FF] rounded-l-md flex items-center justify-center cursor-ew-resize hover:brightness-125 z-20"></div>
+          <div id="trimHandleStart" title="Drag to adjust Start Time" class="w-3.5 h-full bg-[#ff5a1f] rounded-l-md flex items-center justify-center cursor-ew-resize hover:brightness-125 z-20"></div>
 
           <!-- Floating Range Info -->
           <div class="pointer-events-none self-center mx-auto px-2.5 py-0.5 rounded-full bg-black/80 text-white font-mono text-[10px] hidden sm:flex items-center gap-1">
@@ -185,7 +185,7 @@
           </div>
 
           <!-- Right Handle (Trim Out) -->
-          <div id="trimHandleEnd" title="Drag to adjust End Time" class="w-3.5 h-full bg-[#8655FF] rounded-r-md flex items-center justify-center cursor-ew-resize hover:brightness-125 z-20"></div>
+          <div id="trimHandleEnd" title="Drag to adjust End Time" class="w-3.5 h-full bg-[#ff5a1f] rounded-r-md flex items-center justify-center cursor-ew-resize hover:brightness-125 z-20"></div>
         </div>
 
         <!-- Playhead -->
@@ -196,21 +196,21 @@
     <!-- Start / End Time Fields as Small Dark Pills & Actions -->
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-2">
       <div class="flex items-center gap-3">
-        <div class="bg-[#17181D] px-4 py-2 rounded-full border border-white/10 flex items-center gap-2">
+        <div class="bg-[#0e0f16] px-4 py-2 rounded-full border border-white/10 flex items-center gap-2">
           <span class="text-[10px] uppercase font-semibold text-[#8B8D98]">Start</span>
           <input type="text" id="trimStartInput" value="00:00:10" onchange="handleStartInputChange()" class="font-mono text-xs text-white bg-transparent outline-none w-16" />
         </div>
-        <div class="bg-[#17181D] px-4 py-2 rounded-full border border-white/10 flex items-center gap-2">
+        <div class="bg-[#0e0f16] px-4 py-2 rounded-full border border-white/10 flex items-center gap-2">
           <span class="text-[10px] uppercase font-semibold text-[#8B8D98]">End</span>
           <input type="text" id="trimEndInput" value="03:34" onchange="handleEndInputChange()" class="font-mono text-xs text-white bg-transparent outline-none w-16" />
         </div>
       </div>
 
       <div class="flex items-center gap-3 self-end sm:self-auto">
-        <button type="button" onclick="previewTrimmedClip()" class="px-5 py-2.5 rounded-full bg-[#17181D] hover:bg-[#303137] text-white text-xs font-semibold border border-white/10 cursor-pointer">
+        <button type="button" onclick="previewTrimmedClip()" class="px-5 py-2.5 rounded-full bg-[#181924] hover:bg-[#222332] text-white text-xs font-semibold border border-white/10 cursor-pointer">
           Preview Clip
         </button>
-        <button type="button" id="exportTrimBtn" onclick="exportTrimmedVideo()" class="btn-pill-blue px-7 py-2.5 rounded-full text-white text-xs font-bold uppercase tracking-wider shadow-[0_0_24px_rgba(33,101,247,0.45)] hover:scale-105 active:scale-95 transition-all cursor-pointer">
+        <button type="button" id="exportTrimBtn" onclick="exportTrimmedVideo()" class="btn-pill-blue px-7 py-2.5 rounded-full text-white text-xs font-bold uppercase tracking-wider shadow-[0_0_24px_rgba(255,90,31,0.45)] hover:scale-105 active:scale-95 transition-all cursor-pointer">
           <span id="exportTrimBtnText">Export Video</span>
         </button>
       </div>

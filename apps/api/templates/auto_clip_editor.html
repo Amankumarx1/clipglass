@@ -9,13 +9,13 @@
     <div>
       <div class="flex items-center gap-3">
         <a href="/auto-clip" class="w-8 h-8 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center text-[#8B8D98] hover:text-white transition-all text-xs" title="Back to Auto Clip Studio">←</a>
-        <h1 class="text-2xl sm:text-3xl font-light tracking-tight text-white">Auto Clip <span class="font-bold text-[#8655FF]">Editor</span></h1>
+        <h1 class="text-2xl sm:text-3xl font-light tracking-tight text-white">Auto Clip <span class="font-bold text-[#ff5a1f]">Editor</span></h1>
       </div>
       <p class="text-xs text-[#8B8D98] mt-1 pl-11">Fine-tune vertical safe zones, caption animations, and audio mix.</p>
     </div>
     <div class="flex items-center gap-3">
-      <a href="/auto-clip" class="px-4 py-2 rounded-full bg-[#17181D] hover:bg-[#24252B] text-xs font-semibold text-[#8B8D98] hover:text-white transition-all border border-white/10">Discard</a>
-      <button type="button" id="exportClipBtn" onclick="exportEditedClip()" class="btn-pill-blue px-6 py-2 rounded-full text-xs font-bold uppercase tracking-wider text-white shadow-[0_0_20px_rgba(33,101,247,0.4)] flex items-center gap-2 cursor-pointer">
+      <a href="/auto-clip" class="px-4 py-2 rounded-full bg-[#181924] hover:bg-[#222332] text-xs font-semibold text-[#8B8D98] hover:text-white transition-all border border-white/10">Discard</a>
+      <button type="button" id="exportClipBtn" onclick="exportEditedClip()" class="btn-pill-blue px-6 py-2 rounded-full text-xs font-bold uppercase tracking-wider text-white shadow-[0_0_20px_rgba(255,90,31,0.4)] flex items-center gap-2 cursor-pointer">
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
         <span>Export Clip</span>
       </button>
@@ -25,23 +25,23 @@
   <!-- Main Split Editor Workspace -->
   <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
     <!-- Left: Video Canvas with 9:16 Safe Zone Overlay & Framing Guide -->
-    <div class="lg:col-span-8 flex flex-col items-center justify-center bg-[#24252B] rounded-3xl p-6 relative overflow-hidden min-h-[480px] border border-white/10 shadow-2xl">
-      <div class="relative w-full max-w-[320px] aspect-[9/16] bg-[#101113] rounded-2xl overflow-hidden shadow-2xl border border-white/10 flex items-center justify-center group">
+    <div class="lg:col-span-8 flex flex-col items-center justify-center bg-[#12131a] rounded-3xl p-6 relative overflow-hidden min-h-[480px] border border-white/10 shadow-2xl">
+      <div class="relative w-full max-w-[320px] aspect-[9/16] bg-[#090a0f] rounded-2xl overflow-hidden shadow-2xl border border-white/10 flex items-center justify-center group">
         <!-- Mock Video Stream -->
         <img id="editorVideoImg" src="/static/samples/nature_sample.jpg" onerror="this.src='https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=720&auto=format&fit=crop&q=80'" alt="Video Frame" class="w-full h-full object-cover">
         
         <!-- Frame Model Visual Overlay (Dynamic Guide) -->
         <div id="editorFrameGuideOverlay" class="absolute inset-0 pointer-events-none transition-all duration-300">
-          <div class="absolute inset-x-8 top-12 bottom-32 border-2 border-blue-400 border-dashed rounded-xl pointer-events-none flex flex-col justify-between p-2">
-            <div class="flex justify-between items-center text-[9px] font-mono text-blue-400 bg-black/60 px-2 py-0.5 rounded self-start">
+          <div class="absolute inset-x-8 top-12 bottom-32 border-2 border-[#ff5a1f]/60 border-dashed rounded-xl pointer-events-none flex flex-col justify-between p-2">
+            <div class="flex justify-between items-center text-[9px] font-mono text-[#ff5a1f] bg-black/60 px-2 py-0.5 rounded self-start">
               <span>[AI YuNet: FACE]</span>
             </div>
           </div>
         </div>
 
         <!-- 9:16 Safe Area Bounding Lines -->
-        <div class="absolute inset-4 border border-[#8655FF]/40 border-dashed rounded-lg pointer-events-none flex flex-col justify-between p-2">
-          <div class="flex items-center justify-between text-[9px] font-mono font-bold text-[#8655FF] bg-black/70 px-2 py-0.5 rounded backdrop-blur-sm self-start">
+        <div class="absolute inset-4 border border-[#ff5a1f]/40 border-dashed rounded-lg pointer-events-none flex flex-col justify-between p-2">
+          <div class="flex items-center justify-between text-[9px] font-mono font-bold text-[#ff5a1f] bg-black/70 px-2 py-0.5 rounded backdrop-blur-sm self-start">
             <span id="editorFrameBadge">9:16 SAFE ZONE • FACE TRACK</span>
           </div>
 
@@ -58,7 +58,7 @@
         </div>
 
         <!-- Video Transport Control Bar -->
-        <div class="absolute bottom-2 inset-x-2 bg-[#17181D]/90 backdrop-blur-md rounded-xl px-3 py-2 flex items-center justify-between text-xs text-white border border-white/10 opacity-90 group-hover:opacity-100 transition-opacity">
+        <div class="absolute bottom-2 inset-x-2 bg-[#0e0f16]/90 backdrop-blur-md rounded-xl px-3 py-2 flex items-center justify-between text-xs text-white border border-white/10 opacity-90 group-hover:opacity-100 transition-opacity">
           <button type="button" id="editorPlayBtn" onclick="toggleEditorPlayback()" class="w-7 h-7 rounded-full btn-pill-blue text-white flex items-center justify-center font-bold text-[11px] shadow">▶</button>
           <span class="font-mono text-[11px] text-[#8B8D98]" id="editorTimeDisplay">00:04.2 / 00:15.0</span>
           <button type="button" onclick="cycleAspectRatio()" class="px-2 py-0.5 rounded bg-white/10 text-[10px] font-semibold text-[#8B8D98] hover:text-white" title="Cycle Reframe Ratio">9:16</button>
@@ -67,10 +67,10 @@
     </div>
 
     <!-- Right: Property & Style Inspector Tabs -->
-    <div class="lg:col-span-4 bg-[#24252B] rounded-3xl p-5 flex flex-col gap-5 border border-white/10 shadow-2xl">
+    <div class="lg:col-span-4 bg-[#12131a] rounded-3xl p-5 flex flex-col gap-5 border border-white/10 shadow-2xl">
       <!-- Tab Header -->
-      <div class="flex items-center p-1 rounded-full bg-[#17181D] border border-white/10 text-xs font-semibold">
-        <button type="button" onclick="switchEditorTab('caption')" id="tabBtnCaption" class="flex-1 py-1.5 rounded-full bg-[#2165F7] text-white font-semibold text-center transition-all">Caption</button>
+      <div class="flex items-center p-1 rounded-full bg-[#0e0f16] border border-white/10 text-xs font-semibold">
+        <button type="button" onclick="switchEditorTab('caption')" id="tabBtnCaption" class="flex-1 py-1.5 rounded-full bg-[#ff5a1f] text-white font-semibold text-center transition-all">Caption</button>
         <button type="button" onclick="switchEditorTab('style')" id="tabBtnStyle" class="flex-1 py-1.5 rounded-full text-[#8B8D98] hover:text-white text-center transition-all">Style</button>
         <button type="button" onclick="switchEditorTab('effects')" id="tabBtnEffects" class="flex-1 py-1.5 rounded-full text-[#8B8D98] hover:text-white text-center transition-all">Effects</button>
       </div>
@@ -79,7 +79,7 @@
       <div id="tabContentCaption" class="flex flex-col gap-4">
         <div>
           <label class="block text-[10px] uppercase font-semibold text-[#8B8D98] tracking-wider mb-1.5">Caption Preset Style</label>
-          <select id="editorCaptionPresetSelect" onchange="setEditorCaptionPreset(this.value)" class="w-full bg-[#17181D] rounded-full px-4 py-2 text-xs text-white border border-white/10 outline-none">
+          <select id="editorCaptionPresetSelect" onchange="setEditorCaptionPreset(this.value)" class="w-full bg-[#0e0f16] rounded-full px-4 py-2 text-xs text-white border border-white/10 outline-none">
             <option value="viral_pop">Viral Pop (Highlight Bounce)</option>
             <option value="minimalist">Clean Minimalist (Editorial)</option>
             <option value="neon_cyber">Neon Cyber (Glow Aura)</option>

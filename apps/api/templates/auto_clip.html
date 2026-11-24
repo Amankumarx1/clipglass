@@ -7,15 +7,15 @@
   <!-- Page Header (Centered, minimal & editorial) -->
   <div class="text-center flex flex-col items-center gap-2">
     <h1 class="text-3xl sm:text-4xl font-light text-white tracking-tight">
-      Auto Clip <span class="font-bold text-[#8655FF]">Studio</span>
+      Auto Clip <span class="font-bold text-[#ff5a1f]">Studio</span>
     </h1>
     <p class="text-xs sm:text-sm text-[#8B8D98] max-w-lg leading-relaxed">
       Auto Clip &amp; Shorts Studio — turn long videos into viral moments with intelligent audio-visual highlight detection, animated caption typography, and AI face tracking.
     </p>
 
     <!-- Source Mode Switcher: YouTube URL vs Upload from PC -->
-    <div class="flex items-center gap-1.5 p-1 rounded-full bg-[#17181D] border border-white/10 mt-2">
-      <button type="button" id="clipSourceUrlBtn" onclick="switchClipSource('url')" class="px-5 py-1.5 rounded-full text-xs font-semibold bg-[#2165F7] text-white shadow-sm transition-all flex items-center gap-1.5">
+    <div class="flex items-center gap-1.5 p-1 rounded-full bg-[#0e0f16] border border-white/10 mt-2">
+      <button type="button" id="clipSourceUrlBtn" onclick="switchClipSource('url')" class="px-5 py-1.5 rounded-full text-xs font-semibold bg-[#ff5a1f] text-white shadow-sm transition-all flex items-center gap-1.5">
         <span>YouTube URL</span>
       </button>
       <button type="button" id="clipSourcePcBtn" onclick="switchClipSource('pc')" class="px-5 py-1.5 rounded-full text-xs font-semibold text-[#8B8D98] hover:text-white transition-all flex items-center gap-1.5">
@@ -25,7 +25,7 @@
   </div>
 
   <!-- Main Config Charcoal Panel -->
-  <div class="bg-[#24252B] rounded-3xl p-6 sm:p-8 flex flex-col gap-6 border border-white/10 shadow-2xl">
+  <div class="bg-[#12131a] rounded-3xl p-6 sm:p-8 flex flex-col gap-6 border border-white/10 shadow-2xl">
     <!-- YouTube URL Input Container -->
     <div id="clipUrlContainer" class="flex flex-col gap-2">
       <div class="relative flex items-center">
@@ -33,7 +33,7 @@
           id="clipUrlInput" 
           type="text" 
           placeholder="Paste YouTube link (e.g. https://www.youtube.com/watch?v=...)" 
-          class="w-full h-12 pl-5 pr-24 rounded-full bg-[#17181D] text-xs sm:text-sm text-white placeholder:text-[#8B8D98] border border-white/10 focus:outline-none focus:border-white/30 transition-all"
+          class="w-full h-12 pl-5 pr-24 rounded-full bg-[#0e0f16] text-xs sm:text-sm text-white placeholder:text-[#8B8D98] border border-white/10 focus:outline-none focus:border-[#ff5a1f]/50 transition-all"
         />
         <button 
           type="button" 
@@ -50,7 +50,7 @@
     <div id="clipPcContainer" class="hidden flex flex-col gap-3">
       <div 
         id="clipDropZone" 
-        class="border border-dashed border-white/20 rounded-2xl p-8 text-center flex flex-col items-center justify-center gap-2 hover:border-white/40 transition-all cursor-pointer bg-[#17181D]/60"
+        class="border border-dashed border-white/20 rounded-2xl p-8 text-center flex flex-col items-center justify-center gap-2 hover:border-[#ff5a1f]/50 transition-all cursor-pointer bg-[#0e0f16]"
         onclick="document.getElementById('clipFileInput').click()"
         ondragover="event.preventDefault(); this.classList.add('border-white/50');"
         ondragleave="this.classList.remove('border-white/50');"
@@ -70,8 +70,8 @@
       <!-- Target Duration -->
       <div>
         <label class="text-[10px] uppercase font-semibold text-[#8B8D98] tracking-wider block mb-1.5">Clip Length</label>
-        <div class="grid grid-cols-3 gap-1 bg-[#17181D] p-1 rounded-full border border-white/10">
-          <button type="button" onclick="setClipLength('30s')" class="length-btn py-1 rounded-full text-xs font-semibold bg-[#2165F7] text-white">30s</button>
+        <div class="grid grid-cols-3 gap-1 bg-[#0e0f16] p-1 rounded-full border border-white/10">
+          <button type="button" onclick="setClipLength('30s')" class="length-btn py-1 rounded-full text-xs font-semibold bg-[#ff5a1f] text-white">30s</button>
           <button type="button" onclick="setClipLength('45s')" class="length-btn py-1 rounded-full text-xs font-semibold text-[#8B8D98] hover:text-white">45s</button>
           <button type="button" onclick="setClipLength('60s')" class="length-btn py-1 rounded-full text-xs font-semibold text-[#8B8D98] hover:text-white">60s</button>
         </div>
@@ -80,8 +80,8 @@
       <!-- Aspect Ratio -->
       <div>
         <label class="text-[10px] uppercase font-semibold text-[#8B8D98] tracking-wider block mb-1.5">Aspect Ratio</label>
-        <div class="grid grid-cols-3 gap-1 bg-[#17181D] p-1 rounded-full border border-white/10">
-          <button type="button" class="py-1 rounded-full text-xs font-semibold bg-[#8655FF] text-white">9:16</button>
+        <div class="grid grid-cols-3 gap-1 bg-[#0e0f16] p-1 rounded-full border border-white/10">
+          <button type="button" class="py-1 rounded-full text-xs font-semibold bg-[#ff5a1f] text-white">9:16</button>
           <button type="button" class="py-1 rounded-full text-xs font-semibold text-[#8B8D98] hover:text-white">1:1</button>
           <button type="button" class="py-1 rounded-full text-xs font-semibold text-[#8B8D98] hover:text-white">16:9</button>
         </div>
@@ -90,7 +90,7 @@
       <!-- Reframe Mode (7 Models) -->
       <div>
         <label class="text-[10px] uppercase font-semibold text-[#8B8D98] tracking-wider block mb-1.5">Reframe Mode</label>
-        <select id="clipReframeSelect" onchange="syncReframeSelectToStudio(this.value)" class="w-full h-9 px-3 rounded-full text-xs bg-[#17181D] text-white border border-white/10 outline-none hover:border-white/20 transition-all cursor-pointer">
+        <select id="clipReframeSelect" onchange="syncReframeSelectToStudio(this.value)" class="w-full h-9 px-3 rounded-full text-xs bg-[#0e0f16] text-white border border-white/10 outline-none hover:border-white/20 transition-all cursor-pointer">
           <option value="follow-face">Follow Speaker Face (AI YuNet)</option>
           <option value="center">Center Crop 9:16</option>
           <option value="split">Split Screen Stack (Dual Layer)</option>
@@ -104,7 +104,7 @@
       <!-- Caption Style (10 Presets) -->
       <div>
         <label class="text-[10px] uppercase font-semibold text-[#8B8D98] tracking-wider block mb-1.5">Caption Preset</label>
-        <select id="clipCaptionSelect" onchange="syncCaptionSelectToStudio(this.value)" class="w-full h-9 px-3 rounded-full text-xs bg-[#17181D] text-white border border-white/10 outline-none hover:border-white/20 transition-all cursor-pointer">
+        <select id="clipCaptionSelect" onchange="syncCaptionSelectToStudio(this.value)" class="w-full h-9 px-3 rounded-full text-xs bg-[#0e0f16] text-white border border-white/10 outline-none hover:border-white/20 transition-all cursor-pointer">
           <option value="viral_pop">Viral Pop (Highlight)</option>
           <option value="minimalist">Clean Minimalist</option>
           <option value="neon_cyber">Neon Cyber (Glow)</option>
@@ -122,16 +122,16 @@
     <!-- Bottom Actions Row -->
     <div class="pt-2 border-t border-white/[0.08] flex flex-col sm:flex-row sm:items-center justify-between gap-4">
       <label class="flex items-center gap-2.5 text-xs text-[#8B8D98] cursor-pointer">
-        <input type="checkbox" id="clipConsentCheckbox" checked class="w-4 h-4 rounded accent-[#2165F7]">
+        <input type="checkbox" id="clipConsentCheckbox" checked class="w-4 h-4 rounded accent-[#ff5a1f]">
         <span>I confirm I own this video or have permission to clip it.</span>
       </label>
 
       <div class="flex items-center gap-3 self-end sm:self-auto flex-wrap">
-        <button type="button" onclick="openSelectionZoomOverlay('all')" class="px-4 py-2.5 rounded-full bg-[#17181D] hover:bg-[#303137] text-xs font-semibold text-white border border-white/10 transition-all flex items-center gap-2 cursor-pointer shadow-sm hover:border-[#8655FF]/40" title="Zoom-out preview for framing and captions">
+        <button type="button" onclick="openSelectionZoomOverlay('all')" class="px-4 py-2.5 rounded-full bg-[#181924] hover:bg-[#222332] text-xs font-semibold text-white border border-white/10 transition-all flex items-center gap-2 cursor-pointer shadow-sm hover:border-[#ff5a1f]/40" title="Zoom-out preview for framing and captions">
           <span>🔭</span>
           <span>Zoom Preview</span>
         </button>
-        <button type="button" onclick="generateClips()" class="btn-pill-blue px-7 py-2.5 text-xs font-bold uppercase tracking-wider text-white shadow-[0_0_24px_rgba(33,101,247,0.45)] hover:scale-105 active:scale-95 transition-all flex items-center justify-center gap-2 cursor-pointer">
+        <button type="button" onclick="generateClips()" class="btn-pill-blue px-7 py-2.5 text-xs font-bold uppercase tracking-wider text-white shadow-[0_0_24px_rgba(255,90,31,0.45)] hover:scale-105 active:scale-95 transition-all flex items-center justify-center gap-2 cursor-pointer">
           <span>Generate Ranked Clips</span>
           <span>→</span>
         </button>

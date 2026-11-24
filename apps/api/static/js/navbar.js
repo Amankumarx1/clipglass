@@ -142,6 +142,27 @@
       }
     });
 
+    // Universal Sidebar Dock Indicator
+    function updateDockIndicator() {
+      const activeItem = document.querySelector('.dock-item.active');
+      const indicator = document.getElementById('dockIndicator');
+      if (activeItem && indicator && window.innerWidth >= 1024) {
+        const dock = document.getElementById('sideDock');
+        if (dock) {
+          const dockRect = dock.getBoundingClientRect();
+          const itemRect = activeItem.getBoundingClientRect();
+          indicator.style.top = (itemRect.top - dockRect.top + (itemRect.height - 34) / 2) + 'px';
+          indicator.style.opacity = '1';
+        }
+      } else if (indicator) {
+        indicator.style.opacity = '0';
+      }
+    }
+    window.updateDockIndicator = updateDockIndicator;
+    updateDockIndicator();
+    setTimeout(updateDockIndicator, 150);
+    window.addEventListener('resize', updateDockIndicator);
+
     // Mobile Hamburger Menu
     const mobileBtn = document.getElementById('mobileMenuBtn');
     const mobileDrawer = document.getElementById('mobileMenuDrawer');

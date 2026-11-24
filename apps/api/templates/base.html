@@ -13,7 +13,7 @@
         localStorage.setItem('clipglass_theme', 'dark');
         localStorage.setItem('clipglass-theme', 'dark');
         localStorage.setItem('cg_theme', 'dark');
-        var savedAccent = localStorage.getItem('clipglass_accent') || 'blue';
+        var savedAccent = localStorage.getItem('clipglass_accent') || 'orange';
         document.documentElement.setAttribute('data-accent', savedAccent);
       } catch (e) {}
     })();
@@ -27,187 +27,127 @@
         extend: {
           colors: {
             brand: {
-              blue: '#2165F7',
-              purple: '#8655FF',
-              red: '#F51F36',
-              dark: '#101113',
-              surface: '#24252B',
-              panel: '#17181D',
-              card: '#24252B'
+              orange: '#ff5a1f',
+              red: '#f51f36',
+              dark: '#090a0f',
+              surface: '#12131a',
+              panel: '#0e0f16',
+              card: '#12131a'
             }
           }
         }
       }
     };
   </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Rubik:ital,wght@0,300;0,400;0,500;0,600;0,700;1,700&family=Space+Grotesk:wght@500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/static/css/liquid-glass.css">
   {% block head %}{% endblock %}
 </head>
-<body class="bg-[#101113] text-[#F4F4F6] font-['Rubik',sans-serif] relative min-h-screen flex flex-col justify-between selection:bg-[#2165F7] selection:text-white antialiased overflow-x-hidden">
-  <!-- Subtle Smoky Navy/Violet Atmospheric Glow Behind Center -->
-  <div class="fixed inset-0 pointer-events-none -z-10 bg-[#101113]">
-    <div class="absolute inset-0 bg-[radial-gradient(ellipse_70%_55%_at_50%_35%,rgba(35,42,75,0.30),transparent_75%)]"></div>
+<body class="bg-[#090a0f] text-[#F4F4F6] font-['Rubik',sans-serif] relative min-h-screen flex flex-col justify-between selection:bg-[#ff5a1f] selection:text-white antialiased overflow-x-hidden lg:pl-[76px] pb-16 lg:pb-0">
+  <!-- Ambient Obsidian & Orange Atmospheric Glow Behind Content Matching Landing Page -->
+  <div class="fixed inset-0 pointer-events-none -z-10 bg-[#090a0f]">
+    <div class="absolute inset-0 bg-[radial-gradient(ellipse_75%_50%_at_50%_15%,rgba(255,90,31,0.12),transparent_70%),radial-gradient(ellipse_60%_30%_at_50%_100%,rgba(245,31,54,0.08),transparent_70%)]"></div>
   </div>
 
-  <!-- Editorial Top Navigation (Flat, restrained & spacious) -->
-  <header class="w-full max-w-7xl mx-auto px-6 lg:px-12 py-5 select-none z-50">
-    <nav class="flex items-center justify-between">
-      <!-- Left: Faceted Crimson Play Mark + ClipGlass Wordmark -->
-      <a href="/" onclick="playGlassTick()" class="flex items-center gap-2.5 font-bold text-sm tracking-tight text-white group shrink-0 font-['Space_Grotesk']">
-        <svg class="w-7 h-7 drop-shadow-[0_2px_8px_rgba(245,31,54,0.45)] group-hover:scale-105 transition-transform" viewBox="0 0 28 28">
-          <defs>
-            <linearGradient id="baseLogoG" x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0%" stop-color="#f51f36"/>
-              <stop offset="100%" stop-color="#ff5a1f"/>
-            </linearGradient>
-          </defs>
-          <path d="M5 4l18 10-18 10V4z" fill="url(#baseLogoG)"/>
-          <path d="M11 10.5l8 3.5-8 3.5v-7z" fill="#fff" opacity="0.95"/>
-        </svg>
-        <span class="font-bold text-white text-[15px] tracking-tight">ClipGlass</span>
+  <!-- Universal Left Vertical Navigation Dock (Primary Navbar across all pages) -->
+  <aside class="side-dock" id="sideDock" aria-label="Universal Navigation Dock">
+    <!-- Top: Faceted Crimson/Orange Play Mark Logo -->
+    <a href="/" onclick="playGlassTick()" class="dock-logo" title="ClipGlass Home" aria-label="ClipGlass Home">
+      <svg viewBox="0 0 28 28" width="28" height="28" style="filter:drop-shadow(0 2px 8px rgba(245,31,54,.45))">
+        <defs>
+          <linearGradient id="dockLogoG" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#f51f36"/>
+            <stop offset="100%" stop-color="#ff5a1f"/>
+          </linearGradient>
+        </defs>
+        <path d="M5 4l18 10-18 10V4z" fill="url(#dockLogoG)"/>
+        <path d="M11 10.5l8 3.5-8 3.5v-7z" fill="#fff" opacity="0.95"/>
+      </svg>
+    </a>
+
+    <!-- Vertical Neon Orange Active Indicator -->
+    <div class="dock-indicator" id="dockIndicator"></div>
+
+    <!-- Primary Dock Nav Items -->
+    <nav class="dock-nav" aria-label="Primary Navigation">
+      <!-- 1. Home -->
+      <a href="/" onclick="playGlassTick()" class="dock-item {% if active_page in ['home', 'index'] %}active{% endif %}" data-nav="home" title="Home">
+        <svg viewBox="0 0 24 24" class="dock-icon" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        <span class="dock-label">Home</span>
       </a>
 
-      <!-- Center/Right: Compact Uppercase Gray Links with Wide Letter Spacing -->
-      <div class="hidden lg:flex items-center gap-8 text-[11px] font-semibold tracking-[0.14em] uppercase text-[#8B8D98]">
-        <a href="/downloader" onclick="playGlassTick()" class="hover:text-white transition-colors {% if active_page == 'downloader' %}text-white relative after:content-[''] after:absolute after:-bottom-1.5 after:left-0 after:right-0 after:h-0.5 after:bg-[#ff5a1f] after:shadow-[0_0_8px_#ff5a1f]{% endif %}">
-          Downloader
-        </a>
-        <a href="/audio-studio" onclick="playGlassTick()" class="hover:text-white transition-colors {% if active_page in ['studio', 'audio_studio'] %}text-white relative after:content-[''] after:absolute after:-bottom-1.5 after:left-0 after:right-0 after:h-0.5 after:bg-[#ff5a1f] after:shadow-[0_0_8px_#ff5a1f]{% endif %}">
-          Studio
-        </a>
-        <a href="/video-trimmer" onclick="playGlassTick()" class="hover:text-white transition-colors {% if active_page == 'video_trimmer' %}text-white relative after:content-[''] after:absolute after:-bottom-1.5 after:left-0 after:right-0 after:h-0.5 after:bg-[#ff5a1f] after:shadow-[0_0_8px_#ff5a1f]{% endif %}">
-          Trimmer
-        </a>
-        <a href="/auto-clip" onclick="playGlassTick()" class="hover:text-white transition-colors {% if active_page in ['auto_clip', 'auto_clip_editor'] %}text-white relative after:content-[''] after:absolute after:-bottom-1.5 after:left-0 after:right-0 after:h-0.5 after:bg-[#ff5a1f] after:shadow-[0_0_8px_#ff5a1f]{% endif %}">
-          Auto Clip
-        </a>
-        <a href="/recent" onclick="playGlassTick()" class="hover:text-white transition-colors {% if active_page == 'recent' %}text-white relative after:content-[''] after:absolute after:-bottom-1.5 after:left-0 after:right-0 after:h-0.5 after:bg-[#ff5a1f] after:shadow-[0_0_8px_#ff5a1f]{% endif %}">
-          Recent
-        </a>
+      <!-- 2. Downloader -->
+      <a href="/downloader" onclick="playGlassTick()" class="dock-item {% if active_page == 'downloader' %}active{% endif %}" data-nav="downloader" title="Downloader">
+        <svg viewBox="0 0 24 24" class="dock-icon" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        <span class="dock-label">Downloader</span>
+      </a>
 
-        <!-- More Dropdown -->
-        <div class="nav-dropdown relative">
-          <button type="button" class="dropdown-trigger flex items-center gap-1 hover:text-white transition-colors uppercase {% if active_page in ['how_it_works', 'faq', 'terms', 'privacy', 'copyright', 'design', 'jobs'] %}text-white{% endif %}">
-            <span>More</span>
-            <svg class="w-3 h-3 opacity-60" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-          </button>
-          <div class="dropdown-menu hidden absolute top-full right-0 mt-3 w-48 bg-[#17181D] rounded-2xl border border-white/10 p-2 shadow-2xl flex flex-col gap-1 z-50">
-            <a href="/jobs" onclick="playGlassTick()" class="px-3 py-2 rounded-xl text-xs hover:bg-white/10 flex items-center gap-2 text-white">
-              <span>📊</span>
-              <span>Queue Manager</span>
-            </a>
-            <a href="/how-it-works" onclick="playGlassTick()" class="px-3 py-2 rounded-xl text-xs hover:bg-white/10 flex items-center gap-2 text-white">
-              <span>💡</span>
-              <span>How It Works</span>
-            </a>
-            <a href="/faq" onclick="playGlassTick()" class="px-3 py-2 rounded-xl text-xs hover:bg-white/10 flex items-center gap-2 text-[#8B8D98] hover:text-white">
-              <span>❓</span>
-              <span>FAQ</span>
-            </a>
-            <a href="/design" onclick="playGlassTick()" class="px-3 py-2 rounded-xl text-xs hover:bg-white/10 flex items-center gap-2 text-[#8B8D98] hover:text-white">
-              <span>🎨</span>
-              <span>Design Showcase</span>
-            </a>
-            <div class="h-px bg-white/10 my-1"></div>
-            <a href="/terms" onclick="playGlassTick()" class="px-3 py-1.5 rounded-xl text-[11px] hover:bg-white/10 text-[#8B8D98] hover:text-white">Terms of Service</a>
-            <a href="/privacy" onclick="playGlassTick()" class="px-3 py-1.5 rounded-xl text-[11px] hover:bg-white/10 text-[#8B8D98] hover:text-white">Privacy Policy</a>
-            <a href="/copyright" onclick="playGlassTick()" class="px-3 py-1.5 rounded-xl text-[11px] hover:bg-white/10 text-[#8B8D98] hover:text-white">Copyright &amp; DMCA</a>
-          </div>
+      <!-- 3. Studio -->
+      <a href="/audio-studio" onclick="playGlassTick()" class="dock-item {% if active_page in ['studio', 'audio_studio'] %}active{% endif %}" data-nav="studio" title="Audio Studio">
+        <svg viewBox="0 0 24 24" class="dock-icon" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+        <span class="dock-label">Studio</span>
+      </a>
+
+      <!-- 4. Trimmer -->
+      <a href="/video-trimmer" onclick="playGlassTick()" class="dock-item {% if active_page == 'video_trimmer' %}active{% endif %}" data-nav="trimmer" title="Video Trimmer">
+        <svg viewBox="0 0 24 24" class="dock-icon" fill="none" stroke="currentColor" stroke-width="2"><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><line x1="20" y1="4" x2="8.12" y2="15.88"/><line x1="14.47" y1="14.48" x2="20" y2="20"/><line x1="8.12" y1="8.12" x2="12" y2="12"/></svg>
+        <span class="dock-label">Trimmer</span>
+      </a>
+
+      <!-- 5. Auto Clip -->
+      <a href="/auto-clip" onclick="playGlassTick()" class="dock-item {% if active_page in ['auto_clip', 'auto_clip_editor'] %}active{% endif %}" data-nav="auto-clip" title="Auto Clip & Shorts">
+        <svg viewBox="0 0 24 24" class="dock-icon" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="3"/><polygon points="10 8 16 12 10 16 10 8" fill="currentColor"/></svg>
+        <span class="dock-label">Auto Clip</span>
+      </a>
+
+      <!-- 6. Recent Sessions -->
+      <a href="/recent" onclick="playGlassTick()" class="dock-item {% if active_page == 'recent' %}active{% endif %}" data-nav="recent" title="Recent Downloads">
+        <div class="relative flex items-center justify-center">
+          <svg viewBox="0 0 24 24" class="dock-icon" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+          <span data-history-count class="hidden absolute -top-1.5 -right-2 w-3.5 h-3.5 rounded-full bg-[#ff5a1f] text-white text-[8px] font-bold items-center justify-center">0</span>
         </div>
-      </div>
+        <span class="dock-label">Recent</span>
+      </a>
 
-      <!-- Right: Action Controls (Jobs, History, Settings, Blue Open App Pill) -->
-      <div class="flex items-center gap-3">
-        <!-- Jobs Queue Icon -->
-        <a href="/jobs" onclick="playGlassTick()" title="Job Queue Manager" class="relative w-8 h-8 rounded-full flex items-center justify-center text-[#8B8D98] hover:text-white hover:bg-white/[0.06] transition-all {% if active_page == 'jobs' %}text-[#2165F7]{% endif %}">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
-          <span id="activeJobsBadge" class="hidden absolute -top-0.5 -right-0.5 min-w-3.5 h-3.5 px-0.5 rounded-full bg-[#2165F7] text-white text-[8px] font-bold flex items-center justify-center">1</span>
-        </a>
+      <!-- 7. Jobs Queue Manager -->
+      <a href="/jobs" onclick="playGlassTick()" class="dock-item {% if active_page in ['jobs', 'job_details'] %}active{% endif %}" data-nav="jobs" title="Job Queue Manager">
+        <div class="relative flex items-center justify-center">
+          <svg viewBox="0 0 24 24" class="dock-icon" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
+          <span id="activeJobsBadge" class="hidden absolute -top-1.5 -right-2 min-w-3.5 h-3.5 px-0.5 rounded-full bg-[#ff5a1f] text-white text-[8px] font-bold flex items-center justify-center">1</span>
+        </div>
+        <span class="dock-label">Jobs</span>
+      </a>
 
-        <!-- Recent Session Drawer Button -->
-        <button type="button" onclick="event.preventDefault(); playGlassTick(); toggleSessionDrawer()" title="Recent session downloads" class="relative w-8 h-8 rounded-full flex items-center justify-center text-[#8B8D98] hover:text-white hover:bg-white/[0.06] transition-all cursor-pointer {% if active_page == 'recent' %}text-[#8655FF]{% endif %}">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-          <span data-history-count class="hidden absolute -top-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-[#8655FF] text-white text-[8px] font-bold items-center justify-center">0</span>
-        </button>
-
-        <!-- Settings Button -->
-        <a href="/settings" onclick="playGlassTick()" title="Settings" class="w-8 h-8 rounded-full flex items-center justify-center text-[#8B8D98] hover:text-white hover:bg-white/[0.06] transition-all {% if active_page == 'settings' %}text-white{% endif %}">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
-        </a>
-
-        <!-- Blue Open App Pill Button -->
-        <a href="/downloader" class="btn-pill-blue px-5 py-2 text-[11px] font-bold tracking-wider uppercase text-white shadow-[0_0_24px_rgba(33,101,247,0.45)] hover:scale-105 active:scale-95 transition-all">
-          Open App
-        </a>
-
-        <!-- Mobile Hamburger -->
-        <button type="button" id="mobileMenuBtn" aria-label="Toggle mobile menu" class="lg:hidden w-8 h-8 rounded-full flex items-center justify-center text-white bg-white/[0.06] hover:bg-white/10 transition-colors ml-1">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
-        </button>
-      </div>
+      <!-- 8. Settings -->
+      <a href="/settings" onclick="playGlassTick()" class="dock-item {% if active_page == 'settings' %}active{% endif %}" data-nav="settings" title="Settings & Preferences">
+        <svg viewBox="0 0 24 24" class="dock-icon" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        <span class="dock-label">Settings</span>
+      </a>
     </nav>
 
-    <!-- Mobile Drawer (Clean Dark Panel) -->
-    <div id="mobileMenuDrawer" class="hidden lg:hidden mt-3 bg-[#17181D] rounded-2xl p-4 shadow-2xl flex flex-col gap-2 text-sm font-semibold border border-white/10">
-      <a href="/" onclick="playGlassTick()" class="py-2.5 px-3 rounded-xl hover:bg-white/10 flex items-center gap-2.5 text-white">
-        <span class="w-2 h-2 rounded-full bg-[#8655FF]"></span>
-        <span>Home</span>
-      </a>
-      <a href="/downloader" onclick="playGlassTick()" class="py-2.5 px-3 rounded-xl hover:bg-white/10 flex items-center gap-2.5 text-[#2165F7]">
-        <span>⚡</span>
-        <span>Downloader</span>
-      </a>
-      <a href="/audio-studio" onclick="playGlassTick()" class="py-2.5 px-3 rounded-xl hover:bg-white/10 flex items-center gap-2.5 text-[#8655FF]">
-        <span>🎛</span>
-        <span>Audio Studio (Auto &amp; Custom)</span>
-      </a>
-      <a href="/video-trimmer" onclick="playGlassTick()" class="py-2.5 px-3 rounded-xl hover:bg-white/10 flex items-center gap-2.5 text-emerald-400">
-        <span>✂️</span>
-        <span>Video Trimmer</span>
-      </a>
-      <a href="/auto-clip" onclick="playGlassTick()" class="py-2.5 px-3 rounded-xl hover:bg-white/10 flex items-center gap-2.5 text-pink-400">
-        <span>📱</span>
-        <span>Auto Clip Studio</span>
-      </a>
-      <a href="/auto-clip/editor" onclick="playGlassTick()" class="py-2.5 px-3 rounded-xl hover:bg-white/10 flex items-center gap-2.5 text-[#2165F7]">
-        <span>🎬</span>
-        <span>Auto Clip Editor</span>
-      </a>
-      <a href="/jobs" onclick="playGlassTick()" class="py-2 px-3 rounded-xl hover:bg-white/10 flex items-center gap-2 text-xs text-[#8B8D98]">
-        <span>Queue Manager</span>
-      </a>
-      <a href="/recent" onclick="playGlassTick()" class="py-2 px-3 rounded-xl hover:bg-white/10 flex items-center gap-2 text-xs text-[#8B8D98]">
-        <span>Recent Downloads</span>
-      </a>
-      <a href="/settings" onclick="playGlassTick()" class="py-2 px-3 rounded-xl hover:bg-white/10 flex items-center gap-2 text-xs text-[#8B8D98]">
-        <span>Settings</span>
-      </a>
-      <a href="/how-it-works" onclick="playGlassTick()" class="py-2 px-3 rounded-xl hover:bg-white/10 flex items-center gap-2 text-xs text-[#8B8D98]">
-        <span>How It Works</span>
-      </a>
-      <a href="/faq" onclick="playGlassTick()" class="py-2 px-3 rounded-xl hover:bg-white/10 flex items-center gap-2 text-xs text-[#8B8D98]">
-        <span>Help &amp; FAQ</span>
-      </a>
-      <a href="/design" onclick="playGlassTick()" class="py-2 px-3 rounded-xl hover:bg-white/10 flex items-center gap-2 text-xs text-[#8B8D98]">
-        <span>Design Showcase</span>
-      </a>
-    </div>
-  </header>
+    <!-- Equalizer Widget at bottom of dock (triggers session history / telemetry) -->
+    <button type="button" class="dock-equalizer" id="dockEq" onclick="playGlassTick(); toggleSessionDrawer()" title="Audio Telemetry & Session History" aria-label="Audio Session">
+      <div class="eq-bars">
+        <span class="b1"></span><span class="b2"></span><span class="b3"></span><span class="b4"></span>
+      </div>
+    </button>
+  </aside>
 
-  <!-- Page Content Block (Centered, spacious, consistent offset) -->
+  <!-- Page Content Block (Centered, spacious, offset from universal left dock) -->
   <main class="flex-1 flex flex-col justify-between py-8 px-6 lg:px-12 max-w-7xl mx-auto w-full">
     {% block content %}{% endblock %}
   </main>
 
-  <!-- Slim Editorial Footer -->
-  <footer class="w-full max-w-7xl mx-auto px-6 lg:px-12 py-8 border-t border-white/[0.06] mt-20 text-[11px] text-[#8B8D98]">
+  <!-- Sleek Obsidian Editorial Footer -->
+  <footer class="w-full max-w-7xl mx-auto px-6 lg:px-12 py-8 border-t border-white/[0.06] mt-16 text-[11px] text-[#8B8D98]">
     <div class="flex flex-col md:flex-row items-center justify-between gap-4">
       <div class="flex items-center gap-2.5">
-        <span class="w-4 h-4 rounded-full bg-[#F51F36] flex items-center justify-center shrink-0">
+        <span class="w-4 h-4 rounded-full bg-[#ff5a1f] flex items-center justify-center shrink-0 shadow-[0_0_8px_rgba(255,90,31,0.5)]">
           <span class="ml-0.5 border-l-[4px] border-l-white border-y-[2.5px] border-y-transparent"></span>
         </span>
-        <span class="text-white font-medium text-xs">ClipGlass</span>
-        <span class="text-slate-600 hidden sm:inline">· Designed for media processing</span>
+        <span class="text-white font-medium text-xs font-['Space_Grotesk']">ClipGlass</span>
+        <span class="text-slate-500 hidden sm:inline">· Designed for high-speed media processing</span>
       </div>
       <div class="flex flex-wrap items-center justify-center gap-6 text-[10px] uppercase tracking-wider text-[#8B8D98]">
         <a href="/downloader" class="hover:text-white transition-colors">Downloader</a>
@@ -216,20 +156,25 @@
         <a href="/auto-clip" class="hover:text-white transition-colors">Auto Clip</a>
         <a href="/recent" class="hover:text-white transition-colors">Recent</a>
         <a href="/jobs" class="hover:text-white transition-colors">Jobs</a>
+        <a href="/how-it-works" class="hover:text-white transition-colors">How It Works</a>
+        <a href="/faq" class="hover:text-white transition-colors">FAQ</a>
+        <a href="/design" class="hover:text-white transition-colors">Design</a>
         <a href="/settings" class="hover:text-white transition-colors">Settings</a>
-        <a href="/faq" class="hover:text-white transition-colors">Help &amp; FAQ</a>
+        <a href="/terms" class="hover:text-white transition-colors">Terms</a>
+        <a href="/privacy" class="hover:text-white transition-colors">Privacy</a>
+        <a href="/copyright" class="hover:text-white transition-colors">DMCA</a>
       </div>
     </div>
   </footer>
 
   <!-- Persistent Session History Slide-out Drawer -->
   <div id="sessionHistoryDrawer" class="hidden fixed inset-0 z-[200]">
-    <div class="absolute inset-0 bg-black/60 backdrop-blur-md" onclick="toggleSessionDrawer()"></div>
-    <div class="absolute top-0 right-0 bottom-0 w-full max-w-md bg-[#17181D]/98 backdrop-blur-2xl p-6 shadow-2xl flex flex-col justify-between border-l border-white/10 overflow-y-auto">
+    <div class="absolute inset-0 bg-black/70 backdrop-blur-md" onclick="toggleSessionDrawer()"></div>
+    <div class="absolute top-0 right-0 bottom-0 w-full max-w-md bg-[#12131a]/98 backdrop-blur-2xl p-6 shadow-2xl flex flex-col justify-between border-l border-white/10 overflow-y-auto">
       <div>
         <div class="flex items-center justify-between pb-4 border-b border-white/10">
           <div class="flex items-center gap-2.5">
-            <span class="w-8 h-8 rounded-full bg-[#8655FF]/20 text-[#8655FF] flex items-center justify-center font-bold">⏱</span>
+            <span class="w-8 h-8 rounded-full bg-[#ff5a1f]/20 text-[#ff5a1f] flex items-center justify-center font-bold">⏱</span>
             <div>
               <h2 class="font-bold text-sm text-white">Recent Session</h2>
               <p class="text-[11px] text-[#8B8D98]">15-minute ephemeral files</p>
@@ -242,7 +187,7 @@
         </div>
       </div>
       <div class="pt-4 border-t border-white/10 flex items-center justify-between">
-        <a href="/recent" class="text-xs font-semibold text-[#2165F7] hover:underline">View All History →</a>
+        <a href="/recent" class="text-xs font-semibold text-[#ff5a1f] hover:underline">View All History →</a>
         <button type="button" onclick="clearSessionHistory()" class="text-[11px] font-semibold text-rose-400 hover:underline cursor-pointer">Clear Session</button>
       </div>
     </div>
