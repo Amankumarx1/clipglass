@@ -46,8 +46,7 @@ button{font:inherit;color:inherit}
 .lbx{position:fixed;left:0;right:0;height:12vh;background:#000;z-index:95;border:none!important;outline:none!important;transition:transform 1.4s var(--ease)}
 .lbx.t{top:0}.lbx.b{bottom:0}.ready .lbx.t{transform:translateY(-100%)}.ready .lbx.b{transform:translateY(100%)}
 
-/* Hide chrome & tools completely during intro opening to eliminate rogue lines */
-body:not(.ready) header.hd,
+/* Hide chrome & tools during intro opening */
 body:not(.ready) .side-dock,
 body:not(.ready) .cad-tools,
 body:not(.ready) .trust-badge,
@@ -59,9 +58,11 @@ body:not(.ready) .after {
 }
 
 /* Left Vertical Navigation Dock */
-.side-dock{position:fixed;left:0;top:0;bottom:0;width:76px;z-index:60;background:rgba(12,13,18,.82);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border-right:1px solid rgba(255,255,255,.06);display:flex;flex-direction:column;align-items:center;padding:24px 0 20px;transition:opacity .8s var(--ease),visibility 0s,transform .4s var(--ease)}
-.dock-indicator{position:absolute;left:0;top:104px;width:3px;height:34px;background:#ff5a1f;border-radius:0 3px 3px 0;box-shadow:0 0 12px #ff5a1f;transition:top .35s var(--ease)}
-.dock-nav{display:flex;flex-direction:column;align-items:center;gap:22px;margin-top:68px;width:100%}
+.side-dock{position:fixed;left:0;top:0;bottom:0;width:76px;z-index:60;background:rgba(12,13,18,.82);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border-right:1px solid rgba(255,255,255,.06);display:flex;flex-direction:column;align-items:center;padding:18px 0 20px;transition:opacity .8s var(--ease),visibility 0s,transform .4s var(--ease)}
+.dock-logo{width:38px;height:38px;display:flex;align-items:center;justify-content:center;margin-bottom:12px;transition:transform .3s var(--ease);cursor:pointer}
+.dock-logo:hover{transform:scale(1.08)}
+.dock-indicator{position:absolute;left:0;top:82px;width:3px;height:34px;background:#ff5a1f;border-radius:0 3px 3px 0;box-shadow:0 0 12px #ff5a1f;transition:top .35s var(--ease)}
+.dock-nav{display:flex;flex-direction:column;align-items:center;gap:20px;margin-top:16px;width:100%}
 .dock-item{display:flex;flex-direction:column;align-items:center;gap:5px;width:100%;color:#7e8191;transition:all .3s ease;position:relative;padding:8px 0}
 .dock-item:hover{color:#fff;transform:translateY(-1px)}
 .dock-item.active{color:#ff5a1f}
@@ -77,24 +78,8 @@ body:not(.ready) .after {
 .eq-bars .b4{animation-delay:.15s;height:12px}
 @keyframes eqPulse{0%,100%{transform:scaleY(.35)}50%{transform:scaleY(1)}}
 
-/* Top Header Bar */
-header.hd{position:fixed;z-index:55;top:0;left:76px;right:0;height:74px;display:flex;justify-content:space-between;align-items:center;padding:0 4vw;background:rgba(9,10,15,.65);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1px solid rgba(255,255,255,.05);transition:opacity .8s var(--ease),background .4s,border-color .4s}
-header.sc{background:rgba(9,10,15,.92);border-bottom-color:rgba(255,255,255,.08)}
-.logo{display:flex;align-items:center;gap:11px;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:17px;letter-spacing:-.02em}
-.logo-mark{width:28px;height:28px;filter:drop-shadow(0 2px 8px rgba(245,31,54,.45))}
-.center-nav{display:flex;align-items:center;gap:32px;font-size:13px;font-weight:500;color:#9496a4}
-.nav-item{position:relative;transition:color .3s;padding:8px 0}
-.nav-item:hover{color:#fff}
-.nav-item.active{color:#fff}
-.nav-item.active::after{content:"";position:absolute;bottom:0;left:0;right:0;height:2px;background:#ff5a1f;border-radius:2px;box-shadow:0 0 8px #ff5a1f}
-.header-right{display:flex;align-items:center;gap:12px}
-.icon-btn{width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);display:flex;align-items:center;justify-content:center;color:#b2b5c4;cursor:pointer;transition:all .3s}
-.icon-btn:hover{background:rgba(255,255,255,.09);color:#fff;border-color:rgba(255,255,255,.2);transform:translateY(-1px)}
-.btn-download-pill{display:inline-flex;align-items:center;gap:8px;padding:9px 20px;border-radius:999px;background:#1f66ff;color:#fff;font-size:12px;font-weight:600;letter-spacing:.02em;box-shadow:0 4px 18px rgba(31,102,255,.45);transition:all .3s var(--ease)}
-.btn-download-pill:hover{background:#1a56db;transform:translateY(-1px);box-shadow:0 8px 24px rgba(31,102,255,.6)}
-
-/* Main Hero Stage */
-#gl{position:fixed;inset:0;width:100%;height:100%;z-index:1;pointer-events:none}
+/* Main Hero Stage - 3D Canvas in Front (z-index: 2), Background Plates Behind (z-index: 0) */
+#gl{position:fixed;inset:0;width:100%;height:100%;z-index:2;pointer-events:none}
 .stage{position:relative;height:100vh;min-height:680px;padding-left:76px;overflow:hidden;touch-action:pan-y;cursor:grab;display:flex;align-items:center;
 background:
   radial-gradient(ellipse 70% 6% at 50% 100%,rgba(255,90,31,.45) 0%,transparent 70%),
@@ -109,13 +94,13 @@ background-image:linear-gradient(to right,rgba(255,255,255,.025) 1px,transparent
 mask-image:radial-gradient(ellipse at 50% 50%,#000 35%,transparent 75%);-webkit-mask-image:radial-gradient(ellipse at 50% 50%,#000 35%,transparent 75%)}
 
 /* Floating Angled Glass Parallelogram Plates Behind Headphone */
-.glass-plate{position:absolute;pointer-events:none;z-index:1;border-radius:24px;border:1px solid rgba(255,90,31,.28);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);box-shadow:0 20px 50px rgba(0,0,0,.7),inset 0 0 25px rgba(255,90,31,.12);transform:skewX(-24deg);transition:transform .8s var(--ease)}
-.plate-left{left:calc(12vw + 76px);top:22vh;width:24vw;height:34vh;background:linear-gradient(135deg,rgba(35,38,50,.35),rgba(20,22,30,.25))}
-.plate-bottom{left:calc(16vw + 76px);top:46vh;width:28vw;height:24vh;background:linear-gradient(135deg,rgba(255,90,31,.12),rgba(20,22,30,.3));border-color:rgba(255,90,31,.45);box-shadow:0 0 35px rgba(255,90,31,.25)}
-.plate-right{right:4vw;top:24vh;width:16vw;height:42vh;background:linear-gradient(135deg,rgba(255,90,31,.18),rgba(20,22,30,.15));border-color:rgba(255,90,31,.5);box-shadow:0 0 40px rgba(255,90,31,.2)}
+.glass-plate{position:absolute;pointer-events:none;z-index:0;border-radius:24px;border:1px solid rgba(255,90,31,.25);box-shadow:0 20px 50px rgba(0,0,0,.7),inset 0 0 25px rgba(255,90,31,.1);transform:skewX(-24deg);transition:transform .8s var(--ease)}
+.plate-left{left:calc(4vw + 76px);top:18vh;width:20vw;height:42vh;background:linear-gradient(135deg,rgba(30,33,45,.4),rgba(18,20,28,.2))}
+.plate-bottom{left:calc(8vw + 76px);top:52vh;width:22vw;height:24vh;background:linear-gradient(135deg,rgba(255,90,31,.12),rgba(20,22,30,.25));border-color:rgba(255,90,31,.4);box-shadow:0 0 35px rgba(255,90,31,.2)}
+.plate-right{right:3vw;top:16vh;width:22vw;height:54vh;background:linear-gradient(135deg,rgba(255,90,31,.16),rgba(20,22,30,.12));border-color:rgba(255,90,31,.45);box-shadow:0 0 40px rgba(255,90,31,.18)}
 
 /* 5 Headphone Pagination Dots (Under the Headphone) */
-.hp-dots{position:absolute;left:calc(32vw + 38px);bottom:12vh;translate:-50% 0;z-index:4;display:flex;align-items:center;gap:9px;transition:opacity .8s var(--ease)}
+.hp-dots{position:absolute;left:calc(32vw + 38px);bottom:12vh;translate:-50% 0;z-index:5;display:flex;align-items:center;gap:9px;transition:opacity .8s var(--ease)}
 .hp-dot{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.3);cursor:pointer;transition:all .3s var(--ease)}
 .hp-dot:hover{background:rgba(255,255,255,.6);transform:scale(1.2)}
 .hp-dot.active{width:8px;height:8px;background:#fff;box-shadow:0 0 10px rgba(255,255,255,.8);transform:scale(1.1)}
@@ -156,8 +141,8 @@ mask-image:radial-gradient(ellipse at 50% 50%,#000 35%,transparent 75%);-webkit-
 .t-item svg{color:#ff5a1f}
 .t-sep{width:1px;height:12px;background:rgba(255,255,255,.15)}
 
-/* CAD Assembly HUD Tools */
-.cad-tools{position:absolute;z-index:10;top:88px;right:4vw;display:flex;align-items:center;gap:10px;transition:opacity .8s var(--ease)}
+/* CAD Assembly HUD Tools - Placed cleanly at top-right without header interference */
+.cad-tools{position:absolute;z-index:10;top:32px;right:4vw;display:flex;align-items:center;gap:10px;transition:opacity .8s var(--ease)}
 .cad-btn{display:inline-flex;align-items:center;gap:7px;padding:8px 16px;border-radius:999px;background:rgba(18,20,28,.78);border:1px solid rgba(255,255,255,.12);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);font-size:11px;font-weight:600;letter-spacing:.03em;color:#c9cbd3;cursor:pointer;transition:all .3s var(--ease);box-shadow:0 10px 24px -8px rgba(0,0,0,.6)}
 .cad-btn:hover{background:rgba(30,33,45,.92);border-color:rgba(255,90,31,.5);color:#fff;transform:translateY(-1px)}
 .cad-btn.active{background:linear-gradient(135deg,rgba(255,90,31,.35),rgba(245,31,54,.3));border-color:rgba(255,90,31,.8);color:#fff;box-shadow:0 0 18px rgba(255,90,31,.4)}
@@ -165,7 +150,6 @@ mask-image:radial-gradient(ellipse at 50% 50%,#000 35%,transparent 75%);-webkit-
 
 /* Responsive adjustments */
 @media(max-width:1024px){
-  header.hd{left:0;padding:0 5vw}
   .side-dock{display:none}
   .stage{padding-left:0}
   .plate-right{display:none}
@@ -173,7 +157,7 @@ mask-image:radial-gradient(ellipse at 50% 50%,#000 35%,transparent 75%);-webkit-
   .copy{left:7vw;right:7vw;top:66%;max-width:none}
   .kw{left:7vw;right:7vw;top:66%;max-width:none}
   .trust-badge{bottom:2vh;right:50%;translate:50% 0}
-  .cad-tools{top:auto;bottom:12vh;right:50%;translate:50% 0}
+  .cad-tools{top:20px;right:50%;translate:50% 0}
   .hint{display:none}
 }
 
@@ -230,7 +214,7 @@ footer{position:relative;margin-top:130px;padding:90px 6vw 34px;text-align:cente
 .fl{margin-top:56px;padding-top:26px;display:flex;flex-wrap:wrap;gap:14px 36px;justify-content:space-between;font-size:13px;color:var(--mut)}
 .fl .links{display:flex;gap:22px;flex-wrap:wrap}.fl a:hover{color:#fff}
 @media(max-width:1100px){.cards{grid-template-columns:1fr 1fr}}
-@media(max-width:820px){.cards{grid-template-columns:1fr}.fan,.trio,.panel{grid-template-columns:1fr}.st{--ry:0deg!important;--tz:0px!important}.panel{padding:44px 6vw}.fl{flex-direction:column}header,header.sc{padding:0 5vw}}
+@media(max-width:820px){.cards{grid-template-columns:1fr}.fan,.trio,.panel{grid-template-columns:1fr}.st{--ry:0deg!important;--tz:0px!important}.panel{padding:44px 6vw}.fl{flex-direction:column}}
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
@@ -241,8 +225,20 @@ footer{position:relative;margin-top:130px;padding:90px 6vw 34px;text-align:cente
 <i class="lbx t"></i><i class="lbx b"></i>
 <canvas id="gl" aria-hidden="true"></canvas>
 
-<!-- Left Vertical Sidebar Dock (Mockup Navigation) -->
+<!-- Left Vertical Sidebar Dock with ClipGlass Logo -->
 <aside class="side-dock" id="sideDock">
+  <a href="#top" class="dock-logo" title="ClipGlass" aria-label="ClipGlass Home">
+    <svg viewBox="0 0 28 28" width="28" height="28" style="filter:drop-shadow(0 2px 8px rgba(245,31,54,.45))">
+      <defs>
+        <linearGradient id="dockLogoG" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stop-color="#f51f36"/>
+          <stop offset="100%" stop-color="#ff5a1f"/>
+        </linearGradient>
+      </defs>
+      <path d="M5 4l18 10-18 10V4z" fill="url(#dockLogoG)"/>
+      <path d="M11 10.5l8 3.5-8 3.5v-7z" fill="#fff" opacity="0.95"/>
+    </svg>
+  </a>
   <div class="dock-indicator" id="dockIndicator"></div>
   <nav class="dock-nav" aria-label="Primary Dock">
     <a href="#top" class="dock-item active" data-nav="home" title="Home">
@@ -278,51 +274,9 @@ footer{position:relative;margin-top:130px;padding:90px 6vw 34px;text-align:cente
   </div>
 </aside>
 
-<!-- Top Header Navigation -->
-<header class="hd" id="hd">
-  <a class="logo" href="#top" aria-label="ClipGlass home">
-    <svg class="logo-mark" viewBox="0 0 28 28">
-      <defs>
-        <linearGradient id="logoG" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0%" stop-color="#f51f36"/>
-          <stop offset="100%" stop-color="#ff5a1f"/>
-        </linearGradient>
-      </defs>
-      <path d="M5 4l18 10-18 10V4z" fill="url(#logoG)"/>
-      <path d="M11 10.5l8 3.5-8 3.5v-7z" fill="#fff" opacity="0.95"/>
-    </svg>
-    <span class="logo-text">ClipGlass</span>
-  </a>
-
-  <nav class="center-nav" aria-label="Main Navigation">
-    <a href="#top" class="nav-item active">Home</a>
-    <a href="#work" class="nav-item">Features</a>
-    <a href="/downloader" class="nav-item">Download</a>
-    <a href="#how" class="nav-item">Pricing</a>
-    <a href="#privacy" class="nav-item">About</a>
-    <a href="/faq" class="nav-item">Contact</a>
-  </nav>
-
-  <div class="header-right">
-    <button class="icon-btn" id="searchBtn" title="Search" aria-label="Search">
-      <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-    </button>
-    <button class="icon-btn" id="notifBtn" title="Notifications" aria-label="Notifications">
-      <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-    </button>
-    <button class="icon-btn" id="themeBtn" title="Toggle Theme" aria-label="Toggle Theme">
-      <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
-    </button>
-    <a href="/downloader" class="btn-download-pill">
-      <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-      <span>Download</span>
-    </a>
-  </div>
-</header>
-
 <main>
 <section class="stage" id="top">
-  <!-- Perspective Grid and Angled Floating Glass Plates Matching Mockup -->
+  <!-- Perspective Grid and Angled Floating Glass Plates Matching Mockup (Behind 3D Canvas) -->
   <div class="grid-bg"></div>
   <div class="glass-plate plate-left"></div>
   <div class="glass-plate plate-bottom"></div>
@@ -402,7 +356,7 @@ footer{position:relative;margin-top:130px;padding:90px 6vw 34px;text-align:cente
 
   <div class="hint">Drag to rotate</div>
 
-  <!-- CAD Interactive Controls -->
+  <!-- CAD Interactive Controls - Clean Top-Right Position -->
   <div class="cad-tools" id="cadTools">
     <button type="button" id="btnExplode" class="cad-btn" aria-label="Toggle Exploded CAD View">
       <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"/></svg>
@@ -490,7 +444,7 @@ footer{position:relative;margin-top:130px;padding:90px 6vw 34px;text-align:cente
 </main>
 
 <script>
-// Global Skip Function (Accessible anywhere, even if inline or from HTML)
+// Global Skip Function
 function skipIntro(){
   try{sessionStorage.setItem('cg_intro','1')}catch(e){}
   const introEl=document.getElementById('intro');
@@ -556,10 +510,6 @@ if(skipBtn)skipBtn.onclick=skipIntro;
 addEventListener('keydown',e=>{if(e.key==='Escape')skipIntro()});
 const replayBtn=$('#replay');
 if(replayBtn)replayBtn.onclick=e=>{e.preventDefault();try{sessionStorage.removeItem('cg_intro')}catch(x){}scrollTo(0,0);location.reload()};
-
-// Header scroll effect
-const hd=$('#hd');
-if(hd)addEventListener('scroll',()=>hd.classList.toggle('sc',scrollY>30),{passive:true});
 
 // Intersection observer for scroll reveals
 const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}}),{threshold:.15});
@@ -670,7 +620,7 @@ S.environment=pm.fromScene(env,.02).texture;
 const key=new THREE.DirectionalLight(0xffffff,.85);key.position.set(-3,5,6);S.add(key);
 
 // Warm amber rim light casting from right-rear to mirror the mockup glow
-const rimAmber=new THREE.PointLight(0xff5a1f,3.0,25);rimAmber.position.set(6,1,-3);S.add(rimAmber);
+const rimAmber=new THREE.PointLight(0xff5a1f,3.2,25);rimAmber.position.set(6,1,-3);S.add(rimAmber);
 const fillBlue=new THREE.PointLight(0x2f6bff,1.0,25);fillBlue.position.set(-6,2,-5);S.add(fillBlue);
 
 // Procedural Materials
@@ -693,7 +643,7 @@ gsg.addColorStop(0,'rgba(0,0,0,.75)');gsg.addColorStop(.45,'rgba(0,0,0,.35)');gs
 const groundShadow=new THREE.Mesh(new THREE.PlaneGeometry(6,3.6),new THREE.MeshBasicMaterial({map:new THREE.CanvasTexture(gsc),transparent:true,opacity:.55,depthWrite:false}));
 groundShadow.rotation.x=-Math.PI/2;groundShadow.position.set(-.4,-1.85,0);S.add(groundShadow);
 
-// Headphones - Exploded Multi-Part Precision Assembly
+// Headphones - High-Fidelity Exploded Multi-Part Precision Assembly with Glowing Halos
 const H=new THREE.Group(),inner=new THREE.Group();H.add(inner);S.add(H);inner.position.y=.5;
 const X=1.7;
 
@@ -756,13 +706,13 @@ const cupAssembly=[];
   const fb=M(new THREE.CylinderGeometry(.34,.34,.03,48),fab);fb.position.y=-.4;fb.scale.x=1.18;cushionG.add(fb);
 
   // Glowing Neon Orange Halo Ring (Matches Mockup Interior Ear Halo!)
-  const haloGeo=new THREE.TorusGeometry(.54,.025,16,64);
+  const haloGeo=new THREE.TorusGeometry(.54,.035,16,64);
   const haloMat=new THREE.MeshBasicMaterial({color:0xff5a1f,toneMapped:false});
   const haloMesh=new THREE.Mesh(haloGeo,haloMat);
   haloMesh.rotation.x=Math.PI/2;haloMesh.position.y=-.28;haloMesh.scale.x=1.18;cupG.add(haloMesh);
 
   // Warm Amber / Orange Interior PointLight
-  const innerLight=new THREE.PointLight(0xff6a1f,3.2,4.5);
+  const innerLight=new THREE.PointLight(0xff6a1f,3.8,5.5);
   innerLight.position.set(0,-.26,0);
   cupG.add(innerLight);
 
@@ -781,17 +731,23 @@ const cupAssembly=[];
   cupAssembly.push({side:s,basePivot,yokeG,pinMeshes,cupG,shellG,badgeG,rimG,cushionG,caliperRing,reticleRing});
 });
 
-// Real model loading
-let real=null,realS=1;
-function useModel(g){
-  if(real)H.remove(real);
-  const m=g.scene,b=new THREE.Box3().setFromObject(m),sz=b.getSize(new THREE.Vector3()),c=b.getCenter(new THREE.Vector3());
-  m.position.sub(c);m.traverse(o=>{if(o.isMesh&&o.material&&!Array.isArray(o.material)){o.material.envMapIntensity=1.3;o.material.needsUpdate=true}});
-  real=new THREE.Group();real.add(m);realS=4/Math.max(sz.x,sz.y,sz.z);inner.visible=false;H.add(real)}
+// Drag and drop custom GLB model support
 if(window.THREE&&THREE.GLTFLoader){
-  new THREE.GLTFLoader().load(MODEL_URL,useModel,undefined,()=>{});
   addEventListener('dragover',e=>e.preventDefault());
-  addEventListener('drop',e=>{e.preventDefault();const f=e.dataTransfer.files[0];if(f&&/\.glb$/i.test(f.name))f.arrayBuffer().then(b=>new THREE.GLTFLoader().parse(b,'',useModel,()=>{}))})}
+  addEventListener('drop',e=>{
+    e.preventDefault();
+    const f=e.dataTransfer.files[0];
+    if(f&&/\.glb$/i.test(f.name)){
+      f.arrayBuffer().then(b=>new THREE.GLTFLoader().parse(b,'',g=>{
+        const m=g.scene,bx=new THREE.Box3().setFromObject(m),sz=bx.getSize(new THREE.Vector3()),c=bx.getCenter(new THREE.Vector3());
+        m.position.sub(c);
+        m.traverse(o=>{if(o.isMesh&&o.material&&!Array.isArray(o.material)){o.material.envMapIntensity=1.3;o.material.needsUpdate=true}});
+        const real=new THREE.Group();real.add(m);const realS=4/Math.max(sz.x,sz.y,sz.z);real.scale.setScalar(realS);
+        inner.visible=false;H.add(real);
+      },()=>{}))
+    }
+  });
+}
 
 // Ambient orange background light sweep
 const sweep=new THREE.PointLight(0xff5a1f,0,16);sweep.position.set(-6,2,-1);S.add(sweep);
@@ -863,7 +819,7 @@ function tick(t){
 
   const m=innerWidth<1024,halfH=Math.tan(C.fov*Math.PI/360)*10.5,visW=2*halfH*C.aspect;
   // Position headphone in left/center area matching the mockup
-  const tx=m?0:(.38-.5)*visW,ty=m?.8:.12,ts=m?.55:.74,k=1-Math.exp(-dt*5),ky=1-Math.exp(-dt*(T<4.6?1.5:2.6));
+  const tx=m?0:(.36-.5)*visW,ty=m?.8:.10,ts=m?.55:.76,k=1-Math.exp(-dt*5),ky=1-Math.exp(-dt*(T<4.6?1.5:2.6));
   cr.x+=(tx-cr.x)*k;cr.y+=(ty-cr.y)*k;cr.s+=(ts-cr.s)*k;cr.yaw+=(SL[slide].yaw+spin*Math.PI*2-cr.yaw)*ky;
   if(!dragging)drag*=Math.exp(-dt*1.3);
   sp+=(cl(scrollY/innerHeight,0,1)-sp)*(1-Math.exp(-dt*8));const scr=sp*4.6;
@@ -973,7 +929,6 @@ function tick(t){
   });
 
   inner.scale.setScalar(1);
-  if(real){real.scale.setScalar(realS);real.rotation.y=MODEL_ROT_Y}
 
   const hoverFade=sm(cl((T-4.1)/1.0,0,1));
   const hoverBob=(still?0:Math.sin(sec*1.1)*.08*hoverFade);
