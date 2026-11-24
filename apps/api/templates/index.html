@@ -34,11 +34,15 @@ button{font:inherit;color:inherit}
 #skip:hover{opacity:1}.ready #skip{opacity:0;pointer-events:none}
 .lbx{position:fixed;left:0;right:0;height:12vh;background:#000;z-index:25;transition:transform 1.6s var(--ease)}
 .lbx.t{top:0}.lbx.b{bottom:0}.ready .lbx.t{transform:translateY(-100%)}.ready .lbx.b{transform:translateY(100%)}
-.kw{position:fixed;inset:0;z-index:1;pointer-events:none;display:grid;place-items:center;overflow:hidden}
-.kw span{grid-area:1/1;font:800 clamp(4.5rem,19vw,18rem)/1 'Space Grotesk',sans-serif;text-transform:uppercase;letter-spacing:-.02em;color:transparent;-webkit-text-stroke:2px rgba(255,255,255,.3);opacity:0;scale:1.3;filter:blur(16px);transition:opacity .5s ease,scale 1.2s var(--ease),filter .7s ease}
-.kw span.on{opacity:1;scale:1;filter:blur(0)}
-.kw span:last-child{background:linear-gradient(90deg,#ff2d6f,#1f66ff);-webkit-background-clip:text;background-clip:text;-webkit-text-stroke:0}
-.ready .kw{display:none}
+/* opening sequence in place of copy (clean behind headphone) */
+.opening-kw{position:absolute;z-index:3;left:calc(44vw + 31vh);top:50%;translate:0 -50%;max-width:calc(100vw - 44vw - 31vh - 6vw);pointer-events:none;transition:opacity .5s var(--ease),visibility .5s}
+.ready .opening-kw{opacity:0;visibility:hidden;pointer-events:none}
+.opening-kw .step-tag{display:inline-flex;align-items:center;gap:8px;font-size:11px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--a2);margin-bottom:12px;opacity:0;translate:0 12px;transition:all .45s var(--ease)}
+.opening-kw .step-word{font:800 clamp(36px,5.2vw,76px)/1 'Space Grotesk',sans-serif;letter-spacing:-.02em;text-transform:uppercase;color:#fff;margin-bottom:14px;opacity:0;translate:0 24px;filter:blur(8px);transition:all .55s var(--ease)}
+.opening-kw .step-word b{background:linear-gradient(90deg,#ff2d6f,#1f66ff);-webkit-background-clip:text;background-clip:text;-webkit-text-stroke:0;color:transparent}
+.opening-kw .step-sub{font-size:clamp(13px,1.1vw,16px);line-height:1.55;font-weight:300;color:var(--mut);max-width:32ch;opacity:0;translate:0 18px;transition:all .55s var(--ease) .08s}
+.opening-kw.on .step-tag,.opening-kw.on .step-word,.opening-kw.on .step-sub{opacity:1;translate:0 0;filter:blur(0)}
+@media(max-width:820px){.opening-kw{left:7vw;right:7vw;top:66%;max-width:none}}
 .pill{opacity:0;transition:opacity 1.8s ease .3s}.ready .pill{opacity:1}.ready .p2{opacity:.85}
 .num{opacity:0}.ready .num{opacity:1}
 .cats,.arr{visibility:hidden}.ready .cats,.ready .arr{visibility:visible;animation:fin 1.4s ease .7s backwards}
@@ -155,7 +159,6 @@ footer{position:relative;margin-top:130px;padding:90px 6vw 34px;text-align:cente
 <body>
 <div id="intro" role="status" aria-label="Loading ClipGlass"><div class="il"><div class="wmk" aria-hidden="true"><span>ClipGlass</span><span class="fill" id="wf">ClipGlass</span></div><div class="ibar"><span id="pg"></span></div></div><b id="cnt" aria-hidden="true">000</b></div>
 <button id="skip">Skip intro</button>
-<div class="kw" aria-hidden="true"><span>Paste</span><span>Pick</span><span>Done.</span></div>
 <i class="lbx t"></i><i class="lbx b"></i>
 <canvas id="gl" aria-hidden="true"></canvas>
 <header class="hd" id="hd">
@@ -169,9 +172,14 @@ footer{position:relative;margin-top:130px;padding:90px 6vw 34px;text-align:cente
   <div class="cats" id="cats" aria-label="Workspaces"></div>
   <button class="arr l" id="prev" aria-label="Previous workspace">‹</button>
   <button class="arr r" id="next" aria-label="Next workspace">›</button>
+  <div class="opening-kw" id="openingKw" aria-hidden="true">
+    <div class="step-tag" id="stepTag">01 — Input</div>
+    <div class="step-word" id="stepWord">Paste.</div>
+    <p class="step-sub" id="stepSub">Drop in any YouTube video, Short or Music link.</p>
+  </div>
   <h1 class="copy" aria-live="polite">
-    <span class="ln" style="--i:1"><span id="l1">Download in</span></span>
-    <span class="ln" style="--i:2"><span><b id="l2">seconds.</b></span></span>
+    <span class="ln" style="--i:1"><span id="l1">Paste. Pick.</span></span>
+    <span class="ln" style="--i:2"><span><b id="l2">Done.</b></span></span>
     <p class="sub"><span class="ln" style="--i:3"><span id="l3">Paste a link, pick a quality. Up to 4K video or MP3.</span></span></p>
   </h1>
   <div class="buy fade">
@@ -272,7 +280,7 @@ const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
 // Put a real headphone model (.glb) at this path to replace the built-in one. You can also drop a .glb onto the page.
 const MODEL_URL='/static/models/headphones.glb', MODEL_ROT_Y=0;
 const SL=[
- {n:'01',cat:'Downloader',l1:'Download in',l2:'seconds.',sub:'Paste a link, pick a quality. Up to 4K video or MP3.',href:'/downloader',yaw:-.55,hex:['#ff2d6f','#1f66ff','#ff7355'],acc:[0xff2d6f,0x1f66ff,0xff7355]},
+ {n:'01',cat:'Downloader',l1:'Paste. Pick.',l2:'Done.',sub:'Paste a link, pick a quality. Up to 4K video or MP3.',href:'/downloader',yaw:-.55,hex:['#ff2d6f','#1f66ff','#ff7355'],acc:[0xff2d6f,0x1f66ff,0xff7355]},
  {n:'02',cat:'Studio',l1:'Master your',l2:'sound.',sub:'79 effects, an automatic mode and a full custom rack.',href:'/studio',yaw:.6,hex:['#19e3b1','#8a5cff','#ffd23f'],acc:[0x19e3b1,0x8a5cff,0xffd23f]},
  {n:'03',cat:'Trimmer',l1:'Cut with',l2:'precision.',sub:'Frame-accurate trimming with lossless stream copy.',href:'/video-trimmer',yaw:-.95,hex:['#ffd23f','#ff7355','#19e3b1'],acc:[0xffd23f,0xff7355,0x19e3b1]},
  {n:'04',cat:'Auto Clip',l1:'Shorts, ready',l2:'to post.',sub:'Finds the strongest moments and exports 9:16 clips with captions.',href:'/auto-clip',yaw:.9,hex:['#ff8a1f','#17c8ff','#ff3bd4'],acc:[0xff8a1f,0x17c8ff,0xff3bd4]}];
@@ -508,7 +516,7 @@ function playHaptic(type){
 let isExploded=false,explodeAmt=0;
 const btnExp=$('#btnExplode'),btnRe=$('#btnReassemble'),btnAud=$('#btnAudio');
 if(btnExp)btnExp.onclick=()=>{isExploded=!isExploded;btnExp.classList.toggle('active',isExploded);$('#explodeLabel').textContent=isExploded?'Assemble':'Exploded View';playHaptic(isExploded?'explode':'dock')};
-if(btnRe)btnRe.onclick=()=>{T=0;isExploded=false;if(btnExp)btnExp.classList.remove('active');$('#explodeLabel').textContent='Exploded View';tick.rv=0;playHaptic('dock')};
+if(btnRe)btnRe.onclick=()=>{T=0;isExploded=false;if(btnExp)btnExp.classList.remove('active');$('#explodeLabel').textContent='Exploded View';tick.rv=0;tick.w=-1;playHaptic('dock')};
 if(btnAud)btnAud.onclick=()=>{initAudio();soundEnabled=!soundEnabled;btnAud.classList.toggle('active',soundEnabled);$('#soundLabel').textContent=soundEnabled?'Sound ON':'Sound FX';if(soundEnabled)playHaptic('chime')};
 
 // Animation
@@ -528,7 +536,29 @@ function tick(t){
     if(CG.skip){T=99}else T+=ds;
     if(T>4.4&&!tick.rv){tick.rv=1;document.body.classList.add('ready');try{sessionStorage.setItem('cg_intro','1')}catch(e){}}
     if(T>5.8)CG.skip=false;
-    const wi=T<1.2?-1:T<2.4?0:T<3.5?1:T<4.4?2:-1;if(wi!==tick.w){tick.w=wi;$$('.kw span').forEach((w,k)=>w.classList.toggle('on',k===wi))}}
+    const kwSteps=[
+      {tag:'01 — Input',word:'Paste.',sub:'Drop in any YouTube video, Short or Music link.'},
+      {tag:'02 — Select',word:'Pick.',sub:'Choose up to 4K video resolution or mastered audio.'},
+      {tag:'03 — Export',word:'Done.',sub:'Instant download. No account, no install.'}
+    ];
+    const wi=T<1.1?-1:T<2.3?0:T<3.4?1:T<4.3?2:-1;
+    if(wi!==tick.w){
+      tick.w=wi;
+      const okw=$('#openingKw');
+      if(okw){
+        if(wi>=0){
+          okw.classList.remove('on');
+          void okw.offsetWidth;
+          $('#stepTag').textContent=kwSteps[wi].tag;
+          $('#stepWord').innerHTML=wi===2?'<b>Done.</b>':kwSteps[wi].word;
+          $('#stepSub').textContent=kwSteps[wi].sub;
+          okw.classList.add('on');
+        }else{
+          okw.classList.remove('on');
+        }
+      }
+    }
+  }
   const m=innerWidth<820,halfH=Math.tan(C.fov*Math.PI/360)*10.5,visW=2*halfH*C.aspect;
   const tx=m?0:(.43-.5)*visW,ty=m?.95:.1,ts=m?.55:.75,k=1-Math.exp(-dt*5),ky=1-Math.exp(-dt*(T<4.6?1.5:2.6));
   cr.x+=(tx-cr.x)*k;cr.y+=(ty-cr.y)*k;cr.s+=(ts-cr.s)*k;cr.yaw+=(SL[slide].yaw+spin*Math.PI*2-cr.yaw)*ky;
