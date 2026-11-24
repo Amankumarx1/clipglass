@@ -1,0 +1,74 @@
+version: '3.8'
+
+services:
+  caddy:
+    image: caddy:2-alpine
+    container_name: clipglass_caddy
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      - DOMAIN=${DOMAIN:-localhost}
+      - ACME_EMAIL=${ACME_EMAIL:-admin@example.com}
+    volumes:
+      - ./docker/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - app
+    restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  app:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.api
+    container_name: clipglass_app
+    expose:
+      - "8000"
+    environment:
+      - ENVIRONMENT=production
+      - PORT=8000
+      - WORKERS=${WORKERS:-4}
+      - ALLOWED_ORIGINS=${ALLOWED_ORIGINS:-https://${DOMAIN:-localhost}}
+      - MAX_DURATION_SECONDS=10800
+      - MAX_FILE_SIZE_BYTES=2147483648
+      - FILE_TTL_SECONDS=900
+      - REDIS_URL=redis://redis:6379/0
+      - USE_REDIS=${USE_REDIS:-false}
+      - TEMP_STORAGE_DIR=/tmp/clipglass_downloads
+      - TURNSTILE_ENABLED=${TURNSTILE_ENABLED:-false}
+      - TURNSTILE_SECRET_KEY=${TURNSTILE_SECRET_KEY:-}
+    volumes:
+      - ephemeral_storage:/tmp/clipglass_downloads
+    restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "15m"
+        max-file: "3"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/healthz"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+  redis:
+    image: redis:7-alpine
+    container_name: clipglass_redis
+    restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "5m"
+        max-file: "2"
+
+volumes:
+  ephemeral_storage:
+  caddy_data:
+  caddy_config:

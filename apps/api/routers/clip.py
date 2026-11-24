@@ -15,6 +15,7 @@ from services.clip_render_service import render_clip_segment, package_clips_zip
 from services.edit_box_service import EditBoxParser
 from services.polish_pack_service import get_available_polish_styles
 from services.ytdlp_service import validate_youtube_url
+from services.security_service import get_real_client_ip
 from app.config import settings
 
 router = APIRouter(prefix="/api/clip", tags=["Auto Clip"])
@@ -59,7 +60,7 @@ async def create_clip_job(request: Request, body: ClipJobCreateRequest):
             }
         )
 
-    client_ip = request.client.host if request.client else "127.0.0.1"
+    client_ip = get_real_client_ip(request)
 
     # Rate Limiting: Prevent DoS from rapid repeated clipping requests
     now = time.time()

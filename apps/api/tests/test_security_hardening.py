@@ -14,12 +14,15 @@ def test_security_headers_present():
     """Verify essential security headers (nosniff, frame denial, CSP, etc.) are injected."""
     res = client.get("/health")
     assert res.status_code == 200
+    assert res.headers.get("Server") == "ClipGlass"
     assert res.headers.get("X-Content-Type-Options") == "nosniff"
     assert res.headers.get("X-Frame-Options") == "DENY"
     assert res.headers.get("Referrer-Policy") == "strict-origin-when-cross-origin"
     assert "Content-Security-Policy" in res.headers
     assert "default-src 'self'" in res.headers["Content-Security-Policy"]
     assert "frame-ancestors 'none'" in res.headers["Content-Security-Policy"]
+    assert "https:" in res.headers["Content-Security-Policy"]
+    assert "wss:" in res.headers["Content-Security-Policy"]
 
 def test_clip_job_ssrf_prevention():
     """Verify that malicious URLs (userinfo spoofing, non-YouTube domains, internal IP ranges) are rejected."""
@@ -92,3 +95,20 @@ def test_creative_fx_hook_sanitization():
     assert "\\" not in sanitized.replace("\\:", "").replace("\\%", "")
     assert "\\:" in sanitized
     assert "\\%" in sanitized
+
+def test_real_client_ip_detection():
+    """Verify that Cloudflare, X-Forwarded-For, and socket client IPs are properly resolved."""
+    from services.security_service import get_real_client_ip
+    from starlette.requests import Request
+
+    # 1. Cloudflare CF-Connecting-IP
+    scope_cf = {"type": "http", "headers": [(b"cf-connecting-ip", b"203.0.113.195")], "client": ("10.0.0.1", 12345)}
+    assert get_real_client_ip(Request(scope_cf)) == "203.0.113.195"
+
+    # 2. X-Forwarded-For chain
+    scope_xff = {"type": "http", "headers": [(b"x-forwarded-for", b"198.51.100.42, 10.0.0.1")], "client": ("10.0.0.1", 12345)}
+    assert get_real_client_ip(Request(scope_xff)) == "198.51.100.42"
+
+    # 3. Direct socket client host fallback
+    scope_direct = {"type": "http", "headers": [], "client": ("192.0.2.1", 12345)}
+    assert get_real_client_ip(Request(scope_direct)) == "192.0.2.1"

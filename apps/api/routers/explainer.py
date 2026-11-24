@@ -3,6 +3,7 @@ from collections import defaultdict
 from fastapi import APIRouter, Request, HTTPException, status
 from schemas.explainer import ExplainerGenerateRequest, ExplainerGenerateResponse
 from services.explainer_service import generate_explainer_short
+from services.security_service import get_real_client_ip
 from app.config import settings
 
 router = APIRouter(prefix="/api/v1/explainer", tags=["Explainer"])
@@ -11,7 +12,7 @@ ip_explainer_timestamps = defaultdict(list)
 
 @router.post("/generate", response_model=ExplainerGenerateResponse)
 async def create_explainer_short(request: Request, body: ExplainerGenerateRequest):
-    client_ip = request.client.host if request.client else "127.0.0.1"
+    client_ip = get_real_client_ip(request)
 
     # Rate Limiting: Prevent CPU/GPU worker exhaustion
     now = time.time()

@@ -5,13 +5,14 @@ services:
     build:
       context: .
       dockerfile: docker/Dockerfile.api
-    container_name: clipglass
+    container_name: clipglass_app
     ports:
       - "8000:8000"
     environment:
       - ENVIRONMENT=production
       - PORT=8000
-      - ALLOWED_ORIGINS=http://localhost:8000,http://127.0.0.1:8000
+      - WORKERS=2
+      - ALLOWED_ORIGINS=http://localhost:8000,http://127.0.0.1:8000,http://localhost:3000
       - MAX_DURATION_SECONDS=10800
       - MAX_FILE_SIZE_BYTES=2147483648
       - FILE_TTL_SECONDS=900
@@ -21,6 +22,17 @@ services:
     volumes:
       - ephemeral_storage:/tmp/clipglass_downloads
     restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/healthz"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
 
   redis:
     image: redis:7-alpine
@@ -28,7 +40,11 @@ services:
     ports:
       - "6379:6379"
     restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "5m"
+        max-file: "2"
 
 volumes:
   ephemeral_storage:
-

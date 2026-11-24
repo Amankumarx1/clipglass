@@ -11,6 +11,7 @@ from schemas.jobs import JobCreateRequest, JobCreateResponse, JobEventData
 from schemas.inspect import FriendlyError
 from services.queue_service import job_manager
 from services.ytdlp_service import sanitize_filename
+from services.security_service import get_real_client_ip
 from app.config import settings
 
 router = APIRouter(prefix="/api/v1/jobs", tags=["Jobs"])
@@ -94,7 +95,7 @@ async def create_job(request: Request, body: JobCreateRequest):
             }
         )
 
-    client_ip = request.client.host if request.client else "127.0.0.1"
+    client_ip = get_real_client_ip(request)
 
     now = time.time()
     cutoff = now - 600.0

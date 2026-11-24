@@ -42,11 +42,12 @@ allowed_origins = [
     "http://127.0.0.1:3000",
     *(settings.allowed_origins_list or [])
 ]
+is_wildcard = "*" in allowed_origins
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=allowed_origins,
-    allow_credentials=True,
+    allow_origins=allowed_origins if not is_wildcard else ["*"],
+    allow_credentials=not is_wildcard,
     allow_methods=["GET", "POST", "DELETE", "OPTIONS"],
     allow_headers=["*"],
 )
@@ -54,6 +55,7 @@ app.add_middleware(
 @app.middleware("http")
 async def add_security_headers(request: Request, call_next):
     response = await call_next(request)
+    response.headers["Server"] = "ClipGlass"
     response.headers["X-Content-Type-Options"] = "nosniff"
     response.headers["X-Frame-Options"] = "DENY"
     response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
@@ -66,7 +68,7 @@ async def add_security_headers(request: Request, call_next):
         "font-src 'self' https://fonts.gstatic.com data:; "
         "img-src 'self' data: https: blob:; "
         "media-src 'self' blob: data:; "
-        "connect-src 'self' http://localhost:* http://127.0.0.1:*; "
+        "connect-src 'self' https: wss: ws: http://localhost:* http://127.0.0.1:*; "
         "frame-ancestors 'none';"
     )
     if settings.ENVIRONMENT == "production":

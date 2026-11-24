@@ -6,6 +6,7 @@ from schemas.inspect import InspectRequest, InspectResponse, FriendlyError
 import re
 import urllib.parse
 from services.ytdlp_service import inspect_video, extract_subtitles_text, sanitize_filename
+from services.security_service import get_real_client_ip
 from app.config import settings
 
 router = APIRouter(prefix="/api/v1", tags=["Inspect"])
@@ -26,7 +27,7 @@ CACHE_TTL_SECONDS = 600.0  # 10 minutes
     }
 )
 async def inspect_endpoint(request: Request, body: InspectRequest):
-    client_ip = request.client.host if request.client else "127.0.0.1"
+    client_ip = get_real_client_ip(request)
 
     now = time.time()
     cutoff = now - 60.0
@@ -87,7 +88,7 @@ async def inspect_get_endpoint(request: Request, url: str):
 
 @router.get("/subtitles/download")
 async def download_subtitles_endpoint(request: Request, url: str, lang: str = "en", format: str = "srt"):
-    client_ip = request.client.host if request.client else "127.0.0.1"
+    client_ip = get_real_client_ip(request)
     now = time.time()
     cutoff = now - 60.0
     timestamps = [t for t in ip_inspect_timestamps[client_ip] if t > cutoff]
