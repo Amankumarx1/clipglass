@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{% block title %}ClipGlass — Everything media. One workspace.{% endblock %}</title>
-  <link rel="icon" type="image/svg+xml" href="/static/img/icon.svg">
+  <link rel="icon" type="image/png" href="/static/img/icon.png">
   <script>
     (function() {
       try {
@@ -52,18 +52,9 @@
 
   <!-- Universal Left Vertical Navigation Dock (Primary Navbar across all pages) -->
   <aside class="side-dock" id="sideDock" aria-label="Universal Navigation Dock">
-    <!-- Top: Faceted Crimson/Orange Play Mark Logo -->
+    <!-- Top: Faceted Crimson/Orange Headphone Logo -->
     <a href="/" onclick="playGlassTick()" class="dock-logo" title="ClipGlass Home" aria-label="ClipGlass Home">
-      <svg viewBox="0 0 28 28" width="28" height="28" style="filter:drop-shadow(0 2px 8px rgba(245,31,54,.45))">
-        <defs>
-          <linearGradient id="dockLogoG" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0%" stop-color="#f51f36"/>
-            <stop offset="100%" stop-color="#ff5a1f"/>
-          </linearGradient>
-        </defs>
-        <path d="M5 4l18 10-18 10V4z" fill="url(#dockLogoG)"/>
-        <path d="M11 10.5l8 3.5-8 3.5v-7z" fill="#fff" opacity="0.95"/>
-      </svg>
+      <img src="/static/img/logo.png" alt="ClipGlass Logo" class="w-9 h-9 object-contain drop-shadow-[0_2px_10px_rgba(255,90,31,0.55)] hover:scale-110 transition-transform" />
     </a>
 
     <!-- Vertical Neon Orange Active Indicator -->
@@ -143,9 +134,7 @@
   <footer class="w-full max-w-7xl mx-auto px-6 lg:px-12 py-8 border-t border-white/[0.06] mt-16 text-[11px] text-[#8B8D98]">
     <div class="flex flex-col md:flex-row items-center justify-between gap-4">
       <div class="flex items-center gap-2.5">
-        <span class="w-4 h-4 rounded-full bg-[#ff5a1f] flex items-center justify-center shrink-0 shadow-[0_0_8px_rgba(255,90,31,0.5)]">
-          <span class="ml-0.5 border-l-[4px] border-l-white border-y-[2.5px] border-y-transparent"></span>
-        </span>
+        <img src="/static/img/logo.png" alt="ClipGlass Logo" class="w-5 h-5 object-contain drop-shadow-[0_0_8px_rgba(255,90,31,0.5)]" />
         <span class="text-white font-medium text-xs font-['Space_Grotesk']">ClipGlass</span>
         <span class="text-slate-500 hidden sm:inline">· Designed for high-speed media processing</span>
       </div>
