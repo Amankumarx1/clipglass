@@ -150,6 +150,8 @@ class ClipJobManager:
         chapters = []
         heatmap = []
         caption_path = None
+        comments = []
+        live_chat_path = None
 
         if record.source_video and os.path.exists(record.source_video):
             import subprocess
@@ -191,8 +193,13 @@ class ClipJobManager:
             chapters = ingest_res.chapters
             heatmap = ingest_res.heatmap
             caption_path = ingest_res.caption_path
+            comments = getattr(ingest_res, 'comments', [])
+            live_chat_path = getattr(ingest_res, 'live_chat_path', None)
             record.percent = 35.0
-            record.active_step = "Retrieved stream metadata and subtitles (Zero-Download)..."
+            if getattr(ingest_res, 'is_live', False):
+                record.active_step = "Retrieved live stream broadcast, chat replay and metadata (Zero-Download)..."
+            else:
+                record.active_step = "Retrieved stream metadata, comments and subtitles (Zero-Download)..."
             record.emit_update()
 
         # 2. Transcription Stage
@@ -206,14 +213,19 @@ class ClipJobManager:
         # 3. Multimodal Signals Stage
         record.stage = "signals"
         record.percent = 60.0
-        record.active_step = "Analyzing audio loudness, scene changes & retention heatmap..."
+        if comments or live_chat_path:
+            record.active_step = "Analyzing audience comment energy & live chat bursts..."
+        else:
+            record.active_step = "Analyzing audio loudness, scene changes & retention heatmap..."
         record.emit_update()
 
         signals = analyze_multimodal_signals(
             record.source_video,
             record.source_duration,
             chapters,
-            heatmap
+            heatmap,
+            comments=comments,
+            live_chat_path=live_chat_path
         )
 
         # 4. LLM / Heuristic Scoring Stage

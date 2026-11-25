@@ -29,6 +29,7 @@ class MultimodalSignals(BaseModel):
     scene_cuts: List[float] = Field(default_factory=list)
     chapters: List[float] = Field(default_factory=list)
     heatmap: List[float] = Field(default_factory=list)
+    comment_energy: List[float] = Field(default_factory=list)
     duration_seconds: int = 0
 
 class ClipMoment(BaseModel):

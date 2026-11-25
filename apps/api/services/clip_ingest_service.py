@@ -15,7 +15,10 @@ class IngestResult:
         channel: str,
         chapters: List[Dict[str, Any]],
         heatmap: List[Dict[str, Any]],
-        caption_path: Optional[str] = None
+        caption_path: Optional[str] = None,
+        comments: Optional[List[Dict[str, Any]]] = None,
+        live_chat_path: Optional[str] = None,
+        is_live: bool = False
     ):
         self.video_path = video_path
         self.duration = duration
@@ -24,6 +27,9 @@ class IngestResult:
         self.chapters = chapters
         self.heatmap = heatmap
         self.caption_path = caption_path
+        self.comments = comments or []
+        self.live_chat_path = live_chat_path
+        self.is_live = is_live
 
 def ingest_video_and_metadata(
     url: str,
@@ -33,7 +39,8 @@ def ingest_video_and_metadata(
 ) -> Tuple[Optional[IngestResult], Optional[FriendlyError]]:
     """
     Ingests video metadata and streams up to 1080p H.264 + audio,
-    extracting chapters, heatmap, and YouTube captions.
+    extracting chapters, heatmap, comments, and YouTube captions.
+    Supports standard videos, finished VODs, and live streams with DVR / chat replay.
     """
     # 1. SSRF and Domain Validation
     is_valid, canonical_url, err = validate_youtube_url(url)
@@ -52,6 +59,8 @@ def ingest_video_and_metadata(
         "quiet": True,
         "no_warnings": True,
         "socket_timeout": 20,
+        "getcomments": True,
+        "extractor_args": {"youtube": {"max_comments": ["250", "all", "100", "0"]}},
     }
     if settings.YOUTUBE_PROXY:
         base_opts["proxy"] = settings.YOUTUBE_PROXY
@@ -59,6 +68,8 @@ def ingest_video_and_metadata(
         base_opts["cookiefile"] = settings.YOUTUBE_COOKIES_FILE
 
     # 2. Extract Metadata First (Check duration cap before downloading)
+    comments = []
+    is_live = False
     try:
         with yt_dlp.YoutubeDL(base_opts) as ydl:
             meta = ydl.extract_info(canonical_url, download=False)
@@ -71,13 +82,33 @@ def ingest_video_and_metadata(
                 )
 
             duration = float(meta.get("duration") or 0)
+            is_live = bool(meta.get("is_live") or meta.get("live_status") == "is_live")
+            was_live = bool(meta.get("was_live") or meta.get("live_status") == "was_live")
+
+            # Support active live streams and finished live stream VODs:
             if duration <= 0:
-                return None, FriendlyError(
-                    code="live-stream-unsupported",
-                    title="Live Streams Unsupported",
-                    explanation="Auto Clip requires fixed-length recorded videos, not live streams.",
-                    suggestedAction="Provide a finished recording or VOD."
-                )
+                if is_live or was_live or "/live/" in canonical_url:
+                    is_live = True
+                    # Derive duration from DVR playlist window in formats, or default to 900s (15 min) or duration_cap
+                    derived_dur = 900.0
+                    formats = meta.get("formats") or []
+                    for f in formats:
+                        manifest_url = f.get("manifest_url") or f.get("url") or ""
+                        dur_match = re.search(r'(?:playlist|manifest)_duration/(\d+)', manifest_url)
+                        if dur_match:
+                            try:
+                                derived_dur = float(dur_match.group(1))
+                                break
+                            except Exception:
+                                pass
+                    duration = min(float(duration_cap), derived_dur)
+                else:
+                    return None, FriendlyError(
+                        code="live-stream-unsupported",
+                        title="Media Duration Unavailable",
+                        explanation="Unable to determine video length. If this is an active broadcast, please ensure DVR playback is enabled.",
+                        suggestedAction="Provide a finished recording, VOD, or active DVR live stream."
+                    )
 
             if duration > duration_cap:
                 max_mins = duration_cap // 60
@@ -90,6 +121,9 @@ def ingest_video_and_metadata(
 
             chapters = meta.get("chapters") or []
             heatmap = meta.get("heatmap") or []
+            raw_comments = meta.get("comments") or []
+            if raw_comments:
+                comments = list(raw_comments)
             title = sanitize_filename(meta.get("title") or "clipglass_source")
             channel = meta.get("uploader") or meta.get("channel") or "YouTube Creator"
     except Exception as e:
@@ -100,7 +134,7 @@ def ingest_video_and_metadata(
             suggestedAction="Please verify the video URL and try again."
         )
 
-    # 3. Zero-Download Fast Ingestion: Fetch subtitles/captions only (no full video download)
+    # 3. Zero-Download Fast Ingestion: Fetch subtitles/captions and live chat only (no full video download)
     # The full video is NEVER downloaded to save disk and memory; clips are cut on-demand during render.
     outtmpl = os.path.join(job_dir, "source.%(ext)s")
     sub_opts = dict(base_opts)
@@ -109,8 +143,8 @@ def ingest_video_and_metadata(
         "skip_download": True,
         "writesubtitles": True,
         "writeautomaticsub": True,
-        "subtitleslangs": ["en-IN", "hi", "en", "en-US", "all"],
-        "subtitlesformat": "json3/vtt/srt",
+        "subtitleslangs": ["live_chat", "en-IN", "hi", "en", "en-US", "all"],
+        "subtitlesformat": "json3/vtt/srt/live_chat",
     })
     try:
         with yt_dlp.YoutubeDL(sub_opts) as ydl:
@@ -141,6 +175,12 @@ def ingest_video_and_metadata(
         except Exception:
             pass
 
+    # Detect live chat replay file if present
+    live_chat_path = None
+    chat_files = [os.path.join(job_dir, f) for f in os.listdir(job_dir) if "live_chat" in f]
+    if chat_files:
+        live_chat_path = chat_files[0]
+
     return IngestResult(
         video_path=canonical_url,
         duration=duration,
@@ -148,6 +188,9 @@ def ingest_video_and_metadata(
         channel=channel,
         chapters=chapters,
         heatmap=heatmap,
-        caption_path=caption_path
+        caption_path=caption_path,
+        comments=comments,
+        live_chat_path=live_chat_path,
+        is_live=is_live
     ), None
 

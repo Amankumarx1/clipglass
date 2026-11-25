@@ -102,7 +102,41 @@ def download_clip_section(
     # Find resulting downloaded section file
     candidates = [os.path.join(job_dir, f) for f in os.listdir(job_dir) if f.startswith(f"raw_section_{clip_id}") and not f.endswith(".part")]
     candidates.sort(key=lambda x: (0 if x.endswith(".mp4") else 1))
-    return candidates[0] if candidates else None
+    if candidates:
+        return candidates[0]
+
+    # Live Stream / HLS fallback: Extract stream URL and trim directly with FFmpeg
+    try:
+        with yt_dlp.YoutubeDL({"quiet": True, "noplaylist": True, "socket_timeout": 15}) as ydl:
+            info = ydl.extract_info(url, download=False)
+            stream_url = None
+            if info:
+                formats = info.get("formats") or []
+                for f in reversed(formats):
+                    u = f.get("url") or f.get("manifest_url")
+                    if u and ("m3u8" in u or "googlevideo" in u):
+                        stream_url = u
+                        break
+                if not stream_url:
+                    stream_url = info.get("url")
+
+            if stream_url:
+                dur = max(1.0, end - start)
+                fb_out = os.path.join(job_dir, f"raw_section_{clip_id}.mp4")
+                cmd = [
+                    "ffmpeg", "-nostdin", "-threads", "2",
+                    "-ss", str(start), "-t", str(dur),
+                    "-i", stream_url,
+                    "-c:v", "libx264", "-preset", "ultrafast", "-c:a", "aac",
+                    "-y", fb_out
+                ]
+                subprocess.run(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, timeout=45)
+                if os.path.exists(fb_out) and os.path.getsize(fb_out) > 1000:
+                    return fb_out
+    except Exception as e:
+        print(f"Fallback stream trim notice for clip {clip_id}: {e}")
+
+    return None
 
 def render_clip_segment(
     source_video: str,

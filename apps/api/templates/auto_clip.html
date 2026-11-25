@@ -1219,8 +1219,9 @@
           <video id="clipVideo-${idx}" ${c.videoUrl ? `src="${c.videoUrl}"` : ''} playsinline loop preload="metadata" class="absolute inset-0 w-full h-full object-cover transition-opacity duration-300 ${c.videoUrl ? 'opacity-100' : 'opacity-0'} z-0"></video>
 
           <!-- Score Badge Top-Left -->
-          <div class="absolute top-3.5 left-3.5 px-3 py-1 rounded-full ${c.score >= 90 ? 'bg-emerald-500' : 'bg-[#ff5a1f]'} text-white text-[11px] font-extrabold shadow-md z-20 pointer-events-none">
-            Viral Score: ${c.score} / 100
+          <div class="absolute top-3.5 left-3.5 px-3 py-1 rounded-full ${c.score >= 90 ? 'bg-emerald-500' : 'bg-[#ff5a1f]'} text-white text-[11px] font-extrabold shadow-md z-20 pointer-events-none flex items-center gap-1.5">
+            <span>Viral Score: ${c.score} / 100</span>
+            ${c.evidence && c.evidence.some(e => e.toLowerCase().includes('chat') || e.toLowerCase().includes('burst')) ? '<span class="bg-black/50 px-1.5 py-0.5 rounded-full text-[9px] text-amber-300">🔥 Chat Burst</span>' : ''}
           </div>
 
           <!-- Top-Right Actions -->
@@ -1268,6 +1269,11 @@
             <span class="text-[10px] px-2 py-0.5 rounded-full bg-white/5 border border-white/10 text-slate-300 font-mono">Hook: ${c.hookScore}%</span>
             <span class="text-[10px] px-2 py-0.5 rounded-full bg-white/5 border border-white/10 text-slate-300 font-mono">Engage: ${c.engagementScore}%</span>
             <span class="text-[10px] px-2 py-0.5 rounded-full bg-white/5 border border-white/10 text-slate-300 font-mono">Retention: ${c.valueScore}%</span>
+            ${c.evidence && c.evidence.some(e => e.toLowerCase().includes('chat') || e.toLowerCase().includes('burst')) ? `
+              <span class="text-[10px] px-2 py-0.5 rounded-full bg-rose-500/20 border border-rose-500/40 text-rose-300 font-bold flex items-center gap-1">
+                <span>🔥</span><span>Chat Energetic</span>
+              </span>
+            ` : ''}
           </div>
 
           <p class="text-[11px] text-[#8B8D98] line-clamp-2 leading-relaxed">

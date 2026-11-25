@@ -146,6 +146,7 @@ def heuristic_score_clips(
         return []
 
     # Compute composite 1-second score
+    has_comments = any(c > 0.15 for c in signals.comment_energy)
     composite = [0.0] * T
     for s in range(T):
         h = signals.heatmap[s] if s < len(signals.heatmap) else 0.0
@@ -153,9 +154,13 @@ def heuristic_score_clips(
         b = signals.burst[s] if s < len(signals.burst) else 0.0
         c = signals.scene_cuts[s] if s < len(signals.scene_cuts) else 0.0
         ch = signals.chapters[s] if s < len(signals.chapters) else 0.0
+        ce = signals.comment_energy[s] if s < len(signals.comment_energy) else 0.0
 
-        # Weighted blend
-        composite[s] = 0.35 * h + 0.25 * l + 0.20 * b + 0.10 * c + 0.10 * ch
+        # Weighted blend (prioritize audience comment energy when present)
+        if has_comments:
+            composite[s] = 0.35 * ce + 0.25 * h + 0.20 * l + 0.10 * b + 0.05 * c + 0.05 * ch
+        else:
+            composite[s] = 0.35 * h + 0.25 * l + 0.20 * b + 0.10 * c + 0.10 * ch
 
     # Sliding window search with window size ~35s
     window_sz = min(T, max(min_dur, 35))
@@ -183,16 +188,23 @@ def heuristic_score_clips(
         slice_loudness = signals.loudness[s_int:e_int] if s_int < len(signals.loudness) else []
         slice_burst = signals.burst[s_int:e_int] if s_int < len(signals.burst) else []
         slice_cuts = signals.scene_cuts[s_int:e_int] if s_int < len(signals.scene_cuts) else []
+        slice_comm = signals.comment_energy[s_int:e_int] if s_int < len(signals.comment_energy) else []
+        peak_comm = max(slice_comm, default=0.0)
+        avg_comm = sum(slice_comm) / max(1, len(slice_comm)) if slice_comm else 0.0
 
-        # Hook score: based on burst / energy in first 4 seconds
+        # Hook score: based on burst / energy in first 4 seconds (and chat spike)
         hook_window = slice_burst[:4] if slice_burst else [0.5]
         max_hook_burst = max(hook_window, default=0.5)
         hook_sc = int(min(98, max(60, 65 + max_hook_burst * 32)))
+        if peak_comm > 0.4:
+            hook_sc = int(min(99, max(hook_sc, 72 + peak_comm * 26)))
 
-        # Engagement score: based on loudness variance and scene cuts
+        # Engagement score: based on loudness variance, scene cuts & chat velocity
         avg_loud = sum(slice_loudness) / max(1, len(slice_loudness)) if slice_loudness else 0.5
         cut_count = sum(1 for c in slice_cuts if c > 0.5)
         eng_sc = int(min(98, max(60, 60 + avg_loud * 25 + min(12, cut_count * 3))))
+        if avg_comm > 0.3:
+            eng_sc = int(min(99, max(eng_sc, 68 + avg_comm * 30)))
 
         # Value score: based on speech content density and duration efficiency
         word_count = len(words)
@@ -200,15 +212,21 @@ def heuristic_score_clips(
         wpm = (word_count / dur) * 60 if dur > 0 else 120
         val_sc = int(min(96, max(65, 70 + min(25, int(wpm * 0.12)))))
 
-        # Shareability score: based on heatmap retention peak
+        # Shareability score: based on heatmap retention peak and audience comment hype
         peak_heatmap = max(slice_heatmap, default=0.4)
         share_sc = int(min(98, max(55, 55 + peak_heatmap * 42)))
+        if peak_comm > 0.35:
+            share_sc = int(min(99, max(share_sc, 68 + peak_comm * 30)))
 
         # Overall composite
         comp_score = int(round(0.35 * hook_sc + 0.30 * eng_sc + 0.20 * val_sc + 0.15 * share_sc))
 
         # 2. Extract evidence badges
         evidence: List[str] = []
+        if peak_comm > 0.55:
+            evidence.append(f"Chat Burst 🔥 ({int(peak_comm * 100)}% energy)")
+        elif peak_comm > 0.35:
+            evidence.append("Chat Spike 💬 (High viewer activity)")
         if peak_heatmap > 0.6:
             evidence.append(f"Heatmap Peak ({int(peak_heatmap * 100)}% retention)")
         if max_hook_burst > 0.4:
@@ -217,6 +235,10 @@ def heuristic_score_clips(
             evidence.append(f"Visual Dynamic ({cut_count} scene cuts)")
         if not evidence:
             evidence.append("Core Thematic Climax")
+
+        reason = "High audience retention peak and audio energy transition."
+        if peak_comm > 0.4:
+            reason = "Discovered via high-energy live chat burst and energetic viewer comments."
 
         # 3. Extract opening hook
         first_words = transcript_txt.split()[:7]
@@ -274,6 +296,8 @@ async def score_clips_with_llm(
             sig_note += " [HEATMAP PEAK]"
         if sec < len(signals.burst) and signals.burst[sec] > 0.6:
             sig_note += " [AUDIO SPIKE]"
+        if sec < len(signals.comment_energy) and signals.comment_energy[sec] > 0.6:
+            sig_note += " [CHAT BURST 🔥]"
         if sec < len(signals.scene_cuts) and signals.scene_cuts[sec] > 0.5:
             sig_note += " [SCENE CUT]"
         lines.append(f"[{s.start:.1f}s - {s.end:.1f}s]{sig_note} {s.text}")

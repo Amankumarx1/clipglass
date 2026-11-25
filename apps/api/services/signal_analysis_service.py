@@ -2,8 +2,9 @@ import os
 import subprocess
 import struct
 import math
-from typing import List, Dict, Any, Tuple
+from typing import List, Dict, Any, Tuple, Optional
 from schemas.clip import MultimodalSignals
+from services.comment_energy_service import compute_comment_energy_signal
 
 def extract_audio_loudness_and_bursts(file_path: str, duration_sec: int) -> Tuple[List[float], List[float]]:
     """
@@ -129,21 +130,25 @@ def analyze_multimodal_signals(
     video_path: str,
     duration: float,
     chapters: List[Dict[str, Any]],
-    heatmap: List[Dict[str, Any]]
+    heatmap: List[Dict[str, Any]],
+    comments: Optional[List[Dict[str, Any]]] = None,
+    live_chat_path: Optional[str] = None
 ) -> MultimodalSignals:
     """
-    Aggregates all 5 temporal indicators in 1-second normalized bins.
-    For remote YouTube URLs (zero full-download architecture), derives signals directly from
-    retention heatmap and chapters without consuming disk space or running heavy subprocesses.
+    Aggregates all 6 temporal indicators (loudness, burst, scene cuts, chapters, heatmap, comment energy)
+    in 1-second normalized bins.
+    For live streams and remote YouTube URLs (zero full-download architecture), derives signals directly from
+    retention heatmap, live chat bursts, energetic audience comments, and chapter boundaries.
     """
     dur_sec = max(1, int(duration))
 
     chapter_bins = map_chapters_to_bins(chapters, dur_sec)
     heatmap_bins = map_heatmap_to_bins(heatmap, dur_sec)
+    comment_bins, _ = compute_comment_energy_signal(dur_sec, comments=comments, live_chat_path=live_chat_path)
 
     is_remote = video_path.startswith("http://") or video_path.startswith("https://") or not os.path.exists(video_path)
     if is_remote:
-        # Zero-Download Fast Path: Synthesize loudness & bursts from heatmap attention curve and chapter boundaries
+        # Zero-Download Fast Path: Synthesize loudness & bursts from heatmap, chat energy, and chapter boundaries
         loudness = [0.0] * dur_sec
         bursts = [0.0] * dur_sec
         scene_cuts = [0.0] * dur_sec
@@ -151,13 +156,23 @@ def analyze_multimodal_signals(
         for s in range(dur_sec):
             base_score = heatmap_bins[s] if s < len(heatmap_bins) else 0.5
             chap_boost = chapter_bins[s] if s < len(chapter_bins) else 0.0
-            loudness[s] = round(min(1.0, max(0.2, base_score * 0.8 + chap_boost * 0.2)), 3)
-            # Bursts at sudden retention jumps or chapter starts
+            comm_score = comment_bins[s] if s < len(comment_bins) else 0.0
+
+            # When energetic comments exist, synthesize loudness and engagement directly
+            loudness[s] = round(min(1.0, max(0.2, base_score * 0.5 + comm_score * 0.45 + chap_boost * 0.15)), 3)
+
+            # Bursts at sudden retention jumps, chat bursts, or chapter starts
             prev_score = heatmap_bins[s-1] if (s > 0 and s-1 < len(heatmap_bins)) else 0.5
-            if s > 0 and base_score > prev_score + 0.04:
-                bursts[s] = 0.85
+            prev_comm = comment_bins[s-1] if (s > 0 and s-1 < len(comment_bins)) else 0.0
+
+            if comm_score > 0.6:
+                bursts[s] = max(bursts[s], round(comm_score, 3))
+            if s > 0 and comm_score > prev_comm + 0.15:
+                bursts[s] = 0.95
+            elif s > 0 and base_score > prev_score + 0.04:
+                bursts[s] = max(bursts[s], 0.85)
             elif chap_boost > 0.5:
-                bursts[s] = 0.75
+                bursts[s] = max(bursts[s], 0.75)
                 scene_cuts[s] = 1.0
 
         return MultimodalSignals(
@@ -166,6 +181,7 @@ def analyze_multimodal_signals(
             scene_cuts=scene_cuts,
             chapters=chapter_bins,
             heatmap=heatmap_bins,
+            comment_energy=comment_bins,
             duration_seconds=dur_sec
         )
 
@@ -179,5 +195,6 @@ def analyze_multimodal_signals(
         scene_cuts=scene_cuts,
         chapters=chapter_bins,
         heatmap=heatmap_bins,
+        comment_energy=comment_bins,
         duration_seconds=dur_sec
     )
