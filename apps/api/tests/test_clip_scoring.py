@@ -132,3 +132,47 @@ def test_rerank_finalists_duplicate_elimination():
     assert "c1" in ids
     assert "c3" in ids
     assert "c2" not in ids
+
+def test_heuristic_score_clips_multipart_240m():
+    # 18,000s duration (300 mins > 240 mins) -> 2 parts
+    dur = 18000
+    heatmap = [0.1] * dur
+    # High heatmap in Part 1 (at 1000s)
+    for s in range(1000, 1040):
+        heatmap[s] = 0.95
+    # High heatmap in Part 2 (at 15000s)
+    for s in range(15000, 15040):
+        heatmap[s] = 0.95
+
+    loudness = [0.2] * dur
+    burst = [0.1] * dur
+    burst[1005] = 0.8
+    burst[15005] = 0.8
+
+    signals = MultimodalSignals(
+        loudness=loudness,
+        burst=burst,
+        scene_cuts=[0.0] * dur,
+        chapters=[0.0] * dur,
+        heatmap=heatmap,
+        duration_seconds=dur
+    )
+
+    sentences = [
+        TranscriptSentence(
+            text="Viral moment in part one of this ultra long stream.",
+            start=1000.0, end=1035.0, words=[TranscriptWord(word="Viral", start=1000.0, end=1001.0)]
+        ),
+        TranscriptSentence(
+            text="Viral moment in part two of this ultra long stream.",
+            start=15000.0, end=15035.0, words=[TranscriptWord(word="Viral", start=15000.0, end=15001.0)]
+        ),
+    ]
+
+    clips = heuristic_score_clips(signals, sentences, clip_count=2, min_dur=15, max_dur=45)
+    assert len(clips) >= 2
+    parts = [c.part for c in clips]
+    assert 1 in parts
+    assert 2 in parts
+    assert any("Part 1 of 2" in " ".join(c.evidence) for c in clips)
+    assert any("Part 2 of 2" in " ".join(c.evidence) for c in clips)

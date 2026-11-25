@@ -18,7 +18,9 @@ class IngestResult:
         caption_path: Optional[str] = None,
         comments: Optional[List[Dict[str, Any]]] = None,
         live_chat_path: Optional[str] = None,
-        is_live: bool = False
+        is_live: bool = False,
+        num_parts: int = 1,
+        parts_info: Optional[List[Dict[str, Any]]] = None
     ):
         self.video_path = video_path
         self.duration = duration
@@ -30,6 +32,8 @@ class IngestResult:
         self.comments = comments or []
         self.live_chat_path = live_chat_path
         self.is_live = is_live
+        self.num_parts = num_parts
+        self.parts_info = parts_info or []
 
 def ingest_video_and_metadata(
     url: str,
@@ -110,14 +114,19 @@ def ingest_video_and_metadata(
                         suggestedAction="Provide a finished recording, VOD, or active DVR live stream."
                     )
 
-            if duration > duration_cap:
-                max_mins = duration_cap // 60
-                return None, FriendlyError(
-                    code="duration-exceeded",
-                    title="Video Exceeds Duration Limit",
-                    explanation=f"This video is {duration/60:.1f} minutes long. Auto Clip supports up to {max_mins} minutes.",
-                    suggestedAction=f"Choose a video under {max_mins} minutes or trim the segment first."
-                )
+            import math
+            CHUNK_DURATION_CAP = 14400  # 240 minutes in seconds
+            num_parts = max(1, math.ceil(duration / CHUNK_DURATION_CAP))
+            parts_info = []
+            for p in range(num_parts):
+                p_start = p * CHUNK_DURATION_CAP
+                p_end = min((p + 1) * CHUNK_DURATION_CAP, duration)
+                parts_info.append({
+                    "part": p + 1,
+                    "startTime": p_start,
+                    "endTime": p_end,
+                    "duration": p_end - p_start
+                })
 
             chapters = meta.get("chapters") or []
             heatmap = meta.get("heatmap") or []
@@ -191,6 +200,8 @@ def ingest_video_and_metadata(
         caption_path=caption_path,
         comments=comments,
         live_chat_path=live_chat_path,
-        is_live=is_live
+        is_live=is_live,
+        num_parts=num_parts,
+        parts_info=parts_info
     ), None
 

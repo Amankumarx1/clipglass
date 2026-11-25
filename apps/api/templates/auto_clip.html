@@ -33,16 +33,54 @@
           id="clipUrlInput" 
           type="text" 
           placeholder="Paste YouTube link (e.g. https://www.youtube.com/watch?v=...)" 
-          class="w-full h-12 pl-5 pr-24 rounded-full bg-[#0e0f16] text-xs sm:text-sm text-white placeholder:text-[#8B8D98] border border-white/10 focus:outline-none focus:border-[#ff5a1f]/50 transition-all"
+          onkeydown="if(event.key === 'Enter') { event.preventDefault(); fetchClipUrlBtn(); }"
+          class="w-full h-12 pl-5 pr-44 sm:pr-48 rounded-full bg-[#0e0f16] text-xs sm:text-sm text-white placeholder:text-[#8B8D98] border border-white/10 focus:outline-none focus:border-[#ff5a1f]/50 transition-all"
         />
-        <button 
-          type="button" 
-          onclick="pasteClipUrl()" 
-          class="absolute right-2 px-3.5 py-1.5 rounded-full text-xs font-medium bg-white/[0.06] hover:bg-white/10 text-white transition-colors flex items-center gap-1"
-        >
-          <span>📋</span>
-          <span>Paste</span>
-        </button>
+        <div class="absolute right-2 flex items-center gap-1.5">
+          <button 
+            type="button" 
+            onclick="pasteClipUrl()" 
+            class="px-3 py-1.5 rounded-full text-xs font-medium bg-white/[0.06] hover:bg-white/10 text-white transition-colors flex items-center gap-1 cursor-pointer"
+            title="Paste link from clipboard"
+          >
+            <span>📋</span>
+            <span>Paste</span>
+          </button>
+          <button 
+            type="button" 
+            id="clipFetchBtn"
+            onclick="fetchClipUrlBtn()" 
+            class="px-3.5 py-1.5 rounded-full text-xs font-bold bg-[#ff5a1f] hover:bg-[#ff5a1f]/90 text-white transition-all shadow-[0_0_12px_rgba(255,90,31,0.4)] flex items-center gap-1 cursor-pointer"
+            title="Fetch video stream and analyze duration"
+          >
+            <span>⚡</span>
+            <span id="clipFetchBtnText">Fetch</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 240 Minute Multi-Part Notice Banner (Shown when video duration > 240m) -->
+    <div id="clipDurationWarningBanner" class="hidden rounded-2xl p-4 bg-amber-500/10 border border-amber-500/30 flex flex-col gap-2.5 transition-all">
+      <div class="flex items-center justify-between gap-3 flex-wrap">
+        <div class="flex items-center gap-2.5">
+          <span class="w-8 h-8 rounded-full bg-amber-500/20 text-amber-400 flex items-center justify-center text-sm font-bold shadow-sm">⏱️</span>
+          <div>
+            <h4 class="text-xs sm:text-sm font-bold text-white flex items-center gap-2">
+              <span>Extended Video Duration Detected</span>
+              <span id="clipDurationBadge" class="px-2 py-0.5 rounded-full text-[10px] font-mono bg-amber-500/20 text-amber-300 border border-amber-500/30">Over 240 mins</span>
+            </h4>
+            <p id="clipDurationExplainer" class="text-[11px] text-[#8B8D98] mt-0.5 leading-relaxed">
+              Auto clipping standard processing limit is 240 minutes. ClipGlass will automatically divide this video into 240-minute parts and discover highlights across each partition.
+            </p>
+          </div>
+        </div>
+        <div id="clipPartsCountBadge" class="px-3 py-1 rounded-full bg-white/5 border border-white/10 text-xs font-mono text-amber-300 font-bold">
+          2 Parts
+        </div>
+      </div>
+      <!-- Parts Timeline Chips -->
+      <div id="clipPartsChipsContainer" class="flex items-center gap-2 flex-wrap pt-2 border-t border-white/5">
       </div>
     </div>
 
@@ -1007,6 +1045,42 @@
     }
   }
 
+  function showDurationWarningBanner(durMins, numParts, durationSec) {
+    const banner = document.getElementById('clipDurationWarningBanner');
+    if (!banner) return;
+    banner.classList.remove('hidden');
+
+    const badge = document.getElementById('clipDurationBadge');
+    if (badge) badge.textContent = `${durMins} mins (${Math.floor(durMins / 60)}h ${durMins % 60}m)`;
+
+    const countBadge = document.getElementById('clipPartsCountBadge');
+    if (countBadge) countBadge.textContent = `${numParts} Parts (240m each)`;
+
+    const explainer = document.getElementById('clipDurationExplainer');
+    if (explainer) {
+      explainer.textContent = `Video length is ${durMins} mins (exceeds 240 min limit). ClipGlass will automatically divide it into ${numParts} parts of 240 minutes and discover highlights across each partition!`;
+    }
+
+    const chips = document.getElementById('clipPartsChipsContainer');
+    if (chips) {
+      const CHUNK_SEC = 14400;
+      let html = '';
+      for (let p = 0; p < numParts; p++) {
+        const startSec = p * CHUNK_SEC;
+        const endSec = Math.min((p + 1) * CHUNK_SEC, durationSec);
+        const sMins = Math.floor(startSec / 60);
+        const eMins = Math.floor(endSec / 60);
+        html += `<span class="px-2.5 py-1 rounded-full bg-white/5 border border-white/10 text-[11px] font-mono text-slate-300">Part ${p + 1}: ${sMins}m – ${eMins}m</span>`;
+      }
+      chips.innerHTML = html;
+    }
+  }
+
+  function hideDurationWarningBanner() {
+    const banner = document.getElementById('clipDurationWarningBanner');
+    if (banner) banner.classList.add('hidden');
+  }
+
   async function inspectClipUrl(url) {
     if (!url || !url.trim() || !url.startsWith('http')) return;
     if (window.showToast) window.showToast('Fetching media stream from link...', 'fetching');
@@ -1014,9 +1088,49 @@
       const res = await fetch(`/api/inspect?url=${encodeURIComponent(url.trim())}`);
       if (res.ok) {
         const data = await res.json();
-        if (window.showToast) window.showToast(`✓ Link inspected: "${data.title}" ready for clipping!`, 'success');
+        const durationSec = data.duration || 0;
+        const durMins = Math.round(durationSec / 60);
+        const LIMIT_SECONDS = 240 * 60; // 14400s
+
+        if (durationSec > LIMIT_SECONDS) {
+          const numParts = Math.ceil(durationSec / LIMIT_SECONDS);
+          if (window.showToast) {
+            window.showToast(`⚠️ Video length is ${durMins} mins (exceeds 240 min limit). Dividing into ${numParts} parts of 240 minutes for auto clipping!`, 'info');
+          }
+          showDurationWarningBanner(durMins, numParts, durationSec);
+        } else {
+          hideDurationWarningBanner();
+          if (window.showToast) {
+            window.showToast(`✓ Link inspected: "${data.title}" ready for clipping!`, 'success');
+          }
+        }
+      } else {
+        if (window.showToast) window.showToast('Unable to inspect link. Please verify the URL.', 'error');
       }
-    } catch {}
+    } catch (err) {
+      console.error('Inspect error:', err);
+    }
+  }
+
+  async function fetchClipUrlBtn() {
+    if (window.playGlassTick) window.playGlassTick();
+    const input = document.getElementById('clipUrlInput');
+    const url = input ? input.value.trim() : '';
+    if (!url) {
+      if (window.showToast) window.showToast('Please enter or paste a YouTube URL first', 'info');
+      return;
+    }
+    const btn = document.getElementById('clipFetchBtn');
+    const btnText = document.getElementById('clipFetchBtnText');
+    if (btnText) btnText.textContent = 'Fetching...';
+    if (btn) btn.disabled = true;
+
+    try {
+      await inspectClipUrl(url);
+    } finally {
+      if (btnText) btnText.textContent = 'Fetch';
+      if (btn) btn.disabled = false;
+    }
   }
 
   async function pasteClipUrl() {
@@ -1227,6 +1341,7 @@
         feedback: c.feedback || null,
         videoUrl: c.videoUrl || null,
         status: c.status || 'discovered',
+        part: c.part || null,
         captions: c.words ? c.words.map(w => w.word) : []
       };
     });
@@ -1240,8 +1355,9 @@
           <video id="clipVideo-${idx}" ${c.videoUrl ? `src="${c.videoUrl}"` : ''} playsinline loop preload="metadata" class="absolute inset-0 w-full h-full object-cover transition-opacity duration-300 ${c.videoUrl ? 'opacity-100' : 'opacity-0'} z-0"></video>
 
           <!-- Score Badge Top-Left -->
-          <div class="absolute top-3.5 left-3.5 px-3 py-1 rounded-full ${c.score >= 90 ? 'bg-emerald-500' : 'bg-[#ff5a1f]'} text-white text-[11px] font-extrabold shadow-md z-20 pointer-events-none flex items-center gap-1.5">
+          <div class="absolute top-3.5 left-3.5 px-3 py-1 rounded-full ${c.score >= 90 ? 'bg-emerald-500' : 'bg-[#ff5a1f]'} text-white text-[11px] font-extrabold shadow-md z-20 pointer-events-none flex items-center gap-1.5 flex-wrap">
             <span>Viral Score: ${c.score} / 100</span>
+            ${c.part ? `<span class="bg-black/50 px-1.5 py-0.5 rounded-full text-[9px] text-amber-300">Part ${c.part}</span>` : ''}
             ${c.evidence && c.evidence.some(e => e.toLowerCase().includes('chat') || e.toLowerCase().includes('burst')) ? '<span class="bg-black/50 px-1.5 py-0.5 rounded-full text-[9px] text-amber-300">🔥 Chat Burst</span>' : ''}
           </div>
 
@@ -1290,6 +1406,7 @@
             <span class="text-[10px] px-2 py-0.5 rounded-full bg-white/5 border border-white/10 text-slate-300 font-mono">Hook: ${c.hookScore}%</span>
             <span class="text-[10px] px-2 py-0.5 rounded-full bg-white/5 border border-white/10 text-slate-300 font-mono">Engage: ${c.engagementScore}%</span>
             <span class="text-[10px] px-2 py-0.5 rounded-full bg-white/5 border border-white/10 text-slate-300 font-mono">Retention: ${c.valueScore}%</span>
+            ${c.part ? `<span class="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/20 border border-amber-500/40 text-amber-300 font-bold font-mono">Part ${c.part}</span>` : ''}
             ${c.evidence && c.evidence.some(e => e.toLowerCase().includes('chat') || e.toLowerCase().includes('burst')) ? `
               <span class="text-[10px] px-2 py-0.5 rounded-full bg-rose-500/20 border border-rose-500/40 text-rose-300 font-bold flex items-center gap-1">
                 <span>🔥</span><span>Chat Energetic</span>

@@ -2,6 +2,7 @@ import os
 import json
 import re
 import uuid
+import math
 import httpx
 from typing import List, Dict, Any, Optional, Tuple
 from schemas.clip import (
@@ -163,25 +164,44 @@ def heuristic_score_clips(
             composite[s] = 0.35 * h + 0.25 * l + 0.20 * b + 0.10 * c + 0.10 * ch
 
     # Sliding window search with window size ~35s
+    # 240 minutes partition support (14,400s per part)
+    CHUNK_DURATION = 14400
+    num_parts = max(1, math.ceil(T / CHUNK_DURATION)) if T > CHUNK_DURATION else 1
     window_sz = min(T, max(min_dur, 35))
     candidates_raw = []
 
-    for start_sec in range(0, max(1, T - window_sz), 5):
-        end_sec = min(T, start_sec + window_sz)
-        avg_score = sum(composite[start_sec:end_sec]) / max(1, end_sec - start_sec)
-        candidates_raw.append((start_sec, end_sec, avg_score))
+    if num_parts > 1:
+        # Search candidate windows partitioned across each 240-minute segment
+        # Ensure balanced representation across all parts of the stream
+        candidates_per_part = max(3, math.ceil((clip_count * 3) / num_parts))
+        for p in range(num_parts):
+            p_start = p * CHUNK_DURATION
+            p_end = min((p + 1) * CHUNK_DURATION, T)
+            part_candidates = []
+            for start_sec in range(p_start, max(p_start + 1, p_end - window_sz), 5):
+                end_sec = min(p_end, start_sec + window_sz)
+                avg_score = sum(composite[start_sec:end_sec]) / max(1, end_sec - start_sec)
+                part_candidates.append((start_sec, end_sec, avg_score, p + 1))
+            part_candidates.sort(key=lambda x: x[2], reverse=True)
+            candidates_raw.extend(part_candidates[:candidates_per_part])
+    else:
+        for start_sec in range(0, max(1, T - window_sz), 5):
+            end_sec = min(T, start_sec + window_sz)
+            avg_score = sum(composite[start_sec:end_sec]) / max(1, end_sec - start_sec)
+            candidates_raw.append((start_sec, end_sec, avg_score, 1))
 
     candidates_raw.sort(key=lambda x: x[2], reverse=True)
 
     initial_moments: List[ClipMoment] = []
     top_n = min(len(candidates_raw), clip_count * 3)
 
-    for idx, (raw_s, raw_e, raw_sc) in enumerate(candidates_raw[:top_n]):
+    for idx, (raw_s, raw_e, raw_sc, raw_part) in enumerate(candidates_raw[:top_n]):
         snapped_s, snapped_e, transcript_txt, words = snap_boundaries_to_sentences(
             float(raw_s), float(raw_e), sentences, float(min_dur), float(max_dur)
         )
         s_int = int(snapped_s)
         e_int = int(snapped_e)
+        part_num = raw_part or ((s_int // CHUNK_DURATION) + 1)
 
         # 1. Calculate 4 Sub-Scores from signals in slice
         slice_heatmap = signals.heatmap[s_int:e_int] if s_int < len(signals.heatmap) else []
@@ -245,7 +265,12 @@ def heuristic_score_clips(
         hook = " ".join(first_words).upper() if first_words else "WAIT FOR THIS MOMENT"
         hook = re.sub(r'[^\w\s]', '', hook) or "WAIT FOR THIS MOMENT"
 
-        title = f"{title_prefix}: Part {idx+1}"
+        if num_parts > 1:
+            evidence.append(f"Part {part_num} of {num_parts} (240m chunk)")
+            title = f"{title_prefix} [Part {part_num}]: Highlight {idx+1}"
+        else:
+            title = f"{title_prefix}: Part {idx+1}"
+
         hashtags = ["#shorts", "#viral", "#clip", "#fyp", "#trending"]
         cid = uuid.uuid4().hex[:12]
 
@@ -265,7 +290,8 @@ def heuristic_score_clips(
             reason=reason,
             evidence=evidence,
             transcriptText=transcript_txt,
-            words=words
+            words=words,
+            part=part_num
         ))
 
     # Apply head-to-head tournament reranking
@@ -412,6 +438,11 @@ TRANSCRIPT TIMELINE:
                 s_sc = int(item.get("shareability_score", 85))
                 comp_sc = int(item.get("score", round(0.35*h_sc + 0.3*e_sc + 0.2*v_sc + 0.15*s_sc)))
 
+                llm_part = ((int(snapped_s) // 14400) + 1) if signals.duration_seconds > 14400 else 1
+                ev = item.get("evidence", ["Hook peak", "Speech clarity"])
+                if signals.duration_seconds > 14400:
+                    ev.append(f"Part {llm_part} (240m chunk)")
+
                 candidates.append(ClipMoment(
                     clipId=cid,
                     start=snapped_s,
@@ -426,9 +457,10 @@ TRANSCRIPT TIMELINE:
                     title=str(item.get("title", f"{title_prefix}: Highlight"))[:80],
                     hashtags=item.get("hashtags", ["#shorts", "#viral", "#reels"]),
                     reason=str(item.get("reason", "Strong opening hook with consistent retention."))[:200],
-                    evidence=item.get("evidence", ["Hook peak", "Speech clarity"]),
+                    evidence=ev,
                     transcriptText=transcript_txt,
-                    words=words
+                    words=words,
+                    part=llm_part
                 ))
 
             if candidates:

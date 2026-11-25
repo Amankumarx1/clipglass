@@ -91,6 +91,11 @@ def test_auto_clip_page():
     assert "Viral Score" in response.text
     assert "inspectClipUrl" in response.text
     assert "Fetching media stream from link" in response.text
+    assert "clipFetchBtn" in response.text
+    assert "fetchClipUrlBtn" in response.text
+    assert "clipDurationWarningBanner" in response.text
+    assert "showDurationWarningBanner" in response.text
+    assert "exceeds 240 min limit" in response.text or "240" in response.text
 
 # 06. Auto Clip Editor
 def test_auto_clip_editor_page():

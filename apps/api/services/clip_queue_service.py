@@ -231,7 +231,12 @@ class ClipJobManager:
         # 4. LLM / Heuristic Scoring Stage
         record.stage = "scoring"
         record.percent = 80.0
-        record.active_step = "Scoring viral hooks and snapping sentence boundaries..."
+        if record.source_duration > 14400:
+            import math
+            num_parts = max(1, math.ceil(record.source_duration / 14400))
+            record.active_step = f"Scoring viral moments partitioned across {num_parts} parts of 240m..."
+        else:
+            record.active_step = "Scoring viral hooks and snapping sentence boundaries..."
         record.emit_update()
 
         # Run async scoring in new event loop if needed

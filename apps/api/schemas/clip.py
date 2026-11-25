@@ -56,6 +56,7 @@ class ClipMoment(BaseModel):
     transcriptText: Optional[str] = None
     words: List[TranscriptWord] = Field(default_factory=list)
     feedback: Optional[Literal['up', 'down']] = None
+    part: Optional[int] = None
 
 class ClipJobCreateRequest(BaseModel):
     url: str = Field(..., max_length=2048)
