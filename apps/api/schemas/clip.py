@@ -53,6 +53,7 @@ class ClipMoment(BaseModel):
     polishStyle: PolishStyleType = 'none'
     status: Literal['discovered', 'rendering', 'ready', 'failed'] = 'discovered'
     videoUrl: Optional[str] = None
+    srtUrl: Optional[str] = None
     transcriptText: Optional[str] = None
     words: List[TranscriptWord] = Field(default_factory=list)
     feedback: Optional[Literal['up', 'down']] = None
@@ -110,7 +111,7 @@ class EditBoxOperationResult(BaseModel):
 
 class ClipJobEventData(BaseModel):
     jobId: str
-    stage: Literal['queued', 'ingest', 'transcribe', 'signals', 'scoring', 'ready', 'failed', 'cancelled']
+    stage: Literal['queued', 'probe', 'ingest', 'transcribe', 'signals', 'scoring', 'slicing', 'rendering', 'ready', 'failed', 'cancelled']
     percent: float = 0.0
     activeStep: str = ""
     eta: Optional[int] = None

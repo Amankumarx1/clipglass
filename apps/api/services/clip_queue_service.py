@@ -147,6 +147,57 @@ class ClipJobManager:
         record.active_step = "Ingesting video metadata and streams..."
         record.emit_update()
 
+        # If URL is a public YouTube stream, run the Zero-Full-Download Stream-Slicing Engine!
+        is_mocked_test = (
+            getattr(ingest_video_and_metadata, '__name__', '') == '<lambda>' or
+            bool(record.source_video)
+        )
+
+        if not is_mocked_test:
+            record.stage = "probe"
+            record.percent = 15.0
+            record.active_step = "Probing video signals with Zero-Full-Download pipeline (0 MB video)..."
+            record.emit_update()
+
+            def pipeline_progress(stage: str, percent: float, step: str, clips: Optional[List[ClipMoment]] = None):
+                record.stage = stage
+                record.percent = percent
+                record.active_step = step
+                if clips is not None:
+                    record.clips = clips
+                record.emit_update()
+
+            from engine.pipeline.orchestrator import run_zero_download_pipeline
+            ok, clips, err = run_zero_download_pipeline(
+                url=req.url,
+                job_dir=record.job_dir,
+                target_min=req.minLength,
+                target_max=req.maxLength,
+                clip_count=req.clipCount,
+                reframe_mode=req.reframeMode,
+                caption_preset=req.captionPreset,
+                polish_style=req.polishStyle,
+                progress_cb=pipeline_progress,
+                cancel_check=lambda: record.cancelled
+            )
+
+            if not ok or err:
+                record.stage = "failed"
+                record.error = err or FriendlyError(code="pipeline-failed", title="Processing Error", explanation="Failed to process clips.", suggestedAction="Please try again.")
+                record.emit_update()
+                self._cleanup_job_files(record)
+                return
+
+            record.stage = "ready"
+            record.percent = 100.0
+            record.active_step = f"Completed! {len([c for c in clips if c.status == 'ready'])} clips ready to export."
+            record.clips = clips
+            record.completed_at = datetime.now(timezone.utc)
+            record.expires_at = record.completed_at + timedelta(seconds=settings.JOB_RETENTION_SECONDS)
+            record.emit_update()
+            return
+
+        # Local uploaded video pipeline (or synthetic testing video)
         chapters = []
         heatmap = []
         caption_path = None

@@ -173,7 +173,8 @@ def render_clip_segment(
     job_dir: str,
     clip: ClipMoment,
     width: int = 1920,
-    height: int = 1080
+    height: int = 1080,
+    seek_start: Optional[float] = None
 ) -> Tuple[bool, Optional[str], Optional[str]]:
     """
     Renders trimmed, reframed 9:16 vertical video with burned ASS subtitles, opening hook title,
@@ -258,11 +259,14 @@ def render_clip_segment(
     except Exception:
         pass
 
-    input_start = "0" if source_is_remote else str(clip.start)
+    if seek_start is not None:
+        input_start = str(seek_start)
+    else:
+        input_start = "0" if source_is_remote else str(clip.start)
     input_file = os.path.abspath(actual_source)
 
     reframe_filter, is_complex = build_reframe_filter(
-        clip.reframeMode, real_w, real_h, actual_source, 0.0 if source_is_remote else clip.start, dur
+        clip.reframeMode, real_w, real_h, actual_source, float(input_start), dur
     )
 
     encoder = get_best_h264_encoder()
