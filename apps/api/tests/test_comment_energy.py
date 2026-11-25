@@ -175,8 +175,9 @@ def test_heuristic_clipping_ranks_energetic_comment_first():
 
     # The top ranked clip must overlap the energetic chat spike (40-65s)
     assert 35.0 <= top_clip.start <= 50.0
-    # Must have Chat Burst evidence badge
+    # Must have Chat Burst evidence badge and dynamic reason
     assert any("Chat Burst" in e or "Chat Spike" in e for e in top_clip.evidence)
+    assert "chat" in top_clip.reason.lower() or "comment" in top_clip.reason.lower()
     assert top_clip.score >= 85
 
 def test_ingest_supports_live_streams_with_dvr(monkeypatch, tmp_path):
@@ -219,3 +220,66 @@ def test_ingest_supports_live_streams_with_dvr(monkeypatch, tmp_path):
     assert res.duration == 1200.0
     assert len(res.comments) == 1
     assert "GTA 6 Live Stream" in res.title
+
+def test_pipeline_e2e_with_energetic_comments(monkeypatch, tmp_path):
+    from services.clip_queue_service import clip_job_manager, ClipJobRecord
+    from services.clip_ingest_service import IngestResult
+    from schemas.clip import ClipJobCreateRequest
+
+    req = ClipJobCreateRequest(
+        url="https://www.youtube.com/live/Bm8PmWwBxu4",
+        clipCount=2,
+        minLength=20,
+        maxLength=45,
+        consent=True
+    )
+    job_id = "test_e2e_live_comments"
+    record = ClipJobRecord(job_id, req, "127.0.0.1")
+    record.job_dir = str(tmp_path)
+
+    mock_ingest = IngestResult(
+        video_path="https://www.youtube.com/watch?v=Bm8PmWwBxu4",
+        duration=180.0,
+        title="Epic GTA 6 Live Stream",
+        channel="LiveStreamer",
+        chapters=[],
+        heatmap=[],
+        comments=[
+            {"author": "Chat1", "text": "0:50 NO WAY HE SURVIVED THAT LMAOO 🔥🔥🔥", "like_count": 95},
+            {"author": "Chat2", "text": "0:52 BRO DROPPED THE CONTROLLER 💀💀", "like_count": 60}
+        ],
+        is_live=True
+    )
+
+    mock_sentences = [
+        TranscriptSentence(
+            text="Welcome to the livestream everyone.",
+            start=0.0, end=25.0,
+            words=[TranscriptWord(word="Welcome", start=0.0, end=1.0)]
+        ),
+        TranscriptSentence(
+            text="Look at that incredible jump across the river unbelievable!",
+            start=45.0, end=75.0,
+            words=[TranscriptWord(word="Look", start=45.0, end=46.0)]
+        ),
+        TranscriptSentence(
+            text="Alright guys that concludes today's broadcast.",
+            start=120.0, end=150.0,
+            words=[TranscriptWord(word="Alright", start=120.0, end=121.0)]
+        )
+    ]
+
+    monkeypatch.setattr("services.clip_queue_service.ingest_video_and_metadata", lambda *args, **kwargs: (mock_ingest, None))
+    monkeypatch.setattr("services.clip_queue_service.get_or_create_transcript", lambda *args, **kwargs: mock_sentences)
+
+    clip_job_manager._execute_pipeline(record)
+
+    assert record.stage == "ready"
+    assert record.error is None
+    assert len(record.clips) >= 1
+    top = record.clips[0]
+    # The energetic chat burst at 50s must be the top ranked clip
+    assert 40.0 <= top.start <= 60.0
+    assert any("Chat Burst" in e or "Chat Spike" in e for e in top.evidence)
+    assert "chat" in top.reason.lower() or "comment" in top.reason.lower()
+    assert top.score >= 80

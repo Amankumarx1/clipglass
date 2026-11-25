@@ -262,7 +262,7 @@ def heuristic_score_clips(
             hook=hook,
             title=title,
             hashtags=hashtags,
-            reason="High audience retention peak and audio energy transition.",
+            reason=reason,
             evidence=evidence,
             transcriptText=transcript_txt,
             words=words

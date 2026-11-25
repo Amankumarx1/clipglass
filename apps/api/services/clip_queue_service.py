@@ -241,7 +241,7 @@ class ClipJobManager:
                 clip_count=req.clipCount,
                 min_dur=req.minLength,
                 max_dur=req.maxLength,
-                title_prefix=ingest_res.title
+                title_prefix=record.source_title or "Clip"
             )
 
         new_loop = asyncio.new_event_loop()

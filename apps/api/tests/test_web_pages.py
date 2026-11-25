@@ -76,6 +76,9 @@ def test_auto_clip_page():
     assert "openSelectionZoomOverlay" in response.text
     assert "zoomCaptionDisplay" in response.text
     assert "zoomGuideOverlay" in response.text
+    assert "Chat Burst" in response.text
+    assert "Chat Energetic" in response.text
+    assert "Viral Score" in response.text
 
 # 06. Auto Clip Editor
 def test_auto_clip_editor_page():
