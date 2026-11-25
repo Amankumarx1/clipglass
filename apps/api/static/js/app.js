@@ -50,22 +50,65 @@
   }
   window.formatDuration = formatDuration;
 
-  // Notification Toast
+  // Pop-Up Style Notification System
   function showToast(message, type = 'info') {
-    const toast = document.createElement('div');
+    const existing = document.getElementById('globalPopupNotification');
+    if (existing) existing.remove();
+
+    if (window.playGlassTick) window.playGlassTick();
+
     const isFetching = type === 'fetching' || type === 'loading';
-    toast.className = `fixed bottom-6 right-6 z-[200] px-4 py-3 rounded-2xl glass glass-rim shadow-2xl text-xs font-semibold flex items-center gap-2.5 transition-all transform translate-y-4 opacity-0 border ${isFetching ? 'border-[#ff5a1f]/40 bg-[#12131a]/95' : 'border-white/10'}`;
-    const icon = type === 'success' ? '✓' : type === 'error' ? '✕' : (isFetching ? '⚡' : 'ℹ');
-    const color = type === 'success' ? 'text-emerald-400' : type === 'error' ? 'text-rose-400' : (isFetching ? 'text-[#ff5a1f] animate-pulse' : 'text-blue-400');
-    toast.innerHTML = `<span class="${color} font-bold text-sm">${icon}</span><span class="text-white">${message}</span>`;
+    const isSuccess = type === 'success';
+    const isError = type === 'error';
+
+    const toast = document.createElement('div');
+    toast.id = 'globalPopupNotification';
+    toast.className = `fixed top-6 left-1/2 -translate-x-1/2 z-[9999] max-w-lg w-[92vw] sm:w-auto px-5 py-3.5 rounded-2xl bg-[#12131a]/95 backdrop-blur-2xl shadow-[0_20px_50px_rgba(0,0,0,0.85)] border flex items-center justify-between gap-4 transition-all duration-300 transform -translate-y-8 scale-90 opacity-0 select-none ${
+      isFetching ? 'border-[#ff5a1f]/70 shadow-[0_0_30px_rgba(255,90,31,0.35)]' :
+      isSuccess ? 'border-emerald-500/60 shadow-[0_0_30px_rgba(16,185,129,0.3)]' :
+      isError ? 'border-rose-500/60 shadow-[0_0_30px_rgba(244,63,94,0.3)]' :
+      'border-blue-500/60 shadow-[0_0_30px_rgba(59,130,246,0.3)]'
+    }`;
+
+    const iconBadge = isFetching 
+      ? '<span class="w-8 h-8 rounded-xl bg-[#ff5a1f]/20 border border-[#ff5a1f]/40 text-[#ff5a1f] flex items-center justify-center font-bold text-sm animate-pulse shrink-0">⚡</span>'
+      : isSuccess
+      ? '<span class="w-8 h-8 rounded-xl bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 flex items-center justify-center font-bold text-sm shrink-0">✓</span>'
+      : isError
+      ? '<span class="w-8 h-8 rounded-xl bg-rose-500/20 border border-rose-500/40 text-rose-400 flex items-center justify-center font-bold text-sm shrink-0">✕</span>'
+      : '<span class="w-8 h-8 rounded-xl bg-blue-500/20 border border-blue-500/40 text-blue-400 flex items-center justify-center font-bold text-sm shrink-0">ℹ</span>';
+
+    const titleTag = isFetching ? 'FETCHING MEDIA' : isSuccess ? 'SUCCESS' : isError ? 'ERROR' : 'NOTIFICATION';
+    const tagColor = isFetching ? 'text-[#ff5a1f]' : isSuccess ? 'text-emerald-400' : isError ? 'text-rose-400' : 'text-blue-400';
+
+    toast.innerHTML = `
+      <div class="flex items-center gap-3.5 min-w-0">
+        ${iconBadge}
+        <div class="flex flex-col min-w-0">
+          <span class="text-[9px] font-mono font-bold tracking-wider uppercase ${tagColor}">${titleTag}</span>
+          <span class="text-xs sm:text-sm font-semibold text-white tracking-tight leading-snug">${message}</span>
+        </div>
+      </div>
+      <button type="button" onclick="this.closest('#globalPopupNotification').remove()" class="w-6 h-6 rounded-full hover:bg-white/10 text-slate-400 hover:text-white flex items-center justify-center text-xs font-bold transition-colors cursor-pointer shrink-0 ml-2" title="Dismiss">
+        ✕
+      </button>
+    `;
+
     document.body.appendChild(toast);
-    setTimeout(() => {
-      toast.classList.remove('translate-y-4', 'opacity-0');
-    }, 20);
-    setTimeout(() => {
-      toast.classList.add('opacity-0', 'translate-y-4');
+
+    requestAnimationFrame(() => {
+      toast.classList.remove('-translate-y-8', 'scale-90', 'opacity-0');
+      toast.classList.add('translate-y-0', 'scale-100', 'opacity-100');
+    });
+
+    const timeoutDuration = isFetching ? 4800 : 3600;
+    const dismissTimer = setTimeout(() => {
+      toast.classList.remove('translate-y-0', 'scale-100', 'opacity-100');
+      toast.classList.add('-translate-y-8', 'scale-90', 'opacity-0');
       setTimeout(() => toast.remove(), 300);
-    }, isFetching ? 4000 : 3200);
+    }, timeoutDuration);
+
+    toast.addEventListener('mouseenter', () => clearTimeout(dismissTimer));
   }
   window.showToast = showToast;
 

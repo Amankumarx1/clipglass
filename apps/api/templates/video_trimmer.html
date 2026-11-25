@@ -163,21 +163,40 @@
       <div class="flex flex-col gap-3 text-xs">
         <div>
           <label class="text-[10px] uppercase font-semibold text-[#8B8D98] tracking-wider block mb-1.5">Format</label>
-          <select id="trimContainerFormat"
-            class="w-full h-10 px-4 rounded-full bg-[#0e0f16] text-white border border-white/10 outline-none">
-            <option value="mp4" class="bg-[#0e0f16]">MP4 (H.264 / AAC)</option>
-            <option value="webm" class="bg-[#0e0f16]">WebM (VP9 / Opus)</option>
-          </select>
+          <div class="relative" id="trimFormatWrapper">
+            <select id="trimContainerFormat" class="hidden">
+              <option value="mp4" selected>MP4 (H.264 / AAC)</option>
+              <option value="webm">WebM (VP9 / Opus)</option>
+            </select>
+            <button type="button" id="trimFormatTrigger" onclick="toggleTrimFormatMenu()"
+              class="w-full h-10 px-4 rounded-full bg-[#0e0f16] hover:bg-[#181924] text-white border border-white/10 hover:border-white/20 flex items-center justify-between text-xs font-semibold transition-all cursor-pointer shadow-sm">
+              <span id="trimFormatSelectedText">MP4 (H.264 / AAC)</span>
+              <svg id="trimFormatChevron" class="w-3.5 h-3.5 text-[#8B8D98] transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+            </button>
+            <div id="trimFormatMenu"
+              class="hidden absolute top-11 left-0 right-0 z-50 bg-[#12131a] border border-white/10 rounded-2xl shadow-2xl p-1.5 flex flex-col gap-1 backdrop-blur-xl">
+              <button type="button" onclick="selectTrimContainerFormat('mp4', 'MP4 (H.264 / AAC)')"
+                class="trim-fmt-opt px-3 py-2 rounded-xl text-xs font-semibold text-left flex items-center justify-between transition-all bg-[#ff5a1f]/15 text-[#ff5a1f] border border-[#ff5a1f]/30" data-value="mp4">
+                <span>MP4 (H.264 / AAC)</span>
+                <span class="text-xs">✓</span>
+              </button>
+              <button type="button" onclick="selectTrimContainerFormat('webm', 'WebM (VP9 / Opus)')"
+                class="trim-fmt-opt px-3 py-2 rounded-xl text-xs font-semibold text-left flex items-center justify-between transition-all text-[#8B8D98] hover:text-white hover:bg-white/5" data-value="webm">
+                <span>WebM (VP9 / Opus)</span>
+                <span class="text-xs opacity-0">✓</span>
+              </button>
+            </div>
+          </div>
         </div>
         <div>
           <label class="text-[10px] uppercase font-semibold text-[#8B8D98] tracking-wider block mb-1.5">Quality
             Mode</label>
           <div class="flex items-center gap-1.5 p-1 rounded-full bg-[#0e0f16] border border-white/10">
             <button type="button" id="cutModeCopyBtn" onclick="setCutMode('copy')"
-              class="flex-1 py-1.5 rounded-full text-[11px] font-semibold bg-[#ff5a1f] text-white shadow-sm transition-all">Stream
+              class="flex-1 py-1.5 rounded-full text-[11px] font-semibold bg-[#ff5a1f] text-white shadow-sm transition-all cursor-pointer">Stream
               Copy</button>
             <button type="button" id="cutModeEncodeBtn" onclick="setCutMode('encode')"
-              class="flex-1 py-1.5 rounded-full text-[11px] font-semibold text-[#8B8D98] hover:text-white transition-all">Re-encode</button>
+              class="flex-1 py-1.5 rounded-full text-[11px] font-semibold text-[#8B8D98] hover:text-white transition-all cursor-pointer">Re-encode</button>
           </div>
         </div>
         <div class="pt-2">
@@ -569,15 +588,56 @@
     const copyBtn = document.getElementById('cutModeCopyBtn');
     const encBtn = document.getElementById('cutModeEncodeBtn');
     if (mode === 'copy') {
-      copyBtn.className = 'px-3 py-1 rounded-full bg-emerald-500 text-white shadow-sm transition-all cursor-pointer';
-      encBtn.className = 'px-3 py-1 rounded-full glass text-slate-400 hover:text-white transition-all cursor-pointer';
+      copyBtn.className = 'flex-1 py-1.5 rounded-full text-[11px] font-semibold bg-[#ff5a1f] text-white shadow-sm transition-all cursor-pointer';
+      encBtn.className = 'flex-1 py-1.5 rounded-full text-[11px] font-semibold text-[#8B8D98] hover:text-white transition-all cursor-pointer';
       showToast('Mode: Stream Copy (Near-instant cut)', 'info');
     } else {
-      encBtn.className = 'px-3 py-1 rounded-full bg-emerald-500 text-white shadow-sm transition-all cursor-pointer';
-      copyBtn.className = 'px-3 py-1 rounded-full glass text-slate-400 hover:text-white transition-all cursor-pointer';
+      encBtn.className = 'flex-1 py-1.5 rounded-full text-[11px] font-semibold bg-[#ff5a1f] text-white shadow-sm transition-all cursor-pointer';
+      copyBtn.className = 'flex-1 py-1.5 rounded-full text-[11px] font-semibold text-[#8B8D98] hover:text-white transition-all cursor-pointer';
       showToast('Mode: Frame-Accurate Re-encode (Precise keyframe cut)', 'info');
     }
   }
+
+  // Format Dropdown Pop-Up Controller
+  function toggleTrimFormatMenu() {
+    playGlassTick();
+    const menu = document.getElementById('trimFormatMenu');
+    const chevron = document.getElementById('trimFormatChevron');
+    if (menu) menu.classList.toggle('hidden');
+    if (chevron) chevron.classList.toggle('rotate-180');
+  }
+
+  function selectTrimContainerFormat(val, label) {
+    playGlassTick();
+    const sel = document.getElementById('trimContainerFormat');
+    if (sel) {
+      sel.value = val;
+      sel.dispatchEvent(new Event('change'));
+    }
+    const lbl = document.getElementById('trimFormatSelectedText');
+    if (lbl) lbl.textContent = label;
+    document.querySelectorAll('.trim-fmt-opt').forEach(opt => {
+      const match = opt.getAttribute('data-value') === val;
+      if (match) {
+        opt.className = 'trim-fmt-opt px-3 py-2 rounded-xl text-xs font-semibold text-left flex items-center justify-between transition-all bg-[#ff5a1f]/15 text-[#ff5a1f] border border-[#ff5a1f]/30';
+        opt.querySelector('span:last-child').classList.remove('opacity-0');
+      } else {
+        opt.className = 'trim-fmt-opt px-3 py-2 rounded-xl text-xs font-semibold text-left flex items-center justify-between transition-all text-[#8B8D98] hover:text-white hover:bg-white/5';
+        opt.querySelector('span:last-child').classList.add('opacity-0');
+      }
+    });
+    toggleTrimFormatMenu();
+  }
+
+  document.addEventListener('click', (e) => {
+    const wrap = document.getElementById('trimFormatWrapper');
+    const menu = document.getElementById('trimFormatMenu');
+    if (wrap && menu && !wrap.contains(e.target)) {
+      menu.classList.add('hidden');
+      const chevron = document.getElementById('trimFormatChevron');
+      if (chevron) chevron.classList.remove('rotate-180');
+    }
+  });
 
   // Drawer Toggle & Navigation
   function toggleVideoImportDrawer(defaultTab = 'pc') {
@@ -928,7 +988,7 @@
           body: JSON.stringify({
             url: loadedVideoUrl,
             mode: 'video',
-            format: 'mp4',
+            format: document.getElementById('trimContainerFormat')?.value || 'mp4',
             quality: 'best',
             consent: true,
             trim: {
