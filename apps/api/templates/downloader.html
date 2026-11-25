@@ -204,8 +204,8 @@
             <span id="sizeAccuracyBadge"
               class="hidden px-2 py-0.5 rounded-full text-[9px] font-bold bg-[#ff5a1f]/20 text-[#ff5a1f] border border-[#ff5a1f]/40">Actual Stream Size</span>
           </div>
-          <p id="estimatedSizeText" class="text-xl font-bold text-white mt-0.5">~248 MB</p>
-          <span id="sizeBreakdownText" class="text-[10px] text-[#8B8D98] block mt-0.5">Select options to calculate exact size</span>
+          <p id="estimatedSizeText" class="text-xl font-bold text-white mt-0.5">--</p>
+          <span id="sizeBreakdownText" class="text-[10px] text-[#8B8D98] block mt-0.5">Paste or fetch a link to calculate size</span>
         </div>
         <div class="flex items-center gap-2.5">
           <button type="button" id="startVideoBtn" onclick="triggerDownload('video')"
@@ -466,6 +466,13 @@
     const badgeEl = document.getElementById('sizeAccuracyBadge');
     const breakdownEl = document.getElementById('sizeBreakdownText');
     if (!sizeEl) return;
+
+    if (!inspectedMediaData) {
+      sizeEl.textContent = '--';
+      if (badgeEl) badgeEl.classList.add('hidden');
+      if (breakdownEl) breakdownEl.textContent = 'Paste or fetch a link to calculate size';
+      return;
+    }
 
     const duration = inspectedMediaData?.duration || 0;
     const availableHeights = inspectedMediaData?.availableHeights || [];
