@@ -58,8 +58,8 @@ class ClipMoment(BaseModel):
 
 class ClipJobCreateRequest(BaseModel):
     url: str = Field(..., max_length=2048)
-    minLength: int = Field(20, ge=15, le=90)
-    maxLength: int = Field(60, ge=20, le=180)
+    minLength: int = Field(20, ge=5, le=90)
+    maxLength: int = Field(60, ge=10, le=180)
     clipCount: int = Field(3, ge=1, le=10)
     language: str = Field("en", max_length=10)
     reframeMode: ReframeModeType = 'follow-face'
@@ -72,8 +72,8 @@ class ClipJobCreateRequest(BaseModel):
     @classmethod
     def validate_clip_url(cls, v: str) -> str:
         clean = v.strip()
-        if not (clean.startswith("http://") or clean.startswith("https://")):
-            raise ValueError("URL must start with http:// or https://")
+        if not (clean.startswith("http://") or clean.startswith("https://") or clean.startswith("local://")):
+            raise ValueError("URL must start with http://, https://, or local://")
         return clean
 
 class ClipMomentUpdateRequest(BaseModel):

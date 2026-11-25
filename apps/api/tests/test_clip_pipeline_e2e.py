@@ -128,3 +128,45 @@ def test_api_feedback_and_edit_box():
     assert res_data["result"]["success"] is True
     assert clip.duration == 30.0
     assert clip.end == 40.0
+
+def test_api_clip_upload_and_cancel(tmp_path):
+    video_path = tmp_path / "sample_upload.mp4"
+    cmd = [
+        "ffmpeg", "-y", "-f", "lavfi", "-i", "testsrc=size=320x240:rate=10:duration=1",
+        "-c:v", "libx264", str(video_path)
+    ]
+    subprocess.run(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, check=True)
+
+    with open(video_path, "rb") as f:
+        res = client.post(
+            "/api/clip/upload",
+            files={"file": ("sample_upload.mp4", f, "video/mp4")},
+            data={"consent": "true", "clipCount": "2", "minLength": "10", "maxLength": "30"}
+        )
+    assert res.status_code == 200
+    data = res.json()
+    assert "jobId" in data
+    job_id = data["jobId"]
+
+    # Test cancel endpoint
+    cancel_res = client.post(f"/api/clip/jobs/{job_id}/cancel")
+    assert cancel_res.status_code == 200
+    assert cancel_res.json()["message"] == "Clip job cancelled."
+
+def test_api_trim_upload(tmp_path):
+    video_path = tmp_path / "test_trim.mp4"
+    cmd = [
+        "ffmpeg", "-y", "-f", "lavfi", "-i", "testsrc=size=320x240:rate=10:duration=3",
+        "-c:v", "libx264", str(video_path)
+    ]
+    subprocess.run(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, check=True)
+
+    with open(video_path, "rb") as f:
+        res = client.post(
+            "/api/v1/jobs/trim-upload",
+            files={"file": ("test_trim.mp4", f, "video/mp4")},
+            data={"startTime": "00:00:01", "endTime": "00:00:02", "mode": "copy"}
+        )
+    assert res.status_code == 200
+    assert res.headers["content-type"] == "video/mp4"
+    assert len(res.content) > 500

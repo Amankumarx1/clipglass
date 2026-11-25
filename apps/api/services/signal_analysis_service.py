@@ -15,7 +15,7 @@ def extract_audio_loudness_and_bursts(file_path: str, duration_sec: int) -> Tupl
     try:
         cmd = [
             "ffmpeg", "-nostdin", "-threads", "2", "-i", file_path,
-            "-ac", "1", "-ar", "8000", "-f", "s16le", "-acodec", "pcm_s16le", "-"
+            "-vn", "-ac", "1", "-ar", "8000", "-f", "s16le", "-acodec", "pcm_s16le", "-"
         ]
         proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
         raw_audio, _ = proc.communicate(timeout=60)
@@ -72,7 +72,7 @@ def extract_scene_cuts(file_path: str, duration_sec: int) -> List[float]:
     try:
         cmd = [
             "ffmpeg", "-nostdin", "-threads", "2", "-i", file_path,
-            "-vf", "select='gt(scene,0.35)',metadata=print:key=lavfi.scene_score",
+            "-vf", "scale=240:-1,select='gt(scene,0.35)',metadata=print:key=lavfi.scene_score",
             "-f", "null", "-"
         ]
         proc = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, timeout=60)

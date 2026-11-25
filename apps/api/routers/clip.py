@@ -1,9 +1,10 @@
 import os
 import re
 import time
+import shutil
 import asyncio
 from collections import defaultdict
-from fastapi import APIRouter, Request, HTTPException, status, Header
+from fastapi import APIRouter, Request, HTTPException, status, Header, UploadFile, File, Form
 from fastapi.responses import FileResponse, StreamingResponse
 from sse_starlette.sse import EventSourceResponse
 from schemas.clip import (
@@ -103,6 +104,88 @@ async def create_clip_job(request: Request, body: ClipJobCreateRequest):
         raise HTTPException(status_code=status.HTTP_429_TOO_MANY_REQUESTS, detail=str(e))
     except Exception as e:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
+
+@router.post("/upload")
+async def upload_clip_job(
+    request: Request,
+    file: UploadFile = File(...),
+    consent: bool = Form(True),
+    clipCount: int = Form(3),
+    minLength: int = Form(15),
+    maxLength: int = Form(60),
+    reframeMode: str = Form("follow-face"),
+    captionPreset: str = Form("viral_pop")
+):
+    if not consent:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail={
+                "code": "consent-required",
+                "title": "Consent Required",
+                "explanation": "You must confirm you own this video or have legal permission to clip it.",
+                "suggestedAction": "Check the consent checkbox to proceed."
+            }
+        )
+
+    client_ip = get_real_client_ip(request)
+    now = time.time()
+    cutoff = now - 600.0
+    timestamps = [t for t in ip_clip_timestamps[client_ip] if t > cutoff]
+    if len(timestamps) >= settings.RATE_LIMIT_JOBS_PER_10_MINUTES:
+        ip_clip_timestamps[client_ip] = timestamps
+        retry_after = int(600.0 - (now - timestamps[0]))
+        raise HTTPException(
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+            headers={"Retry-After": str(max(1, retry_after))},
+            detail={
+                "code": "rate-limited",
+                "title": "Job Rate Limit Reached",
+                "explanation": f"You can create at most {settings.RATE_LIMIT_JOBS_PER_10_MINUTES} Auto Clip jobs per 10 minutes.",
+                "suggestedAction": "Please wait a few minutes before starting a new job."
+            }
+        )
+    timestamps.append(now)
+    ip_clip_timestamps[client_ip] = timestamps
+
+    # Create temporary storage for uploaded video
+    import uuid
+    safe_filename = re.sub(r'[^a-zA-Z0-9_\-\.]', '_', file.filename or "uploaded.mp4")
+    temp_dir = os.path.join(settings.TEMP_STORAGE_DIR, f"clip_upload_{uuid.uuid4().hex[:8]}")
+    os.makedirs(temp_dir, exist_ok=True)
+    temp_video_path = os.path.join(temp_dir, safe_filename)
+
+    with open(temp_video_path, "wb") as f_out:
+        shutil.copyfileobj(file.file, f_out)
+
+    req_body = ClipJobCreateRequest(
+        url=f"local://{safe_filename}",
+        clipCount=clipCount,
+        minLength=minLength,
+        maxLength=maxLength,
+        reframeMode=reframeMode,
+        captionPreset=captionPreset,
+        consent=consent
+    )
+
+    try:
+        job_id = clip_job_manager.create_job(
+            req_body, client_ip,
+            source_video=temp_video_path,
+            source_title=safe_filename
+        )
+        return {"jobId": job_id, "message": "Auto Clip job initiated from file upload."}
+    except ValueError as e:
+        raise HTTPException(status_code=status.HTTP_429_TOO_MANY_REQUESTS, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
+
+@router.post("/jobs/{job_id}/cancel")
+async def cancel_clip_job(job_id: str):
+    valid_id = validate_job_id(job_id)
+    success = clip_job_manager.cancel_job(valid_id)
+    if not success:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Clip job not found or already ended.")
+    return {"message": "Clip job cancelled.", "jobId": valid_id}
 
 @router.get("/jobs/{job_id}/events")
 async def clip_job_events(job_id: str):

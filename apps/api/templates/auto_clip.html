@@ -153,6 +153,31 @@
     </button>
   </div>
 
+  <!-- Real-Time Auto Clip Pipeline Progress Indicator -->
+  <div id="clipProgressContainer" class="hidden w-full bg-[#17181D] rounded-3xl p-6 border border-white/10 shadow-2xl flex flex-col gap-4 transition-all">
+    <div class="flex items-center justify-between flex-wrap gap-2">
+      <div class="flex items-center gap-3">
+        <div class="w-9 h-9 rounded-full bg-[#ff5a1f]/20 text-[#ff5a1f] flex items-center justify-center font-bold text-sm animate-pulse">
+          ⚡
+        </div>
+        <div>
+          <h4 id="clipProgressTitle" class="text-sm font-bold text-white tracking-tight">Analyzing Video Streams...</h4>
+          <p id="clipProgressSubtitle" class="text-xs text-[#8B8D98]">Connecting to multimodal pipeline...</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-3">
+        <span id="clipProgressPercentText" class="text-sm font-mono font-extrabold text-[#ff5a1f]">0%</span>
+        <button type="button" onclick="cancelActiveClipJob()" class="px-3 py-1 rounded-full bg-white/5 hover:bg-white/10 text-xs font-semibold text-rose-400 border border-rose-500/20 transition-all cursor-pointer">
+          Cancel
+        </button>
+      </div>
+    </div>
+    <!-- Progress Bar -->
+    <div class="w-full h-2.5 bg-black/60 rounded-full overflow-hidden p-0.5 border border-white/10">
+      <div id="clipProgressBar" class="h-full bg-gradient-to-r from-[#ff5a1f] via-amber-500 to-emerald-400 rounded-full transition-all duration-300 w-0 shadow-[0_0_12px_rgba(255,90,31,0.6)]"></div>
+    </div>
+  </div>
+
   <!-- Generated Clips Grid -->
   <div id="clipsGrid" class="grid grid-cols-1 md:grid-cols-3 gap-6">
     <!-- Populated dynamically via JS -->
@@ -962,12 +987,19 @@
     if (window.showToast) window.showToast(`Loaded "${file.name}" from PC into Auto Clip!`, 'success');
   }
 
+  let currentClipJobId = null;
+  let activeClipEventSource = null;
+  let selectedClipLength = '30s';
+
   function setClipLength(len) {
     if (window.playGlassTick) window.playGlassTick();
+    selectedClipLength = len;
     document.querySelectorAll('.length-btn').forEach(b => {
       b.className = 'length-btn py-1 rounded-full text-xs font-semibold text-[#8B8D98] hover:text-white';
     });
-    event.target.className = 'length-btn py-1 rounded-full text-xs font-semibold bg-[#2165F7] text-white';
+    if (event && event.target) {
+      event.target.className = 'length-btn py-1 rounded-full text-xs font-semibold bg-[#ff5a1f] text-white';
+    }
   }
 
   async function pasteClipUrl() {
@@ -978,7 +1010,7 @@
     } catch {}
   }
 
-  function generateClips() {
+  async function generateClips() {
     const consent = document.getElementById('clipConsentCheckbox').checked;
     if (!consent) {
       if (window.showToast) window.showToast('You must confirm ownership/permission to clip this video', 'error');
@@ -996,70 +1028,214 @@
     }
 
     if (window.playGlassPop) window.playGlassPop();
-    const sourceLabel = activeSource === 'pc' && uploadedFile ? uploadedFile.name.replace(/\.[^/.]+$/, "") : (url ? 'Online Stream Video' : 'Video Source');
-    if (window.showToast) window.showToast(`Analyzing "${sourceLabel}" for multimodal viral moments...`, 'info');
 
-    setTimeout(() => {
-      renderGeneratedClips(sourceLabel);
-      document.getElementById('clipsGrid').scrollIntoView({ behavior: 'smooth' });
-      if (window.showToast) window.showToast('3 High-scoring viral shorts generated! Evidence and sub-scores populated.', 'success');
-    }, 1000);
+    let minL = 15, maxL = 35;
+    if (selectedClipLength === '45s') { minL = 30; maxL = 50; }
+    else if (selectedClipLength === '60s') { minL = 45; maxL = 65; }
+
+    const reframe = activeFrameModel || document.getElementById('clipReframeSelect')?.value || 'follow-face';
+    const caption = activeCaptionPreset || document.getElementById('clipCaptionSelect')?.value || 'viral_pop';
+
+    // Show Progress Indicator
+    const progressBox = document.getElementById('clipProgressContainer');
+    const pTitle = document.getElementById('clipProgressTitle');
+    const pSub = document.getElementById('clipProgressSubtitle');
+    const pBar = document.getElementById('clipProgressBar');
+    const pTxt = document.getElementById('clipProgressPercentText');
+
+    progressBox.classList.remove('hidden');
+    progressBox.scrollIntoView({ behavior: 'smooth' });
+    pTitle.textContent = 'Initiating Auto Clip Pipeline...';
+    pSub.textContent = 'Connecting to server workers...';
+    pBar.style.width = '10%';
+    pTxt.textContent = '10%';
+
+    try {
+      let res;
+      if (activeSource === 'url') {
+        res = await fetch('/api/clip/jobs', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            url: url,
+            minLength: minL,
+            maxLength: maxL,
+            clipCount: 3,
+            reframeMode: reframe,
+            captionPreset: caption,
+            consent: true
+          })
+        });
+      } else {
+        const formData = new FormData();
+        formData.append('file', uploadedFile);
+        formData.append('consent', 'true');
+        formData.append('clipCount', '3');
+        formData.append('minLength', minL.toString());
+        formData.append('maxLength', maxL.toString());
+        formData.append('reframeMode', reframe);
+        formData.append('captionPreset', caption);
+
+        res = await fetch('/api/clip/upload', {
+          method: 'POST',
+          body: formData
+        });
+      }
+
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        const errMsg = (errData.detail && (errData.detail.explanation || errData.detail.title || errData.detail)) || 'Failed to start clipping job';
+        progressBox.classList.add('hidden');
+        if (window.showToast) window.showToast(errMsg, 'error');
+        return;
+      }
+
+      const jobData = await res.json();
+      currentClipJobId = jobData.jobId;
+      if (window.showToast) window.showToast('Auto Clip job started! Extracting acoustic and retention signals...', 'info');
+
+      // Connect to SSE stream
+      if (activeClipEventSource) activeClipEventSource.close();
+      activeClipEventSource = new EventSource(`/api/clip/jobs/${currentClipJobId}/events`);
+
+      activeClipEventSource.addEventListener('update', (ev) => {
+        try {
+          const update = JSON.parse(ev.data);
+          const percent = Math.round(update.percent || 10);
+          pBar.style.width = `${percent}%`;
+          pTxt.textContent = `${percent}%`;
+          pTitle.textContent = update.activeStep || 'Analyzing video signals...';
+          pSub.textContent = `Stage: ${update.stage.toUpperCase()}`;
+
+          if (update.stage === 'ready') {
+            activeClipEventSource.close();
+            pBar.style.width = '100%';
+            pTxt.textContent = '100%';
+            pTitle.textContent = 'Viral Highlights Ready!';
+            pSub.textContent = 'All viral clips discovered and scored!';
+            setTimeout(() => {
+              progressBox.classList.add('hidden');
+            }, 1800);
+
+            renderGeneratedClips(update.clips || []);
+            document.getElementById('clipsGrid').scrollIntoView({ behavior: 'smooth' });
+            if (window.showToast) window.showToast(`Found ${update.clips ? update.clips.length : 3} high-scoring viral shorts!`, 'success');
+          } else if (update.stage === 'failed') {
+            activeClipEventSource.close();
+            progressBox.classList.add('hidden');
+            const errExpl = (update.error && update.error.explanation) || 'Clipping failed on server.';
+            if (window.showToast) window.showToast(errExpl, 'error');
+          } else if (update.stage === 'cancelled') {
+            activeClipEventSource.close();
+            progressBox.classList.add('hidden');
+            if (window.showToast) window.showToast('Job cancelled.', 'info');
+          }
+        } catch (e) {
+          console.warn('SSE parse error:', e);
+        }
+      });
+
+      activeClipEventSource.onerror = () => {
+        // SSE timeout or connection error fallback: poll clips after brief wait
+        setTimeout(async () => {
+          try {
+            const pollRes = await fetch(`/api/clip/jobs/${currentClipJobId}/clips`);
+            if (pollRes.ok) {
+              const pollData = await pollRes.json();
+              if (pollData.stage === 'ready' && pollData.clips && pollData.clips.length > 0) {
+                if (activeClipEventSource) activeClipEventSource.close();
+                progressBox.classList.add('hidden');
+                renderGeneratedClips(pollData.clips);
+              }
+            }
+          } catch {}
+        }, 5000);
+      };
+
+    } catch (err) {
+      console.error(err);
+      progressBox.classList.add('hidden');
+      if (window.showToast) window.showToast('Error communicating with Auto Clip server.', 'error');
+    }
   }
 
-  function renderGeneratedClips(sourceLabel) {
-    const grid = document.getElementById('clipsGrid');
-    const localVideoUrl = uploadedFile ? URL.createObjectURL(uploadedFile) : null;
+  async function cancelActiveClipJob() {
+    if (window.playGlassTick) window.playGlassTick();
+    if (!currentClipJobId) return;
+    try {
+      await fetch(`/api/clip/jobs/${currentClipJobId}/cancel`, { method: 'POST' });
+    } catch {}
+    if (activeClipEventSource) activeClipEventSource.close();
+    document.getElementById('clipProgressContainer').classList.add('hidden');
+    if (window.showToast) window.showToast('Clipping job cancelled.', 'info');
+  }
 
-    activeClips = sampleClipsData.map((d) => ({
-      cid: d.cid,
-      title: `${sourceLabel} — ${d.titleSuffix}`,
-      score: d.score,
-      hookScore: d.hookScore,
-      engagementScore: d.engagementScore,
-      valueScore: d.valueScore,
-      shareabilityScore: d.shareabilityScore,
-      dur: d.dur,
-      durSec: d.durSec,
-      size: d.size,
-      hook: d.hook,
-      reason: d.reason,
-      evidence: d.evidence,
-      feedback: d.feedback,
-      videoUrl: localVideoUrl || d.videoUrl,
-      captions: d.captions
-    }));
+  function renderGeneratedClips(clips) {
+    const grid = document.getElementById('clipsGrid');
+    if (!clips || clips.length === 0) {
+      grid.innerHTML = '<div class="col-span-3 text-center py-8 text-xs text-[#8B8D98]">No highlight segments found. Try adjusting duration or source.</div>';
+      return;
+    }
+
+    activeClips = clips.map((c, idx) => {
+      const durSec = Math.round(c.duration || (c.end - c.start) || 30);
+      const m = Math.floor(durSec / 60);
+      const s = durSec % 60;
+      const formattedDur = `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+      return {
+        cid: c.clipId || `c${idx+1}`,
+        title: c.title || `Viral Short #${idx+1}`,
+        score: c.score || 88,
+        hookScore: c.hookScore || 90,
+        engagementScore: c.engagementScore || 85,
+        valueScore: c.valueScore || 85,
+        shareabilityScore: c.shareabilityScore || 85,
+        dur: formattedDur,
+        durSec: durSec,
+        start: c.start || 0,
+        end: c.end || durSec,
+        size: '~18 MB',
+        hook: c.hook || 'WATCH THIS MOMENT',
+        reason: c.reason || 'High acoustic energy and sentence completion',
+        evidence: c.evidence || ['Heatmap Peak', 'Sentence Snapped', 'Speech Energy'],
+        feedback: c.feedback || null,
+        videoUrl: c.videoUrl || null,
+        status: c.status || 'discovered',
+        captions: c.words ? c.words.map(w => w.word) : []
+      };
+    });
 
     grid.innerHTML = activeClips.map((c, idx) => `
-      <div class="bg-[#24252B] rounded-3xl p-5 shadow-xl flex flex-col justify-between transition-all border border-white/10 group hover:border-white/20">
+      <div class="bg-[#17181D] rounded-3xl p-5 shadow-xl flex flex-col justify-between transition-all border border-white/10 group hover:border-[#ff5a1f]/30">
         <!-- 9:16 Vertical Video Container -->
-        <div class="aspect-[9/16] w-full rounded-2xl overflow-hidden shadow-inner relative flex flex-col items-center justify-center text-center cursor-pointer bg-[#101113] border border-white/10" onclick="toggleClipPlay(${idx}, event)">
+        <div class="aspect-[9/16] w-full rounded-2xl overflow-hidden shadow-inner relative flex flex-col items-center justify-center text-center cursor-pointer bg-[#0e0f16] border border-white/10" onclick="handleCardVideoClick(${idx}, event)">
           
           <!-- Real 9:16 Video Player -->
-          <video id="clipVideo-${idx}" src="${c.videoUrl}" playsinline loop preload="metadata" class="absolute inset-0 w-full h-full object-cover transition-opacity duration-300 opacity-0 z-0"></video>
+          <video id="clipVideo-${idx}" ${c.videoUrl ? `src="${c.videoUrl}"` : ''} playsinline loop preload="metadata" class="absolute inset-0 w-full h-full object-cover transition-opacity duration-300 ${c.videoUrl ? 'opacity-100' : 'opacity-0'} z-0"></video>
 
           <!-- Score Badge Top-Left -->
-          <div class="absolute top-3.5 left-3.5 px-3 py-1 rounded-full ${c.score >= 95 ? 'bg-emerald-500' : 'bg-blue-600'} text-white text-[11px] font-extrabold shadow-md z-20 pointer-events-none">
-            Score: ${c.score} / 100
+          <div class="absolute top-3.5 left-3.5 px-3 py-1 rounded-full ${c.score >= 90 ? 'bg-emerald-500' : 'bg-[#ff5a1f]'} text-white text-[11px] font-extrabold shadow-md z-20 pointer-events-none">
+            Viral Score: ${c.score} / 100
           </div>
 
           <!-- Top-Right Actions -->
           <div class="absolute top-3.5 right-3.5 flex items-center gap-1.5 z-20" onclick="event.stopPropagation()">
-            <button type="button" id="muteBtn-${idx}" onclick="toggleClipMute(${idx}, event)" title="Toggle Sound" class="w-8 h-8 rounded-full bg-black/60 backdrop-blur-md text-white hover:text-cyan-400 text-xs flex items-center justify-center shadow transition-transform active:scale-95 cursor-pointer">
+            <button type="button" id="muteBtn-${idx}" onclick="toggleClipMute(${idx}, event)" title="Toggle Sound" class="w-8 h-8 rounded-full bg-black/70 backdrop-blur-md text-white hover:text-[#ff5a1f] text-xs flex items-center justify-center shadow transition-transform active:scale-95 cursor-pointer">
               <span id="muteIcon-${idx}">🔇</span>
             </button>
-            <button type="button" onclick="openPreviewModal(${idx}, event)" title="Full 9:16 Preview Lightbox" class="w-8 h-8 rounded-full bg-black/60 backdrop-blur-md text-white hover:text-cyan-400 text-xs flex items-center justify-center shadow transition-transform active:scale-95 cursor-pointer">
+            <button type="button" onclick="openPreviewModal(${idx}, event)" title="Full 9:16 Preview Lightbox" class="w-8 h-8 rounded-full bg-black/70 backdrop-blur-md text-white hover:text-[#ff5a1f] text-xs flex items-center justify-center shadow transition-transform active:scale-95 cursor-pointer">
               <span>🔍</span>
             </button>
           </div>
 
-          <!-- Center Poster Overlay -->
-          <div id="posterOverlay-${idx}" class="absolute inset-0 flex flex-col items-center justify-center gap-2 p-4 z-10 transition-opacity duration-300 pointer-events-none">
-            <div class="w-14 h-14 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-sm flex items-center justify-center text-3xl shadow-lg">
+          <!-- Center Poster / Render Trigger Overlay -->
+          <div id="posterOverlay-${idx}" class="absolute inset-0 flex flex-col items-center justify-center gap-2 p-4 z-10 transition-opacity duration-300 ${c.videoUrl ? 'opacity-0 pointer-events-none' : 'opacity-100'}">
+            <div class="w-14 h-14 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-sm flex items-center justify-center text-2xl shadow-lg">
               🎬
             </div>
-            <div class="w-10 h-10 rounded-full btn-pill-blue flex items-center justify-center text-sm font-bold text-white shadow-xl mt-1">
-              ▶
-            </div>
+            <button type="button" id="renderBtn-${idx}" onclick="renderClipMoment('${currentClipJobId}', '${c.cid}', ${idx}, event)" class="px-4 py-2 rounded-full btn-pill-blue text-xs font-bold text-white shadow-xl flex items-center gap-1.5 hover:scale-105 active:scale-95 transition-all cursor-pointer">
+              <span>⚡ Render &amp; Play 9:16</span>
+            </button>
             <span class="text-[11px] font-mono font-bold text-white/90 bg-black/60 px-2.5 py-0.5 rounded-full mt-1">
               ${c.dur}
             </span>
@@ -1067,8 +1243,8 @@
 
           <!-- Dynamic Caption Overlay -->
           <div id="clipCaptionOverlay-${idx}" class="absolute bottom-4 inset-x-2 text-center pointer-events-none z-10">
-            <div class="inline-block px-3 py-1 rounded-full bg-black/75 backdrop-blur-md border border-white/10 shadow-lg">
-              <p class="font-extrabold text-[11px] text-yellow-300 uppercase tracking-wide truncate max-w-[180px]">
+            <div class="inline-block px-3 py-1.5 rounded-full bg-black/80 backdrop-blur-md border border-white/10 shadow-lg">
+              <p class="font-extrabold text-[11px] text-yellow-300 uppercase tracking-wide truncate max-w-[200px]">
                 ${c.hook}
               </p>
             </div>
@@ -1079,19 +1255,95 @@
         <div class="mt-4 flex flex-col gap-3">
           <div class="flex items-center justify-between text-xs">
             <span class="font-bold text-white truncate max-w-[180px]">${c.title}</span>
-            <span class="text-[#8B8D98] font-mono text-[11px]">${c.size}</span>
+            <span class="text-[#8B8D98] font-mono text-[11px]">${c.dur}</span>
           </div>
-          <div class="flex items-center gap-2">
-            <a href="/auto-clip/editor?title=${encodeURIComponent(c.title)}&hook=${encodeURIComponent(c.hook)}" class="flex-1 py-1.5 rounded-full bg-white/5 hover:bg-white/10 text-white text-xs font-semibold text-center border border-white/10 transition-all">
-              Edit in Studio
+
+          <!-- Evidence Sub-Score Pills -->
+          <div class="flex items-center gap-1.5 flex-wrap">
+            <span class="text-[10px] px-2 py-0.5 rounded-full bg-white/5 border border-white/10 text-slate-300 font-mono">Hook: ${c.hookScore}%</span>
+            <span class="text-[10px] px-2 py-0.5 rounded-full bg-white/5 border border-white/10 text-slate-300 font-mono">Engage: ${c.engagementScore}%</span>
+            <span class="text-[10px] px-2 py-0.5 rounded-full bg-white/5 border border-white/10 text-slate-300 font-mono">Retention: ${c.valueScore}%</span>
+          </div>
+
+          <p class="text-[11px] text-[#8B8D98] line-clamp-2 leading-relaxed">
+            ${c.reason}
+          </p>
+
+          <div class="flex items-center gap-2 pt-1 border-t border-white/[0.08]">
+            <a href="/auto-clip/editor?jobId=${currentClipJobId || ''}&clipId=${c.cid}&title=${encodeURIComponent(c.title)}&hook=${encodeURIComponent(c.hook)}" class="flex-1 py-1.5 rounded-full bg-white/5 hover:bg-white/10 text-white text-xs font-semibold text-center border border-white/10 transition-all flex items-center justify-center gap-1">
+              <span>✏️ Safe Zone &amp; Style</span>
             </a>
-            <button type="button" onclick="downloadClipDirect('${c.videoUrl}', '${c.title}')" class="px-4 py-1.5 rounded-full btn-pill-blue text-xs font-bold text-white shadow transition-all cursor-pointer">
-              ↓ Save
+            <button type="button" onclick="downloadClipDirect('/api/clip/jobs/${currentClipJobId}/clips/${c.cid}/download', '${c.title}')" class="px-4 py-1.5 rounded-full btn-pill-blue text-xs font-bold text-white shadow transition-all cursor-pointer flex items-center gap-1">
+              <span>↓</span>
+              <span>Save</span>
             </button>
           </div>
         </div>
       </div>
     `).join('');
+  }
+
+  async function renderClipMoment(jobId, cid, idx, event) {
+    if (event) event.stopPropagation();
+    if (!jobId) {
+      if (window.showToast) window.showToast('Please start an Auto Clip job first', 'error');
+      return;
+    }
+
+    const btn = document.getElementById(`renderBtn-${idx}`);
+    if (btn) {
+      btn.disabled = true;
+      btn.innerHTML = `<svg class="animate-spin -ml-1 mr-1.5 h-3.5 w-3.5 text-white inline" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path></svg> Rendering 9:16...`;
+    }
+    if (window.showToast) window.showToast('Rendering 9:16 vertical short with burned animated captions & face tracking...', 'info');
+
+    try {
+      const res = await fetch(`/api/clip/jobs/${jobId}/clips/${cid}/render`, { method: 'POST' });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        if (btn) {
+          btn.disabled = false;
+          btn.innerHTML = `<span>⚡ Render &amp; Play 9:16</span>`;
+        }
+        if (window.showToast) window.showToast((err.detail && (err.detail.explanation || err.detail)) || 'Render failed on server.', 'error');
+        return;
+      }
+
+      const data = await res.json();
+      const streamUrl = `/api/clip/jobs/${jobId}/clips/${cid}/download`;
+      activeClips[idx].videoUrl = streamUrl;
+      activeClips[idx].status = 'ready';
+
+      const vid = document.getElementById(`clipVideo-${idx}`);
+      const poster = document.getElementById(`posterOverlay-${idx}`);
+      if (vid) {
+        vid.src = streamUrl;
+        vid.load();
+        vid.classList.remove('opacity-0');
+        vid.classList.add('opacity-100');
+        vid.play().catch(() => {});
+      }
+      if (poster) poster.classList.add('opacity-0', 'pointer-events-none');
+      if (window.showToast) window.showToast('Clip rendered successfully! Playing preview.', 'success');
+
+    } catch (e) {
+      console.error(e);
+      if (btn) {
+        btn.disabled = false;
+        btn.innerHTML = `<span>⚡ Render &amp; Play 9:16</span>`;
+      }
+      if (window.showToast) window.showToast('Error rendering clip.', 'error');
+    }
+  }
+
+  function handleCardVideoClick(idx, event) {
+    const c = activeClips[idx];
+    if (!c) return;
+    if (!c.videoUrl) {
+      renderClipMoment(currentClipJobId, c.cid, idx, event);
+    } else {
+      toggleClipPlay(idx, event);
+    }
   }
 
   function toggleClipPlay(idx, event) {
@@ -1222,12 +1474,24 @@
   }
 
   function exportAllClipsZip() {
-    if (window.showToast) window.showToast('Packaging all viral vertical shorts into ZIP archive...', 'info');
+    if (!currentClipJobId) {
+      if (window.showToast) window.showToast('Please generate ranked clips first before exporting ZIP', 'info');
+      return;
+    }
+    if (window.showToast) window.showToast('Packaging all viral vertical shorts and subtitles into ZIP bundle...', 'info');
+    window.location.href = `/api/clip/jobs/${currentClipJobId}/export-all`;
   }
 
   document.addEventListener('DOMContentLoaded', () => {
     selectCaptionPreset('viral_pop');
     selectFrameModel('follow-face');
+
+    const params = new URLSearchParams(window.location.search);
+    const qUrl = params.get('url');
+    if (qUrl) {
+      const input = document.getElementById('clipUrlInput');
+      if (input) input.value = qUrl;
+    }
   });
 
   document.addEventListener('keydown', (e) => {

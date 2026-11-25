@@ -393,13 +393,109 @@
     if (window.showToast) window.showToast('Aspect ratio locked to 9:16 Vertical Shorts safe layout.', 'info');
   }
 
-  function exportEditedClip() {
+  let activeJobId = null;
+  let activeClipId = null;
+  let currentClipData = null;
+
+  async function loadEditorClipData() {
+    const params = new URLSearchParams(window.location.search);
+    activeJobId = params.get('jobId');
+    activeClipId = params.get('clipId');
+    const paramHook = params.get('hook');
+    const paramTitle = params.get('title');
+
+    if (paramHook && document.getElementById('captionTextInput')) {
+      document.getElementById('captionTextInput').value = paramHook;
+      updateCaptionPreview();
+    }
+
+    if (!activeJobId || !activeClipId) return;
+
+    try {
+      const res = await fetch(`/api/clip/jobs/${activeJobId}/clips`);
+      if (res.ok) {
+        const data = await res.json();
+        const clip = (data.clips || []).find(c => c.clipId === activeClipId);
+        if (clip) {
+          currentClipData = clip;
+          if (clip.hook && document.getElementById('captionTextInput')) {
+            document.getElementById('captionTextInput').value = clip.hook;
+            updateCaptionPreview();
+          }
+          if (clip.captionPreset) {
+            setEditorCaptionPreset(clip.captionPreset);
+            const select = document.getElementById('editorCaptionPresetSelect');
+            if (select) select.value = clip.captionPreset;
+          }
+          if (clip.reframeMode) {
+            setEditorFrameModel(clip.reframeMode);
+          }
+          if (clip.videoUrl) {
+            const img = document.getElementById('editorVideoImg');
+            if (img) {
+              const video = document.createElement('video');
+              video.id = 'editorVideoPlayer';
+              video.src = clip.videoUrl;
+              video.playsInline = true;
+              video.loop = true;
+              video.className = 'w-full h-full object-cover';
+              img.replaceWith(video);
+            }
+          }
+          if (document.getElementById('editorTimeDisplay')) {
+            const dur = Math.round(clip.duration || (clip.end - clip.start) || 15);
+            document.getElementById('editorTimeDisplay').textContent = `00:00.0 / 00:${dur < 10 ? '0' : ''}${dur}.0`;
+          }
+        }
+      }
+    } catch (e) {
+      console.warn('Error loading clip in editor:', e);
+    }
+  }
+
+  async function exportEditedClip() {
     if (window.playGlassTick) window.playGlassTick();
     const btn = document.getElementById('exportClipBtn');
     btn.disabled = true;
     btn.innerHTML = `<svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white inline" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path></svg> Rendering Clip...`;
+
+    const updatedHook = document.getElementById('captionTextInput')?.value?.trim();
+    const updatedPreset = document.getElementById('editorCaptionPresetSelect')?.value || 'viral_pop';
+    const updatedReframe = activeFrameModel || 'follow-face';
+
+    if (activeJobId && activeClipId) {
+      try {
+        await fetch(`/api/clip/jobs/${activeJobId}/clips/${activeClipId}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            hook: updatedHook,
+            captionPreset: updatedPreset,
+            reframeMode: updatedReframe
+          })
+        });
+
+        const renderRes = await fetch(`/api/clip/jobs/${activeJobId}/clips/${activeClipId}/render`, { method: 'POST' });
+        if (renderRes.ok) {
+          const downloadUrl = `/api/clip/jobs/${activeJobId}/clips/${activeClipId}/download`;
+          if (window.showToast) window.showToast('Clip rendered with custom styling! Starting download...', 'success');
+          if (window.downloadFileToPc) {
+            window.downloadFileToPc(downloadUrl, `clip_${activeClipId}`);
+          } else {
+            window.location.href = downloadUrl;
+          }
+          setTimeout(() => {
+            window.location.href = '/auto-clip';
+          }, 1500);
+          return;
+        }
+      } catch (e) {
+        console.warn(e);
+      }
+    }
+
     setTimeout(() => {
-      window.location.href = '/jobs';
+      window.location.href = '/auto-clip';
     }, 1200);
   }
 
@@ -409,6 +505,7 @@
     updateCaptionPreview();
     setEditorCaptionPreset('viral_pop');
     setEditorFrameModel('follow-face');
+    loadEditorClipData();
   });
 </script>
 {% endblock %}

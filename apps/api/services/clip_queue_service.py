@@ -64,10 +64,19 @@ class ClipJobManager:
         self.active_jobs_per_ip: Dict[str, int] = {}
         self._lock = threading.Lock()
 
-    def create_job(self, request: ClipJobCreateRequest, client_ip: str) -> str:
+    def create_job(
+        self,
+        request: ClipJobCreateRequest,
+        client_ip: str,
+        source_video: Optional[str] = None,
+        source_title: Optional[str] = None
+    ) -> str:
         job_id = uuid.uuid4().hex
         record = ClipJobRecord(job_id, request, client_ip)
         os.makedirs(record.job_dir, exist_ok=True)
+        if source_video:
+            record.source_video = source_video
+            record.source_title = source_title or "Uploaded Video"
 
         with self._lock:
             # 1 active job per IP limit rule
@@ -138,28 +147,50 @@ class ClipJobManager:
         record.active_step = "Ingesting video metadata and streams..."
         record.emit_update()
 
-        def ingest_progress(d):
-            if record.cancelled:
-                raise Exception("Job cancelled by user.")
-            if d.get("status") == "downloading":
-                total = d.get("total_bytes") or d.get("total_bytes_estimate") or 1
-                dl = d.get("downloaded_bytes", 0)
-                record.percent = round(10.0 + (dl / total) * 25.0, 1)
-                record.emit_update()
+        chapters = []
+        heatmap = []
+        caption_path = None
 
-        ingest_res, err = ingest_video_and_metadata(
-            req.url, record.job_dir, duration_cap=settings.CLIP_DURATION_CAP, progress_cb=ingest_progress
-        )
-        if err or not ingest_res:
-            record.stage = "failed"
-            record.error = err or FriendlyError(code="ingest-error", title="Ingest Failed", explanation="Failed to ingest media.", suggestedAction="Try again.")
+        if record.source_video and os.path.exists(record.source_video):
+            import subprocess
+            try:
+                probe = subprocess.run(
+                    ["ffprobe", "-v", "error", "-show_entries", "format=duration", "-of", "default=noprint_wrappers=1:nokey=1", record.source_video],
+                    capture_output=True, text=True, timeout=10
+                )
+                dur = float(probe.stdout.strip()) if probe.stdout.strip() else 60.0
+            except Exception:
+                dur = 60.0
+            record.source_duration = dur
+            record.percent = 35.0
+            record.active_step = "Loaded video stream..."
             record.emit_update()
-            self._cleanup_job_files(record)
-            return
+        else:
+            def ingest_progress(d):
+                if record.cancelled:
+                    raise Exception("Job cancelled by user.")
+                if d.get("status") == "downloading":
+                    total = d.get("total_bytes") or d.get("total_bytes_estimate") or 1
+                    dl = d.get("downloaded_bytes", 0)
+                    record.percent = round(10.0 + (dl / total) * 25.0, 1)
+                    record.emit_update()
 
-        record.source_video = ingest_res.video_path
-        record.source_duration = ingest_res.duration
-        record.source_title = ingest_res.title
+            ingest_res, err = ingest_video_and_metadata(
+                req.url, record.job_dir, duration_cap=settings.CLIP_DURATION_CAP, progress_cb=ingest_progress
+            )
+            if err or not ingest_res:
+                record.stage = "failed"
+                record.error = err or FriendlyError(code="ingest-error", title="Ingest Failed", explanation="Failed to ingest media.", suggestedAction="Try again.")
+                record.emit_update()
+                self._cleanup_job_files(record)
+                return
+
+            record.source_video = ingest_res.video_path
+            record.source_duration = ingest_res.duration
+            record.source_title = ingest_res.title
+            chapters = ingest_res.chapters
+            heatmap = ingest_res.heatmap
+            caption_path = ingest_res.caption_path
 
         # 2. Transcription Stage
         record.stage = "transcribe"
@@ -167,7 +198,7 @@ class ClipJobManager:
         record.active_step = "Transcribing speech and aligning word timestamps..."
         record.emit_update()
 
-        sentences = get_or_create_transcript(record.job_dir, ingest_res.video_path, ingest_res.caption_path)
+        sentences = get_or_create_transcript(record.job_dir, record.source_video, caption_path)
 
         # 3. Multimodal Signals Stage
         record.stage = "signals"
@@ -176,10 +207,10 @@ class ClipJobManager:
         record.emit_update()
 
         signals = analyze_multimodal_signals(
-            ingest_res.video_path,
-            ingest_res.duration,
-            ingest_res.chapters,
-            ingest_res.heatmap
+            record.source_video,
+            record.source_duration,
+            chapters,
+            heatmap
         )
 
         # 4. LLM / Heuristic Scoring Stage

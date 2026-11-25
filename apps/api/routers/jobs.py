@@ -3,8 +3,11 @@ import os
 import re
 import urllib.parse
 import asyncio
+import subprocess
+import shutil
+import uuid
 from collections import defaultdict
-from fastapi import APIRouter, HTTPException, Request, Response, status
+from fastapi import APIRouter, HTTPException, Request, Response, status, UploadFile, File, Form
 from fastapi.responses import FileResponse, StreamingResponse
 from sse_starlette.sse import EventSourceResponse
 from schemas.jobs import JobCreateRequest, JobCreateResponse, JobEventData
@@ -81,6 +84,64 @@ async def list_jobs():
             "failed": failed
         }
     }
+
+@router.post("/trim-upload")
+async def trim_uploaded_video(
+    file: UploadFile = File(...),
+    startTime: str = Form("00:00:00"),
+    endTime: str = Form("00:00:30"),
+    mode: str = Form("copy")
+):
+    """Lossless or frame-accurate segment trimming for local uploaded video."""
+    clean_name = re.sub(r'[^a-zA-Z0-9_\-\.]', '_', file.filename or "video.mp4")
+    temp_dir = os.path.join(settings.TEMP_STORAGE_DIR, f"trim_{uuid.uuid4().hex[:8]}")
+    os.makedirs(temp_dir, exist_ok=True)
+    in_path = os.path.join(temp_dir, f"input_{clean_name}")
+    out_filename = f"trimmed_{clean_name}"
+    out_path = os.path.join(temp_dir, out_filename)
+
+    with open(in_path, "wb") as f_in:
+        shutil.copyfileobj(file.file, f_in)
+
+    if mode == "copy":
+        cmd = [
+            "ffmpeg", "-y",
+            "-ss", str(startTime), "-to", str(endTime),
+            "-i", in_path,
+            "-c", "copy",
+            out_path
+        ]
+    else:
+        cmd = [
+            "ffmpeg", "-y",
+            "-ss", str(startTime), "-to", str(endTime),
+            "-i", in_path,
+            "-c:v", "libx264", "-crf", "22", "-preset", "fast",
+            "-c:a", "aac", "-b:a", "192k",
+            out_path
+        ]
+
+    try:
+        proc = subprocess.run(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.PIPE, timeout=120)
+        if proc.returncode != 0 or not os.path.exists(out_path):
+            fallback_cmd = [
+                "ffmpeg", "-y", "-i", in_path,
+                "-ss", str(startTime), "-to", str(endTime),
+                "-c", "copy", out_path
+            ]
+            subprocess.run(fallback_cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, timeout=120)
+
+        if not os.path.exists(out_path) or os.path.getsize(out_path) == 0:
+            raise HTTPException(status_code=500, detail="Trimming process failed.")
+
+        return FileResponse(
+            out_path,
+            media_type="video/mp4",
+            filename=out_filename,
+            headers={"Content-Disposition": f'attachment; filename="{out_filename}"'}
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 @router.post("", response_model=JobCreateResponse)
 async def create_job(request: Request, body: JobCreateRequest):

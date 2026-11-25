@@ -271,7 +271,7 @@
     const url = targetUrl || document.getElementById('downloaderUrlInput')?.value?.trim();
     let dest = `/video-trimmer?title=${encodeURIComponent(title)}&type=video`;
     if (activeJobId) dest += `&jobId=${activeJobId}`;
-    else if (url) dest += `&url=${encodeURIComponent(url)}`;
+    if (url) dest += `&url=${encodeURIComponent(url)}`;
     window.location.href = dest;
   }
 
@@ -281,7 +281,7 @@
     const url = targetUrl || document.getElementById('downloaderUrlInput')?.value?.trim();
     let dest = `/auto-clip?title=${encodeURIComponent(title)}`;
     if (activeJobId) dest += `&jobId=${activeJobId}`;
-    else if (url) dest += `&url=${encodeURIComponent(url)}`;
+    if (url) dest += `&url=${encodeURIComponent(url)}`;
     window.location.href = dest;
   }
 

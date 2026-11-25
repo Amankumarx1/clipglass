@@ -638,10 +638,15 @@
   }
 
   // File & Stream Loading Handlers
+  let uploadedVideoFile = null;
+  let localVideoUrl = null;
+  let loadedJobId = null;
+
   function loadVideoFromFile(file) {
     playGlassPop();
-    const objectUrl = URL.createObjectURL(file);
-    realVideo.src = objectUrl;
+    uploadedVideoFile = file;
+    localVideoUrl = URL.createObjectURL(file);
+    realVideo.src = localVideoUrl;
 
     mockContainer.classList.add('hidden');
     realVideo.classList.remove('hidden');
@@ -686,6 +691,7 @@
 
   function loadVideoFromJobId(jobId, title) {
     playGlassPop();
+    loadedJobId = jobId;
     const streamUrl = `/api/v1/jobs/${jobId}/file?inline=1`;
     realVideo.src = streamUrl;
     realVideo.load();
@@ -949,6 +955,42 @@
       }
     }
 
+    // If loaded from a local PC file, trim via high-performance lossless server endpoint!
+    if (uploadedVideoFile) {
+      try {
+        const formData = new FormData();
+        formData.append('file', uploadedVideoFile);
+        formData.append('startTime', startFormatted);
+        formData.append('endTime', endFormatted);
+        formData.append('mode', currentCutMode || 'copy');
+
+        const trimRes = await fetch('/api/v1/jobs/trim-upload', {
+          method: 'POST',
+          body: formData
+        });
+
+        if (trimRes.ok) {
+          const blob = await trimRes.blob();
+          const blobUrl = URL.createObjectURL(blob);
+          const trimmedTitle = `${title} (Trimmed ${startFormatted}-${endFormatted})`;
+          const safeFilename = `${trimmedTitle.replace(/[^a-zA-Z0-9_\-\s]/g, '').trim().replace(/\s+/g, '_')}.mp4`;
+
+          const a = document.createElement('a');
+          a.href = blobUrl;
+          a.download = safeFilename;
+          document.body.appendChild(a);
+          a.click();
+          setTimeout(() => a.remove(), 250);
+
+          if (exportBtnText) exportBtnText.textContent = '↓ Export Trimmed Video';
+          showToast(`Downloaded trimmed video (${startFormatted} to ${endFormatted}) to your PC!`, 'success');
+          return;
+        }
+      } catch (err) {
+        console.warn('Trim upload error:', err);
+      }
+    }
+
     // Local / session video export fallback
     setTimeout(() => {
       if (exportBtnText) exportBtnText.textContent = '↓ Export Trimmed Video';
@@ -994,11 +1036,15 @@
     const qUrl = params.get('url');
     const qTitle = params.get('title');
 
+    if (qUrl) {
+      loadedVideoUrl = qUrl;
+      const qInput = document.getElementById('quickVideoUrlInput');
+      if (qInput) qInput.value = qUrl;
+    }
+
     if (qJobId) {
       loadVideoFromJobId(qJobId, qTitle ? decodeURIComponent(qTitle) : 'Downloaded Video');
     } else if (qUrl) {
-      const qInput = document.getElementById('quickVideoUrlInput');
-      if (qInput) qInput.value = qUrl;
       fetchVideoFromUrl(qUrl);
     } else if (qTitle) {
       loadVideoFromHistory(decodeURIComponent(qTitle), 'MP4 Video Stream', 'High Definition');
