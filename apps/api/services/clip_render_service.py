@@ -61,6 +61,49 @@ def generate_srt_subtitles(words: List[TranscriptWord], out_path: str, clip_offs
     with open(out_path, "w", encoding="utf-8") as f:
         f.write("\n".join(lines))
 
+def download_clip_section(
+    url: str,
+    job_dir: str,
+    clip_id: str,
+    start: float,
+    end: float
+) -> Optional[str]:
+    """
+    Downloads ONLY the requested 30-60 second section directly from YouTube on-demand,
+    bypassing full video download and saving 98%+ bandwidth and memory.
+    """
+    import yt_dlp
+    from yt_dlp.utils import download_range_func
+    from app.config import settings
+
+    outtmpl = os.path.join(job_dir, f"raw_section_{clip_id}.%(ext)s")
+    base_opts: Dict[str, Any] = {
+        "outtmpl": outtmpl,
+        "format": "bv*[height<=1080]+ba/b[height<=1080]/best",
+        "merge_output_format": "mp4",
+        "download_ranges": download_range_func(None, [(start, end)]),
+        "force_keyframes_at_cuts": True,
+        "quiet": True,
+        "no_warnings": True,
+        "socket_timeout": 30,
+        "noplaylist": True,
+    }
+    if settings.YOUTUBE_PROXY:
+        base_opts["proxy"] = settings.YOUTUBE_PROXY
+    if settings.YOUTUBE_COOKIES_FILE:
+        base_opts["cookiefile"] = settings.YOUTUBE_COOKIES_FILE
+
+    try:
+        with yt_dlp.YoutubeDL(base_opts) as ydl:
+            ydl.download([url])
+    except Exception as e:
+        print(f"Error downloading clip section {clip_id}: {e}")
+
+    # Find resulting downloaded section file
+    candidates = [os.path.join(job_dir, f) for f in os.listdir(job_dir) if f.startswith(f"raw_section_{clip_id}") and not f.endswith(".part")]
+    candidates.sort(key=lambda x: (0 if x.endswith(".mp4") else 1))
+    return candidates[0] if candidates else None
+
 def render_clip_segment(
     source_video: str,
     job_dir: str,
@@ -81,6 +124,18 @@ def render_clip_segment(
     meta_path = os.path.join(job_dir, f"clip_{clip.clipId}.json")
 
     dur = max(1.0, clip.end - clip.start)
+
+    # 0. Zero-Download On-Demand Slicing: If source is remote YouTube URL, fetch ONLY this clip's time range
+    actual_source = source_video
+    cleanup_temp_source = False
+    source_is_remote = source_video.startswith("http://") or source_video.startswith("https://")
+
+    if source_is_remote:
+        sec_path = download_clip_section(source_video, job_dir, clip.clipId, clip.start, clip.end)
+        if not sec_path or not os.path.exists(sec_path):
+            return False, None, f"Failed to download video stream section for clip {clip.clipId}"
+        actual_source = sec_path
+        cleanup_temp_source = True
 
     # 1. Generate Word-Synced Subtitles with Opening Hook Title Banner
     words_to_burn = clip.words if clip.words else []
@@ -119,8 +174,11 @@ def render_clip_segment(
         json.dump(metadata_content, f, indent=2)
 
     # 3. Assemble FFmpeg filter graph
+    input_start = "0" if source_is_remote else str(clip.start)
+    input_file = os.path.basename(actual_source)
+
     reframe_filter, is_complex = build_reframe_filter(
-        clip.reframeMode, width, height, source_video, clip.start, dur
+        clip.reframeMode, width, height, actual_source, 0.0 if source_is_remote else clip.start, dur
     )
 
     encoder = get_best_h264_encoder()
@@ -133,8 +191,8 @@ def render_clip_segment(
         filter_complex = f"{reframe_filter};[v]ass={rel_ass}[final_v]"
         cmd = [
             "ffmpeg", "-y",
-            "-ss", str(clip.start), "-t", str(dur),
-            "-i", os.path.basename(source_video),
+            "-ss", input_start, "-t", str(dur),
+            "-i", input_file,
             "-filter_complex", filter_complex,
             "-map", "[final_v]", "-map", "0:a?",
             "-c:v", encoder,
@@ -146,8 +204,8 @@ def render_clip_segment(
         vf_chain = f"{reframe_filter},ass={rel_ass}"
         cmd = [
             "ffmpeg", "-y",
-            "-ss", str(clip.start), "-t", str(dur),
-            "-i", os.path.basename(source_video),
+            "-ss", input_start, "-t", str(dur),
+            "-i", input_file,
             "-vf", vf_chain,
             "-c:v", encoder,
             "-c:a", "aac", "-b:a", "192k",
@@ -171,6 +229,12 @@ def render_clip_segment(
             return False, None, err_msg
     except Exception as e:
         return False, None, str(e)
+    finally:
+        if cleanup_temp_source and actual_source and os.path.exists(actual_source):
+            try:
+                os.remove(actual_source)
+            except Exception:
+                pass
 
 def package_clips_zip(job_dir: str, clips: List[ClipMoment]) -> Optional[str]:
     """

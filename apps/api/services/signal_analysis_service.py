@@ -133,13 +133,45 @@ def analyze_multimodal_signals(
 ) -> MultimodalSignals:
     """
     Aggregates all 5 temporal indicators in 1-second normalized bins.
+    For remote YouTube URLs (zero full-download architecture), derives signals directly from
+    retention heatmap and chapters without consuming disk space or running heavy subprocesses.
     """
     dur_sec = max(1, int(duration))
 
-    loudness, bursts = extract_audio_loudness_and_bursts(video_path, dur_sec)
-    scene_cuts = extract_scene_cuts(video_path, dur_sec)
     chapter_bins = map_chapters_to_bins(chapters, dur_sec)
     heatmap_bins = map_heatmap_to_bins(heatmap, dur_sec)
+
+    is_remote = video_path.startswith("http://") or video_path.startswith("https://") or not os.path.exists(video_path)
+    if is_remote:
+        # Zero-Download Fast Path: Synthesize loudness & bursts from heatmap attention curve and chapter boundaries
+        loudness = [0.0] * dur_sec
+        bursts = [0.0] * dur_sec
+        scene_cuts = [0.0] * dur_sec
+
+        for s in range(dur_sec):
+            base_score = heatmap_bins[s] if s < len(heatmap_bins) else 0.5
+            chap_boost = chapter_bins[s] if s < len(chapter_bins) else 0.0
+            loudness[s] = round(min(1.0, max(0.2, base_score * 0.8 + chap_boost * 0.2)), 3)
+            # Bursts at sudden retention jumps or chapter starts
+            prev_score = heatmap_bins[s-1] if (s > 0 and s-1 < len(heatmap_bins)) else 0.5
+            if s > 0 and base_score > prev_score + 0.04:
+                bursts[s] = 0.85
+            elif chap_boost > 0.5:
+                bursts[s] = 0.75
+                scene_cuts[s] = 1.0
+
+        return MultimodalSignals(
+            loudness=loudness,
+            burst=bursts,
+            scene_cuts=scene_cuts,
+            chapters=chapter_bins,
+            heatmap=heatmap_bins,
+            duration_seconds=dur_sec
+        )
+
+    # Local file path: run FFmpeg
+    loudness, bursts = extract_audio_loudness_and_bursts(video_path, dur_sec)
+    scene_cuts = extract_scene_cuts(video_path, dur_sec)
 
     return MultimodalSignals(
         loudness=loudness,

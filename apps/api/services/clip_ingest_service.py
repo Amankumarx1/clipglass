@@ -100,64 +100,23 @@ def ingest_video_and_metadata(
             suggestedAction="Please verify the video URL and try again."
         )
 
-    # 3. Download Source Video + Audio (Deterministic 2-step: Video stream first, captions next)
-    video_out = os.path.join(job_dir, "source.mp4")
+    # 3. Zero-Download Fast Ingestion: Fetch subtitles/captions only (no full video download)
+    # The full video is NEVER downloaded to save disk and memory; clips are cut on-demand during render.
     outtmpl = os.path.join(job_dir, "source.%(ext)s")
-
-    # Step 3a: Video and Audio stream download
-    download_opts = dict(base_opts)
-    download_opts.update({
-        "outtmpl": outtmpl,
-        "format": "bv*[height<=1080]+ba/b[height<=1080]/best",
-        "merge_output_format": "mp4",
-        "writesubtitles": False,
-        "writeautomaticsub": False,
-    })
-
-    if progress_cb:
-        download_opts["progress_hooks"] = [progress_cb]
-
-    try:
-        with yt_dlp.YoutubeDL(download_opts) as ydl:
-            ydl.download([canonical_url])
-    except Exception as e:
-        mp4_files = [f for f in os.listdir(job_dir) if f.endswith(".mp4")]
-        if not mp4_files:
-            return None, FriendlyError(
-                code="download-error",
-                title="Download Processing Error",
-                explanation=str(e)[:250],
-                suggestedAction="Please retry shortly."
-            )
-
-    # Verify source video exists
-    if not os.path.exists(video_out):
-        mp4_files = [f for f in os.listdir(job_dir) if f.endswith(".mp4")]
-        if mp4_files:
-            video_out = os.path.join(job_dir, mp4_files[0])
-        else:
-            return None, FriendlyError(
-                code="download-failed",
-                title="Source Download Failed",
-                explanation="Could not download video and audio streams for clipping.",
-                suggestedAction="Try another YouTube URL."
-            )
-
-    # Step 3b: Optional subtitles fetch (non-blocking, fallback to faster-whisper on error)
     sub_opts = dict(base_opts)
     sub_opts.update({
         "outtmpl": outtmpl,
         "skip_download": True,
         "writesubtitles": True,
         "writeautomaticsub": True,
-        "subtitleslangs": ["en-IN", "hi", "en", "en-US"],
+        "subtitleslangs": ["en-IN", "hi", "en", "en-US", "all"],
         "subtitlesformat": "json3/vtt/srt",
     })
     try:
         with yt_dlp.YoutubeDL(sub_opts) as ydl:
             ydl.download([canonical_url])
     except Exception:
-        # Non-fatal subtitle error (e.g. YouTube HTTP 429 timedtext); pipeline gracefully falls back
+        # Non-fatal subtitle notice; pipeline gracefully falls back
         pass
 
     # Detect caption file if downloaded (prefer json3, then vtt, then srt)
@@ -166,9 +125,24 @@ def ingest_video_and_metadata(
     candidates.sort(key=lambda x: (0 if x.endswith(".json3") else 1 if x.endswith(".vtt") else 2))
     if candidates:
         caption_path = os.path.join(job_dir, candidates[0])
+    else:
+        # If no native YouTube captions exist, fetch a lightweight low-bitrate audio-only stream for Whisper (~2MB)
+        audio_outtmpl = os.path.join(job_dir, "source_audio.%(ext)s")
+        audio_opts = dict(base_opts)
+        audio_opts.update({
+            "outtmpl": audio_outtmpl,
+            "format": "ba[abr<=48]/ba/worstaudio",
+            "writesubtitles": False,
+            "writeautomaticsub": False,
+        })
+        try:
+            with yt_dlp.YoutubeDL(audio_opts) as ydl:
+                ydl.download([canonical_url])
+        except Exception:
+            pass
 
     return IngestResult(
-        video_path=video_out,
+        video_path=canonical_url,
         duration=duration,
         title=title,
         channel=channel,

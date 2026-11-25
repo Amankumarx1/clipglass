@@ -191,6 +191,9 @@ class ClipJobManager:
             chapters = ingest_res.chapters
             heatmap = ingest_res.heatmap
             caption_path = ingest_res.caption_path
+            record.percent = 35.0
+            record.active_step = "Retrieved stream metadata and subtitles (Zero-Download)..."
+            record.emit_update()
 
         # 2. Transcription Stage
         record.stage = "transcribe"

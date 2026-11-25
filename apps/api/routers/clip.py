@@ -318,7 +318,8 @@ async def render_clip(job_id: str, cid: str):
     if not matched_clip:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Clip moment not found.")
 
-    if not record.source_video or not os.path.exists(record.source_video):
+    is_remote = record.source_video and (record.source_video.startswith("http://") or record.source_video.startswith("https://"))
+    if not record.source_video or (not is_remote and not os.path.exists(record.source_video)):
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Source video is not available.")
 
     matched_clip.status = 'rendering'
