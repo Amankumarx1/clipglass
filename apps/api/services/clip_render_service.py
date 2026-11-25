@@ -173,12 +173,25 @@ def render_clip_segment(
     with open(meta_path, "w", encoding="utf-8") as f:
         json.dump(metadata_content, f, indent=2)
 
-    # 3. Assemble FFmpeg filter graph
+    # 3. Assemble FFmpeg filter graph (Probe source dimensions to handle any resolution cleanly)
+    real_w, real_h = width, height
+    try:
+        probe = subprocess.run(
+            ["ffprobe", "-v", "error", "-select_streams", "v:0", "-show_entries", "stream=width,height", "-of", "csv=s=x:p=0", actual_source],
+            capture_output=True, text=True, timeout=5
+        )
+        if probe.stdout.strip():
+            parts = probe.stdout.strip().split('x')
+            if len(parts) == 2:
+                real_w, real_h = int(parts[0]), int(parts[1])
+    except Exception:
+        pass
+
     input_start = "0" if source_is_remote else str(clip.start)
     input_file = os.path.basename(actual_source)
 
     reframe_filter, is_complex = build_reframe_filter(
-        clip.reframeMode, width, height, actual_source, 0.0 if source_is_remote else clip.start, dur
+        clip.reframeMode, real_w, real_h, actual_source, 0.0 if source_is_remote else clip.start, dur
     )
 
     encoder = get_best_h264_encoder()

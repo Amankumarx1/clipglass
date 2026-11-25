@@ -4,10 +4,8 @@ import math
 from typing import List, Tuple, Optional
 
 def compute_center_crop_filter(width: int, height: int) -> str:
-    """Standard center 9:16 vertical crop with 1080x1920 scaling."""
-    target_w = int(height * 9 / 16)
-    target_w = target_w - (target_w % 2)
-    return f"crop={target_w}:{height}:(iw-ow)/2:0,scale=1080:1920"
+    """Standard center 9:16 vertical crop with 1080x1920 scaling, adaptive to any source resolution."""
+    return "crop='min(iw,ih*9/16)':ih:(iw-ow)/2:0,scale=1080:1920:force_original_aspect_ratio=decrease,pad=1080:1920:(ow-iw)/2:(oh-ih)/2:black"
 
 def compute_split_screen_filter(width: int, height: int) -> str:
     """
@@ -127,10 +125,11 @@ def build_reframe_filter(
     elif reframe_mode in ('follow-face', 'dual-speaker'):
         points = track_faces_opencv_or_mediapipe(video_path, start_time, duration, width, height)
         target_w = int(height * 9 / 16)
-        target_w = target_w - (target_w % 2)
+        target_w = min(width, target_w - (target_w % 2))
 
-        # Compute smoothed optimal center coordinate
+        # Compute smoothed optimal center coordinate clamped to video boundaries
         avg_x = sum(p[1] for p in points) // max(1, len(points))
+        avg_x = max(0, min(avg_x, max(0, width - target_w)))
         avg_x = avg_x - (avg_x % 2)
         return f"crop={target_w}:{height}:{avg_x}:0,scale=1080:1920", False
 
