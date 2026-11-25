@@ -2083,11 +2083,6 @@
       // Ambient orange background light sweep
       const sweep = new THREE.PointLight(0xff5a1f, 0, 16); sweep.position.set(-6, 2, -1); S.add(sweep);
 
-      // Shockwave lock ring
-      const shockGeo = new THREE.RingGeometry(.9, 1.02, 64);
-      const shockMat = new THREE.MeshBasicMaterial({ color: 0xff5a1f, transparent: true, opacity: 0, side: THREE.DoubleSide, depthWrite: false, toneMapped: false });
-      const shock = new THREE.Mesh(shockGeo, shockMat); shock.visible = false; S.add(shock);
-
       // Web Audio API Procedural Sound Design
       let audioCtx = null, soundEnabled = false;
       function initAudio() { if (!audioCtx) { const AC = window.AudioContext || window.webkitAudioContext; if (AC) audioCtx = new AC() } }
@@ -2275,8 +2270,8 @@
 
         const hoverFade = sm(cl((T - 4.1) / 1.0, 0, 1));
         const hoverBob = (still ? 0 : Math.sin(sec * 1.1) * .08 * hoverFade);
-        H.position.set(cr.x - explodeAmt * .65, cr.y - .35 * cr.s + hoverBob + scr, 0);
-        H.scale.setScalar(cr.s * (1 - explodeAmt * .10));
+        H.position.set(cr.x - explodeAmt * .78, cr.y - .35 * cr.s + hoverBob + scr, 0);
+        H.scale.setScalar(cr.s * (1 - explodeAmt * .12));
         H.rotation.y = cr.yaw + drag + smx * .45 + sp * 1.2 + explodeAmt * .26; H.rotation.x = smy * .25; H.rotation.z = -smx * .05;
 
         // Cinematic opening camera
@@ -2294,8 +2289,6 @@
         groundShadow.position.x = H.position.x;
         groundShadow.scale.setScalar(1 + (H.position.y - .5) * .2);
 
-        const sT = T - 4.08;
-        if (sT > 0 && sT < 1.4) { const w = sT / 1.4; shock.visible = true; shock.position.set(H.position.x, H.position.y + .35, -.2); shock.scale.setScalar(1.2 + w * 8.5); shock.material.opacity = (1 - w) * .95 } else { shock.visible = false }
         sweep.position.x = L(-8, 8, cl((T - 2.8) / 2.2, 0, 1)); sweep.intensity = T > 2.8 && T < 5.0 ? 3.8 * Math.sin(cl((T - 2.8) / 2.2, 0, 1) * Math.PI) : 0;
         if (!tick.on) { cv.classList.add('on'); tick.on = 1 }
         if (sp < .995) R.render(S, C);
