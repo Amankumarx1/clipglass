@@ -21,7 +21,7 @@ def test_downloader_page():
     assert "downloaderUrlInput" in response.text
     assert "Paste Link" in response.text
     assert "handleDownloaderPasteClick" in response.text
-    assert "consentCheck" in response.text
+    assert "openActiveInAutoClip" in response.text
     assert "inspectBtn" in response.text
     assert "startVideoBtn" in response.text
     assert "startAudioBtn" in response.text
