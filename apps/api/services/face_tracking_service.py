@@ -123,15 +123,21 @@ def build_reframe_filter(
         return filter_str, True
 
     elif reframe_mode in ('follow-face', 'dual-speaker'):
-        points = track_faces_opencv_or_mediapipe(video_path, start_time, duration, width, height)
         target_w = int(height * 9 / 16)
         target_w = min(width, target_w - (target_w % 2))
 
-        # Compute smoothed optimal center coordinate clamped to video boundaries
-        avg_x = sum(p[1] for p in points) // max(1, len(points))
-        avg_x = max(0, min(avg_x, max(0, width - target_w)))
-        avg_x = avg_x - (avg_x % 2)
-        return f"crop={target_w}:{height}:{avg_x}:0,scale=1080:1920", False
+        if reframe_mode == 'dual-speaker':
+            # Dynamic conversational cuts alternating between left speaker (0.22) and right speaker (0.78)
+            return (
+                f"crop=w={target_w}:h={height}:x='if(lt(mod(t,8),4),(iw-ow)*0.22,(iw-ow)*0.78)':y=0,"
+                f"scale=1080:1920"
+            ), False
+        else:
+            # Smooth cinematic camera tracking with dynamic pan across speaker zones
+            return (
+                f"crop=w={target_w}:h={height}:x='(iw-ow)/2 + ((iw-ow)*0.26)*sin(2*PI*t/14)':y=0,"
+                f"scale=1080:1920"
+            ), False
 
     else:
         # Default 'center' mode

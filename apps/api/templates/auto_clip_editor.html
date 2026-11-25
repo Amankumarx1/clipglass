@@ -274,11 +274,11 @@
     const preview = document.getElementById('liveCaptionPreview');
     if (!preview) return;
     preview.className = `caption-preview-box text-center text-sm drop-shadow-[0_2px_8px_rgba(0,0,0,0.9)] ${editorCaptionMap[presetKey] || 'caption-style-viral_pop'}`;
-    const img = document.getElementById('editorVideoImg');
-    if (img) {
-      img.classList.remove('stage-camera-zooming');
-      void img.offsetWidth;
-      img.classList.add('stage-camera-zooming');
+    const mediaEl = document.getElementById('editorVideoPlayer') || document.getElementById('editorVideoImg');
+    if (mediaEl) {
+      mediaEl.classList.remove('stage-camera-zooming');
+      void mediaEl.offsetWidth;
+      mediaEl.classList.add('stage-camera-zooming');
     }
     updateCaptionPreview();
   }
@@ -289,11 +289,11 @@
     const badge = document.getElementById('editorFrameBadge');
     const overlay = document.getElementById('editorFrameGuideOverlay');
     if (badge) badge.textContent = `9:16 SAFE ZONE • ${modelKey.toUpperCase()}`;
-    const img = document.getElementById('editorVideoImg');
-    if (img) {
-      img.classList.remove('stage-camera-zooming');
-      void img.offsetWidth;
-      img.classList.add('stage-camera-zooming');
+    const mediaEl = document.getElementById('editorVideoPlayer') || document.getElementById('editorVideoImg');
+    if (mediaEl) {
+      mediaEl.classList.remove('stage-camera-zooming');
+      void mediaEl.offsetWidth;
+      mediaEl.classList.add('stage-camera-zooming');
     }
 
     if (!overlay) return;
@@ -436,14 +436,17 @@
           if (clip.reframeMode) {
             setEditorFrameModel(clip.reframeMode);
           }
-          if (clip.videoUrl) {
+          const videoSrc = clip.videoUrl || (activeJobId && activeClipId ? `/api/clip/jobs/${activeJobId}/clips/${activeClipId}/download` : '');
+          if (videoSrc) {
             const img = document.getElementById('editorVideoImg');
             if (img) {
               const video = document.createElement('video');
               video.id = 'editorVideoPlayer';
-              video.src = clip.videoUrl;
+              video.src = videoSrc;
               video.playsInline = true;
               video.loop = true;
+              video.autoplay = true;
+              video.muted = true;
               video.className = 'w-full h-full object-cover';
               img.replaceWith(video);
             }

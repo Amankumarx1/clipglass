@@ -131,32 +131,149 @@
       <!-- Reframe Mode (7 Models) -->
       <div>
         <label class="text-[10px] uppercase font-semibold text-[#8B8D98] tracking-wider block mb-1.5">Reframe Mode</label>
-        <select id="clipReframeSelect" onchange="syncReframeSelectToStudio(this.value)" class="w-full h-9 px-3 rounded-full text-xs bg-[#0e0f16] text-white border border-white/10 outline-none hover:border-white/20 transition-all cursor-pointer">
-          <option value="follow-face">Follow Speaker Face (AI YuNet)</option>
-          <option value="center">Center Crop 9:16</option>
-          <option value="split">Split Screen Stack (Dual Layer)</option>
-          <option value="dual-speaker">Dual-Speaker Switcher</option>
-          <option value="blurred-fill">Blurred Mirror Pillarbox Fill</option>
-          <option value="letterbox">Cinematic 2.35:1 Letterbox</option>
-          <option value="pip">Picture-in-Picture (PiP Reaction)</option>
-        </select>
+        <div class="relative" id="clipReframeWrapper">
+          <select id="clipReframeSelect" onchange="syncReframeSelectToStudio(this.value)" class="hidden">
+            <option value="follow-face" selected>Follow Speaker Face (AI YuNet)</option>
+            <option value="center">Center Crop 9:16</option>
+            <option value="split">Split Screen Stack (Dual Layer)</option>
+            <option value="dual-speaker">Dual-Speaker Switcher</option>
+            <option value="blurred-fill">Blurred Mirror Pillarbox Fill</option>
+            <option value="letterbox">Cinematic 2.35:1 Letterbox</option>
+            <option value="pip">Picture-in-Picture (PiP Reaction)</option>
+          </select>
+          <button type="button" id="clipReframeTrigger" onclick="toggleReframeMenu()"
+            class="w-full h-9 px-3 rounded-full bg-[#0e0f16] hover:bg-[#181924] text-white border border-white/10 hover:border-white/20 flex items-center justify-between text-xs font-semibold transition-all cursor-pointer shadow-sm">
+            <span id="clipReframeSelectedText" class="truncate">Follow Speaker Face (AI YuNet)</span>
+            <svg id="clipReframeChevron" class="w-3.5 h-3.5 text-[#8B8D98] transition-transform duration-200 shrink-0 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+          </button>
+          <div id="clipReframeMenu"
+            class="hidden absolute top-10 left-0 right-0 z-50 bg-[#12131a] border border-white/10 rounded-2xl shadow-2xl p-1.5 flex flex-col gap-1 backdrop-blur-xl max-h-60 overflow-y-auto">
+            <button type="button" onclick="selectReframeOption('follow-face', 'Follow Speaker Face (AI YuNet)')"
+              class="reframe-opt px-3 py-2 rounded-xl text-xs font-semibold text-left flex items-center justify-between transition-all bg-[#ff5a1f]/15 text-[#ff5a1f] border border-[#ff5a1f]/30" data-value="follow-face">
+              <span>Follow Speaker Face (AI YuNet)</span>
+              <span class="text-xs">✓</span>
+            </button>
+            <button type="button" onclick="selectReframeOption('center', 'Center Crop 9:16')"
+              class="reframe-opt px-3 py-2 rounded-xl text-xs font-semibold text-left flex items-center justify-between transition-all text-[#8B8D98] hover:text-white hover:bg-white/5" data-value="center">
+              <span>Center Crop 9:16</span>
+              <span class="text-xs opacity-0">✓</span>
+            </button>
+            <button type="button" onclick="selectReframeOption('split', 'Split Screen Stack (Dual Layer)')"
+              class="reframe-opt px-3 py-2 rounded-xl text-xs font-semibold text-left flex items-center justify-between transition-all text-[#8B8D98] hover:text-white hover:bg-white/5" data-value="split">
+              <span>Split Screen Stack (Dual Layer)</span>
+              <span class="text-xs opacity-0">✓</span>
+            </button>
+            <button type="button" onclick="selectReframeOption('dual-speaker', 'Dual-Speaker Switcher')"
+              class="reframe-opt px-3 py-2 rounded-xl text-xs font-semibold text-left flex items-center justify-between transition-all text-[#8B8D98] hover:text-white hover:bg-white/5" data-value="dual-speaker">
+              <span>Dual-Speaker Switcher</span>
+              <span class="text-xs opacity-0">✓</span>
+            </button>
+            <button type="button" onclick="selectReframeOption('blurred-fill', 'Blurred Mirror Pillarbox Fill')"
+              class="reframe-opt px-3 py-2 rounded-xl text-xs font-semibold text-left flex items-center justify-between transition-all text-[#8B8D98] hover:text-white hover:bg-white/5" data-value="blurred-fill">
+              <span>Blurred Mirror Pillarbox Fill</span>
+              <span class="text-xs opacity-0">✓</span>
+            </button>
+            <button type="button" onclick="selectReframeOption('letterbox', 'Cinematic 2.35:1 Letterbox')"
+              class="reframe-opt px-3 py-2 rounded-xl text-xs font-semibold text-left flex items-center justify-between transition-all text-[#8B8D98] hover:text-white hover:bg-white/5" data-value="letterbox">
+              <span>Cinematic 2.35:1 Letterbox</span>
+              <span class="text-xs opacity-0">✓</span>
+            </button>
+            <button type="button" onclick="selectReframeOption('pip', 'Picture-in-Picture (PiP Reaction)')"
+              class="reframe-opt px-3 py-2 rounded-xl text-xs font-semibold text-left flex items-center justify-between transition-all text-[#8B8D98] hover:text-white hover:bg-white/5" data-value="pip">
+              <span>Picture-in-Picture (PiP Reaction)</span>
+              <span class="text-xs opacity-0">✓</span>
+            </button>
+          </div>
+        </div>
       </div>
 
       <!-- Caption Style (10 Presets) -->
       <div>
         <label class="text-[10px] uppercase font-semibold text-[#8B8D98] tracking-wider block mb-1.5">Caption Preset</label>
-        <select id="clipCaptionSelect" onchange="syncCaptionSelectToStudio(this.value)" class="w-full h-9 px-3 rounded-full text-xs bg-[#0e0f16] text-white border border-white/10 outline-none hover:border-white/20 transition-all cursor-pointer">
-          <option value="viral_pop">Viral Pop (Highlight)</option>
-          <option value="minimalist">Clean Minimalist</option>
-          <option value="neon_cyber">Neon Cyber (Glow)</option>
-          <option value="karaoke">Karaoke Word Bounce</option>
-          <option value="headline">Bold Headline (Impact)</option>
-          <option value="dynamic_box">Dynamic Pill Box</option>
-          <option value="glitch_cyber">Glitch Cyberpunk</option>
-          <option value="gold_luxury">Gold Metallic Luxury</option>
-          <option value="comic_pop">Retro Comic Pop</option>
-          <option value="cinematic_sub">Cinematic Subtitle</option>
-        </select>
+        <div class="relative" id="clipCaptionWrapper">
+          <select id="clipCaptionSelect" onchange="syncCaptionSelectToStudio(this.value)" class="hidden">
+            <option value="viral_pop" selected>Viral Pop (Highlight)</option>
+            <option value="minimalist">Clean Minimalist</option>
+            <option value="neon_cyber">Neon Cyber (Glow)</option>
+            <option value="karaoke">Karaoke Word Bounce</option>
+            <option value="headline">Bold Headline (Impact)</option>
+            <option value="dynamic_box">Dynamic Pill Box</option>
+            <option value="glitch_cyber">Glitch Cyberpunk</option>
+            <option value="gold_luxury">Gold Metallic Luxury</option>
+            <option value="comic_pop">Retro Comic Pop</option>
+            <option value="cinematic_sub">Cinematic Subtitle</option>
+          </select>
+          <button type="button" id="clipCaptionTrigger" onclick="toggleCaptionMenu()"
+            class="w-full h-9 px-3 rounded-full bg-[#0e0f16] hover:bg-[#181924] text-white border border-white/10 hover:border-white/20 flex items-center justify-between text-xs font-semibold transition-all cursor-pointer shadow-sm">
+            <span id="clipCaptionSelectedText" class="truncate">Viral Pop (Highlight)</span>
+            <svg id="clipCaptionChevron" class="w-3.5 h-3.5 text-[#8B8D98] transition-transform duration-200 shrink-0 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+          </button>
+          <div id="clipCaptionMenu"
+            class="hidden absolute top-10 left-0 right-0 z-50 bg-[#12131a] border border-white/10 rounded-2xl shadow-2xl p-1.5 flex flex-col gap-1 backdrop-blur-xl max-h-60 overflow-y-auto">
+            <button type="button" onclick="selectCaptionOption('viral_pop', 'Viral Pop (Highlight)')"
+              class="caption-opt px-3 py-2 rounded-xl text-xs font-semibold text-left flex items-center justify-between transition-all bg-[#ff5a1f]/15 text-[#ff5a1f] border border-[#ff5a1f]/30" data-value="viral_pop">
+              <span>Viral Pop (Highlight)</span>
+              <span class="text-xs">✓</span>
+            </button>
+            <button type="button" onclick="selectCaptionOption('minimalist', 'Clean Minimalist')"
+              class="caption-opt px-3 py-2 rounded-xl text-xs font-semibold text-left flex items-center justify-between transition-all text-[#8B8D98] hover:text-white hover:bg-white/5" data-value="minimalist">
+              <span>Clean Minimalist</span>
+              <span class="text-xs opacity-0">✓</span>
+            </button>
+            <button type="button" onclick="selectCaptionOption('neon_cyber', 'Neon Cyber (Glow)')"
+              class="caption-opt px-3 py-2 rounded-xl text-xs font-semibold text-left flex items-center justify-between transition-all text-[#8B8D98] hover:text-white hover:bg-white/5" data-value="neon_cyber">
+              <span>Neon Cyber (Glow)</span>
+              <span class="text-xs opacity-0">✓</span>
+            </button>
+            <button type="button" onclick="selectCaptionOption('karaoke', 'Karaoke Word Bounce')"
+              class="caption-opt px-3 py-2 rounded-xl text-xs font-semibold text-left flex items-center justify-between transition-all text-[#8B8D98] hover:text-white hover:bg-white/5" data-value="karaoke">
+              <span>Karaoke Word Bounce</span>
+              <span class="text-xs opacity-0">✓</span>
+            </button>
+            <button type="button" onclick="selectCaptionOption('headline', 'Bold Headline (Impact)')"
+              class="caption-opt px-3 py-2 rounded-xl text-xs font-semibold text-left flex items-center justify-between transition-all text-[#8B8D98] hover:text-white hover:bg-white/5" data-value="headline">
+              <span>Bold Headline (Impact)</span>
+              <span class="text-xs opacity-0">✓</span>
+            </button>
+            <button type="button" onclick="selectCaptionOption('dynamic_box', 'Dynamic Pill Box')"
+              class="caption-opt px-3 py-2 rounded-xl text-xs font-semibold text-left flex items-center justify-between transition-all text-[#8B8D98] hover:text-white hover:bg-white/5" data-value="dynamic_box">
+              <span>Dynamic Pill Box</span>
+              <span class="text-xs opacity-0">✓</span>
+            </button>
+            <button type="button" onclick="selectCaptionOption('glitch_cyber', 'Glitch Cyberpunk')"
+              class="caption-opt px-3 py-2 rounded-xl text-xs font-semibold text-left flex items-center justify-between transition-all text-[#8B8D98] hover:text-white hover:bg-white/5" data-value="glitch_cyber">
+              <span>Glitch Cyberpunk</span>
+              <span class="text-xs opacity-0">✓</span>
+            </button>
+            <button type="button" onclick="selectCaptionOption('gold_luxury', 'Gold Metallic Luxury')"
+              class="caption-opt px-3 py-2 rounded-xl text-xs font-semibold text-left flex items-center justify-between transition-all text-[#8B8D98] hover:text-white hover:bg-white/5" data-value="gold_luxury">
+              <span>Gold Metallic Luxury</span>
+              <span class="text-xs opacity-0">✓</span>
+            </button>
+            <button type="button" onclick="selectCaptionOption('comic_pop', 'Retro Comic Pop')"
+              class="caption-opt px-3 py-2 rounded-xl text-xs font-semibold text-left flex items-center justify-between transition-all text-[#8B8D98] hover:text-white hover:bg-white/5" data-value="comic_pop">
+              <span>Retro Comic Pop</span>
+              <span class="text-xs opacity-0">✓</span>
+            </button>
+            <button type="button" onclick="selectCaptionOption('cinematic_sub', 'Cinematic Subtitle')"
+              class="caption-opt px-3 py-2 rounded-xl text-xs font-semibold text-left flex items-center justify-between transition-all text-[#8B8D98] hover:text-white hover:bg-white/5" data-value="cinematic_sub">
+              <span>Cinematic Subtitle</span>
+              <span class="text-xs opacity-0">✓</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Configuration Quick Indicator -->
+      <div class="col-span-full pt-1 flex items-center justify-between text-[11px] text-[#8B8D98] bg-[#0e0f16] px-4 py-2 rounded-full border border-white/5 flex-wrap gap-2">
+        <div class="flex items-center gap-2">
+          <span class="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_8px_#34d399]"></span>
+          <span id="activePresetSummaryText" class="font-medium text-white truncate">Active: Follow Speaker Face (AI YuNet) • Viral Pop (Highlight)</span>
+        </div>
+        <button type="button" onclick="openSelectionZoomOverlay('all')" class="text-[#ff5a1f] hover:underline font-semibold flex items-center gap-1 cursor-pointer">
+          <span>Inspect Framing &amp; Captions</span>
+          <span>→</span>
+        </button>
       </div>
     </div>
 
@@ -894,21 +1011,105 @@
 
   function updateActiveSummary() {
     const summary = document.getElementById('zoomTriggerBadge');
+    const capName = captionPresetsMap[activeCaptionPreset]?.name || activeCaptionPreset;
+    const frameName = frameModelsMap[activeFrameModel]?.name || activeFrameModel;
     if (summary) {
-      const capName = captionPresetsMap[activeCaptionPreset]?.name || activeCaptionPreset;
-      const frameName = frameModelsMap[activeFrameModel]?.name || activeFrameModel;
       summary.textContent = `${capName} • ${frameName}`;
+    }
+    const indicator = document.getElementById('activePresetSummaryText');
+    if (indicator) {
+      indicator.textContent = `Active: ${frameName} • ${capName}`;
     }
   }
 
+  function toggleReframeMenu() {
+    if (window.playGlassTick) window.playGlassTick();
+    const menu = document.getElementById('clipReframeMenu');
+    const chevron = document.getElementById('clipReframeChevron');
+    if (menu) menu.classList.toggle('hidden');
+    if (chevron) chevron.classList.toggle('rotate-180');
+  }
+
+  function selectReframeOption(val, label) {
+    if (window.playGlassTick) window.playGlassTick();
+    const sel = document.getElementById('clipReframeSelect');
+    if (sel) {
+      sel.value = val;
+    }
+    const lbl = document.getElementById('clipReframeSelectedText');
+    if (lbl) lbl.textContent = label;
+    document.querySelectorAll('.reframe-opt').forEach(opt => {
+      const match = opt.getAttribute('data-value') === val;
+      if (match) {
+        opt.className = 'reframe-opt px-3 py-2 rounded-xl text-xs font-semibold text-left flex items-center justify-between transition-all bg-[#ff5a1f]/15 text-[#ff5a1f] border border-[#ff5a1f]/30';
+        opt.querySelector('span:last-child').classList.remove('opacity-0');
+      } else {
+        opt.className = 'reframe-opt px-3 py-2 rounded-xl text-xs font-semibold text-left flex items-center justify-between transition-all text-[#8B8D98] hover:text-white hover:bg-white/5';
+        opt.querySelector('span:last-child').classList.add('opacity-0');
+      }
+    });
+    toggleReframeMenu();
+    syncReframeSelectToStudio(val);
+  }
+
+  function toggleCaptionMenu() {
+    if (window.playGlassTick) window.playGlassTick();
+    const menu = document.getElementById('clipCaptionMenu');
+    const chevron = document.getElementById('clipCaptionChevron');
+    if (menu) menu.classList.toggle('hidden');
+    if (chevron) chevron.classList.toggle('rotate-180');
+  }
+
+  function selectCaptionOption(val, label) {
+    if (window.playGlassTick) window.playGlassTick();
+    const sel = document.getElementById('clipCaptionSelect');
+    if (sel) {
+      sel.value = val;
+    }
+    const lbl = document.getElementById('clipCaptionSelectedText');
+    if (lbl) lbl.textContent = label;
+    document.querySelectorAll('.caption-opt').forEach(opt => {
+      const match = opt.getAttribute('data-value') === val;
+      if (match) {
+        opt.className = 'caption-opt px-3 py-2 rounded-xl text-xs font-semibold text-left flex items-center justify-between transition-all bg-[#ff5a1f]/15 text-[#ff5a1f] border border-[#ff5a1f]/30';
+        opt.querySelector('span:last-child').classList.remove('opacity-0');
+      } else {
+        opt.className = 'caption-opt px-3 py-2 rounded-xl text-xs font-semibold text-left flex items-center justify-between transition-all text-[#8B8D98] hover:text-white hover:bg-white/5';
+        opt.querySelector('span:last-child').classList.add('opacity-0');
+      }
+    });
+    toggleCaptionMenu();
+    syncCaptionSelectToStudio(val);
+  }
+
+  document.addEventListener('click', (e) => {
+    const rWrap = document.getElementById('clipReframeWrapper');
+    const rMenu = document.getElementById('clipReframeMenu');
+    if (rWrap && rMenu && !rWrap.contains(e.target)) {
+      rMenu.classList.add('hidden');
+      const chev = document.getElementById('clipReframeChevron');
+      if (chev) chev.classList.remove('rotate-180');
+    }
+
+    const cWrap = document.getElementById('clipCaptionWrapper');
+    const cMenu = document.getElementById('clipCaptionMenu');
+    if (cWrap && cMenu && !cWrap.contains(e.target)) {
+      cMenu.classList.add('hidden');
+      const chev = document.getElementById('clipCaptionChevron');
+      if (chev) chev.classList.remove('rotate-180');
+    }
+  });
+
   function syncCaptionSelectToStudio(val) {
     selectCaptionPreset(val);
-    openSelectionZoomOverlay('caption');
+    updateActiveSummary();
+    if (window.showToast) window.showToast(`Caption Preset: ${captionPresetsMap[val]?.name || val}`, 'info');
   }
 
   function syncReframeSelectToStudio(val) {
     selectFrameModel(val);
-    openSelectionZoomOverlay('reframe');
+    updateActiveSummary();
+    if (window.showToast) window.showToast(`Reframe Mode: ${frameModelsMap[val]?.name || val}`, 'info');
   }
 
   const sampleClipsData = [
@@ -1350,6 +1551,8 @@
         videoUrl: c.videoUrl || null,
         status: c.status || 'discovered',
         part: c.part || null,
+        reframeMode: c.reframeMode || activeFrameModel || 'follow-face',
+        captionPreset: c.captionPreset || activeCaptionPreset || 'viral_pop',
         captions: c.words ? c.words.map(w => w.word) : []
       };
     });
@@ -1394,8 +1597,8 @@
 
           <!-- Dynamic Caption Overlay -->
           <div id="clipCaptionOverlay-${idx}" class="absolute bottom-4 inset-x-2 text-center pointer-events-none z-10">
-            <div class="inline-block px-3 py-1.5 rounded-full bg-black/80 backdrop-blur-md border border-white/10 shadow-lg">
-              <p class="font-extrabold text-[11px] text-yellow-300 uppercase tracking-wide truncate max-w-[200px]">
+            <div class="caption-preview-box inline-block px-3 py-1.5 rounded-xl ${captionPresetsMap[c.captionPreset || activeCaptionPreset]?.cls || 'caption-style-viral_pop'} shadow-2xl transition-all duration-300">
+              <p class="font-black text-[12px] uppercase tracking-wide truncate max-w-[220px]">
                 ${c.hook}
               </p>
             </div>
@@ -1409,8 +1612,16 @@
             <span class="text-[#8B8D98] font-mono text-[11px]">${c.dur}</span>
           </div>
 
-          <!-- Evidence Sub-Score Pills -->
+          <!-- Evidence & Configuration Sub-Score Pills -->
           <div class="flex items-center gap-1.5 flex-wrap">
+            <span class="text-[9px] px-2 py-0.5 rounded-full bg-blue-500/20 border border-blue-500/30 text-blue-300 font-mono font-bold flex items-center gap-1">
+              <span>📐</span>
+              <span>${frameModelsMap[c.reframeMode || activeFrameModel]?.name || '9:16 Reframe'}</span>
+            </span>
+            <span class="text-[9px] px-2 py-0.5 rounded-full bg-amber-400/20 border border-amber-400/30 text-amber-300 font-mono font-bold flex items-center gap-1">
+              <span>💬</span>
+              <span>${captionPresetsMap[c.captionPreset || activeCaptionPreset]?.name || 'Viral Pop'}</span>
+            </span>
             <span class="text-[10px] px-2 py-0.5 rounded-full bg-white/5 border border-white/10 text-slate-300 font-mono">Hook: ${c.hookScore}%</span>
             <span class="text-[10px] px-2 py-0.5 rounded-full bg-white/5 border border-white/10 text-slate-300 font-mono">Engage: ${c.engagementScore}%</span>
             <span class="text-[10px] px-2 py-0.5 rounded-full bg-white/5 border border-white/10 text-slate-300 font-mono">Retention: ${c.valueScore}%</span>
@@ -1545,8 +1756,17 @@
     if (modal && vid && c) {
       document.getElementById('modalClipTitle').textContent = c.title || 'Preview Short';
       document.getElementById('modalHookText').textContent = c.hook || 'VIRAL HOOK';
-      document.getElementById('modalCaptionText').textContent = c.hook || 'VIRAL HOOK';
-      vid.src = c.videoUrl;
+      const capDisplay = document.getElementById('modalCaptionText');
+      if (capDisplay) {
+        capDisplay.textContent = c.hook || 'VIRAL HOOK';
+        const presetKey = c.captionPreset || activeCaptionPreset || 'viral_pop';
+        const presetCls = captionPresetsMap[presetKey]?.cls || 'caption-style-viral_pop';
+        capDisplay.className = `caption-preview-box text-center font-black text-sm sm:text-base ${presetCls}`;
+      }
+      const streamUrl = c.videoUrl || (currentClipJobId ? `/api/clip/jobs/${currentClipJobId}/clips/${c.cid}/download` : '');
+      if (streamUrl) {
+        vid.src = streamUrl;
+      }
       vid.currentTime = 0;
       modal.classList.remove('hidden');
 
