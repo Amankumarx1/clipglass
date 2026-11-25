@@ -260,7 +260,7 @@
       const btn = document.getElementById('tabBtn' + t.charAt(0).toUpperCase() + t.slice(1));
       const content = document.getElementById('tabContent' + t.charAt(0).toUpperCase() + t.slice(1));
       if (t === tabName) {
-        if (btn) btn.className = "flex-1 py-1.5 rounded-full bg-[#2165F7] text-white font-semibold text-center transition-all";
+        if (btn) btn.className = "flex-1 py-1.5 rounded-full bg-[#ff5a1f] text-white font-semibold text-center transition-all";
         if (content) content.classList.remove('hidden');
       } else {
         if (btn) btn.className = "flex-1 py-1.5 rounded-full text-[#8B8D98] hover:text-white text-center transition-all";
@@ -285,6 +285,7 @@
 
   function setEditorFrameModel(modelKey) {
     if (window.playGlassTick) window.playGlassTick();
+    activeFrameModel = modelKey;
     const badge = document.getElementById('editorFrameBadge');
     const overlay = document.getElementById('editorFrameGuideOverlay');
     if (badge) badge.textContent = `9:16 SAFE ZONE • ${modelKey.toUpperCase()}`;
@@ -386,6 +387,11 @@
     isPlaying = !isPlaying;
     const btn = document.getElementById('editorPlayBtn');
     if (btn) btn.textContent = isPlaying ? '❚❚' : '▶';
+    const vid = document.getElementById('editorVideoPlayer');
+    if (vid) {
+      if (isPlaying) vid.play();
+      else vid.pause();
+    }
   }
 
   function cycleAspectRatio() {

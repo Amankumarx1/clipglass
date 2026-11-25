@@ -161,6 +161,10 @@
       <!-- 3. Subtitles & Metadata (Simple Checkbox Rows) -->
       <div class="flex flex-col gap-2.5 pt-3 border-t border-white/[0.08] text-xs text-[#8B8D98]">
         <label class="flex items-center gap-2.5 cursor-pointer hover:text-white transition-colors">
+          <input type="checkbox" id="consentCheck" checked class="w-4 h-4 rounded accent-[#ff5a1f]" />
+          <span>I confirm I own this media or have rights to process it</span>
+        </label>
+        <label class="flex items-center gap-2.5 cursor-pointer hover:text-white transition-colors">
           <input type="checkbox" id="embedThumbnailCheck" checked class="w-4 h-4 rounded accent-[#ff5a1f]" />
           <span>Embed video cover art into file</span>
         </label>
@@ -348,15 +352,18 @@
 
   document.addEventListener('DOMContentLoaded', () => {
     // Apply user media preferences from settings
-    const prefRes = localStorage.getItem('clipglass-default-res');
+    const prefRes = localStorage.getItem('clipglass_pref_res') || localStorage.getItem('clipglass-default-res');
     if (prefRes) {
-      const resBtn = Array.from(document.querySelectorAll('.res-btn')).find(b => b.textContent.includes(prefRes.replace('p', '')));
-      if (resBtn) resBtn.click();
+      selectQuality(prefRes);
     }
-    const prefFmt = localStorage.getItem('clipglass-default-fmt');
+    const prefFmt = localStorage.getItem('clipglass_pref_fmt') || localStorage.getItem('clipglass-default-fmt');
     if (prefFmt) {
-      const fmtBtn = Array.from(document.querySelectorAll('.fmt-btn')).find(b => b.textContent.toLowerCase() === prefFmt.toLowerCase());
-      if (fmtBtn) fmtBtn.click();
+      const containerSel = document.getElementById('containerFormat');
+      if (containerSel) containerSel.value = prefFmt.toLowerCase();
+    }
+    const prefAbr = localStorage.getItem('clipglass_pref_abr') || localStorage.getItem('clipglass-default-abr');
+    if (prefAbr) {
+      selectAudioFormat(prefAbr === 'flac' ? 'flac' : (prefAbr === 'wav' ? 'wav' : 'mp3'), prefAbr === '320k' ? 320 : 0);
     }
     const params = new URLSearchParams(window.location.search);
     const qUrl = params.get('url');
@@ -456,21 +463,21 @@
 
     // Reset styles
     [videoAudioBtn, videoOnlyBtn, audioOnlyBtn].forEach(b => {
-      b.className = 'py-2.5 rounded-xl text-xs font-bold transition-all text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white flex items-center justify-center gap-1.5';
+      b.className = 'py-2 rounded-full text-xs font-semibold transition-all text-[#8B8D98] hover:text-white flex items-center justify-center gap-1.5';
     });
 
     if (mode === 'audio') {
-      audioOnlyBtn.className = 'py-2.5 rounded-xl text-xs font-bold transition-all bg-purple-600 text-white shadow-sm flex items-center justify-center gap-1.5';
+      audioOnlyBtn.className = 'py-2 rounded-full text-xs font-semibold transition-all bg-[#ff5a1f] text-white shadow-sm flex items-center justify-center gap-1.5';
       videoSec.classList.add('hidden');
       audioSec.classList.remove('hidden');
       document.getElementById('estimatedSizeText').textContent = '~7.2 MB';
     } else if (mode === 'video-only') {
-      videoOnlyBtn.className = 'py-2.5 rounded-xl text-xs font-bold transition-all bg-blue-600 text-white shadow-sm flex items-center justify-center gap-1.5';
+      videoOnlyBtn.className = 'py-2 rounded-full text-xs font-semibold transition-all bg-[#ff5a1f] text-white shadow-sm flex items-center justify-center gap-1.5';
       videoSec.classList.remove('hidden');
       audioSec.classList.add('hidden');
       document.getElementById('estimatedSizeText').textContent = '~180 MB';
     } else {
-      videoAudioBtn.className = 'py-2.5 rounded-xl text-xs font-bold transition-all bg-blue-600 text-white shadow-sm flex items-center justify-center gap-1.5';
+      videoAudioBtn.className = 'py-2 rounded-full text-xs font-semibold transition-all bg-[#ff5a1f] text-white shadow-sm flex items-center justify-center gap-1.5';
       videoSec.classList.remove('hidden');
       audioSec.classList.add('hidden');
       document.getElementById('estimatedSizeText').textContent = '~248 MB';
@@ -481,9 +488,11 @@
     selectedVideoQuality = q;
     playGlassTick();
     document.querySelectorAll('.quality-btn').forEach(b => {
-      b.className = 'quality-btn px-4 py-2 rounded-xl text-xs font-bold glass text-slate-600 dark:text-slate-300 hover:bg-white/30';
+      b.className = 'quality-btn px-4 py-1.5 rounded-full text-xs font-semibold bg-[#0e0f16] text-[#8B8D98] hover:text-white border border-white/10';
+      if (b.textContent.toLowerCase().includes(q.toLowerCase())) {
+        b.className = 'quality-btn px-4 py-1.5 rounded-full text-xs font-semibold bg-[#ff5a1f]/20 text-white border border-[#ff5a1f]/50';
+      }
     });
-    event.target.className = 'quality-btn px-4 py-2 rounded-xl text-xs font-bold bg-blue-500/20 text-blue-600 dark:text-blue-400 border border-blue-500/30';
   }
 
   function selectAudioFormat(fmt, bitrate) {
@@ -491,21 +500,34 @@
     selectedAudioBitrate = bitrate;
     playGlassTick();
     document.querySelectorAll('.audio-btn').forEach(b => {
-      b.className = 'audio-btn px-4 py-2 rounded-xl text-xs font-bold glass text-slate-600 dark:text-slate-300 hover:bg-white/30';
+      b.className = 'audio-btn px-4 py-1.5 rounded-full text-xs font-semibold bg-[#0e0f16] text-[#8B8D98] hover:text-white border border-white/10';
+      if (b.textContent.toLowerCase().includes(fmt.toLowerCase())) {
+        b.className = 'audio-btn px-4 py-1.5 rounded-full text-xs font-semibold bg-[#ff5a1f]/20 text-white border border-[#ff5a1f]/50';
+      }
     });
-    event.target.className = 'audio-btn px-4 py-2 rounded-xl text-xs font-bold bg-purple-500/20 text-purple-600 dark:text-purple-400 border border-purple-500/30';
   }
 
   async function triggerDownload(type) {
-    if (!document.getElementById('consentCheck').checked) {
+    const consentEl = document.getElementById('consentCheck');
+    if (consentEl && !consentEl.checked) {
       showToast('Please check the consent box to proceed', 'error');
       return;
     }
     playGlassPop();
 
-    const reqFilename = document.getElementById('customFilename').value.trim() || document.getElementById('mediaTitle').textContent.trim();
+    const reqUrl = targetUrl || document.getElementById('downloaderUrlInput')?.value?.trim();
+    if (!reqUrl) {
+      showToast('Please paste a YouTube URL first before downloading', 'error');
+      document.getElementById('downloaderUrlInput')?.focus();
+      return;
+    }
+
+    const reqMode = type === 'audio' ? 'audio' : currentMode;
     const reqFormat = type === 'audio' ? selectedAudioFormat : document.getElementById('containerFormat').value;
     const reqQuality = selectedVideoQuality || 'best';
+    const reqFilename = document.getElementById('customFilename').value.trim() || document.getElementById('mediaTitle').textContent.trim();
+    const embedThumb = document.getElementById('embedThumbnailCheck')?.checked ?? true;
+    const embedMeta = document.getElementById('embedMetadataCheck')?.checked ?? true;
 
     const prog = document.getElementById('jobProgressContainer');
     prog.classList.remove('hidden');
@@ -517,19 +539,6 @@
     document.getElementById('jobSpeedText').textContent = 'Speed: Calculating...';
     document.getElementById('jobEtaText').textContent = 'ETA: --:--';
     prog.scrollIntoView({ behavior: 'smooth' });
-
-    const reqUrl = targetUrl || document.getElementById('downloaderUrlInput')?.value?.trim();
-    if (!reqUrl) {
-      showToast('Please paste a YouTube URL first before downloading', 'error');
-      document.getElementById('downloaderUrlInput')?.focus();
-      return;
-    }
-    const reqMode = type === 'audio' ? 'audio' : currentMode;
-    const reqFormat = type === 'audio' ? selectedAudioFormat : document.getElementById('containerFormat').value;
-    const reqQuality = selectedVideoQuality || 'best';
-    const reqFilename = document.getElementById('customFilename').value.trim() || document.getElementById('mediaTitle').textContent.trim();
-    const embedThumb = document.getElementById('embedThumbnailCheck').checked;
-    const embedMeta = document.getElementById('embedMetadataCheck').checked;
 
     try {
       const res = await fetch('/api/v1/jobs', {

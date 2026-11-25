@@ -1198,6 +1198,7 @@
 
         <button
           type="button"
+          onclick="event.stopPropagation(); window.toggleAutoEffectSelection('${eff.id}')"
           class="w-full py-1 rounded-lg text-[10px] font-extrabold transition-all ${isSelected ? 'bg-cyan-500 text-black shadow-sm' : 'glass hover:bg-white/10 text-cyan-300 border border-cyan-400/30'}"
         >
           ${isSelected ? '✓ Selected' : '+ Select'}

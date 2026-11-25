@@ -112,7 +112,7 @@
         <a href="/audio-studio" class="px-4 py-2 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-semibold text-slate-300 transition-all">
           Open in Studio
         </a>
-        <button type="button" id="downloadJobResultBtn" class="px-6 py-2 rounded-full btn-pill-blue text-xs font-bold flex items-center gap-2">
+        <button type="button" id="downloadJobResultBtn" onclick="downloadJobFile()" class="px-6 py-2 rounded-full btn-pill-blue text-xs font-bold flex items-center gap-2 cursor-pointer shadow-lg hover:scale-105 transition-transform">
           <span>↓</span>
           <span>Download Output</span>
         </button>
@@ -124,34 +124,69 @@
 
 {% block scripts %}
 <script>
-  function cancelCurrentJob() {
-    if (window.playGlassTick) window.playGlassTick();
-    if (confirm('Cancel this media rendering task?')) {
-      alert('Job cancelled.');
-      window.location.href = '/jobs';
+  const currentJobId = "{{ job_id or '' }}";
+
+  function downloadJobFile() {
+    if (window.playGlassPop) window.playGlassPop();
+    if (currentJobId && currentJobId !== '#CLG-7364') {
+      const url = `/api/v1/jobs/${currentJobId}/file`;
+      if (window.downloadFileToPc) {
+        window.downloadFileToPc(url, `job_${currentJobId}`);
+      } else {
+        window.location.href = url;
+      }
+    } else {
+      if (window.showToast) window.showToast('No active job file ready to download.', 'info');
     }
   }
 
+  async function cancelCurrentJob() {
+    if (window.playGlassTick) window.playGlassTick();
+    if (currentJobId && currentJobId !== '#CLG-7364') {
+      try {
+        await fetch(`/api/v1/jobs/${currentJobId}`, { method: 'DELETE' });
+        if (window.showToast) window.showToast('Job cancelled.', 'info');
+      } catch (e) {
+        console.warn(e);
+      }
+    }
+    window.location.href = '/jobs';
+  }
+
   // Connect to SSE stream if available
-  const currentJobId = "{{ job_id or '' }}";
   if (currentJobId && currentJobId !== '#CLG-7364') {
     try {
       const evtSource = new EventSource(`/api/v1/jobs/${currentJobId}/events`);
-      evtSource.onmessage = (e) => {
-        const data = JSON.parse(e.data);
-        if (data.progress !== undefined) {
-          const pct = Math.round(data.progress);
-          const dial = document.querySelector('.progress-dial');
-          if (dial) dial.style.setProperty('--p', pct + '%');
-          const txt = document.getElementById('jobPercentText');
-          if (txt) txt.textContent = pct + '%';
-        }
-        if (data.status === 'completed') {
+      const handleData = (data) => {
+        const pct = Math.round(data.percent !== undefined ? data.percent : (data.progress || 0));
+        const dial = document.querySelector('.progress-dial');
+        if (dial) dial.style.setProperty('--p', pct + '%');
+        const txt = document.getElementById('jobPercentText');
+        if (txt) txt.textContent = pct + '%';
+
+        if (data.state === 'ready' || data.status === 'completed') {
           const title = document.getElementById('jobStatusTitle');
           if (title) title.textContent = 'Completed';
           const eta = document.getElementById('jobEtaText');
           if (eta) eta.textContent = 'Ready for download';
+          evtSource.close();
+        } else if (data.state === 'failed') {
+          const title = document.getElementById('jobStatusTitle');
+          if (title) title.textContent = 'Failed';
+          const eta = document.getElementById('jobEtaText');
+          if (eta) eta.textContent = (data.error && data.error.explanation) || 'Execution failed';
+          evtSource.close();
+        } else if (data.eta !== null && data.eta !== undefined) {
+          const eta = document.getElementById('jobEtaText');
+          if (eta) eta.textContent = `ETA: 00:${String(data.eta).padStart(2, '0')}`;
         }
+      };
+
+      evtSource.addEventListener('update', (e) => {
+        try { handleData(JSON.parse(e.data)); } catch (err) {}
+      });
+      evtSource.onmessage = (e) => {
+        try { handleData(JSON.parse(e.data)); } catch (err) {}
       };
     } catch (err) {
       console.warn('SSE notification stream offline, using fallback poll', err);

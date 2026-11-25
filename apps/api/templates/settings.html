@@ -150,10 +150,10 @@
     const onBtn = document.getElementById('soundBtn-on');
     const offBtn = document.getElementById('soundBtn-off');
     if (soundEnabled) {
-      if (onBtn) onBtn.className = 'px-3.5 py-1 rounded-full text-xs font-bold bg-blue-600 text-white shadow-sm';
+      if (onBtn) onBtn.className = 'px-3.5 py-1 rounded-full text-xs font-bold bg-[#ff5a1f] text-white shadow-sm';
       if (offBtn) offBtn.className = 'px-3.5 py-1 rounded-full text-xs font-bold text-slate-400 hover:text-white';
     } else {
-      if (offBtn) offBtn.className = 'px-3.5 py-1 rounded-full text-xs font-bold bg-blue-600 text-white shadow-sm';
+      if (offBtn) offBtn.className = 'px-3.5 py-1 rounded-full text-xs font-bold bg-[#ff5a1f] text-white shadow-sm';
       if (onBtn) onBtn.className = 'px-3.5 py-1 rounded-full text-xs font-bold text-slate-400 hover:text-white';
     }
   }
@@ -168,20 +168,30 @@
   function setMediaPref(key, val) {
     if (window.playGlassTick) window.playGlassTick();
     localStorage.setItem(`clipglass_pref_${key}`, val);
+    if (key === 'res') {
+      localStorage.setItem('clipglass-default-res', val);
+      localStorage.setItem('clipglass_default_res', val);
+    } else if (key === 'fmt') {
+      localStorage.setItem('clipglass-default-fmt', val);
+      localStorage.setItem('clipglass_default_fmt', val);
+    } else if (key === 'abr') {
+      localStorage.setItem('clipglass-default-abr', val);
+      localStorage.setItem('clipglass_default_abr', val);
+    }
     highlightPrefButtons();
     if (window.showToast) window.showToast(`Default ${key.toUpperCase()} set to ${val.toUpperCase()}`, 'info');
   }
 
   function highlightPrefButtons() {
-    const res = localStorage.getItem('clipglass_pref_res') || '1080p';
-    const fmt = localStorage.getItem('clipglass_pref_fmt') || 'mp4';
-    const abr = localStorage.getItem('clipglass_pref_abr') || '320k';
+    const res = localStorage.getItem('clipglass_pref_res') || localStorage.getItem('clipglass-default-res') || '1080p';
+    const fmt = localStorage.getItem('clipglass_pref_fmt') || localStorage.getItem('clipglass-default-fmt') || 'mp4';
+    const abr = localStorage.getItem('clipglass_pref_abr') || localStorage.getItem('clipglass-default-abr') || '320k';
 
     ['2160p', '1440p', '1080p', '720p'].forEach(r => {
       const b = document.getElementById(`res-${r}`);
       if (b) {
         b.className = r === res
-          ? 'pref-btn px-3 py-1 rounded-full text-xs font-bold bg-blue-600 text-white shadow-sm transition-all'
+          ? 'pref-btn px-3 py-1 rounded-full text-xs font-bold bg-[#ff5a1f] text-white shadow-sm transition-all'
           : 'pref-btn px-3 py-1 rounded-full text-xs font-bold bg-white/5 text-slate-400 border border-white/10 transition-all';
       }
     });
@@ -190,7 +200,7 @@
       const b = document.getElementById(`fmt-${f}`);
       if (b) {
         b.className = f === fmt
-          ? 'pref-btn px-4 py-1 rounded-full text-xs font-bold bg-blue-600 text-white shadow-sm transition-all'
+          ? 'pref-btn px-4 py-1 rounded-full text-xs font-bold bg-[#ff5a1f] text-white shadow-sm transition-all'
           : 'pref-btn px-4 py-1 rounded-full text-xs font-bold bg-white/5 text-slate-400 border border-white/10 transition-all';
       }
     });
@@ -199,7 +209,7 @@
       const b = document.getElementById(`abr-${a}`);
       if (b) {
         b.className = a === abr
-          ? 'pref-btn px-3 py-1 rounded-full text-xs font-bold bg-blue-600 text-white shadow-sm transition-all'
+          ? 'pref-btn px-3 py-1 rounded-full text-xs font-bold bg-[#ff5a1f] text-white shadow-sm transition-all'
           : 'pref-btn px-3 py-1 rounded-full text-xs font-bold bg-white/5 text-slate-400 border border-white/10 transition-all';
       }
     });

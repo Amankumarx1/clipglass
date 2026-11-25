@@ -83,10 +83,10 @@
       <!-- Aspect Ratio -->
       <div>
         <label class="text-[10px] uppercase font-semibold text-[#8B8D98] tracking-wider block mb-1.5">Aspect Ratio</label>
-        <div class="grid grid-cols-3 gap-1 bg-[#0e0f16] p-1 rounded-full border border-white/10">
-          <button type="button" class="py-1 rounded-full text-xs font-semibold bg-[#ff5a1f] text-white">9:16</button>
-          <button type="button" class="py-1 rounded-full text-xs font-semibold text-[#8B8D98] hover:text-white">1:1</button>
-          <button type="button" class="py-1 rounded-full text-xs font-semibold text-[#8B8D98] hover:text-white">16:9</button>
+        <div class="grid grid-cols-3 gap-1 bg-[#0e0f16] p-1 rounded-full border border-white/10" id="aspectRatioGroup">
+          <button type="button" onclick="setAspectRatio('9:16', this)" class="aspect-btn py-1 rounded-full text-xs font-semibold bg-[#ff5a1f] text-white">9:16</button>
+          <button type="button" onclick="setAspectRatio('1:1', this)" class="aspect-btn py-1 rounded-full text-xs font-semibold text-[#8B8D98] hover:text-white">1:1</button>
+          <button type="button" onclick="setAspectRatio('16:9', this)" class="aspect-btn py-1 rounded-full text-xs font-semibold text-[#8B8D98] hover:text-white">16:9</button>
         </div>
       </div>
 
@@ -523,18 +523,16 @@
     }
   };
 
-  function setStudioTab(tab) {
+  let selectedAspectRatio = '9:16';
+  function setAspectRatio(ratio, btn) {
     if (window.playGlassTick) window.playGlassTick();
-    const isCap = tab === 'captions';
-    document.getElementById('studioTabCaptionsBtn').className = isCap
-      ? 'px-4 py-1.5 rounded-full text-xs font-semibold bg-[#2165F7] text-white shadow transition-all'
-      : 'px-4 py-1.5 rounded-full text-xs font-semibold text-[#8B8D98] hover:text-white transition-all';
-    document.getElementById('studioTabFramesBtn').className = !isCap
-      ? 'px-4 py-1.5 rounded-full text-xs font-semibold bg-[#2165F7] text-white shadow transition-all'
-      : 'px-4 py-1.5 rounded-full text-xs font-semibold text-[#8B8D98] hover:text-white transition-all';
-
-    document.getElementById('studioCaptionsPanel').classList.toggle('hidden', !isCap);
-    document.getElementById('studioFramesPanel').classList.toggle('hidden', isCap);
+    selectedAspectRatio = ratio;
+    document.querySelectorAll('.aspect-btn').forEach(b => {
+      b.className = 'aspect-btn py-1 rounded-full text-xs font-semibold text-[#8B8D98] hover:text-white';
+    });
+    if (btn) {
+      btn.className = 'aspect-btn py-1 rounded-full text-xs font-semibold bg-[#ff5a1f] text-white';
+    }
   }
 
   function selectCaptionPreset(presetKey) {
@@ -557,7 +555,7 @@
     if (select) select.value = presetKey;
 
     // Update Live 9:16 preview box class
-    const box = document.getElementById('studioCaptionDisplay');
+    const box = document.getElementById('zoomCaptionDisplay');
     if (box) {
       box.className = `caption-preview-box text-center ${captionPresetsMap[presetKey]?.cls || 'caption-style-viral_pop'}`;
     }
@@ -585,7 +583,7 @@
     if (select) select.value = modelKey;
 
     // Update Tag
-    const tag = document.getElementById('studioActiveModelTag');
+    const tag = document.getElementById('zoomStageModelTag');
     if (tag) tag.textContent = frameModelsMap[modelKey]?.badge || modelKey;
 
     // Update visual overlay guide
@@ -594,7 +592,7 @@
   }
 
   function renderStudioFrameGuide(modelKey) {
-    const overlay = document.getElementById('studioGuideOverlay');
+    const overlay = document.getElementById('zoomGuideOverlay');
     if (!overlay) return;
 
     if (modelKey === 'follow-face') {
@@ -842,7 +840,7 @@
   }
 
   function handleStudioTextInput(val) {
-    const box = document.getElementById('studioCaptionDisplay');
+    const box = document.getElementById('zoomCaptionDisplay');
     if (!box) return;
     const words = (val || 'THIS MOMENT CHANGED EVERYTHING').trim().split(/\s+/);
     if (words.length <= 1) {
@@ -857,7 +855,7 @@
   }
 
   function updateActiveSummary() {
-    const summary = document.getElementById('studioActiveSetupSummary');
+    const summary = document.getElementById('zoomTriggerBadge');
     if (summary) {
       const capName = captionPresetsMap[activeCaptionPreset]?.name || activeCaptionPreset;
       const frameName = frameModelsMap[activeFrameModel]?.name || activeFrameModel;
@@ -1378,8 +1376,6 @@
     vid.muted = !vid.muted;
     if (icon) icon.textContent = vid.muted ? '🔇' : '🔊';
   }
-
-  let currentModalClipIdx = 0;
 
   function formatModalTime(sec) {
     if (!sec || isNaN(sec)) return '00:00';

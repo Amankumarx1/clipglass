@@ -123,6 +123,15 @@
   <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
     <!-- Left / Center: Wide Video Preview Canvas -->
     <div class="lg:col-span-8 bg-[#12131a] rounded-3xl p-5 border border-white/10 shadow-2xl flex flex-col gap-4">
+      <!-- Media Header Info -->
+      <div class="flex items-center justify-between pb-1">
+        <div class="min-w-0 flex-1 pr-3">
+          <h2 id="trimmerVideoTitle" class="font-medium text-base text-white truncate">Ready to import video</h2>
+          <p id="trimmerVideoMeta" class="text-xs text-[#8B8D98] mt-0.5">MP4, WebM, MOV or YouTube link</p>
+        </div>
+        <span id="trimmerTag" class="px-2.5 py-0.5 rounded-full bg-white/5 text-[#8B8D98] text-[11px] font-bold shrink-0">AWAITING VIDEO</span>
+      </div>
+
       <div
         class="relative aspect-video w-full rounded-2xl overflow-hidden bg-[#0e0f16] border border-white/10 shadow-inner flex items-center justify-center group">
         <!-- Real Video Player -->
