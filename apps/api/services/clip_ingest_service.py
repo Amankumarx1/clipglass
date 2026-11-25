@@ -152,7 +152,7 @@ def ingest_video_and_metadata(
         "skip_download": True,
         "writesubtitles": True,
         "writeautomaticsub": True,
-        "subtitleslangs": ["live_chat", "en-IN", "hi", "en", "en-US", "all"],
+        "subtitleslangs": ["live_chat", "en", "en-US", "hi", "en-IN"],
         "subtitlesformat": "json3/vtt/srt/live_chat",
     })
     try:
@@ -184,10 +184,11 @@ def ingest_video_and_metadata(
         except Exception:
             pass
 
-    # Detect live chat replay file if present
+    # Detect live chat replay file if present (prefer completed .json over .part)
     live_chat_path = None
     chat_files = [os.path.join(job_dir, f) for f in os.listdir(job_dir) if "live_chat" in f]
     if chat_files:
+        chat_files.sort(key=lambda x: (1 if x.endswith(".part") else 0))
         live_chat_path = chat_files[0]
 
     return IngestResult(

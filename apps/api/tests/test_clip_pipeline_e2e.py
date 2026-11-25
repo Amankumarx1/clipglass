@@ -170,3 +170,93 @@ def test_api_trim_upload(tmp_path):
     assert res.status_code == 200
     assert res.headers["content-type"] == "video/mp4"
     assert len(res.content) > 500
+
+def test_download_clip_renders_on_demand(tmp_path):
+    clip_job_manager.active_jobs_per_ip["127.0.0.1"] = 0
+    # Setup job with a local synthesized video
+    video_path = tmp_path / "source.mp4"
+    cmd = [
+        "ffmpeg", "-y", "-f", "lavfi", "-i", "testsrc=size=320x240:rate=10:duration=3",
+        "-f", "lavfi", "-i", "sine=frequency=440:duration=3",
+        "-c:v", "libx264", "-c:a", "aac", str(video_path)
+    ]
+    subprocess.run(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, check=True)
+
+    req = ClipJobCreateRequest(
+        url="local://sample",
+        consent=True
+    )
+    job_id = clip_job_manager.create_job(req, "127.0.0.1")
+    rec = clip_job_manager.get_job(job_id)
+    rec.job_dir = str(tmp_path)
+    rec.source_video = str(video_path)
+
+    cid = "ondemand01"
+    clip = ClipMoment(
+        clipId=cid,
+        start=0.5,
+        end=2.5,
+        duration=2.0,
+        score=92,
+        hook="ON DEMAND HOOK",
+        title="On Demand Test",
+        reason="Testing on-demand rendering on download",
+        status="discovered"
+    )
+    rec.clips.append(clip)
+
+    # Calling download before render must render on-demand and return 200 instead of 404
+    res = client.get(f"/api/clip/jobs/{job_id}/clips/{cid}/download")
+    assert res.status_code == 200
+    assert res.headers["content-type"] == "video/mp4"
+    assert len(res.content) > 1000
+    assert clip.status == "ready"
+    clip_job_manager.active_jobs_per_ip["127.0.0.1"] = 0
+
+def test_inspect_video_supports_long_duration_and_live(monkeypatch):
+    from services.ytdlp_service import inspect_video
+
+    # 1. 300 minutes (18000s > 240 mins) with 11-char YouTube ID
+    mock_meta_long = {
+        "id": "dQw4w9WgXcQ",
+        "title": "Ultra Long 5-Hour Stream",
+        "channel": "LongChannel",
+        "duration": 18000,
+        "is_live": False,
+        "formats": []
+    }
+    class MockYTDL:
+        def __init__(self, opts=None): pass
+        def __enter__(self): return self
+        def __exit__(self, *args): pass
+        def extract_info(self, url, download=False): return dict(mock_meta_long)
+
+    monkeypatch.setattr("yt_dlp.YoutubeDL", MockYTDL)
+    res, err = inspect_video("https://www.youtube.com/watch?v=dQw4w9WgXcQ")
+    assert err is None
+    assert res is not None
+    assert res.duration == 18000
+    assert res.isLive is False
+
+    # 2. Live stream with 11-char YouTube ID
+    mock_meta_live = {
+        "id": "Bm8PmWwBxu4",
+        "title": "Live Stream Broadcast",
+        "channel": "LiveGamer",
+        "duration": None,
+        "is_live": True,
+        "live_status": "is_live",
+        "formats": []
+    }
+    class MockYTDLLive:
+        def __init__(self, opts=None): pass
+        def __enter__(self): return self
+        def __exit__(self, *args): pass
+        def extract_info(self, url, download=False): return dict(mock_meta_live)
+
+    monkeypatch.setattr("yt_dlp.YoutubeDL", MockYTDLLive)
+    res_live, err_live = inspect_video("https://www.youtube.com/live/Bm8PmWwBxu4")
+    assert err_live is None
+    assert res_live is not None
+    assert res_live.isLive is True
+    assert res_live.duration > 0

@@ -359,7 +359,18 @@ async def download_clip(job_id: str, cid: str, range: str = Header(None)):
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access denied: file path outside storage sandbox.")
 
     if not os.path.exists(file_path):
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Rendered clip file not found.")
+        matched_clip = next((c for c in record.clips if c.clipId == valid_cid), None)
+        if matched_clip:
+            from services.clip_render_service import render_clip_segment
+            success, _, err = render_clip_segment(record.source_video, record.job_dir, matched_clip)
+            if success and os.path.exists(file_path):
+                matched_clip.status = "ready"
+                matched_clip.videoUrl = f"/api/clip/jobs/{job_id}/clips/{valid_cid}/download"
+                record.emit_update()
+            else:
+                raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"Failed to render clip: {err or 'Unknown render error'}")
+        else:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Rendered clip file not found.")
 
     file_size = os.path.getsize(file_path)
 

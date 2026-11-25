@@ -233,11 +233,25 @@ def inspect_video(url: str) -> Tuple[Optional[InspectResponse], Optional[Friendl
             if not info:
                 return None, FriendlyError(code="removed", **FRIENDLY_ERRORS["removed"])
 
-            if info.get("is_live"):
-                return None, FriendlyError(code="live-or-premiere", **FRIENDLY_ERRORS["live-or-premiere"])
+            is_live = bool(info.get("is_live") or info.get("live_status") == "is_live" or "/live/" in canonical_url)
+            duration = int(info.get("duration") or 0)
+            if duration <= 0 and is_live:
+                # Attempt to extract DVR window duration from formats manifest
+                for f in info.get("formats", []):
+                    m_url = f.get("manifest_url") or f.get("url") or ""
+                    m_dur = re.search(r'(?:playlist|manifest)_duration/(\d+)', m_url)
+                    if m_dur:
+                        try:
+                            duration = int(m_dur.group(1))
+                            break
+                        except Exception:
+                            pass
+                if duration <= 0:
+                    duration = 900  # Default 15-min DVR buffer
 
-            duration = info.get("duration", 0)
-            if duration and duration > settings.MAX_DURATION_SECONDS:
+            # Allow inspecting videos up to 86,400s (24 hours) for metadata inspection and 240m multi-part clipping
+            MAX_INSPECT_DURATION = 86400
+            if duration and duration > MAX_INSPECT_DURATION:
                 return None, FriendlyError(code="too-long", **FRIENDLY_ERRORS["too-long"])
 
             title = info.get("title", "Untitled Video")
@@ -357,7 +371,7 @@ def inspect_video(url: str) -> Tuple[Optional[InspectResponse], Optional[Friendl
                 channel=channel,
                 duration=duration,
                 thumbnail=thumbnail,
-                isLive=False,
+                isLive=is_live,
                 availableHeights=available_heights,
                 availableAudio=available_audio,
                 availableSubtitles=subtitles,

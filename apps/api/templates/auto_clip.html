@@ -1045,6 +1045,8 @@
     }
   }
 
+  let detectedVideoDuration = 0;
+
   function showDurationWarningBanner(durMins, numParts, durationSec) {
     const banner = document.getElementById('clipDurationWarningBanner');
     if (!banner) return;
@@ -1089,6 +1091,7 @@
       if (res.ok) {
         const data = await res.json();
         const durationSec = data.duration || 0;
+        detectedVideoDuration = durationSec;
         const durMins = Math.round(durationSec / 60);
         const LIMIT_SECONDS = 240 * 60; // 14400s
 
@@ -1189,6 +1192,11 @@
     pBar.style.width = '10%';
     pTxt.textContent = '10%';
 
+    // Dynamically scale clip count for multi-part (>240m) streams to ensure every part has highlights
+    const dynamicClipCount = (detectedVideoDuration > 14400) 
+      ? Math.min(10, Math.max(3, Math.ceil(detectedVideoDuration / 14400) * 2)) 
+      : 3;
+
     try {
       let res;
       if (activeSource === 'url') {
@@ -1200,7 +1208,7 @@
             url: url,
             minLength: minL,
             maxLength: maxL,
-            clipCount: 3,
+            clipCount: dynamicClipCount,
             reframeMode: reframe,
             captionPreset: caption,
             consent: true
@@ -1210,7 +1218,7 @@
         const formData = new FormData();
         formData.append('file', uploadedFile);
         formData.append('consent', 'true');
-        formData.append('clipCount', '3');
+        formData.append('clipCount', dynamicClipCount.toString());
         formData.append('minLength', minL.toString());
         formData.append('maxLength', maxL.toString());
         formData.append('reframeMode', reframe);
@@ -1613,6 +1621,11 @@
   }
 
   function downloadClipDirect(url, title) {
+    if (!url || url.includes('undefined')) {
+      if (window.showToast) window.showToast('Please generate and render the clip first', 'info');
+      return;
+    }
+    if (window.showToast) window.showToast(`Downloading "${title || 'Clip'}" to your PC...`, 'info');
     if (window.downloadFileToPc) {
       window.downloadFileToPc(url, title || 'clipglass_short');
     } else {

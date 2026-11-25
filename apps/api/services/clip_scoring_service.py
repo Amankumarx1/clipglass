@@ -105,30 +105,43 @@ def rerank_finalists(candidates: List[ClipMoment], target_count: int) -> List[Cl
     # Sort descending by composite score
     sorted_candidates = sorted(candidates, key=lambda x: x.score, reverse=True)
 
-    chosen: List[ClipMoment] = []
-    for cand in sorted_candidates:
-        overlap = False
-        cand_dur = max(1.0, cand.end - cand.start)
+    parts_present = sorted(list(set(c.part for c in sorted_candidates if c.part is not None)))
 
-        for kept in chosen:
+    chosen: List[ClipMoment] = []
+
+    def can_add(cand, current_chosen):
+        cand_dur = max(1.0, cand.end - cand.start)
+        for kept in current_chosen:
             kept_dur = max(1.0, kept.end - kept.start)
-            # Intersection duration
             inter_start = max(cand.start, kept.start)
             inter_end = min(cand.end, kept.end)
             if inter_end > inter_start:
                 inter_dur = inter_end - inter_start
-                # Overlap ratio relative to shorter clip
                 shorter_dur = min(cand_dur, kept_dur)
                 if (inter_dur / shorter_dur) > 0.30:
-                    overlap = True
+                    return False
+        return True
+
+    # Multi-part stream guarantee: include at least 1 top moment from each 240m part
+    if len(parts_present) > 1:
+        for p in parts_present:
+            part_candidates = [c for c in sorted_candidates if c.part == p]
+            for cand in part_candidates:
+                if can_add(cand, chosen):
+                    chosen.append(cand)
                     break
 
-        if not overlap:
+    # Fill remaining slots up to target_count with best non-overlapping candidates
+    for cand in sorted_candidates:
+        if cand in chosen:
+            continue
+        if can_add(cand, chosen):
             chosen.append(cand)
             if len(chosen) >= target_count:
                 break
 
-    return chosen
+    chosen.sort(key=lambda x: x.score, reverse=True)
+    return chosen[:target_count]
 
 def heuristic_score_clips(
     signals: MultimodalSignals,
@@ -295,7 +308,8 @@ def heuristic_score_clips(
         ))
 
     # Apply head-to-head tournament reranking
-    return rerank_finalists(initial_moments, clip_count)
+    effective_target = max(clip_count, num_parts * 2) if num_parts > 1 else clip_count
+    return rerank_finalists(initial_moments, effective_target)
 
 async def score_clips_with_llm(
     signals: MultimodalSignals,
@@ -313,22 +327,35 @@ async def score_clips_with_llm(
     if not (settings.ANTHROPIC_API_KEY or settings.OPENROUTER_API_KEY or settings.OLLAMA_BASE_URL):
         return heuristic_score_clips(signals, sentences, clip_count, min_dur, max_dur, title_prefix)
 
-    # Prepare formatted transcript timeline with signal markers
-    lines = []
+    # Prepare formatted transcript timeline with signal markers across the full timeline
+    signal_lines = []
+    normal_lines = []
     for s in sentences:
         sec = int(s.start)
-        sig_note = ""
+        sig_notes = []
         if sec < len(signals.heatmap) and signals.heatmap[sec] > 0.7:
-            sig_note += " [HEATMAP PEAK]"
+            sig_notes.append("[HEATMAP PEAK]")
         if sec < len(signals.burst) and signals.burst[sec] > 0.6:
-            sig_note += " [AUDIO SPIKE]"
+            sig_notes.append("[AUDIO SPIKE]")
         if sec < len(signals.comment_energy) and signals.comment_energy[sec] > 0.6:
-            sig_note += " [CHAT BURST 🔥]"
+            sig_notes.append("[CHAT BURST 🔥]")
         if sec < len(signals.scene_cuts) and signals.scene_cuts[sec] > 0.5:
-            sig_note += " [SCENE CUT]"
-        lines.append(f"[{s.start:.1f}s - {s.end:.1f}s]{sig_note} {s.text}")
+            sig_notes.append("[SCENE CUT]")
 
-    timeline_str = "\n".join(lines[:140])
+        sig_str = f" {' '.join(sig_notes)}" if sig_notes else ""
+        formatted = f"[{s.start:.1f}s - {s.end:.1f}s]{sig_str} {s.text}"
+        if sig_notes:
+            signal_lines.append(formatted)
+        else:
+            normal_lines.append(formatted)
+
+    # Balance high-signal markers across parts with representative context up to 160 lines
+    if len(signal_lines) >= 120:
+        selected_lines = signal_lines[:120] + normal_lines[:40]
+    else:
+        selected_lines = signal_lines + normal_lines[:max(0, 160 - len(signal_lines))]
+
+    timeline_str = "\n".join(selected_lines)
 
     prompt = f"""You are an elite short-form video editor identifying viral 9:16 clips for YouTube Shorts, Reels, and TikTok.
 Identify up to {clip_count * 2} candidate segments from the video transcript below.
