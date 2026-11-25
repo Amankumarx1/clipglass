@@ -11,6 +11,7 @@ scratch/
 *.pyc
 __pycache__/
 .pytest_cache/
+outputs_*/
 *.log
 .DS_Store
 Thumbs.db

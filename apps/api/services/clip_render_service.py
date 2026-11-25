@@ -222,7 +222,7 @@ def render_clip_segment(
         pass
 
     input_start = "0" if source_is_remote else str(clip.start)
-    input_file = os.path.basename(actual_source)
+    input_file = os.path.abspath(actual_source)
 
     reframe_filter, is_complex = build_reframe_filter(
         clip.reframeMode, real_w, real_h, actual_source, 0.0 if source_is_remote else clip.start, dur

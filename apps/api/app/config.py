@@ -45,7 +45,7 @@ class Settings(BaseSettings):
     YOUTUBE_COOKIES_FILE: str = ""
 
     # Auto Clip Engine Settings
-    CLIP_DURATION_CAP: int = 3600  # 60 minutes cap for Auto Clip
+    CLIP_DURATION_CAP: int = 14400  # 4 hours cap for Auto Clip / Long Gameplay & Streams
     WHISPER_MODEL: str = "base"     # tiny, base, small, medium
     WHISPER_DEVICE: str = "cpu"     # cpu or cuda
     WHISPER_COMPUTE_TYPE: str = "int8" # int8, float16, float32
