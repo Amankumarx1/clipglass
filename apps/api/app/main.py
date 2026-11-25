@@ -104,6 +104,10 @@ async def alias_inspect(request: Request):
     from schemas.inspect import InspectRequest
     return await inspect.inspect_endpoint(request, InspectRequest(**body))
 
+@app.get("/api/audio-stream")
+async def alias_audio_stream(request: Request, url: str):
+    return await inspect.audio_stream_endpoint(request, url)
+
 @app.get("/api/jobs")
 async def alias_list_jobs():
     return await jobs.list_jobs()

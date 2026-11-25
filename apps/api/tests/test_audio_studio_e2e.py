@@ -62,6 +62,26 @@ def test_studio_audio_job_creation_and_file():
     assert s_data["jobId"] == job_id
     assert s_data["state"] in ["queued", "downloading", "converting", "ready", "failed"]
 
+def test_studio_import_modal_popup():
+    # Verify the import drawer is now a full modal popup overlay
+    res = client.get("/audio-studio")
+    assert res.status_code == 200
+    assert 'id="audioImportDrawer"' in res.text
+    assert 'fixed inset-0' in res.text
+    assert 'backdrop-blur-md' in res.text
+    assert 'Import Media Source' in res.text
+    assert 'Browse Local Audio' in res.text
+    assert 'Load Recent File' in res.text
+    assert 'modalAudioUrlInput' in res.text
+
+def test_studio_audio_stream_endpoint_validation():
+    # Missing or invalid url parameter checks
+    res_missing = client.get("/api/audio-stream")
+    assert res_missing.status_code == 422 or res_missing.status_code == 400
+
+    res_invalid = client.get("/api/audio-stream?url=https://invalid-site.com/test")
+    assert res_invalid.status_code == 400
+
 def test_studio_all_60_effects_registered_in_js():
     # Verify studio.js has all 60 effects across the 7 categories and quick presets
     js_res = client.get("/static/js/studio.js")

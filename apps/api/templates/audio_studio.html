@@ -127,40 +127,75 @@
     </div>
   </div>
 
-  <!-- Collapsible Import Drawer (For URL Paste, PC Upload & History) -->
-  <div id="audioImportDrawer" class="hidden glass rounded-3xl p-5 border border-purple-500/20 shadow-2xl flex flex-col gap-4 max-w-2xl mx-auto w-full">
-    <div class="flex items-center justify-between border-b border-white/10 pb-2">
-      <span class="text-xs font-bold text-slate-300 uppercase tracking-wider">Import Media Source</span>
-      <button type="button" onclick="toggleImportDrawer()" class="text-slate-400 hover:text-white text-xs">✕ Close</button>
-    </div>
-
-    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
-      <div class="p-3 rounded-xl bg-white/5 border border-white/10 flex items-center justify-between">
-        <div>
-          <div class="text-xs font-bold text-white">Upload from PC</div>
-          <div class="text-[10px] text-slate-400">MP3, WAV, FLAC, M4A, OGG, AAC or MP4</div>
+  <!-- Import Media Source Pop-up Modal Overlay -->
+  <div id="audioImportDrawer" class="fixed inset-0 z-50 hidden bg-black/80 backdrop-blur-md flex items-center justify-center p-4" onclick="if(event.target === this) toggleImportDrawer()">
+    <div class="bg-[#12131a] rounded-3xl p-6 sm:p-7 border border-white/10 shadow-[0_25px_70px_rgba(0,0,0,0.85)] flex flex-col gap-5 max-w-2xl w-full relative transition-all" onclick="event.stopPropagation()">
+      <div class="flex items-center justify-between border-b border-white/10 pb-3">
+        <div class="flex items-center gap-2.5">
+          <span class="text-sm font-extrabold text-white tracking-wider uppercase">Import Media Source</span>
+          <span class="text-[10px] px-2.5 py-0.5 rounded-full bg-purple-500/20 border border-purple-500/30 text-purple-300 font-mono font-semibold">Audio &amp; Video</span>
         </div>
-        <button
-          type="button"
-          onclick="document.getElementById('audioFileInput').click()"
-          class="px-3 py-1.5 rounded-lg btn-purple text-[11px] font-bold text-white cursor-pointer"
-        >
-          Browse Local Audio
+        <button type="button" onclick="toggleImportDrawer()" class="text-[#8B8D98] hover:text-white text-xs flex items-center gap-1 px-3 py-1.5 rounded-full hover:bg-white/10 transition-all cursor-pointer font-semibold">
+          <span>✕</span>
+          <span>Close</span>
         </button>
       </div>
 
-      <div class="p-3 rounded-xl bg-white/5 border border-white/10 flex items-center justify-between">
-        <div>
-          <div class="text-xs font-bold text-white">From Downloader &amp; History</div>
-          <div class="text-[10px] text-slate-400">Load previous session conversion</div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <!-- Card 1: Upload from PC -->
+        <div class="p-4 rounded-2xl bg-[#171822] border border-white/10 flex items-center justify-between gap-3 hover:border-purple-500/40 transition-all group">
+          <div class="pr-2">
+            <div class="text-xs font-bold text-white group-hover:text-purple-300 transition-colors">Upload from PC</div>
+            <div class="text-[10px] text-[#8B8D98] mt-0.5 leading-snug">MP3, WAV, FLAC, M4A, OGG, AAC or MP4</div>
+          </div>
+          <button
+            type="button"
+            onclick="document.getElementById('audioFileInput').click()"
+            class="px-4 py-2.5 rounded-xl bg-gradient-to-r from-[#9b51e0] to-[#b620e0] hover:brightness-110 text-white text-xs font-bold shadow-lg hover:scale-105 active:scale-95 transition-all shrink-0 cursor-pointer text-center"
+          >
+            Browse Local Audio
+          </button>
         </div>
-        <button
-          type="button"
-          onclick="loadFromHistory()"
-          class="px-3 py-1.5 rounded-lg glass hover:bg-white/10 text-cyan-300 text-[11px] font-bold cursor-pointer"
-        >
-          Load Recent File
-        </button>
+
+        <!-- Card 2: From Downloader & History -->
+        <div class="p-4 rounded-2xl bg-[#171822] border border-white/10 flex items-center justify-between gap-3 hover:border-cyan-500/40 transition-all group">
+          <div class="pr-2">
+            <div class="text-xs font-bold text-white group-hover:text-cyan-300 transition-colors">From Downloader &amp; History</div>
+            <div class="text-[10px] text-[#8B8D98] mt-0.5 leading-snug">Load previous session conversion</div>
+          </div>
+          <button
+            type="button"
+            onclick="loadFromHistory()"
+            class="px-4 py-2.5 rounded-xl bg-[#0b2131] hover:bg-[#103046] text-cyan-300 border border-cyan-500/30 hover:border-cyan-400 text-xs font-bold shadow-lg hover:scale-105 active:scale-95 transition-all shrink-0 cursor-pointer"
+          >
+            Load Recent File
+          </button>
+        </div>
+      </div>
+
+      <!-- Quick YouTube / Web Audio Input inside modal -->
+      <div class="pt-3 border-t border-white/[0.08] flex flex-col gap-2">
+        <label class="text-[11px] font-semibold text-[#8B8D98] flex items-center justify-between">
+          <span>Or Paste YouTube / Web Stream Link:</span>
+          <span class="text-[10px] text-amber-400 font-mono">Instant Decode</span>
+        </label>
+        <div class="flex items-center gap-2">
+          <input
+            type="url"
+            id="modalAudioUrlInput"
+            placeholder="https://youtu.be/... or https://www.youtube.com/watch?v=..."
+            class="flex-1 h-10 px-4 rounded-full bg-[#0e0f16] border border-white/10 text-xs text-white placeholder:text-[#8B8D98] outline-none focus:border-[#ff5a1f]/60 transition-all"
+            onkeydown="if(event.key === 'Enter') handleModalUrlFetch()"
+          />
+          <button
+            type="button"
+            onclick="handleModalUrlFetch()"
+            class="h-10 px-5 rounded-full bg-[#ff5a1f] hover:bg-[#ff6e38] text-white text-xs font-bold shadow hover:scale-105 active:scale-95 transition-all cursor-pointer flex items-center gap-1.5 shrink-0"
+          >
+            <span>⚡</span>
+            <span>Fetch Link</span>
+          </button>
+        </div>
       </div>
     </div>
   </div>
@@ -1943,7 +1978,35 @@
   window.toggleImportDrawer = function() {
     playGlassTick();
     const drawer = document.getElementById('audioImportDrawer');
-    if (drawer) drawer.classList.toggle('hidden');
+    if (drawer) {
+      const isHidden = drawer.classList.contains('hidden');
+      if (isHidden) {
+        drawer.classList.remove('hidden');
+        drawer.classList.add('flex');
+        const modalInput = document.getElementById('modalAudioUrlInput');
+        const mainInput = document.getElementById('quickAudioUrlInput');
+        if (modalInput && mainInput && mainInput.value) {
+          modalInput.value = mainInput.value;
+        }
+      } else {
+        drawer.classList.add('hidden');
+        drawer.classList.remove('flex');
+      }
+    }
+  };
+
+  window.handleModalUrlFetch = function() {
+    const modalInput = document.getElementById('modalAudioUrlInput');
+    const val = modalInput ? modalInput.value.trim() : '';
+    if (!val) {
+      if (window.showToast) window.showToast('Please enter a valid YouTube link', 'error');
+      else alert('Please enter a valid YouTube link');
+      return;
+    }
+    const mainInput = document.getElementById('quickAudioUrlInput');
+    if (mainInput) mainInput.value = val;
+    toggleImportDrawer();
+    fetchAudioFromUrl();
   };
 
   window.handlePasteClick = async function() {
@@ -1999,6 +2062,48 @@
     reader.readAsArrayBuffer(file);
   }
 
+  async function loadAudioBufferFromUrl(audioUrl, trackTitle) {
+    if (window.showToast) window.showToast('Loading audio stream into Studio DSP engine...', 'info');
+    try {
+      const resp = await fetch(audioUrl);
+      if (!resp.ok) {
+        throw new Error(`Failed to stream audio (status ${resp.status})`);
+      }
+      const arrayBuffer = await resp.arrayBuffer();
+      const ctx = window.studioEngine.ensureContext();
+      if (ctx.state === 'suspended') {
+        try { await ctx.resume(); } catch (e) {}
+      }
+      const decodedBuffer = await ctx.decodeAudioData(arrayBuffer);
+      window.studioEngine.rawAudioBuffer = decodedBuffer;
+      window.studioEngine.pauseOffset = 0;
+      if (window.studioEngine.isPlaying) {
+        window.studioEngine.pause();
+      }
+      window.studioEngine.trackMetadata.durationSec = Math.round(decodedBuffer.duration);
+      const m = Math.floor(decodedBuffer.duration / 60);
+      const s = Math.floor(decodedBuffer.duration % 60);
+      const durStr = `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+      window.studioEngine.trackMetadata.durationStr = durStr;
+      if (trackTitle) {
+        window.studioEngine.trackMetadata.name = trackTitle.endsWith('.mp3') ? trackTitle : `${trackTitle}.mp3`;
+      }
+      document.getElementById('workspaceSongTitle').textContent = window.studioEngine.trackMetadata.name;
+      document.getElementById('workspaceSongMeta').textContent = `${window.studioEngine.trackMetadata.format || 'MP3'} · 320 kbps · ${durStr}`;
+      const totalElem = document.getElementById('timecodeTotal');
+      if (totalElem) totalElem.textContent = durStr;
+      window.studioEngine.rebuildDSPChain();
+      window.studioEngine.seek(0);
+      if (window.updatePlayerUI) window.updatePlayerUI();
+      if (window.showToast) window.showToast(`✓ "${window.studioEngine.trackMetadata.name}" ready to play!`, 'success');
+      return true;
+    } catch (err) {
+      console.error('Audio load error:', err);
+      if (window.showToast) window.showToast('Could not decode audio stream: ' + err.message, 'error');
+      return false;
+    }
+  }
+
   window.fetchAudioFromUrl = async function() {
     const urlInput = document.getElementById('quickAudioUrlInput');
     const url = (urlInput ? urlInput.value : '').trim();
@@ -2015,21 +2120,7 @@
     try {
       const inspectRes = await fetch(`/api/inspect?url=${encodeURIComponent(url)}`);
       const inspectData = await inspectRes.json();
-      if (window.showToast) window.showToast(`✓ Link inspected: "${inspectData.title || 'Track'}" loaded into Studio!`, 'success');
-
-      const jobPayload = {
-        url: url,
-        mode: 'audio',
-        format: 'mp3',
-        quality: 'best',
-        consent: true
-      };
-
-      await fetch('/api/v1/jobs', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(jobPayload)
-      });
+      if (window.showToast) window.showToast(`✓ Link inspected: "${inspectData.title || 'Track'}" loading audio...`, 'info');
 
       const mins = Math.floor((inspectData.duration || 214) / 60);
       const secs = (inspectData.duration || 214) % 60;
@@ -2048,30 +2139,66 @@
       document.getElementById('workspaceSongTitle').textContent = window.studioEngine.trackMetadata.name;
       document.getElementById('workspaceSongMeta').textContent = `MP3 · 320 kbps · ${durStr}`;
       document.getElementById('timecodeTotal').textContent = durStr;
-      toggleImportDrawer();
+
+      // Close import pop-up modal if open
+      const drawer = document.getElementById('audioImportDrawer');
+      if (drawer && !drawer.classList.contains('hidden')) {
+        drawer.classList.add('hidden');
+        drawer.classList.remove('flex');
+      }
 
       if (btn) btn.textContent = '[FETCH]';
+
+      // Load actual audio stream into StudioEngine so the user hears the YT link audio!
+      const streamUrl = `/api/audio-stream?url=${encodeURIComponent(url)}`;
+      await loadAudioBufferFromUrl(streamUrl, inspectData.title || 'Imported Stream');
+
+      // Kick off background conversion job for offline download/history
+      fetch('/api/v1/jobs', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          url: url,
+          mode: 'audio',
+          format: 'mp3',
+          quality: 'best',
+          consent: true
+        })
+      }).catch(() => {});
 
     } catch (err) {
       console.error('Fetch error:', err);
       if (btn) btn.textContent = '[FETCH]';
-      alert('Could not inspect audio stream: ' + err.message);
+      if (window.showToast) window.showToast('Could not inspect audio stream: ' + err.message, 'error');
+      else alert('Could not inspect audio stream: ' + err.message);
     }
   };
 
-  window.loadFromHistory = function() {
+  window.loadFromHistory = async function() {
     try {
       const history = JSON.parse(localStorage.getItem('clipglass-session-history') || '[]');
       if (history.length > 0) {
         const item = history[0];
-        window.studioEngine.trackMetadata.name = item.title || 'Recent Track.mp3';
+        window.studioEngine.trackMetadata.name = item.title ? (item.title.endsWith('.mp3') ? item.title : `${item.title}.mp3`) : 'Recent Track.mp3';
         window.studioEngine.trackMetadata.format = item.format || 'MP3';
         document.getElementById('workspaceSongTitle').textContent = window.studioEngine.trackMetadata.name;
         toggleImportDrawer();
+
+        if (item.jobId) {
+          await loadAudioBufferFromUrl(`/api/v1/jobs/${item.jobId}/file?inline=1`, item.title);
+        } else if (item.url) {
+          document.getElementById('quickAudioUrlInput').value = item.url;
+          fetchAudioFromUrl();
+        } else if (item.fileUrl) {
+          await loadAudioBufferFromUrl(item.fileUrl, item.title);
+        }
       } else {
-        alert('No recent tracks found in local history.');
+        if (window.showToast) window.showToast('No recent tracks found in local history.', 'info');
+        else alert('No recent tracks found in local history.');
       }
-    } catch {}
+    } catch (e) {
+      console.warn('History load error:', e);
+    }
   };
 
   // --- REPLACE SOURCE MODAL ---
@@ -2206,13 +2333,30 @@
     document.getElementById('effectSettingsModal').classList.add('hidden');
   };
 
-  document.addEventListener('DOMContentLoaded', () => {
+  document.addEventListener('DOMContentLoaded', async () => {
     const params = new URLSearchParams(window.location.search);
+    const qJobId = params.get('jobId');
     const qUrl = params.get('url');
-    if (qUrl) {
+    const qTitle = params.get('title');
+
+    if (qJobId) {
+      if (qTitle) {
+        document.getElementById('workspaceSongTitle').textContent = decodeURIComponent(qTitle);
+      }
+      await loadAudioBufferFromUrl(`/api/v1/jobs/${qJobId}/file?inline=1`, qTitle ? decodeURIComponent(qTitle) : 'Downloaded Track');
+    } else if (qUrl) {
       const qInput = document.getElementById('quickAudioUrlInput');
       if (qInput) qInput.value = qUrl;
       fetchAudioFromUrl();
+    }
+  });
+
+  window.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      const drawer = document.getElementById('audioImportDrawer');
+      if (drawer && !drawer.classList.contains('hidden')) {
+        toggleImportDrawer();
+      }
     }
   });
 
