@@ -248,6 +248,7 @@ def inspect_video(url: str) -> Tuple[Optional[InspectResponse], Optional[Friendl
             formats = info.get("formats", [])
             height_map: Dict[int, Dict[str, Any]] = {}
             audio_map: Dict[int, Dict[str, Any]] = {}
+            best_audio_size = 0
 
             for f in formats:
                 h = f.get("height")
@@ -265,6 +266,10 @@ def inspect_video(url: str) -> Tuple[Optional[InspectResponse], Optional[Friendl
                             "filesize": filesize
                         }
 
+                if acodec and acodec != "none" and (not vcodec or vcodec == "none"):
+                    if filesize and filesize > best_audio_size:
+                        best_audio_size = filesize
+
                 abr = f.get("abr")
                 if abr and acodec and acodec != "none":
                     rounded_abr = int(round(abr / 10.0) * 10)
@@ -275,11 +280,23 @@ def inspect_video(url: str) -> Tuple[Optional[InspectResponse], Optional[Friendl
                             "ext": f.get("ext", "m4a")
                         }
 
+            if not best_audio_size and duration:
+                best_audio_size = int((160 * 1000 * duration) / 8)
+
             available_heights: List[VideoStreamHeight] = []
             found_heights = sorted(height_map.keys(), reverse=True)
+            used_found = set()
             for std_h in STANDARD_HEIGHTS:
-                if std_h in found_heights:
-                    h_info = height_map[std_h]
+                matched_h = None
+                if std_h in found_heights and std_h not in used_found:
+                    matched_h = std_h
+                else:
+                    candidates = [fh for fh in found_heights if fh not in used_found and abs(fh - std_h) <= max(35, int(std_h * 0.08))]
+                    if candidates:
+                        matched_h = min(candidates, key=lambda x: abs(x - std_h))
+                if matched_h is not None:
+                    used_found.add(matched_h)
+                    h_info = height_map[matched_h]
                     size = h_info.get("filesize")
                     if not size and duration:
                         bitrate_est = std_h * 2500
@@ -289,10 +306,13 @@ def inspect_video(url: str) -> Tuple[Optional[InspectResponse], Optional[Friendl
                         fps=h_info.get("fps", 30),
                         vcodec=h_info.get("vcodec"),
                         approxSize=size,
-                        recommended=(std_h == 1080 if 1080 in found_heights else std_h == found_heights[0])
+                        recommended=(std_h == 1080)
                     ))
 
-            if not available_heights and found_heights:
+            if available_heights:
+                if not any(h.recommended for h in available_heights):
+                    available_heights[0].recommended = True
+            elif found_heights:
                 top_h = found_heights[0]
                 available_heights.append(VideoStreamHeight(
                     height=top_h,
@@ -342,7 +362,8 @@ def inspect_video(url: str) -> Tuple[Optional[InspectResponse], Optional[Friendl
                 availableAudio=available_audio,
                 availableSubtitles=subtitles,
                 chapters=chapters_list,
-                defaultFilename=clean_title
+                defaultFilename=clean_title,
+                audioSize=best_audio_size
             ), None
 
     except yt_dlp.utils.DownloadError as e:

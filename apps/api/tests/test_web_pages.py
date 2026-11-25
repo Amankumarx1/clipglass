@@ -24,6 +24,11 @@ def test_downloader_page():
     assert "startVideoBtn" in response.text
     assert "startAudioBtn" in response.text
     assert "downloadCompletedFile" in response.text
+    assert "inspectNotificationBanner" in response.text
+    assert "sizeAccuracyBadge" in response.text
+    assert "sizeBreakdownText" in response.text
+    assert "updateCalculatedSize" in response.text
+    assert "formatBytes" in response.text
 
 # 03. Audio Studio
 def test_audio_studio_page():

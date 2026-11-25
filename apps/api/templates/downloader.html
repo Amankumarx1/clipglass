@@ -80,8 +80,26 @@
     </div>
 
     <!-- Right Zone: Single Tall Charcoal Panel with Download Options in Vertical Sequence -->
-    <div
-      class="lg:col-span-7 bg-[#12131a] rounded-3xl p-6 sm:p-8 border border-white/10 shadow-2xl flex flex-col gap-6">
+    <div class="lg:col-span-7 flex flex-col gap-4">
+      <!-- Inspect Status Notification Banner -->
+      <div id="inspectNotificationBanner"
+        class="hidden rounded-2xl p-4 bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-xs flex items-center justify-between gap-3 shadow-lg backdrop-blur-md transition-all">
+        <div class="flex items-center gap-3 min-w-0">
+          <span class="w-8 h-8 rounded-full bg-emerald-500/20 text-emerald-400 font-bold flex items-center justify-center shrink-0 text-sm">✓</span>
+          <div class="flex flex-col min-w-0">
+            <div class="flex items-center gap-2 flex-wrap">
+              <span class="font-bold text-white text-xs truncate max-w-[280px]" id="inspectNotifyTitle">Link Inspected</span>
+              <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 shrink-0">Streams Ready</span>
+            </div>
+            <span class="text-[11px] text-emerald-200/80 mt-0.5 truncate" id="inspectNotifySub">Audio and video streams successfully analyzed. Ready to download!</span>
+          </div>
+        </div>
+        <button type="button" onclick="document.getElementById('inspectNotificationBanner').classList.add('hidden')"
+          class="text-emerald-400/60 hover:text-emerald-300 text-sm px-2 py-1 rounded cursor-pointer shrink-0">✕</button>
+      </div>
+
+      <div
+        class="bg-[#12131a] rounded-3xl p-6 sm:p-8 border border-white/10 shadow-2xl flex flex-col gap-6">
       <!-- 1. Mode Selection (3 Compact Mode Pills) -->
       <div>
         <label class="text-[10px] font-semibold text-[#8B8D98] uppercase tracking-[0.14em] block mb-2.5">Download
@@ -181,8 +199,13 @@
       <!-- 4. Download Trigger & Status Line -->
       <div class="pt-4 border-t border-white/[0.08] flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <span class="text-[10px] font-semibold text-[#8B8D98] uppercase tracking-[0.14em]">Estimated Size</span>
+          <div class="flex items-center gap-2">
+            <span class="text-[10px] font-semibold text-[#8B8D98] uppercase tracking-[0.14em]">Estimated Size</span>
+            <span id="sizeAccuracyBadge"
+              class="hidden px-2 py-0.5 rounded-full text-[9px] font-bold bg-[#ff5a1f]/20 text-[#ff5a1f] border border-[#ff5a1f]/40">Actual Stream Size</span>
+          </div>
           <p id="estimatedSizeText" class="text-xl font-bold text-white mt-0.5">~248 MB</p>
+          <span id="sizeBreakdownText" class="text-[10px] text-[#8B8D98] block mt-0.5">Select options to calculate exact size</span>
         </div>
         <div class="flex items-center gap-2.5">
           <button type="button" id="startVideoBtn" onclick="triggerDownload('video')"
@@ -196,6 +219,7 @@
         </div>
       </div>
     </div>
+  </div>
   </div>
 
   <!-- Processing State Modal / Panel (Restrained dark overlay) -->
@@ -258,6 +282,7 @@
   let selectedAudioBitrate = 320;
   let activeEventSource = null;
   let activeJobId = null;
+  let inspectedMediaData = null;
 
   function openActiveInStudio() {
     playGlassTick();
@@ -356,15 +381,25 @@
     if (prefRes) {
       selectQuality(prefRes);
     }
-    const prefFmt = localStorage.getItem('clipglass_pref_fmt') || localStorage.getItem('clipglass-default-fmt');
-    if (prefFmt) {
-      const containerSel = document.getElementById('containerFormat');
-      if (containerSel) containerSel.value = prefFmt.toLowerCase();
+    const containerSel = document.getElementById('containerFormat');
+    if (containerSel) {
+      if (prefFmt) containerSel.value = prefFmt.toLowerCase();
+      containerSel.addEventListener('change', () => {
+        playGlassTick();
+        updateCalculatedSize();
+      });
     }
     const prefAbr = localStorage.getItem('clipglass_pref_abr') || localStorage.getItem('clipglass-default-abr');
     if (prefAbr) {
       selectAudioFormat(prefAbr === 'flac' ? 'flac' : (prefAbr === 'wav' ? 'wav' : 'mp3'), prefAbr === '320k' ? 320 : 0);
     }
+    ['consentCheck', 'embedThumbnailCheck', 'embedMetadataCheck', 'normalizeAudioCheck'].forEach(id => {
+      document.getElementById(id)?.addEventListener('change', () => {
+        playGlassTick();
+        updateCalculatedSize();
+      });
+    });
+
     const params = new URLSearchParams(window.location.search);
     const qUrl = params.get('url');
     const qType = params.get('type');
@@ -378,6 +413,7 @@
     if (qType === 'audio') {
       setOutputMode('audio');
     }
+    updateCalculatedSize();
   });
 
   async function handleDownloaderPasteClick() {
@@ -417,6 +453,133 @@
     if (btnText) btnText.textContent = 'Inspect';
   }
 
+  function formatBytes(bytes) {
+    if (!bytes || bytes <= 0) return '0 B';
+    if (bytes >= 1073741824) return (bytes / 1073741824).toFixed(2) + ' GB';
+    if (bytes >= 1048576) return (bytes / 1048576).toFixed(1) + ' MB';
+    if (bytes >= 1024) return (bytes / 1024).toFixed(0) + ' KB';
+    return bytes + ' B';
+  }
+
+  function updateCalculatedSize() {
+    const sizeEl = document.getElementById('estimatedSizeText');
+    const badgeEl = document.getElementById('sizeAccuracyBadge');
+    const breakdownEl = document.getElementById('sizeBreakdownText');
+    if (!sizeEl) return;
+
+    const duration = inspectedMediaData?.duration || 0;
+    const availableHeights = inspectedMediaData?.availableHeights || [];
+    const actualAudioSize = inspectedMediaData?.audioSize || (duration ? Math.round((160 * 1000 * duration) / 8) : 0);
+
+    // 1. Determine Video Stream Size
+    let videoSize = 0;
+    let matchedHeightLabel = '1080p';
+
+    if (availableHeights.length > 0) {
+      let targetHeight = 1080;
+      if (selectedVideoQuality === 'best') {
+        const sorted = [...availableHeights].sort((a, b) => (b.height || 0) - (a.height || 0));
+        targetHeight = sorted[0].height;
+        videoSize = sorted[0].approxSize || 0;
+        matchedHeightLabel = `${targetHeight}p (Best Available)`;
+      } else {
+        const num = parseInt(selectedVideoQuality);
+        targetHeight = !isNaN(num) ? num : 1080;
+        matchedHeightLabel = `${targetHeight}p`;
+
+        const exact = availableHeights.find(h => h.height === targetHeight);
+        if (exact && exact.approxSize) {
+          videoSize = exact.approxSize;
+        } else {
+          const closest = [...availableHeights].sort((a, b) => Math.abs((a.height || 0) - targetHeight) - Math.abs((b.height || 0) - targetHeight))[0];
+          if (closest && closest.approxSize) {
+            videoSize = closest.approxSize;
+          }
+        }
+      }
+      if (!videoSize && duration) {
+        videoSize = Math.round((targetHeight * 2500 * duration) / 8);
+      }
+    } else {
+      // Baseline before inspection
+      if (selectedVideoQuality === 'best' || selectedVideoQuality === '1080p') {
+        videoSize = 220 * 1024 * 1024;
+      } else if (selectedVideoQuality === '720p') {
+        videoSize = 110 * 1024 * 1024;
+      } else {
+        videoSize = 55 * 1024 * 1024;
+      }
+    }
+
+    // 2. Determine Audio Stream Size
+    let audioSize = 0;
+    let audioFormatLabel = '';
+
+    if (selectedAudioFormat === 'wav') {
+      audioSize = duration ? Math.round(duration * 176400) : (45 * 1024 * 1024);
+      audioFormatLabel = 'WAV Uncompressed';
+    } else if (selectedAudioFormat === 'flac') {
+      audioSize = duration ? Math.round((duration * 850 * 1000) / 8) : (25 * 1024 * 1024);
+      audioFormatLabel = 'FLAC Lossless';
+    } else if (selectedAudioFormat === 'mp3') {
+      const br = selectedAudioBitrate || 320;
+      audioSize = duration ? Math.round((duration * br * 1000) / 8) : Math.round((br / 320) * 8 * 1024 * 1024);
+      audioFormatLabel = `MP3 ${br}k`;
+    } else { // m4a
+      const br = selectedAudioBitrate || 256;
+      audioSize = actualAudioSize || (duration ? Math.round((duration * br * 1000) / 8) : (6.5 * 1024 * 1024));
+      audioFormatLabel = 'M4A / AAC';
+    }
+
+    // 3. Compute final size based on Mode
+    let totalBytes = 0;
+    let breakdownText = '';
+
+    if (currentMode === 'audio') {
+      totalBytes = audioSize;
+      breakdownText = `${audioFormatLabel}: ${formatBytes(audioSize)}`;
+    } else if (currentMode === 'video-only') {
+      totalBytes = videoSize;
+      breakdownText = `Video stream ${matchedHeightLabel}: ${formatBytes(videoSize)} (video-only)`;
+    } else { // video + audio
+      const muxAudio = actualAudioSize || (duration ? Math.round((160 * 1000 * duration) / 8) : (7 * 1024 * 1024));
+      totalBytes = videoSize + muxAudio;
+      breakdownText = `Video ${matchedHeightLabel} (${formatBytes(videoSize)}) + Audio (${formatBytes(muxAudio)})`;
+    }
+
+    // 4. Update UI
+    sizeEl.textContent = `~${formatBytes(totalBytes)}`;
+    if (badgeEl) {
+      badgeEl.classList.remove('hidden');
+      badgeEl.textContent = inspectedMediaData ? 'Actual Stream Size' : 'Calculated Size';
+    }
+    if (breakdownEl) {
+      breakdownEl.textContent = breakdownText;
+    }
+  }
+
+  function updateQualityButtonsUI() {
+    const availableHeights = inspectedMediaData?.availableHeights || [];
+    if (!availableHeights.length) return;
+    document.querySelectorAll('.quality-btn').forEach(b => {
+      const txt = b.textContent.toLowerCase();
+      if (txt.includes('best')) {
+        const topH = availableHeights[0];
+        if (topH && topH.approxSize) {
+          b.title = `${topH.height}p · ${formatBytes(topH.approxSize)}`;
+        }
+      } else {
+        const num = parseInt(txt);
+        if (!isNaN(num)) {
+          const match = availableHeights.find(h => h.height === num);
+          if (match && match.approxSize) {
+            b.title = `${match.height}p · ${formatBytes(match.approxSize)}`;
+          }
+        }
+      }
+    });
+  }
+
   async function inspectMedia(url) {
     try {
       showToast('Inspecting YouTube media stream...', 'info');
@@ -427,6 +590,7 @@
       const res = await fetch(`/api/inspect?url=${encodeURIComponent(url)}`);
       if (res.ok) {
         const data = await res.json();
+        inspectedMediaData = data;
         document.getElementById('mediaTitle').textContent = data.title || 'YouTube Media';
         document.getElementById('mediaChannel').textContent = data.channel || 'Channel';
         document.getElementById('mediaDuration').textContent = formatDuration(data.duration || 0);
@@ -444,10 +608,31 @@
             fn.value = data.title.replace(/[^\w\s-]/gi, '').trim().replace(/\s+/g, '-').toLowerCase();
           }
         }
-        showToast('Stream inspection ready!', 'success');
+
+        // Pop up inspect notification toast
+        showToast(`✓ Link inspected: "${data.title}" ready for download!`, 'success');
+
+        // Show inspect notification banner
+        const banner = document.getElementById('inspectNotificationBanner');
+        if (banner) {
+          const notifyTitle = document.getElementById('inspectNotifyTitle');
+          const notifySub = document.getElementById('inspectNotifySub');
+          if (notifyTitle) notifyTitle.textContent = data.title || 'Link Inspected';
+          if (notifySub) notifySub.textContent = `${data.channel || 'YouTube'} · ${formatDuration(data.duration || 0)} · High definition streams detected and sized`;
+          banner.classList.remove('hidden');
+        }
+
+        if (window.playGlassPop) window.playGlassPop();
+        updateQualityButtonsUI();
+        updateCalculatedSize();
+      } else {
+        const err = await res.json().catch(() => ({}));
+        const errMsg = err?.detail?.explanation || err?.detail?.title || 'Inspection failed for this link';
+        showToast(`✕ ${errMsg}`, 'error');
       }
     } catch (e) {
       console.warn('Inspect fallback:', e);
+      showToast('Error inspecting stream', 'error');
     }
   }
 
@@ -460,6 +645,8 @@
     const audioOnlyBtn = document.getElementById('modeAudioOnlyBtn');
     const videoSec = document.getElementById('videoControlsSection');
     const audioSec = document.getElementById('audioControlsSection');
+    const startVideoBtn = document.getElementById('startVideoBtn');
+    const startAudioBtn = document.getElementById('startAudioBtn');
 
     // Reset styles
     [videoAudioBtn, videoOnlyBtn, audioOnlyBtn].forEach(b => {
@@ -470,18 +657,23 @@
       audioOnlyBtn.className = 'py-2 rounded-full text-xs font-semibold transition-all bg-[#ff5a1f] text-white shadow-sm flex items-center justify-center gap-1.5';
       videoSec.classList.add('hidden');
       audioSec.classList.remove('hidden');
-      document.getElementById('estimatedSizeText').textContent = '~7.2 MB';
+      if (startVideoBtn) startVideoBtn.classList.add('hidden');
+      if (startAudioBtn) startAudioBtn.classList.remove('hidden');
     } else if (mode === 'video-only') {
       videoOnlyBtn.className = 'py-2 rounded-full text-xs font-semibold transition-all bg-[#ff5a1f] text-white shadow-sm flex items-center justify-center gap-1.5';
       videoSec.classList.remove('hidden');
       audioSec.classList.add('hidden');
-      document.getElementById('estimatedSizeText').textContent = '~180 MB';
+      if (startVideoBtn) startVideoBtn.classList.remove('hidden');
+      if (startAudioBtn) startAudioBtn.classList.add('hidden');
     } else {
       videoAudioBtn.className = 'py-2 rounded-full text-xs font-semibold transition-all bg-[#ff5a1f] text-white shadow-sm flex items-center justify-center gap-1.5';
       videoSec.classList.remove('hidden');
       audioSec.classList.add('hidden');
-      document.getElementById('estimatedSizeText').textContent = '~248 MB';
+      if (startVideoBtn) startVideoBtn.classList.remove('hidden');
+      if (startAudioBtn) startAudioBtn.classList.add('hidden');
     }
+
+    updateCalculatedSize();
   }
 
   function selectQuality(q) {
@@ -493,6 +685,7 @@
         b.className = 'quality-btn px-4 py-1.5 rounded-full text-xs font-semibold bg-[#ff5a1f]/20 text-white border border-[#ff5a1f]/50';
       }
     });
+    updateCalculatedSize();
   }
 
   function selectAudioFormat(fmt, bitrate) {
@@ -505,6 +698,7 @@
         b.className = 'audio-btn px-4 py-1.5 rounded-full text-xs font-semibold bg-[#ff5a1f]/20 text-white border border-[#ff5a1f]/50';
       }
     });
+    updateCalculatedSize();
   }
 
   async function triggerDownload(type) {

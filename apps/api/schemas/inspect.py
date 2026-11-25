@@ -38,6 +38,7 @@ class InspectResponse(BaseModel):
     availableSubtitles: List[SubtitleInfo] = []
     chapters: List[ChapterInfo] = []
     defaultFilename: str
+    audioSize: Optional[int] = None
 
 class FriendlyError(BaseModel):
     code: str

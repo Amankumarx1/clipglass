@@ -38,6 +38,8 @@ def test_studio_inspect_real_youtube_url():
     assert "Jaadu" in data["title"] or "Darshan Raval" in data["title"]
     assert data["duration"] > 0
     assert data["thumbnail"] is not None
+    assert "audioSize" in data
+    assert "availableHeights" in data
 
 def test_studio_audio_job_creation_and_file():
     # Create audio job for this stream
