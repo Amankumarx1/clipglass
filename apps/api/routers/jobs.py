@@ -85,43 +85,116 @@ async def list_jobs():
         }
     }
 
+import zipfile
+
 @router.post("/trim-upload")
 async def trim_uploaded_video(
     file: UploadFile = File(...),
     startTime: str = Form("00:00:00"),
     endTime: str = Form("00:00:30"),
-    mode: str = Form("copy")
+    mode: str = Form("copy"),
+    operation: str = Form("trim")
 ):
-    """Lossless or frame-accurate segment trimming for local uploaded video."""
+    """Lossless or frame-accurate segment trimming, section removing, and splitting for local uploaded video."""
     clean_name = re.sub(r'[^a-zA-Z0-9_\-\.]', '_', file.filename or "video.mp4")
     temp_dir = os.path.join(settings.TEMP_STORAGE_DIR, f"trim_{uuid.uuid4().hex[:8]}")
     os.makedirs(temp_dir, exist_ok=True)
     in_path = os.path.join(temp_dir, f"input_{clean_name}")
-    out_filename = f"trimmed_{clean_name}"
+    out_filename = f"{operation}_{clean_name}"
     out_path = os.path.join(temp_dir, out_filename)
 
     with open(in_path, "wb") as f_in:
         shutil.copyfileobj(file.file, f_in)
 
-    if mode == "copy":
-        cmd = [
-            "ffmpeg", "-y",
-            "-ss", str(startTime), "-to", str(endTime),
-            "-i", in_path,
-            "-c", "copy",
-            out_path
-        ]
-    else:
-        cmd = [
-            "ffmpeg", "-y",
-            "-ss", str(startTime), "-to", str(endTime),
-            "-i", in_path,
-            "-c:v", "libx264", "-crf", "22", "-preset", "fast",
-            "-c:a", "aac", "-b:a", "192k",
-            out_path
-        ]
+    def parse_time_sec(t_str: str) -> float:
+        try:
+            parts = str(t_str).strip().split(":")
+            if len(parts) == 3:
+                return float(parts[0]) * 3600 + float(parts[1]) * 60 + float(parts[2])
+            elif len(parts) == 2:
+                return float(parts[0]) * 60 + float(parts[1])
+            return float(t_str)
+        except Exception:
+            return 0.0
 
-    try:
+    s_sec = parse_time_sec(startTime)
+    e_sec = parse_time_sec(endTime)
+
+    # 1. SECTION REMOVING (Cut out selected range and join remaining ends)
+    if operation == "remove":
+        seg1_path = os.path.join(temp_dir, f"seg1_{clean_name}")
+        seg2_path = os.path.join(temp_dir, f"seg2_{clean_name}")
+        
+        has_seg1 = s_sec > 0.1
+        if has_seg1:
+            cmd1 = ["ffmpeg", "-y", "-ss", "00:00:00", "-to", str(startTime), "-i", in_path, "-c", "copy" if mode == "copy" else "libx264", seg1_path]
+            subprocess.run(cmd1, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, timeout=60)
+        
+        cmd2 = ["ffmpeg", "-y", "-ss", str(endTime), "-i", in_path, "-c", "copy" if mode == "copy" else "libx264", seg2_path]
+        subprocess.run(cmd2, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, timeout=60)
+
+        if has_seg1 and os.path.exists(seg1_path) and os.path.exists(seg2_path):
+            list_path = os.path.join(temp_dir, "concat.txt")
+            with open(list_path, "w", encoding="utf-8") as lf:
+                lf.write(f"file '{seg1_path}'\nfile '{seg2_path}'\n")
+            concat_cmd = ["ffmpeg", "-y", "-f", "concat", "-safe", "0", "-i", list_path, "-c", "copy", out_path]
+            proc = subprocess.run(concat_cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, timeout=60)
+            if proc.returncode != 0 or not os.path.exists(out_path):
+                # Fallback re-encode concat
+                reencode_cmd = ["ffmpeg", "-y", "-f", "concat", "-safe", "0", "-i", list_path, "-c:v", "libx264", "-c:a", "aac", out_path]
+                subprocess.run(reencode_cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, timeout=60)
+        elif os.path.exists(seg2_path):
+            shutil.move(seg2_path, out_path)
+        elif has_seg1 and os.path.exists(seg1_path):
+            shutil.move(seg1_path, out_path)
+
+    # 2. SPLITTING VIDEO (Split into multiple parts at split marker)
+    elif operation == "split":
+        part1_path = os.path.join(temp_dir, f"part_1_{clean_name}")
+        part2_path = os.path.join(temp_dir, f"part_2_{clean_name}")
+        split_point = startTime if s_sec > 0.1 else (endTime if e_sec > 0.1 else "00:01:00")
+
+        cmd_p1 = ["ffmpeg", "-y", "-ss", "00:00:00", "-to", str(split_point), "-i", in_path, "-c", "copy" if mode == "copy" else "libx264", part1_path]
+        cmd_p2 = ["ffmpeg", "-y", "-ss", str(split_point), "-i", in_path, "-c", "copy" if mode == "copy" else "libx264", part2_path]
+        subprocess.run(cmd_p1, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, timeout=60)
+        subprocess.run(cmd_p2, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, timeout=60)
+
+        zip_filename = f"split_{os.path.splitext(clean_name)[0]}.zip"
+        zip_path = os.path.join(temp_dir, zip_filename)
+        with zipfile.ZipFile(zip_path, 'w', zipfile.ZIP_DEFLATED) as zf:
+            if os.path.exists(part1_path) and os.path.getsize(part1_path) > 0:
+                zf.write(part1_path, f"part_1_{clean_name}")
+            if os.path.exists(part2_path) and os.path.getsize(part2_path) > 0:
+                zf.write(part2_path, f"part_2_{clean_name}")
+
+        if os.path.exists(zip_path) and os.path.getsize(zip_path) > 0:
+            return FileResponse(
+                zip_path,
+                media_type="application/zip",
+                filename=zip_filename,
+                headers={"Content-Disposition": f'attachment; filename="{zip_filename}"'}
+            )
+
+    # 3. STANDARD TRIM (Keep selected range)
+    else:
+        if mode == "copy":
+            cmd = [
+                "ffmpeg", "-y",
+                "-ss", str(startTime), "-to", str(endTime),
+                "-i", in_path,
+                "-c", "copy",
+                out_path
+            ]
+        else:
+            cmd = [
+                "ffmpeg", "-y",
+                "-ss", str(startTime), "-to", str(endTime),
+                "-i", in_path,
+                "-c:v", "libx264", "-crf", "22", "-preset", "fast",
+                "-c:a", "aac", "-b:a", "192k",
+                out_path
+            ]
+
         proc = subprocess.run(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.PIPE, timeout=120)
         if proc.returncode != 0 or not os.path.exists(out_path):
             fallback_cmd = [
@@ -131,6 +204,7 @@ async def trim_uploaded_video(
             ]
             subprocess.run(fallback_cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, timeout=120)
 
+    try:
         if not os.path.exists(out_path) or os.path.getsize(out_path) == 0:
             raise HTTPException(status_code=500, detail="Trimming process failed.")
 

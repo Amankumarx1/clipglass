@@ -20,8 +20,19 @@ class SubtitleConfig(BaseModel):
 
 class TrimConfig(BaseModel):
     enabled: bool = False
+    operation: Optional[str] = Field("trim", max_length=20)  # "trim", "remove", "split"
     startTime: Optional[str] = Field(None, max_length=20)  # e.g. "00:01:15" or "75"
     endTime: Optional[str] = Field(None, max_length=20)    # e.g. "00:03:40" or "220"
+
+    @field_validator('operation')
+    @classmethod
+    def validate_operation(cls, v: Optional[str]) -> Optional[str]:
+        if not v:
+            return "trim"
+        v_clean = v.strip().lower()
+        if v_clean in ("trim", "remove", "split"):
+            return v_clean
+        return "trim"
 
     @field_validator('startTime', 'endTime')
     @classmethod

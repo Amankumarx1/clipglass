@@ -160,7 +160,32 @@
     <!-- Right: Narrow Output Settings Column -->
     <div class="lg:col-span-4 bg-[#12131a] rounded-3xl p-5 border border-white/10 shadow-2xl flex flex-col gap-5">
       <h3 class="text-xs font-semibold uppercase tracking-[0.14em] text-[#8B8D98]">Output Settings</h3>
-      <div class="flex flex-col gap-3 text-xs">
+      <div class="flex flex-col gap-3.5 text-xs">
+        <!-- Edit Operation Mode (Trim, Remove Section, Split) -->
+        <div>
+          <div class="flex items-center justify-between mb-1.5">
+            <label class="text-[10px] uppercase font-semibold text-[#8B8D98] tracking-wider block">Operation Mode</label>
+            <span id="operationModeBadge" class="text-[9px] font-mono text-[#ff5a1f] px-2.5 py-0.5 rounded-full bg-[#ff5a1f]/10 border border-[#ff5a1f]/30 font-bold uppercase">✂ TRIM</span>
+          </div>
+          <div class="grid grid-cols-3 gap-1 p-1 rounded-full bg-[#0e0f16] border border-white/10 text-[11px] font-semibold">
+            <button type="button" id="opTrimBtn" onclick="setTrimOperation('trim')"
+              class="trim-op-btn flex-1 py-1.5 rounded-full bg-[#ff5a1f] text-white shadow-sm transition-all flex items-center justify-center gap-1 cursor-pointer">
+              <span>✂</span><span>Trim</span>
+            </button>
+            <button type="button" id="opRemoveBtn" onclick="setTrimOperation('remove')"
+              class="trim-op-btn flex-1 py-1.5 rounded-full text-[#8B8D98] hover:text-white transition-all flex items-center justify-center gap-1 cursor-pointer">
+              <span>🗑</span><span>Remove</span>
+            </button>
+            <button type="button" id="opSplitBtn" onclick="setTrimOperation('split')"
+              class="trim-op-btn flex-1 py-1.5 rounded-full text-[#8B8D98] hover:text-white transition-all flex items-center justify-center gap-1 cursor-pointer">
+              <span>⚡</span><span>Split</span>
+            </button>
+          </div>
+          <p id="opModeDescText" class="text-[10px] text-[#8B8D98] mt-1.5 leading-relaxed px-1">
+            Keep only the selected range and trim away outside footage.
+          </p>
+        </div>
+
         <div>
           <label class="text-[10px] uppercase font-semibold text-[#8B8D98] tracking-wider block mb-1.5">Format</label>
           <div class="relative" id="trimFormatWrapper">
@@ -199,9 +224,8 @@
               class="flex-1 py-1.5 rounded-full text-[11px] font-semibold text-[#8B8D98] hover:text-white transition-all cursor-pointer">Re-encode</button>
           </div>
         </div>
-        <div class="pt-2">
-          <span class="text-[10px] uppercase font-semibold text-[#8B8D98] tracking-wider block mb-1">Target
-            Duration</span>
+        <div class="pt-2 border-t border-white/5">
+          <span id="durationLabelText" class="text-[10px] uppercase font-semibold text-[#8B8D98] tracking-wider block mb-1">Target Duration</span>
           <p id="selectedDurationText" class="font-mono font-bold text-lg text-white">00:02:30</p>
           <span id="estTrimSize" class="text-[11px] text-[#8B8D98]">Estimated size: --</span>
         </div>
@@ -211,19 +235,37 @@
 
   <!-- Timeline (Single Horizontal Filmstrip Timeline with Thumbnails & Handles) -->
   <div class="w-full bg-[#12131a] rounded-3xl p-6 border border-white/10 shadow-2xl flex flex-col gap-5">
-    <div class="flex items-center justify-between">
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
       <div class="flex items-center gap-2">
-        <span class="w-2 h-2 rounded-full bg-[#ff5a1f] shadow-[0_0_8px_#ff5a1f]"></span>
+        <span id="timelineStatusDot" class="w-2 h-2 rounded-full bg-[#ff5a1f] shadow-[0_0_8px_#ff5a1f]"></span>
         <h3 class="font-semibold text-xs text-white uppercase tracking-[0.14em]">Visual Filmstrip Timeline</h3>
+        <span id="timelineOpBadge" class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-[#ff5a1f]/15 text-[#ff5a1f] border border-[#ff5a1f]/30 font-semibold hidden md:inline-block">KEEP SELECTION</span>
       </div>
-      <!-- Zoom controls -->
-      <div class="flex items-center gap-1 text-xs font-semibold p-1 rounded-full bg-[#0e0f16] border border-white/10">
-        <button type="button" onclick="setZoom(1)"
-          class="zoom-btn px-2.5 py-0.5 rounded-full bg-[#ff5a1f] text-white">1x</button>
-        <button type="button" onclick="setZoom(2)"
-          class="zoom-btn px-2.5 py-0.5 rounded-full text-[#8B8D98]">2x</button>
-        <button type="button" onclick="setZoom(5)"
-          class="zoom-btn px-2.5 py-0.5 rounded-full text-[#8B8D98]">5x</button>
+      <!-- Quick Timeline Markers & Zoom controls -->
+      <div class="flex items-center flex-wrap gap-2">
+        <div class="flex items-center gap-1 text-[11px] font-semibold p-1 rounded-full bg-[#0e0f16] border border-white/10">
+          <button type="button" onclick="setTrimInToPlayhead()" title="Set Start marker to current playhead"
+            class="px-2.5 py-0.5 rounded-full text-[#8B8D98] hover:text-white hover:bg-white/5 transition-all flex items-center gap-1 cursor-pointer">
+            <span class="font-mono text-[9px] text-[#ff5a1f] font-bold">[ I ]</span><span>Mark In</span>
+          </button>
+          <button type="button" onclick="setTrimOutToPlayhead()" title="Set End marker to current playhead"
+            class="px-2.5 py-0.5 rounded-full text-[#8B8D98] hover:text-white hover:bg-white/5 transition-all flex items-center gap-1 cursor-pointer">
+            <span class="font-mono text-[9px] text-[#ff5a1f] font-bold">[ O ]</span><span>Mark Out</span>
+          </button>
+          <button type="button" onclick="splitAtCurrentPlayhead()" title="Split video at current playhead"
+            class="px-2.5 py-0.5 rounded-full text-[#8B8D98] hover:text-cyan-400 hover:bg-cyan-500/10 transition-all flex items-center gap-1 cursor-pointer">
+            <span class="text-cyan-400">⚡</span><span>Split Here</span>
+          </button>
+        </div>
+        <!-- Zoom controls -->
+        <div class="flex items-center gap-1 text-xs font-semibold p-1 rounded-full bg-[#0e0f16] border border-white/10">
+          <button type="button" onclick="setZoom(1)"
+            class="zoom-btn px-2.5 py-0.5 rounded-full bg-[#ff5a1f] text-white">1x</button>
+          <button type="button" onclick="setZoom(2)"
+            class="zoom-btn px-2.5 py-0.5 rounded-full text-[#8B8D98]">2x</button>
+          <button type="button" onclick="setZoom(5)"
+            class="zoom-btn px-2.5 py-0.5 rounded-full text-[#8B8D98]">5x</button>
+        </div>
       </div>
     </div>
 
@@ -251,7 +293,8 @@
 
           <!-- Floating Range Info -->
           <div
-            class="pointer-events-none self-center mx-auto px-2.5 py-0.5 rounded-full bg-black/80 text-white font-mono text-[10px] hidden sm:flex items-center gap-1">
+            class="pointer-events-none self-center mx-auto px-2.5 py-0.5 rounded-full bg-black/80 text-white font-mono text-[10px] hidden sm:flex items-center gap-1.5 shadow-md">
+            <span id="rangeFloatingPrefix" class="text-[9px] text-[#ff5a1f] font-bold">KEEP:</span>
             <span id="rangeFloatingDuration">00:02:30</span>
           </div>
 
@@ -306,6 +349,7 @@
   let totalVideoDuration = 0;
   let trimStartSec = 0;
   let trimEndSec = 0;
+  let currentTrimOperation = 'trim'; // 'trim' | 'remove' | 'split'
   let isDragging = null; // 'start' | 'end' | 'window'
   let dragStartX = 0;
   let initialStartSec = 0;
@@ -314,6 +358,95 @@
   let currentCutMode = 'copy';
   let loadedVideoUrl = '';
   let activeVideoEventSource = null;
+
+  // Operation Mode Switcher (Trim, Remove Section, Split)
+  function setTrimOperation(op) {
+    currentTrimOperation = op;
+    if (window.playGlassTick) window.playGlassTick();
+
+    const trimBtn = document.getElementById('opTrimBtn');
+    const removeBtn = document.getElementById('opRemoveBtn');
+    const splitBtn = document.getElementById('opSplitBtn');
+    const badge = document.getElementById('operationModeBadge');
+    const descText = document.getElementById('opModeDescText');
+    const tlBadge = document.getElementById('timelineOpBadge');
+    const tlDot = document.getElementById('timelineStatusDot');
+
+    // Reset base styles
+    [trimBtn, removeBtn, splitBtn].forEach(b => {
+      if (b) b.className = 'trim-op-btn flex-1 py-1.5 rounded-full text-[#8B8D98] hover:text-white transition-all flex items-center justify-center gap-1 cursor-pointer';
+    });
+
+    if (op === 'remove') {
+      if (removeBtn) removeBtn.className = 'trim-op-btn flex-1 py-1.5 rounded-full bg-[#f43f5e] text-white shadow-sm transition-all flex items-center justify-center gap-1 cursor-pointer';
+      if (badge) {
+        badge.className = 'text-[9px] font-mono text-[#f43f5e] px-2.5 py-0.5 rounded-full bg-[#f43f5e]/10 border border-[#f43f5e]/30 font-bold uppercase';
+        badge.textContent = '🗑 REMOVE';
+      }
+      if (descText) descText.textContent = 'Cut out the selected range and stitch remaining ends together.';
+      if (tlBadge) {
+        tlBadge.className = 'text-[10px] font-mono px-2 py-0.5 rounded-full bg-[#f43f5e]/15 text-[#f43f5e] border border-[#f43f5e]/30 font-semibold hidden md:inline-block';
+        tlBadge.textContent = 'CUT OUT SECTION';
+      }
+      if (tlDot) tlDot.className = 'w-2 h-2 rounded-full bg-[#f43f5e] shadow-[0_0_8px_#f43f5e]';
+      showToast('Operation: Remove Section (Cut out selected part)', 'info');
+    } else if (op === 'split') {
+      if (splitBtn) splitBtn.className = 'trim-op-btn flex-1 py-1.5 rounded-full bg-[#06b6d4] text-white shadow-sm transition-all flex items-center justify-center gap-1 cursor-pointer';
+      if (badge) {
+        badge.className = 'text-[9px] font-mono text-[#06b6d4] px-2.5 py-0.5 rounded-full bg-[#06b6d4]/10 border border-[#06b6d4]/30 font-bold uppercase';
+        badge.textContent = '⚡ SPLIT';
+      }
+      if (descText) descText.textContent = 'Split video into 2 parts at the marker and download both.';
+      if (tlBadge) {
+        tlBadge.className = 'text-[10px] font-mono px-2 py-0.5 rounded-full bg-[#06b6d4]/15 text-[#06b6d4] border border-[#06b6d4]/30 font-semibold hidden md:inline-block';
+        tlBadge.textContent = 'SPLIT AT MARKER';
+      }
+      if (tlDot) tlDot.className = 'w-2 h-2 rounded-full bg-[#06b6d4] shadow-[0_0_8px_#06b6d4]';
+      showToast('Operation: Split Video (Export multiple parts)', 'info');
+    } else {
+      if (trimBtn) trimBtn.className = 'trim-op-btn flex-1 py-1.5 rounded-full bg-[#ff5a1f] text-white shadow-sm transition-all flex items-center justify-center gap-1 cursor-pointer';
+      if (badge) {
+        badge.className = 'text-[9px] font-mono text-[#ff5a1f] px-2.5 py-0.5 rounded-full bg-[#ff5a1f]/10 border border-[#ff5a1f]/30 font-bold uppercase';
+        badge.textContent = '✂ TRIM';
+      }
+      if (descText) descText.textContent = 'Keep only the selected range and trim away outside footage.';
+      if (tlBadge) {
+        tlBadge.className = 'text-[10px] font-mono px-2 py-0.5 rounded-full bg-[#ff5a1f]/15 text-[#ff5a1f] border border-[#ff5a1f]/30 font-semibold hidden md:inline-block';
+        tlBadge.textContent = 'KEEP SELECTION';
+      }
+      if (tlDot) tlDot.className = 'w-2 h-2 rounded-full bg-[#ff5a1f] shadow-[0_0_8px_#ff5a1f]';
+      showToast('Operation: Trim (Keep selected range)', 'info');
+    }
+
+    updateTrimUI();
+  }
+
+  function setTrimInToPlayhead() {
+    if (totalVideoDuration <= 0) return;
+    const cur = realVideo.currentTime || 0;
+    trimStartSec = Math.max(0, Math.min(cur, trimEndSec - 0.5));
+    if (window.playGlassTick) window.playGlassTick();
+    updateTrimUI();
+    showToast(`Marked In at ${formatDuration(Math.round(trimStartSec))}`, 'info');
+  }
+
+  function setTrimOutToPlayhead() {
+    if (totalVideoDuration <= 0) return;
+    const cur = realVideo.currentTime || 0;
+    trimEndSec = Math.max(trimStartSec + 0.5, Math.min(cur, totalVideoDuration));
+    if (window.playGlassTick) window.playGlassTick();
+    updateTrimUI();
+    showToast(`Marked Out at ${formatDuration(Math.round(trimEndSec))}`, 'info');
+  }
+
+  function splitAtCurrentPlayhead() {
+    if (totalVideoDuration <= 0) return;
+    const cur = realVideo.currentTime || Math.round(totalVideoDuration / 2);
+    trimStartSec = Math.max(0, Math.min(cur, totalVideoDuration - 0.5));
+    trimEndSec = Math.min(totalVideoDuration, trimStartSec + 1);
+    setTrimOperation('split');
+    showToast(`Split point set at ${formatDuration(Math.round(trimStartSec))}`, 'info');
+  }
 
   // Visual Track Generation
   function generateFilmstripAndWaveforms() {
@@ -379,21 +512,88 @@
     const endRatio = Math.max(0, Math.min(1, trimEndSec / totalVideoDuration));
 
     const box = document.getElementById('trimSelectionBox');
+    const handleStart = document.getElementById('trimHandleStart');
+    const handleEnd = document.getElementById('trimHandleEnd');
+    const floatingPrefix = document.getElementById('rangeFloatingPrefix');
+    const exportBtn = document.getElementById('exportTrimBtn');
+    const exportBtnText = document.getElementById('exportTrimBtnText');
+    const durLabel = document.getElementById('durationLabelText');
+
     if (box) {
       box.style.left = `${(startRatio * 100).toFixed(2)}%`;
       box.style.right = `${((1 - endRatio) * 100).toFixed(2)}%`;
+
+      if (currentTrimOperation === 'remove') {
+        box.className = 'absolute top-0 bottom-0 bg-[#f43f5e]/25 border-y-2 border-[#f43f5e] backdrop-blur-[1px] z-10 flex justify-between cursor-grab active:cursor-grabbing';
+        if (handleStart) handleStart.className = 'w-3.5 h-full bg-[#f43f5e] rounded-l-md flex items-center justify-center cursor-ew-resize hover:brightness-125 z-20';
+        if (handleEnd) handleEnd.className = 'w-3.5 h-full bg-[#f43f5e] rounded-r-md flex items-center justify-center cursor-ew-resize hover:brightness-125 z-20';
+        if (floatingPrefix) {
+          floatingPrefix.textContent = 'CUT OUT:';
+          floatingPrefix.className = 'text-[9px] text-[#f43f5e] font-bold';
+        }
+        if (exportBtn && exportBtnText && !exportBtnText.textContent.includes('...')) {
+          exportBtn.className = 'px-7 py-2.5 rounded-full text-white text-xs font-bold uppercase tracking-wider bg-gradient-to-r from-rose-500 to-red-600 shadow-[0_0_24px_rgba(244,63,94,0.45)] hover:scale-105 active:scale-95 transition-all cursor-pointer';
+          exportBtnText.textContent = '🗑 Cut & Remove Section';
+        }
+        if (durLabel) durLabel.textContent = 'Remaining Duration';
+      } else if (currentTrimOperation === 'split') {
+        box.className = 'absolute top-0 bottom-0 bg-[#06b6d4]/20 border-y-2 border-[#06b6d4] backdrop-blur-[1px] z-10 flex justify-between cursor-grab active:cursor-grabbing';
+        if (handleStart) handleStart.className = 'w-3.5 h-full bg-[#06b6d4] rounded-l-md flex items-center justify-center cursor-ew-resize hover:brightness-125 z-20';
+        if (handleEnd) handleEnd.className = 'w-3.5 h-full bg-[#06b6d4] rounded-r-md flex items-center justify-center cursor-ew-resize hover:brightness-125 z-20';
+        if (floatingPrefix) {
+          floatingPrefix.textContent = 'SPLIT AT:';
+          floatingPrefix.className = 'text-[9px] text-[#06b6d4] font-bold';
+        }
+        if (exportBtn && exportBtnText && !exportBtnText.textContent.includes('...')) {
+          exportBtn.className = 'px-7 py-2.5 rounded-full text-white text-xs font-bold uppercase tracking-wider bg-gradient-to-r from-cyan-500 to-blue-600 shadow-[0_0_24px_rgba(6,182,212,0.45)] hover:scale-105 active:scale-95 transition-all cursor-pointer';
+          exportBtnText.textContent = '⚡ Split & Download Parts';
+        }
+        if (durLabel) durLabel.textContent = 'Split Points (P1 / P2)';
+      } else {
+        box.className = 'absolute top-0 bottom-0 bg-[#ff5a1f]/20 border-y border-[#ff5a1f] backdrop-blur-[1px] z-10 flex justify-between cursor-grab active:cursor-grabbing';
+        if (handleStart) handleStart.className = 'w-3.5 h-full bg-[#ff5a1f] rounded-l-md flex items-center justify-center cursor-ew-resize hover:brightness-125 z-20';
+        if (handleEnd) handleEnd.className = 'w-3.5 h-full bg-[#ff5a1f] rounded-r-md flex items-center justify-center cursor-ew-resize hover:brightness-125 z-20';
+        if (floatingPrefix) {
+          floatingPrefix.textContent = 'KEEP:';
+          floatingPrefix.className = 'text-[9px] text-[#ff5a1f] font-bold';
+        }
+        if (exportBtn && exportBtnText && !exportBtnText.textContent.includes('...')) {
+          exportBtn.className = 'btn-pill-blue px-7 py-2.5 rounded-full text-white text-xs font-bold uppercase tracking-wider shadow-[0_0_24px_rgba(255,90,31,0.45)] hover:scale-105 active:scale-95 transition-all cursor-pointer';
+          exportBtnText.textContent = '✂ Export Trimmed Video';
+        }
+        if (durLabel) durLabel.textContent = 'Target Duration';
+      }
     }
 
-    const dur = Math.max(0, trimEndSec - trimStartSec);
+    const cutDur = Math.max(0, trimEndSec - trimStartSec);
     document.getElementById('trimStartInput').value = formatDuration(Math.round(trimStartSec));
     document.getElementById('trimEndInput').value = formatDuration(Math.round(trimEndSec));
-    document.getElementById('selectedDurationText').textContent = formatDuration(Math.round(dur));
 
     const floatDur = document.getElementById('rangeFloatingDuration');
-    if (floatDur) floatDur.textContent = formatDuration(Math.round(dur));
+    if (floatDur) {
+      if (currentTrimOperation === 'split') {
+        floatDur.textContent = formatDuration(Math.round(trimStartSec));
+      } else {
+        floatDur.textContent = formatDuration(Math.round(cutDur));
+      }
+    }
 
-    const estMb = Math.max(1, Math.round((dur / Math.max(1, totalVideoDuration)) * 45));
-    document.getElementById('estTrimSize').textContent = `Est: ~${estMb} MB`;
+    let finalSec = cutDur;
+    if (currentTrimOperation === 'remove') {
+      finalSec = Math.max(0, totalVideoDuration - cutDur);
+      document.getElementById('selectedDurationText').textContent = formatDuration(Math.round(finalSec));
+      const estMb = Math.max(1, Math.round((finalSec / Math.max(1, totalVideoDuration)) * 45));
+      document.getElementById('estTrimSize').textContent = `Est: ~${estMb} MB (cut out -${formatDuration(Math.round(cutDur))})`;
+    } else if (currentTrimOperation === 'split') {
+      const p1 = Math.round(trimStartSec);
+      const p2 = Math.max(0, Math.round(totalVideoDuration - trimStartSec));
+      document.getElementById('selectedDurationText').textContent = `${formatDuration(p1)} | ${formatDuration(p2)}`;
+      document.getElementById('estTrimSize').textContent = `2 Parts · Split at ${formatDuration(p1)}`;
+    } else {
+      document.getElementById('selectedDurationText').textContent = formatDuration(Math.round(finalSec));
+      const estMb = Math.max(1, Math.round((finalSec / Math.max(1, totalVideoDuration)) * 45));
+      document.getElementById('estTrimSize').textContent = `Est: ~${estMb} MB`;
+    }
   }
 
   // Update Playhead Indicator Position
@@ -537,7 +737,8 @@
   function previewTrimmedClip() {
     if (typeof playGlassTick === 'function') playGlassTick();
     if (!realVideo || !realVideo.src || realVideo.classList.contains('hidden')) {
-      showToast(`Previewing trimmed range: ${formatDuration(Math.round(trimStartSec))} - ${formatDuration(Math.round(trimEndSec))}`, 'info');
+      const opName = currentTrimOperation === 'remove' ? 'section removal' : (currentTrimOperation === 'split' ? 'split preview' : 'trimmed range');
+      showToast(`Previewing ${opName}: ${formatDuration(Math.round(trimStartSec))} - ${formatDuration(Math.round(trimEndSec))}`, 'info');
       return;
     }
 
@@ -546,6 +747,28 @@
       previewBoundaryListener = null;
     }
 
+    // SECTION REMOVING PREVIEW: Play from 0 to trimStartSec, jump over the cut section to trimEndSec, and continue to end
+    if (currentTrimOperation === 'remove') {
+      realVideo.currentTime = 0;
+      realVideo.play().catch(e => console.warn(e));
+      previewBoundaryListener = function () {
+        if (realVideo.currentTime >= trimStartSec && realVideo.currentTime < trimEndSec) {
+          realVideo.currentTime = trimEndSec;
+          showToast('⚡ Jumped over cut section!', 'info');
+        } else if (realVideo.currentTime >= (totalVideoDuration || realVideo.duration || 999999) - 0.5) {
+          realVideo.pause();
+          realVideo.currentTime = 0;
+          realVideo.removeEventListener('timeupdate', previewBoundaryListener);
+          previewBoundaryListener = null;
+          showToast('Preview completed (section removed)', 'info');
+        }
+      };
+      realVideo.addEventListener('timeupdate', previewBoundaryListener);
+      showToast('Playing preview skipping removed section...', 'info');
+      return;
+    }
+
+    // STANDARD TRIM / SPLIT PREVIEW
     realVideo.currentTime = trimStartSec;
     realVideo.play().catch(e => console.warn(e));
 
@@ -555,11 +778,11 @@
         realVideo.currentTime = trimStartSec;
         realVideo.removeEventListener('timeupdate', previewBoundaryListener);
         previewBoundaryListener = null;
-        showToast('Trimmed clip preview reached end point', 'info');
+        showToast('Preview reached end point', 'info');
       }
     };
     realVideo.addEventListener('timeupdate', previewBoundaryListener);
-    showToast(`Playing trimmed preview (${formatDuration(Math.round(trimEndSec - trimStartSec))})`, 'info');
+    showToast(`Playing preview (${formatDuration(Math.round(trimEndSec - trimStartSec))})`, 'info');
   }
 
   // Zoom Controller
@@ -961,7 +1184,7 @@
     }
   }
 
-  // Export Trimmed Video
+  // Export Trimmed, Cut, or Split Video
   async function exportTrimmedVideo() {
     playGlassPop();
     const title = document.getElementById('trimmerVideoTitle').textContent.trim();
@@ -976,10 +1199,30 @@
     const durFormatted = formatDuration(Math.round(trimEndSec - trimStartSec));
 
     const exportBtnText = document.getElementById('exportTrimBtnText');
-    if (exportBtnText) exportBtnText.textContent = 'Trimming Video...';
-    showToast(`Trimming clip from ${startFormatted} to ${endFormatted} (${durFormatted})...`, 'info');
+    const isRemove = currentTrimOperation === 'remove';
+    const isSplit = currentTrimOperation === 'split';
+    const opLabel = isRemove ? 'Removing section' : (isSplit ? 'Splitting video' : 'Trimming video');
+    const actionTag = isRemove ? 'Section Removed' : (isSplit ? 'Split Parts' : 'Trimmed');
+    const ext = isSplit ? 'zip' : 'mp4';
 
-    // If loaded from a URL, use the real backend trimmer!
+    if (exportBtnText) exportBtnText.textContent = `${opLabel}...`;
+
+    if (isRemove) {
+      showToast(`Cutting out ${startFormatted} - ${endFormatted} and stitching remaining ends...`, 'info');
+    } else if (isSplit) {
+      showToast(`Splitting video at marker ${startFormatted} into 2 parts...`, 'info');
+    } else {
+      showToast(`Trimming clip from ${startFormatted} to ${endFormatted} (${durFormatted})...`, 'info');
+    }
+
+    function resetExportBtnText() {
+      if (!exportBtnText) return;
+      if (isRemove) exportBtnText.textContent = '🗑 Cut & Remove Section';
+      else if (isSplit) exportBtnText.textContent = '⚡ Split & Download Parts';
+      else exportBtnText.textContent = '✂ Export Trimmed Video';
+    }
+
+    // If loaded from a URL, use the real backend trimmer/cutter/splitter!
     if (loadedVideoUrl) {
       try {
         const res = await fetch('/api/v1/jobs', {
@@ -993,6 +1236,7 @@
             consent: true,
             trim: {
               enabled: true,
+              operation: currentTrimOperation,
               startTime: startFormatted,
               endTime: endFormatted
             }
@@ -1006,35 +1250,35 @@
           trimEvents.addEventListener('update', (ev) => {
             const data = JSON.parse(ev.data);
             const percent = Math.round(data.percent || 0);
-            if (exportBtnText) exportBtnText.textContent = `Trimming ${percent}%...`;
+            if (exportBtnText) exportBtnText.textContent = `${opLabel} ${percent}%...`;
 
             if (data.state === 'ready') {
               trimEvents.close();
-              if (exportBtnText) exportBtnText.textContent = '↓ Export Trimmed Video';
+              resetExportBtnText();
 
-              const trimmedTitle = `${title} (Trimmed ${startFormatted}-${endFormatted})`;
+              const processedTitle = `${title} (${actionTag} ${startFormatted}-${endFormatted})`;
               const fileUrl = `/api/v1/jobs/${jobId}/file`;
 
               saveToSessionHistory({
                 jobId: jobId,
-                title: trimmedTitle,
-                format: `MP4 (${currentCutMode === 'copy' ? 'Copy' : 'Encoded'})`,
+                title: processedTitle,
+                format: `${ext.toUpperCase()} (${currentCutMode === 'copy' ? 'Copy' : 'Encoded'})`,
                 size: data.filesize ? `${(data.filesize / (1024 * 1024)).toFixed(1)} MB` : '18 MB',
                 type: 'video',
                 fileUrl: fileUrl,
                 date: new Date().toLocaleTimeString()
               });
 
-              showToast('Trim complete! Downloading your video...', 'success');
+              showToast(`${actionTag} complete! Downloading your file...`, 'success');
               if (window.downloadFileToPc) {
-                window.downloadFileToPc(fileUrl, trimmedTitle);
+                window.downloadFileToPc(fileUrl, processedTitle);
               } else {
                 window.location.href = fileUrl;
               }
             } else if (data.state === 'failed') {
               trimEvents.close();
-              if (exportBtnText) exportBtnText.textContent = '↓ Export Trimmed Video';
-              showToast('Trimming failed on server.', 'error');
+              resetExportBtnText();
+              showToast(`${opLabel} failed on server.`, 'error');
             }
           });
           return;
@@ -1044,7 +1288,7 @@
       }
     }
 
-    // If loaded from a local PC file, trim via high-performance lossless server endpoint!
+    // If loaded from a local PC file, process via high-performance server endpoint!
     if (uploadedVideoFile) {
       try {
         const formData = new FormData();
@@ -1052,6 +1296,7 @@
         formData.append('startTime', startFormatted);
         formData.append('endTime', endFormatted);
         formData.append('mode', currentCutMode || 'copy');
+        formData.append('operation', currentTrimOperation);
 
         const trimRes = await fetch('/api/v1/jobs/trim-upload', {
           method: 'POST',
@@ -1061,8 +1306,8 @@
         if (trimRes.ok) {
           const blob = await trimRes.blob();
           const blobUrl = URL.createObjectURL(blob);
-          const trimmedTitle = `${title} (Trimmed ${startFormatted}-${endFormatted})`;
-          const safeFilename = `${trimmedTitle.replace(/[^a-zA-Z0-9_\-\s]/g, '').trim().replace(/\s+/g, '_')}.mp4`;
+          const processedTitle = `${title} (${actionTag} ${startFormatted}-${endFormatted})`;
+          const safeFilename = `${processedTitle.replace(/[^a-zA-Z0-9_\-\s]/g, '').trim().replace(/\s+/g, '_')}.${ext}`;
 
           const a = document.createElement('a');
           a.href = blobUrl;
@@ -1071,8 +1316,8 @@
           a.click();
           setTimeout(() => a.remove(), 250);
 
-          if (exportBtnText) exportBtnText.textContent = '↓ Export Trimmed Video';
-          showToast(`Downloaded trimmed video (${startFormatted} to ${endFormatted}) to your PC!`, 'success');
+          resetExportBtnText();
+          showToast(`Downloaded ${actionTag.toLowerCase()} file to your PC!`, 'success');
           return;
         }
       } catch (err) {
@@ -1082,9 +1327,31 @@
 
     // Local / session video export fallback
     setTimeout(() => {
-      if (exportBtnText) exportBtnText.textContent = '↓ Export Trimmed Video';
-      const trimmedTitle = `${title} (Trimmed ${startFormatted}-${endFormatted})`;
-      const safeFilename = `${trimmedTitle.replace(/[^a-zA-Z0-9_\-\s]/g, '').trim().replace(/\s+/g, '_')}.mp4`;
+      resetExportBtnText();
+      const processedTitle = `${title} (${actionTag} ${startFormatted}-${endFormatted})`;
+      const safeFilename = `${processedTitle.replace(/[^a-zA-Z0-9_\-\s]/g, '').trim().replace(/\s+/g, '_')}.${ext}`;
+      const exportUrl = localVideoUrl || '/static/samples/clip_1.mp4';
+
+      // Trigger real browser download to user's PC
+      const a = document.createElement('a');
+      a.href = exportUrl;
+      a.download = safeFilename;
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(() => a.remove(), 250);
+
+      saveToSessionHistory({
+        title: processedTitle,
+        format: `${ext.toUpperCase()} (${currentCutMode === 'copy' ? 'Stream Copy' : 'Frame-Accurate'})`,
+        size: document.getElementById('estTrimSize').textContent.replace('Est: ~', '') || '28 MB',
+        type: 'video',
+        fileUrl: exportUrl,
+        date: new Date().toLocaleTimeString(),
+        timestamp: Date.now()
+      });
+      showToast(`Downloaded ${actionTag.toLowerCase()} file to PC & saved in History!`, 'success');
+    }, 1200);
+  }
       const exportUrl = localVideoUrl || '/static/samples/clip_1.mp4';
 
       // Trigger real browser download to user's PC

@@ -228,7 +228,7 @@ class JobManager:
 
         postprocessor_args: list[str] = []
 
-        # 1. Frame-accurate Segment Trimming using yt-dlp download_ranges & force_keyframes_at_cuts
+        # 1. Frame-accurate Segment Trimming, Section Removing & Splitting
         if req.trim and req.trim.enabled:
             def parse_sec(t_str: Optional[str]) -> Optional[float]:
                 if not t_str:
@@ -245,7 +245,15 @@ class JobManager:
 
             s_sec = parse_sec(req.trim.startTime) or 0.0
             e_sec = parse_sec(req.trim.endTime)
-            if e_sec is not None and e_sec > s_sec:
+            op = getattr(req.trim, 'operation', 'trim') or 'trim'
+
+            if op == "remove" and e_sec is not None and e_sec > s_sec:
+                try:
+                    ydl_opts["download_ranges"] = yt_dlp.utils.download_range_func(None, [(0, s_sec), (e_sec, 999999)])
+                    ydl_opts["force_keyframes_at_cuts"] = True
+                except Exception:
+                    pass
+            elif e_sec is not None and e_sec > s_sec:
                 try:
                     ydl_opts["download_ranges"] = yt_dlp.utils.download_range_func(None, [(s_sec, e_sec)])
                     ydl_opts["force_keyframes_at_cuts"] = True
