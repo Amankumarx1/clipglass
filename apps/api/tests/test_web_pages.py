@@ -10,6 +10,8 @@ def test_home_page():
     assert response.status_code == 200
     assert "ClipGlass" in response.text
     assert "paste a link. pick a quality." in response.text
+    assert "app.js" in response.text
+    assert "Fetching media stream from link" in response.text
 
 # 02. Downloader
 def test_downloader_page():
@@ -29,6 +31,7 @@ def test_downloader_page():
     assert "sizeBreakdownText" in response.text
     assert "updateCalculatedSize" in response.text
     assert "formatBytes" in response.text
+    assert "Fetching media stream from link" in response.text
 
 # 03. Audio Studio
 def test_audio_studio_page():
@@ -44,6 +47,7 @@ def test_audio_studio_page():
         assert "quickAudioUrlInput" in response.text
         assert "fetchAudioFromUrl" in response.text
         assert "toggleAutoEffectSelection" in response.text
+        assert "Fetching media stream from link" in response.text
         assert "From Downloader &amp; History" in response.text or "From Downloader & History" in response.text
 
 # 04. Video Trimmer
@@ -64,6 +68,7 @@ def test_video_trimmer_page():
         assert "cutModeCopyBtn" in response.text
         assert "cutModeEncodeBtn" in response.text
         assert "fetchVideoFromUrl" in response.text
+        assert "Fetching media stream from link" in response.text
 
 # 05. Auto Clip Studio
 def test_auto_clip_page():
@@ -84,6 +89,8 @@ def test_auto_clip_page():
     assert "Chat Burst" in response.text
     assert "Chat Energetic" in response.text
     assert "Viral Score" in response.text
+    assert "inspectClipUrl" in response.text
+    assert "Fetching media stream from link" in response.text
 
 # 06. Auto Clip Editor
 def test_auto_clip_editor_page():

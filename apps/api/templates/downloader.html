@@ -425,7 +425,7 @@
         const cleaned = text.trim();
         input.value = cleaned;
         targetUrl = cleaned;
-        showToast('Link pasted! Inspecting...', 'info');
+        showToast('Link pasted! Fetching media stream...', 'fetching');
         await inspectMedia(cleaned);
       } else {
         input.focus();
@@ -582,7 +582,7 @@
 
   async function inspectMedia(url) {
     try {
-      showToast('Inspecting YouTube media stream...', 'info');
+      showToast('Fetching media stream from link...', 'fetching');
       const urlInput = document.getElementById('downloaderUrlInput');
       if (urlInput && !urlInput.value) {
         urlInput.value = url;

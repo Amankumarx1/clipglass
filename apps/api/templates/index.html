@@ -1840,7 +1840,18 @@
 
     // Link bar form
     const f = $('#f'), url = $('#url'), msg = $('#msg'), gb = $('#gb'), pst = $('#pst');
-    if (pst) pst.onclick = async () => { try { if (url) { url.value = await navigator.clipboard.readText(); url.focus() } if (msg) msg.textContent = '' } catch (e) { if (msg) msg.textContent = 'Clipboard access is blocked. Press Ctrl+V to paste.' } };
+    if (pst) pst.onclick = async () => {
+      try {
+        if (url) {
+          url.value = await navigator.clipboard.readText();
+          url.focus();
+          if (url.value && window.showToast) window.showToast('Link pasted! Fetching media stream...', 'fetching');
+        }
+        if (msg) msg.textContent = '';
+      } catch (e) {
+        if (msg) msg.textContent = 'Clipboard access is blocked. Press Ctrl+V to paste.';
+      }
+    };
     if (url) url.addEventListener('input', () => { if (msg) msg.textContent = '' });
     if (f) f.onsubmit = e => {
       e.preventDefault();
@@ -1850,7 +1861,8 @@
         f.classList.remove('err'); void f.offsetWidth; f.classList.add('err');
         return;
       }
-      if (gb) { gb.classList.add('busy'); gb.textContent = 'Opening…' }
+      if (gb) { gb.classList.add('busy'); gb.textContent = 'Opening…'; }
+      if (window.showToast) window.showToast('Fetching media stream from link...', 'fetching');
       location.href = '/downloader?url=' + encodeURIComponent(v);
     };
 
@@ -2305,6 +2317,7 @@
       if (introEl) introEl.classList.add('hide');
     }
   </script>
+  <script src="/static/js/app.js"></script>
 </body>
 
 </html>

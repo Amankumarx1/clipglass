@@ -1956,16 +1956,19 @@
     const urlInput = document.getElementById('quickAudioUrlInput');
     const url = (urlInput ? urlInput.value : '').trim();
     if (!url) {
-      alert('Please enter a valid YouTube or Audio URL');
+      if (window.showToast) window.showToast('Please enter a valid YouTube or Audio URL', 'error');
+      else alert('Please enter a valid YouTube or Audio URL');
       return;
     }
 
     const btn = document.getElementById('fetchUrlBtn');
     if (btn) btn.textContent = 'Fetching...';
+    if (window.showToast) window.showToast('Fetching media stream from link...', 'fetching');
 
     try {
       const inspectRes = await fetch(`/api/inspect?url=${encodeURIComponent(url)}`);
       const inspectData = await inspectRes.json();
+      if (window.showToast) window.showToast(`✓ Link inspected: "${inspectData.title || 'Track'}" loaded into Studio!`, 'success');
 
       const jobPayload = {
         url: url,
@@ -2038,11 +2041,13 @@
     const input = document.getElementById('replaceUrlInput');
     const val = input ? input.value.trim() : '';
     if (!val) {
-      alert('Please enter a valid URL');
+      if (window.showToast) window.showToast('Please enter a valid URL', 'error');
+      else alert('Please enter a valid URL');
       return;
     }
     closeReplaceSourceModal();
     document.getElementById('quickAudioUrlInput').value = val;
+    if (window.showToast) window.showToast('Fetching media stream from link...', 'fetching');
     fetchAudioFromUrl();
   };
 
@@ -2153,6 +2158,16 @@
     editingCustomIndex = -1;
     document.getElementById('effectSettingsModal').classList.add('hidden');
   };
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const params = new URLSearchParams(window.location.search);
+    const qUrl = params.get('url');
+    if (qUrl) {
+      const qInput = document.getElementById('quickAudioUrlInput');
+      if (qInput) qInput.value = qUrl;
+      fetchAudioFromUrl();
+    }
+  });
 
 })();
 </script>

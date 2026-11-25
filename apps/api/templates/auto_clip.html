@@ -1007,12 +1007,32 @@
     }
   }
 
+  async function inspectClipUrl(url) {
+    if (!url || !url.trim() || !url.startsWith('http')) return;
+    if (window.showToast) window.showToast('Fetching media stream from link...', 'fetching');
+    try {
+      const res = await fetch(`/api/inspect?url=${encodeURIComponent(url.trim())}`);
+      if (res.ok) {
+        const data = await res.json();
+        if (window.showToast) window.showToast(`✓ Link inspected: "${data.title}" ready for clipping!`, 'success');
+      }
+    } catch {}
+  }
+
   async function pasteClipUrl() {
     if (window.playGlassTick) window.playGlassTick();
     try {
       const text = await navigator.clipboard.readText();
-      if (text) document.getElementById('clipUrlInput').value = text;
-    } catch {}
+      if (text && text.trim()) {
+        const cleaned = text.trim();
+        document.getElementById('clipUrlInput').value = cleaned;
+        inspectClipUrl(cleaned);
+      } else {
+        if (window.showToast) window.showToast('Clipboard is empty. Press Ctrl+V to paste.', 'info');
+      }
+    } catch {
+      if (window.showToast) window.showToast('Click input and press Ctrl+V to paste', 'info');
+    }
   }
 
   async function generateClips() {
@@ -1058,6 +1078,7 @@
     try {
       let res;
       if (activeSource === 'url') {
+        if (window.showToast) window.showToast('Fetching media stream from link and extracting signals...', 'fetching');
         res = await fetch('/api/clip/jobs', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -1495,11 +1516,19 @@
     selectCaptionPreset('viral_pop');
     selectFrameModel('follow-face');
 
+    const input = document.getElementById('clipUrlInput');
+    if (input) {
+      input.addEventListener('change', () => {
+        const val = input.value.trim();
+        if (val) inspectClipUrl(val);
+      });
+    }
+
     const params = new URLSearchParams(window.location.search);
     const qUrl = params.get('url');
     if (qUrl) {
-      const input = document.getElementById('clipUrlInput');
       if (input) input.value = qUrl;
+      inspectClipUrl(qUrl);
     }
   });
 

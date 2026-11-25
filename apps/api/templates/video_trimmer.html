@@ -745,6 +745,7 @@
       const text = await navigator.clipboard.readText();
       if (text && text.trim()) {
         input.value = text.trim();
+        showToast('Link pasted! Fetching video stream...', 'fetching');
         fetchVideoFromUrl(text.trim());
       } else {
         input.focus();
@@ -763,6 +764,7 @@
       const text = await navigator.clipboard.readText();
       if (text && text.trim()) {
         input.value = text.trim();
+        showToast('Link pasted! Fetching video stream...', 'fetching');
         fetchVideoFromUrl(text.trim());
       } else {
         input.focus();
@@ -784,7 +786,7 @@
 
     loadedVideoUrl = url;
     playGlassPop();
-    showToast('Fetching video stream details...', 'info');
+    showToast('Fetching media stream from link...', 'fetching');
 
     const quickBtnText = document.getElementById('quickVideoBtnText');
     const drawerBtnText = document.getElementById('fetchVideoBtnText');
@@ -796,6 +798,7 @@
       const inspectRes = await fetch(`/api/inspect?url=${encodeURIComponent(url)}`);
       if (inspectRes.ok) {
         const info = await inspectRes.json();
+        showToast(`✓ Link inspected: "${info.title || 'Video'}" ready for trimming!`, 'success');
         document.getElementById('trimmerVideoTitle').textContent = info.title || 'Fetching Video Stream...';
         document.getElementById('trimmerVideoMeta').textContent = `${formatDuration(info.duration || 0)} · Fetching Media Stream...`;
         if (info.thumbnail) {

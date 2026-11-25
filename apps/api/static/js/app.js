@@ -53,10 +53,11 @@
   // Notification Toast
   function showToast(message, type = 'info') {
     const toast = document.createElement('div');
-    toast.className = `fixed bottom-6 right-6 z-[200] px-4 py-3 rounded-2xl glass glass-rim shadow-2xl text-xs font-semibold flex items-center gap-2.5 transition-all transform translate-y-4 opacity-0`;
-    const icon = type === 'success' ? '✓' : type === 'error' ? '✕' : 'ℹ';
-    const color = type === 'success' ? 'text-emerald-400' : type === 'error' ? 'text-rose-400' : 'text-blue-400';
-    toast.innerHTML = `<span class="${color} font-bold text-sm">${icon}</span><span>${message}</span>`;
+    const isFetching = type === 'fetching' || type === 'loading';
+    toast.className = `fixed bottom-6 right-6 z-[200] px-4 py-3 rounded-2xl glass glass-rim shadow-2xl text-xs font-semibold flex items-center gap-2.5 transition-all transform translate-y-4 opacity-0 border ${isFetching ? 'border-[#ff5a1f]/40 bg-[#12131a]/95' : 'border-white/10'}`;
+    const icon = type === 'success' ? '✓' : type === 'error' ? '✕' : (isFetching ? '⚡' : 'ℹ');
+    const color = type === 'success' ? 'text-emerald-400' : type === 'error' ? 'text-rose-400' : (isFetching ? 'text-[#ff5a1f] animate-pulse' : 'text-blue-400');
+    toast.innerHTML = `<span class="${color} font-bold text-sm">${icon}</span><span class="text-white">${message}</span>`;
     document.body.appendChild(toast);
     setTimeout(() => {
       toast.classList.remove('translate-y-4', 'opacity-0');
@@ -64,9 +65,14 @@
     setTimeout(() => {
       toast.classList.add('opacity-0', 'translate-y-4');
       setTimeout(() => toast.remove(), 300);
-    }, 3200);
+    }, isFetching ? 4000 : 3200);
   }
   window.showToast = showToast;
+
+  function notifyLinkFetching(customMsg) {
+    showToast(customMsg || 'Fetching media stream from link...', 'fetching');
+  }
+  window.notifyLinkFetching = notifyLinkFetching;
 
   async function downloadFileToPc(url, title) {
     if (window.playGlassPop) window.playGlassPop();
