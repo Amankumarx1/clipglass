@@ -342,6 +342,18 @@
 
 {% block scripts %}
 <script>
+  // Safe helper fallbacks so button handlers never throw if external scripts delay
+  const playGlassTick = window.playGlassTick || (() => {});
+  const playGlassPop = window.playGlassPop || (() => {});
+  const showToast = window.showToast || ((msg, type) => console.log(`[Toast ${type}]`, msg));
+  const formatDuration = window.formatDuration || ((sec) => {
+    if (!sec || isNaN(sec)) return '00:00';
+    const m = Math.floor(sec / 60);
+    const s = Math.floor(sec % 60);
+    return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+  });
+  const saveToSessionHistory = window.saveToSessionHistory || (() => {});
+
   const realVideo = document.getElementById('realTrimmerVideo');
   const mockContainer = document.getElementById('trimmerMockContainer');
 
@@ -790,9 +802,12 @@
     currentZoom = z;
     playGlassTick();
     document.querySelectorAll('.zoom-btn').forEach(b => {
-      b.className = 'zoom-btn px-2.5 py-0.5 rounded-lg text-slate-400 hover:text-white transition-all';
+      if (b.textContent.trim() === `${z}x`) {
+        b.className = 'zoom-btn px-2.5 py-0.5 rounded-full bg-[#ff5a1f] text-white shadow-sm cursor-pointer transition-all';
+      } else {
+        b.className = 'zoom-btn px-2.5 py-0.5 rounded-full text-[#8B8D98] hover:text-white cursor-pointer transition-all';
+      }
     });
-    event.target.className = 'zoom-btn px-2.5 py-0.5 rounded-lg bg-emerald-500 text-white shadow-sm';
 
     const inner = document.getElementById('timelineTrackInner');
     if (inner) {
@@ -801,7 +816,7 @@
       else if (z === 5) inner.style.width = '500%';
     }
     updateTrimUI();
-    updatePlayhead(realVideo.currentTime || 0);
+    updatePlayhead(realVideo ? (realVideo.currentTime || 0) : 0);
   }
 
   // Cutting Mode Selector
@@ -1352,28 +1367,31 @@
       showToast(`Downloaded ${actionTag.toLowerCase()} file to PC & saved in History!`, 'success');
     }, 1200);
   }
-      const exportUrl = localVideoUrl || '/static/samples/clip_1.mp4';
 
-      // Trigger real browser download to user's PC
-      const a = document.createElement('a');
-      a.href = exportUrl;
-      a.download = safeFilename;
-      document.body.appendChild(a);
-      a.click();
-      setTimeout(() => a.remove(), 250);
-
-      saveToSessionHistory({
-        title: trimmedTitle,
-        format: `MP4 (${currentCutMode === 'copy' ? 'Stream Copy' : 'Frame-Accurate'})`,
-        size: document.getElementById('estTrimSize').textContent.replace('Est: ~', '') || '28 MB',
-        type: 'video',
-        fileUrl: exportUrl,
-        date: new Date().toLocaleTimeString(),
-        timestamp: Date.now()
-      });
-      showToast(`Downloaded trimmed video (${startFormatted} to ${endFormatted}) to PC & saved in History!`, 'success');
-    }, 1200);
-  }
+  // Explicit window bindings so HTML onclick handlers are always globally accessible
+  window.setTrimOperation = setTrimOperation;
+  window.setTrimInToPlayhead = setTrimInToPlayhead;
+  window.setTrimOutToPlayhead = setTrimOutToPlayhead;
+  window.splitAtCurrentPlayhead = splitAtCurrentPlayhead;
+  window.setZoom = setZoom;
+  window.setCutMode = setCutMode;
+  window.toggleTrimFormatMenu = toggleTrimFormatMenu;
+  window.selectTrimContainerFormat = selectTrimContainerFormat;
+  window.toggleVideoImportDrawer = toggleVideoImportDrawer;
+  window.switchVideoImportTab = switchVideoImportTab;
+  window.handleVideoFileUpload = handleVideoFileUpload;
+  window.handleVideoDrop = handleVideoDrop;
+  window.loadVideoFromFile = loadVideoFromFile;
+  window.loadVideoFromHistory = loadVideoFromHistory;
+  window.loadVideoFromJobId = loadVideoFromJobId;
+  window.handleQuickVideoPaste = handleQuickVideoPaste;
+  window.handleDrawerVideoPaste = handleDrawerVideoPaste;
+  window.fetchVideoFromUrl = fetchVideoFromUrl;
+  window.handleStartInputChange = handleStartInputChange;
+  window.handleEndInputChange = handleEndInputChange;
+  window.updateSelectedDuration = updateSelectedDuration;
+  window.previewTrimmedClip = previewTrimmedClip;
+  window.exportTrimmedVideo = exportTrimmedVideo;
 
   // Initial Boot
   document.addEventListener('DOMContentLoaded', () => {
