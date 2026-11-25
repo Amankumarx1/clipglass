@@ -50,18 +50,21 @@
     <div id="clipPcContainer" class="hidden flex flex-col gap-3">
       <div 
         id="clipDropZone" 
-        class="border border-dashed border-white/20 rounded-2xl p-8 text-center flex flex-col items-center justify-center gap-2 hover:border-[#ff5a1f]/50 transition-all cursor-pointer bg-[#0e0f16]"
+        class="border border-dashed border-white/20 rounded-2xl p-8 text-center flex flex-col items-center justify-center gap-3 hover:border-[#ff5a1f]/50 transition-all cursor-pointer bg-[#0e0f16]"
         onclick="document.getElementById('clipFileInput').click()"
         ondragover="event.preventDefault(); this.classList.add('border-white/50');"
         ondragleave="this.classList.remove('border-white/50');"
         ondrop="handleClipFileDrop(event)"
       >
-        <div class="w-10 h-10 rounded-full bg-white/5 text-white flex items-center justify-center text-xl">📁</div>
+        <div class="w-12 h-12 rounded-full bg-white/5 text-white flex items-center justify-center text-2xl shadow-inner">📁</div>
         <div class="flex flex-col gap-0.5">
-          <p id="clipPcFileName" class="text-xs font-medium text-white">Choose a video file or drag &amp; drop here</p>
+          <p id="clipPcFileName" class="text-xs font-semibold text-white">Choose a video file or drag &amp; drop here</p>
           <p id="clipPcFileMeta" class="text-[11px] text-[#8B8D98]">MP4, MOV, MKV, WebM up to 2GB</p>
         </div>
-        <input type="file" id="clipFileInput" accept="video/*" class="hidden" onchange="handleClipFileUpload(event)">
+        <button type="button" onclick="event.stopPropagation(); document.getElementById('clipFileInput').click()" class="px-5 py-2 rounded-full btn-pill-blue text-xs font-bold text-white shadow-lg cursor-pointer">
+          Browse Video from PC
+        </button>
+        <input type="file" id="clipFileInput" accept="video/*,.mp4,.mov,.mkv,.webm" class="hidden" onchange="handleClipFileUpload(event)">
       </div>
     </div>
 
@@ -955,13 +958,17 @@
     activeSource = source;
     const isUrl = source === 'url';
     document.getElementById('clipSourceUrlBtn').className = isUrl
-      ? 'px-5 py-1.5 rounded-full text-xs font-semibold bg-[#2165F7] text-white shadow-sm transition-all flex items-center gap-1.5'
+      ? 'px-5 py-1.5 rounded-full text-xs font-semibold bg-[#ff5a1f] text-white shadow-sm transition-all flex items-center gap-1.5'
       : 'px-5 py-1.5 rounded-full text-xs font-semibold text-[#8B8D98] hover:text-white transition-all flex items-center gap-1.5';
     document.getElementById('clipSourcePcBtn').className = !isUrl
-      ? 'px-5 py-1.5 rounded-full text-xs font-semibold bg-[#2165F7] text-white shadow-sm transition-all flex items-center gap-1.5'
+      ? 'px-5 py-1.5 rounded-full text-xs font-semibold bg-[#ff5a1f] text-white shadow-sm transition-all flex items-center gap-1.5'
       : 'px-5 py-1.5 rounded-full text-xs font-semibold text-[#8B8D98] hover:text-white transition-all flex items-center gap-1.5';
     document.getElementById('clipUrlContainer').classList.toggle('hidden', !isUrl);
     document.getElementById('clipPcContainer').classList.toggle('hidden', isUrl);
+
+    if (!isUrl && !uploadedFile) {
+      document.getElementById('clipFileInput').click();
+    }
   }
 
   function handleClipFileUpload(event) {

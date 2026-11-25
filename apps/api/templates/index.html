@@ -1902,20 +1902,48 @@
       const grooves = (x, w, h) => { x.fillStyle = '#808080'; x.fillRect(0, 0, w, h); const cx = w / 2, cy = h / 2; for (let r = 4; r < w / 2; r += 2) { const v = 80 + Math.random() * 80 | 0; x.strokeStyle = 'rgb(' + v + ',' + v + ',' + v + ')'; x.lineWidth = 1; x.beginPath(); x.arc(cx, cy, r, 0, Math.PI * 2); x.stroke() } };
       const honeycomb = (x, w, h) => { x.fillStyle = '#08080b'; x.fillRect(0, 0, w, h); x.fillStyle = '#14161f'; const r = 2.5, dx = 6, dy = 5.2; for (let y = 0; y < h; y += dy) { const off = (Math.floor(y / dy) % 2) * (dx / 2); for (let i = 0; i < w; i += dx) { x.beginPath(); x.arc(i + off, y, r, 0, Math.PI * 2); x.fill() } } };
       const rulerTexture = (x, w, h) => { x.fillStyle = '#20222b'; x.fillRect(0, 0, w, h); x.strokeStyle = '#828799'; x.lineWidth = 1.5; for (let y = 8; y < h; y += 10) { const len = (y % 30 === 0) ? w * .6 : w * .32; x.beginPath(); x.moveTo(3, y); x.lineTo(3 + len, y); x.stroke() } };
-      const pcbTexture = (x, w, h) => { x.fillStyle = '#0e2619'; x.fillRect(0, 0, w, h); x.strokeStyle = '#1b5235'; x.lineWidth = 2; for (let i = 0; i < 10; i++) { x.beginPath(); x.moveTo(8 + i * 24, 10); x.lineTo(20 + i * 24, 55); x.lineTo(10 + i * 24, 115); x.stroke() } x.fillStyle = '#d4af37'; for (let i = 0; i < 16; i++) { x.fillRect(12 + (i % 4) * 52, 22 + Math.floor(i / 4) * 26, 5, 5) } x.fillStyle = '#111317'; x.fillRect(60, 35, 40, 24); x.fillRect(130, 65, 28, 28) };
-      const baffleTexture = (x, w, h) => { x.fillStyle = '#151720'; x.fillRect(0, 0, w, h); const cx = w / 2, cy = h / 2; x.fillStyle = '#06070a'; for (let a = 0; a < Math.PI * 2; a += Math.PI / 8) { const r = w * .36; x.beginPath(); x.arc(cx + Math.cos(a) * r, cy + Math.sin(a) * r, 9, 0, Math.PI * 2); x.fill() } };
+      const pcbTexture = (x, w, h) => {
+        x.fillStyle = '#081c13'; x.fillRect(0, 0, w, h);
+        x.strokeStyle = '#113d27'; x.lineWidth = 1.5;
+        for (let r = 24; r < w / 2; r += 20) { x.beginPath(); x.arc(w / 2, h / 2, r, 0, Math.PI * 2); x.stroke() }
+        x.strokeStyle = '#d4af37'; x.lineWidth = 2;
+        for (let i = 0; i < 12; i++) {
+          const a = i * Math.PI / 6;
+          x.beginPath(); x.moveTo(w / 2 + Math.cos(a) * 32, h / 2 + Math.sin(a) * 32);
+          x.lineTo(w / 2 + Math.cos(a + .2) * 75, h / 2 + Math.sin(a + .2) * 75);
+          x.lineTo(w / 2 + Math.cos(a) * 105, h / 2 + Math.sin(a) * 105);
+          x.stroke();
+          x.fillStyle = '#f0c850'; x.beginPath(); x.arc(w / 2 + Math.cos(a) * 105, h / 2 + Math.sin(a) * 105, 3.5, 0, Math.PI * 2); x.fill();
+        }
+        x.fillStyle = '#101217'; x.fillRect(w / 2 - 26, h / 2 - 14, 20, 28); x.fillRect(w / 2 + 6, h / 2 - 20, 24, 18);
+        x.fillStyle = '#a0a6b2'; for (let k = -10; k <= 10; k += 5) { x.fillRect(w / 2 - 30, h / 2 + k - 1, 4, 2); x.fillRect(w / 2 - 6, h / 2 + k - 1, 4, 2) }
+      };
+      const baffleTexture = (x, w, h) => {
+        x.fillStyle = '#14161f'; x.fillRect(0, 0, w, h); const cx = w / 2, cy = h / 2;
+        x.strokeStyle = '#252838'; x.lineWidth = 4; x.beginPath(); x.arc(cx, cy, w * .45, 0, Math.PI * 2); x.stroke();
+        x.fillStyle = '#06070a';
+        for (let a = 0; a < Math.PI * 2; a += Math.PI / 8) {
+          const r = w * .35;
+          x.beginPath(); x.arc(cx + Math.cos(a) * r, cy + Math.sin(a) * r, 8, 0, Math.PI * 2); x.fill();
+          x.strokeStyle = '#323648'; x.lineWidth = 1; x.beginPath(); x.arc(cx + Math.cos(a) * r, cy + Math.sin(a) * r, 8.5, 0, Math.PI * 2); x.stroke();
+        }
+        x.fillStyle = '#0a0b10'; x.beginPath(); x.arc(cx, cy, w * .22, 0, Math.PI * 2); x.fill();
+      };
       const leather = () => new THREE.MeshPhysicalMaterial({ color: lin(0x181920), roughness: .68, bumpMap: TX(256, 256, grain, [26, 9]), bumpScale: .35, clearcoat: .12, clearcoatRoughness: .6 });
-      const paint = new THREE.MeshPhysicalMaterial({ color: lin(0x1a1b22), roughness: .48, metalness: .2, clearcoat: .25, clearcoatRoughness: .35 });
-      const gloss = new THREE.MeshPhysicalMaterial({ color: lin(0x121318), roughness: .12, metalness: .5, clearcoat: 1, clearcoatRoughness: .04 });
+      const paint = new THREE.MeshPhysicalMaterial({ color: lin(0x14151c), roughness: .48, metalness: .25, clearcoat: .25, clearcoatRoughness: .35 });
+      const gloss = new THREE.MeshPhysicalMaterial({ color: lin(0x0e0f14), roughness: .10, metalness: .6, clearcoat: 1, clearcoatRoughness: .04 });
       const cush = leather(), padM = leather();
-      const trim = new THREE.MeshPhysicalMaterial({ color: lin(0x353844), metalness: .94, roughness: .22, clearcoat: .5 });
+      const trim = new THREE.MeshPhysicalMaterial({ color: lin(0x383c4a), metalness: .94, roughness: .22, clearcoat: .5 });
       const fab = new THREE.MeshStandardMaterial({ color: 0x101116, map: TX(128, 128, honeycomb, [4, 4]), roughness: .92 });
-      const copperMat = new THREE.MeshPhysicalMaterial({ color: lin(0xe07a3c), metalness: .95, roughness: .16, clearcoat: .8 });
-      const chromeMat = new THREE.MeshPhysicalMaterial({ color: lin(0xdfe4ec), metalness: .98, roughness: .06, clearcoat: 1 });
-      const baffleMat = new THREE.MeshPhysicalMaterial({ color: lin(0x181a24), roughness: .52, metalness: .28 });
-      const diaphragmMat = new THREE.MeshPhysicalMaterial({ color: lin(0xd0d4de), roughness: .22, metalness: .92, clearcoat: .8 });
+      const copperMat = new THREE.MeshPhysicalMaterial({ color: lin(0xe27a3c), metalness: .96, roughness: .16, clearcoat: .85 });
+      const chromeMat = new THREE.MeshPhysicalMaterial({ color: lin(0xe4eaf5), metalness: .98, roughness: .05, clearcoat: 1 });
+      const baffleMat = new THREE.MeshStandardMaterial({ map: TX(256, 256, baffleTexture), roughness: .45, metalness: .35 });
+      const pcbMat = new THREE.MeshStandardMaterial({ map: TX(256, 256, pcbTexture), roughness: .48, metalness: .4 });
+      const diaphragmMat = new THREE.MeshPhysicalMaterial({ color: lin(0x282b36), roughness: .20, metalness: .85, clearcoat: .95 });
+      const screwMat = new THREE.MeshPhysicalMaterial({ color: lin(0xdfe4ec), metalness: .95, roughness: .12, clearcoat: .8 });
+      const glassMat = new THREE.MeshPhysicalMaterial({ color: 0xffffff, transmission: .88, opacity: .45, transparent: true, roughness: .06, metalness: .05, clearcoat: 1, clearcoatRoughness: .03, ior: 1.52, reflectivity: .85 });
+      const orangeGasketMat = new THREE.MeshPhysicalMaterial({ color: lin(0xff5a1f), roughness: .35, metalness: .15, clearcoat: .3 });
       const rulerMat = new THREE.MeshStandardMaterial({ color: lin(0x282a36), map: TX(64, 128, rulerTexture), metalness: .85, roughness: .25 });
-      const haloMat = new THREE.MeshBasicMaterial({ color: 0xff5a1f, toneMapped: false });
       const bodyMats = [paint, gloss, cush, padM], M = (g, m) => new THREE.Mesh(g, m);
 
       // Interactive Cursor Specular Follow Light & Ground Shadow
@@ -1949,7 +1977,7 @@
         armParts.push(armSub);
       });
 
-      // 4. Earcups Granular Exploded Sub-Assemblies (10 Precision Mechanical Layers)
+      // 4. Earcups Granular Exploded Sub-Assemblies (10 Precision CAD Mechanical Layers per Cup)
       const cupPts = new THREE.SplineCurve([[0, .3], [.4, .3], [.46, .275], [.56, .255], [.66, .2], [.72, .1], [.74, 0], [.72, -.1], [.64, -.18], [.5, -.22], [0, -.22]].map(p => new THREE.Vector2(p[0], p[1]))).getPoints(110).map(p => new THREE.Vector2(Math.max(0, p.x), p.y));
       const pillow = []; for (let i = 0; i <= 56; i++) { const a = i / 56 * Math.PI * 2; pillow.push(new THREE.Vector2(.52 + .21 * Math.cos(a), .16 * Math.sin(a))) }
 
@@ -1968,18 +1996,21 @@
         // C: Cup Orientation Rotator
         const cupG = new THREE.Group(); cupG.rotation.z = -s * Math.PI / 2; basePivot.add(cupG);
 
-        // Precision Engineering Sub-Assemblies (5 Pristine Coaxial Components per Cup - Images 3, 4)
-        // Part 1: Memory Foam Cushion & Acoustic Scrim (Earpad)
+        // Precision Engineering Sub-Assemblies (10 CAD Layers per Cup - Reference Images 1, 2, 3, 4)
+        // Part 1: Ergonomic Circumaural Memory Foam Earpad (Innermost)
         const cushionG = new THREE.Group(); cupG.add(cushionG);
         const cu = M(new THREE.LatheGeometry(pillow, 110), cush); cu.position.y = -.36; cu.scale.x = 1.18; cushionG.add(cu);
         const fb = M(new THREE.CylinderGeometry(.36, .36, .02, 48), fab); fb.position.y = -.42; fb.scale.x = 1.18; cushionG.add(fb);
 
-        // Part 2: Acoustic Baffle Plate with Precision Machined Port Ring
-        const baffleG = new THREE.Group(); cupG.add(baffleG);
-        const bafflePlate = M(new THREE.CylinderGeometry(.66, .67, .035, 64), baffleMat); bafflePlate.position.y = -.20; bafflePlate.scale.x = 1.18; baffleG.add(bafflePlate);
-        const acousticRing = M(new THREE.TorusGeometry(.42, .018, 12, 48), trim); acousticRing.rotation.x = Math.PI / 2; acousticRing.position.y = -.18; acousticRing.scale.x = 1.18; baffleG.add(acousticRing);
+        // Part 2: Pad Mounting Backer Flange Plate
+        const mountPlateG = new THREE.Group(); cupG.add(mountPlateG);
+        const mountPlate = M(new THREE.CylinderGeometry(.64, .64, .02, 64), trim); mountPlate.position.y = -.28; mountPlate.scale.x = 1.18; mountPlateG.add(mountPlate);
 
-        // Part 3: Dynamic Transducer Core (Titanium Dome, Polished Copper Voice Coil, Neodymium Magnet)
+        // Part 3: Acoustic Baffle Plate with 16 Circular Port Vents
+        const baffleG = new THREE.Group(); cupG.add(baffleG);
+        const bafflePlate = M(new THREE.CylinderGeometry(.65, .66, .035, 64), baffleMat); bafflePlate.position.y = -.20; bafflePlate.scale.x = 1.18; baffleG.add(bafflePlate);
+
+        // Part 4: Dynamic Transducer Core (Titanium Dome, Polished Copper Voice Coil, Chrome Neodymium Magnet)
         const driverG = new THREE.Group(); cupG.add(driverG);
         const diaphragm = M(new THREE.SphereGeometry(.24, 32, 16, 0, Math.PI * 2, 0, Math.PI / 2.2), diaphragmMat);
         diaphragm.rotation.x = Math.PI; diaphragm.position.y = -.13; driverG.add(diaphragm);
@@ -1987,29 +2018,48 @@
         voiceCoil.position.y = -.10; driverG.add(voiceCoil);
         const magnet = M(new THREE.CylinderGeometry(.11, .11, .03, 32), chromeMat);
         magnet.position.y = -.07; driverG.add(magnet);
-        const basket = M(new THREE.TorusGeometry(.26, .015, 12, 32), trim);
-        basket.rotation.x = Math.PI / 2; basket.position.y = -.10; driverG.add(basket);
+        const basket = M(new THREE.CylinderGeometry(.26, .26, .02, 32), trim);
+        basket.position.y = -.10; driverG.add(basket);
 
-        // Part 4: Radiant Neon Orange Halo Ring & Amber Internal Illumination
-        const haloG = new THREE.Group(); cupG.add(haloG);
-        const haloMesh = new THREE.Mesh(new THREE.TorusGeometry(.58, .034, 16, 64), haloMat);
-        haloMesh.rotation.x = Math.PI / 2; haloMesh.position.y = .04; haloMesh.scale.x = 1.18; haloG.add(haloMesh);
-        const innerLight = new THREE.PointLight(0xff6a1f, 3.8, 5.0);
-        innerLight.position.set(0, .04, 0); haloG.add(innerLight);
+        // Part 5: Internal Electronics Sub-PCB with Gold Micro-Traces
+        const pcbG = new THREE.Group(); cupG.add(pcbG);
+        const pcbDisc = M(new THREE.CylinderGeometry(.48, .48, .02, 48), pcbMat);
+        pcbDisc.position.y = -.02; pcbDisc.scale.x = 1.18; pcbG.add(pcbDisc);
 
-        // Part 5: Outer Lathe Acoustic Shell & 3.5mm Jack Socket Port
+        // Part 6: Radiant Orange Silicone Acoustic Gasket Ring
+        const gasketG = new THREE.Group(); cupG.add(gasketG);
+        const gasket = M(new THREE.TorusGeometry(.55, .014, 16, 64), orangeGasketMat);
+        gasket.rotation.x = Math.PI / 2; gasket.position.y = .05; gasket.scale.x = 1.18; gasketG.add(gasket);
+        const innerLight = new THREE.PointLight(0xff6a1f, 2.2, 4.0);
+        innerLight.position.set(0, .05, 0); gasketG.add(innerLight);
+
+        // Part 7: Floating Precision Hex Fasteners (4 Miniature Steel Assembly Screws)
+        const screwsG = new THREE.Group(); cupG.add(screwsG);
+        for (let k = 0; k < 4; k++) {
+          const a = k * Math.PI / 2 + Math.PI / 4;
+          const sc = M(new THREE.CylinderGeometry(.016, .016, .06, 12), screwMat);
+          sc.position.set(Math.cos(a) * .44 * 1.18, .12, Math.sin(a) * .44);
+          screwsG.add(sc);
+        }
+
+        // Part 8: Signature ClipGlass Cover Glass (Refractive Glass Lens Disc)
+        const glassG = new THREE.Group(); cupG.add(glassG);
+        const glassDisc = M(new THREE.CylinderGeometry(.58, .58, .022, 64), glassMat);
+        glassDisc.position.y = .18; glassDisc.scale.x = 1.18; glassG.add(glassDisc);
+
+        // Part 9: Outer Lathe Acoustic Shell & 3.5mm Jack Socket Port
         const shellG = new THREE.Group(); cupG.add(shellG);
         const shell = M(new THREE.LatheGeometry(cupPts, 110), paint); shell.scale.x = 1.18; shellG.add(shell);
         const jackPort = M(new THREE.CylinderGeometry(.04, .04, .08, 16), chromeMat);
         jackPort.position.set(0, -.65, 0); jackPort.rotation.z = Math.PI / 2; shellG.add(jackPort);
 
-        // Center Machined Badge & Illuminated Golden Triangle
+        // Part 10: Center Machined Badge & Illuminated Golden Triangle
         const badgeG = new THREE.Group(); cupG.add(badgeG);
         const disc = M(new THREE.CylinderGeometry(.22, .22, .015, 64), gloss); disc.position.y = .304; badgeG.add(disc);
         const tri = M(new THREE.CylinderGeometry(.08, .08, .02, 3), new THREE.MeshBasicMaterial({ color: 0xff8a3d, toneMapped: false }));
         tri.rotation.y = Math.PI / 2; tri.position.y = .316; badgeG.add(tri);
 
-        cupAssembly.push({ side: s, basePivot, yokeG, pinMeshes, cupG, cushionG, baffleG, driverG, haloG, shellG, badgeG });
+        cupAssembly.push({ side: s, basePivot, yokeG, pinMeshes, cupG, cushionG, mountPlateG, baffleG, driverG, pcbG, gasketG, screwsG, glassG, shellG, badgeG });
       });
 
       // Drag and drop custom GLB model support
@@ -2153,14 +2203,14 @@
         const uArms = smDock(bk(1.05, 1.3), .03);
         armParts.forEach(arm => { arm.position.y = -(1 - uArms) * .85 - explodeAmt * .35 });
 
-        // 4. Earcups Granular Exploded Hierarchy
+        // 4. Earcups Granular Exploded Hierarchy (10 Coaxial CAD Layers per Cup)
         cupAssembly.forEach((cp, i) => {
           const s = cp.side;
 
-          // Yoke arcs in smoothly
+          // Yoke arcs in smoothly with disciplined offset
           const uYokePos = smDock(bk(1.45 + i * .1, 1.4), .025);
           const uYokeRot = smRot(bk(1.45 + i * .1, 1.4));
-          cp.yokeG.position.x = s * (1 - uYokePos) * 4.2 + s * explodeAmt * 1.8;
+          cp.yokeG.position.x = s * (1 - uYokePos) * 4.2 + s * explodeAmt * .35;
           cp.yokeG.position.y = -(1 - uYokePos) * 1.3;
           cp.yokeG.position.z = (1 - uYokePos) * 2.0;
           cp.yokeG.rotation.y = s * (1 - uYokeRot) * 2.2;
@@ -2168,49 +2218,65 @@
 
           // Pivot Pins shoot inward
           const uPins = smDock(bk(1.95 + i * .08, 1.15), .04);
-          cp.pinMeshes[0].position.z = -.82 - (1 - uPins) * 1.5 - explodeAmt * .35;
-          cp.pinMeshes[1].position.z = .82 + (1 - uPins) * 1.5 + explodeAmt * .35;
+          cp.pinMeshes[0].position.z = -.82 - (1 - uPins) * 1.5 - explodeAmt * .15;
+          cp.pinMeshes[1].position.z = .82 + (1 - uPins) * 1.5 + explodeAmt * .15;
 
-          // Part 1: Memory foam cushions (Earpad)
+          // Part 1: Ergonomic Circumaural Memory Foam Earpad (Innermost)
           const tCush = bk(2.95 + i * .1, 1.2);
           const uCushPos = sm(tCush);
-          cp.cushionG.position.y = -(1 - uCushPos) * 2.2 - explodeAmt * .95;
+          cp.cushionG.position.y = -(1 - uCushPos) * 2.2 - explodeAmt * .70;
           cp.cushionG.position.x = -s * (1 - uCushPos) * 1.0;
           const compP = cl((tCush - .75) / .25, 0, 1);
           const comp = compP > 0 && compP < 1 ? Math.sin(compP * Math.PI) * .11 : 0;
           cp.cushionG.scale.set(1 - comp, 1 + comp * .5, 1 + comp * .5);
 
-          // Part 2: Acoustic Baffle Plate Assembly
-          const uBaffle = smDock(bk(2.55 + i * .08, 1.2), .02);
-          cp.baffleG.position.y = -(1 - uBaffle) * 1.6 - explodeAmt * .55;
+          // Part 2: Pad Mounting Backer Flange Plate
+          const uMount = smDock(bk(2.75 + i * .08, 1.2), .02);
+          cp.mountPlateG.position.y = -(1 - uMount) * 1.9 - explodeAmt * .48;
 
-          // Part 3: Dynamic Driver Transducer Core (Images 3, 4)
+          // Part 3: Acoustic Baffle Plate with 16 Circular Port Vents
+          const uBaffle = smDock(bk(2.55 + i * .08, 1.2), .02);
+          cp.baffleG.position.y = -(1 - uBaffle) * 1.6 - explodeAmt * .28;
+
+          // Part 4: Dynamic Transducer Core (Titanium Dome, Polished Copper Voice Coil, Chrome Neodymium Magnet)
           const uDriver = smDock(bk(2.35 + i * .08, 1.25), .03);
-          cp.driverG.position.y = -(1 - uDriver) * 1.1 - explodeAmt * .15;
+          cp.driverG.position.y = -(1 - uDriver) * 1.1 - explodeAmt * .10;
           cp.driverG.rotation.y = (1 - uDriver) * 1.8;
 
-          // Part 4: Radiant Neon Orange Halo Ring & Amber Glow
-          const uHalo = smDock(bk(2.05 + i * .08, 1.2), .03);
-          cp.haloG.position.y = (1 - uHalo) * .6 + explodeAmt * .25;
+          // Part 5: Internal Electronics Sub-PCB with Gold Micro-Traces
+          const uPcb = smDock(bk(2.25 + i * .08, 1.2), .03);
+          cp.pcbG.position.y = (1 - uPcb) * .4 + explodeAmt * .10;
 
-          // Part 5: Outer Lathe Acoustic Shell & 3.5mm Socket
+          // Part 6: Radiant Orange Silicone Gasket Ring
+          const uGasket = smDock(bk(2.15 + i * .08, 1.2), .03);
+          cp.gasketG.position.y = (1 - uGasket) * .5 + explodeAmt * .26;
+
+          // Part 7: Floating Precision Hex Fasteners
+          const uScrews = smDock(bk(2.45 + i * .08, 1.2), .03);
+          cp.screwsG.position.y = (1 - uScrews) * .8 + explodeAmt * .42;
+
+          // Part 8: Signature ClipGlass Cover Glass (Refractive Glass Lens Disc)
+          const uGlass = smDock(bk(2.55 + i * .08, 1.2), .03);
+          cp.glassG.position.y = (1 - uGlass) * 1.2 + explodeAmt * .58;
+
+          // Part 9: Outer Lathe Acoustic Shell & 3.5mm Socket
           const uShellPos = smDock(bk(2.65 + i * .1, 1.25), .03);
           const uShellRot = smRot(bk(2.65 + i * .1, 1.25));
-          cp.shellG.position.y = (1 - uShellPos) * 2.0 + explodeAmt * .65;
+          cp.shellG.position.y = (1 - uShellPos) * 2.0 + explodeAmt * .78;
           cp.shellG.position.x = s * (1 - uShellPos) * .8;
           cp.shellG.rotation.y = s * (1 - uShellRot) * 1.2;
 
-          // Part 6: Center Machined Badge & Illuminated Golden Triangle
+          // Part 10: Center Machined Badge & Illuminated Golden Triangle
           const uBadge = smDock(bk(2.85 + i * .08, 1.1), .04);
-          cp.badgeG.position.y = (1 - uBadge) * 2.4 + explodeAmt * .92;
+          cp.badgeG.position.y = (1 - uBadge) * 2.4 + explodeAmt * .98;
         });
 
         inner.scale.setScalar(1);
 
         const hoverFade = sm(cl((T - 4.1) / 1.0, 0, 1));
         const hoverBob = (still ? 0 : Math.sin(sec * 1.1) * .08 * hoverFade);
-        H.position.set(cr.x - explodeAmt * .48, cr.y - .35 * cr.s + hoverBob + scr, 0);
-        H.scale.setScalar(cr.s * (1 - explodeAmt * .08));
+        H.position.set(cr.x - explodeAmt * .65, cr.y - .35 * cr.s + hoverBob + scr, 0);
+        H.scale.setScalar(cr.s * (1 - explodeAmt * .10));
         H.rotation.y = cr.yaw + drag + smx * .45 + sp * 1.2 + explodeAmt * .26; H.rotation.x = smy * .25; H.rotation.z = -smx * .05;
 
         // Cinematic opening camera

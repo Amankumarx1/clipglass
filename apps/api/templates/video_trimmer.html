@@ -58,13 +58,27 @@
       <div id="videoDropZone" onclick="document.getElementById('videoFileInput').click()"
         ondragover="event.preventDefault(); this.classList.add('border-white/40');"
         ondragleave="this.classList.remove('border-white/40');" ondrop="handleVideoDrop(event)"
-        class="w-full py-8 px-6 rounded-2xl border border-dashed border-white/20 hover:border-[#ff5a1f]/50 bg-[#0e0f16] flex flex-col items-center justify-center gap-2 cursor-pointer transition-all text-center">
-        <div class="w-10 h-10 rounded-full bg-white/5 text-white flex items-center justify-center text-xl">🎞</div>
-        <p class="font-medium text-xs text-white">Click to browse or drag &amp; drop video file from your PC</p>
-        <p class="text-[11px] text-[#8B8D98]">Supports MP4, WebM, MOV, MKV, AVI</p>
+        class="w-full py-8 px-6 rounded-2xl border border-dashed border-white/20 hover:border-[#ff5a1f]/50 bg-[#0e0f16] flex flex-col items-center justify-center gap-2.5 cursor-pointer transition-all text-center">
+        <div class="w-12 h-12 rounded-full bg-white/5 text-white flex items-center justify-center text-2xl shadow-inner">🎞</div>
+        <div class="flex flex-col gap-0.5">
+          <p class="font-semibold text-xs text-white">Click to browse or drag &amp; drop video file from your PC</p>
+          <p class="text-[11px] text-[#8B8D98]">Supports MP4, WebM, MOV, MKV, AVI</p>
+        </div>
+        <button type="button" onclick="event.stopPropagation(); document.getElementById('videoFileInput').click()"
+          class="mt-1 px-5 py-2 rounded-full btn-pill-blue text-xs font-bold text-white shadow-lg cursor-pointer">
+          Browse Video from PC
+        </button>
       </div>
       <input type="file" id="videoFileInput" accept="video/*,.mp4,.webm,.mov,.mkv"
         onchange="handleVideoFileUpload(event)" class="hidden" />
+    </div>
+
+    <!-- From Downloader & History Section -->
+    <div id="vImportDownloaderSection" class="hidden flex flex-col gap-3">
+      <p class="text-xs text-[#8B8D98]">Recent downloaded videos from your session:</p>
+      <div id="recentVideoList" class="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-60 overflow-y-auto">
+        <!-- Rendered via JS -->
+      </div>
     </div>
 
     <!-- URL Import Section -->
@@ -567,7 +581,7 @@
   }
 
   function switchVideoImportTab(tab) {
-    playGlassTick();
+    if (window.playGlassTick) window.playGlassTick();
     const pcBtn = document.getElementById('vImportTabPcBtn');
     const dlBtn = document.getElementById('vImportTabDownloaderBtn');
     const urlBtn = document.getElementById('vImportTabUrlBtn');
@@ -576,23 +590,26 @@
     const urlSec = document.getElementById('vImportUrlSection');
 
     [pcBtn, dlBtn, urlBtn].forEach(b => {
-      b.className = 'px-3.5 py-1.5 rounded-xl text-xs font-bold glass text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white flex items-center gap-1.5';
+      if (b) b.className = 'px-4 py-1.5 rounded-full text-xs font-semibold text-[#8B8D98] hover:text-white transition-all flex items-center gap-1.5';
     });
 
-    pcSec.classList.add('hidden');
-    dlSec.classList.add('hidden');
-    urlSec.classList.add('hidden');
+    if (pcSec) pcSec.classList.add('hidden');
+    if (dlSec) dlSec.classList.add('hidden');
+    if (urlSec) urlSec.classList.add('hidden');
 
     if (tab === 'downloader') {
-      dlBtn.className = 'px-3.5 py-1.5 rounded-xl text-xs font-bold bg-emerald-600 text-white shadow-sm flex items-center gap-1.5';
-      dlSec.classList.remove('hidden');
+      if (dlBtn) dlBtn.className = 'px-4 py-1.5 rounded-full text-xs font-semibold bg-[#ff5a1f] text-white shadow-sm flex items-center gap-1.5';
+      if (dlSec) dlSec.classList.remove('hidden');
       renderRecentVideoImports();
     } else if (tab === 'url') {
-      urlBtn.className = 'px-3.5 py-1.5 rounded-xl text-xs font-bold bg-emerald-600 text-white shadow-sm flex items-center gap-1.5';
-      urlSec.classList.remove('hidden');
+      if (urlBtn) urlBtn.className = 'px-4 py-1.5 rounded-full text-xs font-semibold bg-[#ff5a1f] text-white shadow-sm flex items-center gap-1.5';
+      if (urlSec) urlSec.classList.remove('hidden');
     } else {
-      pcBtn.className = 'px-3.5 py-1.5 rounded-xl text-xs font-bold bg-emerald-600 text-white shadow-sm flex items-center gap-1.5';
-      pcSec.classList.remove('hidden');
+      if (pcBtn) pcBtn.className = 'px-4 py-1.5 rounded-full text-xs font-semibold bg-[#ff5a1f] text-white shadow-sm flex items-center gap-1.5';
+      if (pcSec) pcSec.classList.remove('hidden');
+      if (!uploadedVideoFile && document.getElementById('videoFileInput')) {
+        document.getElementById('videoFileInput').click();
+      }
     }
   }
 
